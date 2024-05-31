@@ -1,0 +1,12 @@
+[package]
+name = "chipgame"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dataview = "1.0"
+urandom = "0.1"
+cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
+shade = { git = "https://github.com/CasualX/shade" }
+serde = { version = "1.0", features=["derive"] }
+serde_json = "1.0"

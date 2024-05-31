@@ -1,0 +1,21 @@
+{
+	"name": "",
+	"hint": "",
+	"password": "",
+	"seed": 0,
+	"time": 0,
+	"chips": 0,
+	"map": {
+		"width": 32,
+		"height": 32,
+		"data": [],
+		"legend": []
+	},
+	"entities": [
+		{
+			"kind": "Player",
+			"pos": [15, 8]
+		}
+	],
+	"connections": []
+}

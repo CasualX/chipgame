@@ -1,0 +1,10 @@
+[package]
+name = "main-gl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chipgame = { path = "../game" }
+shade = { git = "https://github.com/CasualX/shade" }
+glutin = "0.26"
+winit = "0.24"

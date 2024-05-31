@@ -1,0 +1,1 @@
+{"name":"Test Twice Test Glitch","hint":"","password":"","seed":10986604979540615193,"time":0,"chips":0,"map":{"width":6,"height":5,"data":[1,2,3,2,1,1,2,2,1,2,2,2,2,1,1,4,4,2,2,2,4,2,2,2,1,2,2,2,1,1],"legend":["Blank","Floor","Wall","Exit","Ice"]},"entities":[{"kind":"Player","pos":[1,2]},{"kind":"Block","pos":[2,2]},{"kind":"Bomb","pos":[2,1]}],"connections":[]}

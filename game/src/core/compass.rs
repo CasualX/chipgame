@@ -1,0 +1,53 @@
+use super::*;
+
+/// Movement and facing directions.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Compass {
+	Up,
+	Left,
+	Down,
+	Right,
+}
+
+impl Compass {
+	#[inline]
+	pub fn turn_left(self) -> Compass {
+		match self {
+			Compass::Up => Compass::Left,
+			Compass::Left => Compass::Down,
+			Compass::Down => Compass::Right,
+			Compass::Right => Compass::Up,
+		}
+	}
+
+	#[inline]
+	pub fn turn_right(self) -> Compass {
+		match self {
+			Compass::Up => Compass::Right,
+			Compass::Left => Compass::Up,
+			Compass::Down => Compass::Left,
+			Compass::Right => Compass::Down,
+		}
+	}
+
+	#[inline]
+	pub fn turn_around(self) -> Compass {
+		match self {
+			Compass::Up => Compass::Down,
+			Compass::Left => Compass::Right,
+			Compass::Down => Compass::Up,
+			Compass::Right => Compass::Left,
+		}
+	}
+
+	#[inline]
+	pub fn to_vec(self) -> Vec2i {
+		match self {
+			Compass::Up => Vec2i(0, -1),
+			Compass::Left => Vec2i(-1, 0),
+			Compass::Down => Vec2i(0, 1),
+			Compass::Right => Vec2i(1, 0),
+		}
+	}
+}
