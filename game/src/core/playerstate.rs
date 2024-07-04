@@ -4,16 +4,40 @@ use super::*;
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
 pub enum PlayerActivity {
 	#[default]
-	Walk,
-	Push,
-	Swim,
-	Drown,
-	Burn,
-	Skate,
-	Slide,
+	/// Walking around.
+	Walking,
+	/// Pushing a block.
+	Pushing,
+	/// Swimming in water with flippers.
+	Swimming,
+	/// Sliding on ice without ice skates.
+	Skating,
+	/// Sliding on force floor without suction boots.
+	Sliding,
+	/// Walking on force floor with suction boots.
 	Suction,
-	Death,
+	/// Player drowned in water without flippers.
+	Drowned,
+	/// Player stepped in fire without fire boots.
+	Burned,
+	/// Player stepped on a bomb.
+	Bombed,
+	/// Player is out of time.
+	OutOfTime,
+	/// Player entity collided with a block.
+	Collided,
+	/// Player entity eaten by a creature.
+	Eaten,
+	/// Player entity does not exist.
+	NotOkay,
+	/// Player won the game.
 	Win,
+}
+
+impl PlayerActivity {
+	pub fn is_game_over(self) -> bool {
+		matches!(self, PlayerActivity::Drowned | PlayerActivity::Burned | PlayerActivity::Bombed | PlayerActivity::OutOfTime | PlayerActivity::Collided | PlayerActivity::Eaten | PlayerActivity::NotOkay | PlayerActivity::Win)
+	}
 }
 
 /// Player state.
@@ -46,7 +70,7 @@ pub struct PlayerState {
 impl PlayerState {
 	pub fn clear(&mut self) {
 		self.inbuf = InputBuffer::default();
-		self.activity = PlayerActivity::Walk;
+		self.activity = PlayerActivity::Walking;
 		self.forced_move = false;
 		self.steps = 0;
 		self.chips = 0;
@@ -73,13 +97,13 @@ pub(super) fn ps_update_inbuf(s: &mut GameState, input: &Input) {
 pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 	if s.ps.activity != activity {
 		s.ps.activity = activity;
-		s.events.push(GameEvent::PlayerAction { player: s.ps.ehandle });
+		s.events.push(GameEvent::PlayerActivity { player: s.ps.ehandle });
 		if matches!(activity, PlayerActivity::Win) {
-			s.ts = TimeState::Stopped;
+			s.ts = TimeState::Paused;
 			s.events.push(GameEvent::GameWin { player: s.ps.ehandle });
 		}
-		if matches!(activity, PlayerActivity::Burn | PlayerActivity::Death | PlayerActivity::Drown) {
-			s.ts = TimeState::Stopped;
+		else if activity.is_game_over() {
+			s.ts = TimeState::Paused;
 			s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
 		}
 	}

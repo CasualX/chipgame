@@ -8,6 +8,7 @@ pub struct VisualState {
 	pub camera: Camera,
 	pub objects: ObjectMap,
 	pub resources: Resources,
+	pub events: Vec<Event>,
 	pub tiles: &'static [TileGfx],
 }
 
@@ -39,7 +40,7 @@ impl VisualState {
 	}
 	pub fn sync(&mut self) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
-			println!("Event: {:?}", ev);
+			println!("GameEvent: {:?}", ev);
 			match ev {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
 				&core::GameEvent::EntityRemoved { entity, kind } => entity_removed(self, entity, kind),
@@ -47,13 +48,22 @@ impl VisualState {
 				&core::GameEvent::EntityFaceDir { entity } => entity_face_dir(self, entity),
 				&core::GameEvent::EntityHidden { entity, hidden } => entity_hidden(self, entity, hidden),
 				&core::GameEvent::EntityTeleport { entity } => entity_teleport(self, entity),
-				&core::GameEvent::PlayerAction { player } => entity_face_dir(self, player),
-				&core::GameEvent::ItemPickup { player, .. } => item_pickup(self, player),
-				&core::GameEvent::LockRemoved { pos, key } => lock_removed(self, pos, key),
+				&core::GameEvent::EntityDrown { entity } => entity_drown(self, entity),
+				&core::GameEvent::PlayerActivity { player } => entity_face_dir(self, player),
+				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
+				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
 				&core::GameEvent::BlueWallCleared { pos } => blue_wall_cleared(self, pos),
 				&core::GameEvent::HiddenWallBumped { pos } => hidden_wall_bumped(self, pos),
 				&core::GameEvent::RecessedWallRaised { pos } => recessed_wall_raised(self, pos),
-				&core::GameEvent::GreenButton { .. } => toggle_walls(self),
+				&core::GameEvent::ToggleWalls => toggle_walls(self),
+				&core::GameEvent::ButtonPress { .. } => button_press(self),
+				&core::GameEvent::GameWin { .. } => game_win(self),
+				&core::GameEvent::SocketFilled { pos } => socket_filled(self, pos),
+				&core::GameEvent::PlayerBump { player } => player_bump(self, player),
+				&core::GameEvent::BlockPush { entity } => block_push(self, entity),
+				&core::GameEvent::EntityTrapped { entity } => entity_trapped(self, entity),
+				&core::GameEvent::BombExplode { entity } => bomb_explode(self, entity),
+				&core::GameEvent::ItemsThief { player } => items_thief(self, player),
 				_ => {}
 			}
 		}

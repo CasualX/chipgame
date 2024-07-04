@@ -1,0 +1,33 @@
+
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub enum SoundFx {
+	GameOver,
+	GameWin,
+	TimeOut,
+	TimeLow,
+	Derezz,
+	CantMove,
+	ICCollected,
+	ItemCollected,
+	BootsStolen,
+	Teleporting,
+	LockOpened,
+	SocketOpened,
+	ButtonPressed,
+	TileEmptied,
+	WallCreated,
+	TrapEntered,
+	BombExplodes,
+	WaterSplash,
+	OneShotCount,
+	BlockMoving,
+	SkatingForward,
+	SkatingTurn,
+	Sliding,
+	SlideWalking,
+	IceWalking,
+	WaterWalking,
+	FireWalking,
+	WallPopup,
+}

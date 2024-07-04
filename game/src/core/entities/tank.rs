@@ -22,10 +22,6 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Death);
-	}
-
 	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::CloneMachine) && ent.step_dir.is_none() {
 		return;
@@ -34,6 +30,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
 		ent.remove = true;
 		return;
+	}
+
+	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
+		ps_activity(s, PlayerActivity::Eaten);
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {

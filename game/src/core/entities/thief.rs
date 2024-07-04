@@ -21,7 +21,16 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn think(_s: &mut GameState, _ent: &mut Entity) {
+fn think(s: &mut GameState, ent: &mut Entity) {
+	if let Some(pl) = s.ents.get(s.ps.ehandle) {
+		if pl.pos == ent.pos && (s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots) {
+			s.ps.flippers = false;
+			s.ps.fire_boots = false;
+			s.ps.ice_skates = false;
+			s.ps.suction_boots = false;
+			s.events.push(GameEvent::ItemsThief { player: s.ps.ehandle });
+		}
+	}
 }
 
 const FLAGS: SolidFlags = SolidFlags {

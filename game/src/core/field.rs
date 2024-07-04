@@ -83,11 +83,6 @@ impl Field {
 		let cur_terrain = self.get_terrain(pos);
 		let cur_solid = cur_terrain.solid_flags();
 
-		// Allow movement if the terrain is solid
-		if cur_solid == SOLID_WALL {
-			return true;
-		}
-
 		// Check for panels on the current terrain
 		let panel = match dir {
 			Compass::Up => PANEL_N,
@@ -95,7 +90,8 @@ impl Field {
 			Compass::Down => PANEL_S,
 			Compass::Right => PANEL_E,
 		};
-		if cur_solid & panel != 0 {
+		// If on a solid wall, allow movement out
+		if cur_solid != SOLID_WALL && cur_solid & panel != 0 {
 			return false;
 		}
 

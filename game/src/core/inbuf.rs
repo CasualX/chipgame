@@ -26,13 +26,14 @@ impl InputBuffer {
 	#[inline(never)]
 	pub fn handle(&mut self, dir: Compass, is: bool, was: bool) {
 		if !was && is {
-			self.add_move(dir);
+			self.add_dir(dir);
 		}
 		if /*was && */!is {
-			self.remove_move(dir);
+			self.remove_dir(dir);
 		}
 	}
-	fn add_move(&mut self, dir: Compass) {
+
+	fn add_dir(&mut self, dir: Compass) {
 		// Find the first seen move
 		let mut i = 0;
 		let nmoves = cmp::min(self.nmoves, 4);
@@ -62,8 +63,20 @@ impl InputBuffer {
 		// Write the new move
 		self.moves[i as usize] = InputDir { dir, seen: false };
 	}
-	fn remove_move(&mut self, dir: Compass) {
-		// Only remove the first move, if it has been seen
+
+	fn remove_dir(&mut self, dir: Compass) {
+		if self.nmoves > 3 && self.moves[3] == (InputDir { dir, seen: true }) {
+			self.nmoves -= 1;
+		}
+		if self.nmoves > 2 && self.moves[2] == (InputDir { dir, seen: true }) {
+			self.moves[2] = self.moves[3];
+			self.nmoves -= 1;
+		}
+		if self.nmoves > 1 && self.moves[1] == (InputDir { dir, seen: true }) {
+			self.moves[1] = self.moves[2];
+			self.moves[2] = self.moves[3];
+			self.nmoves -= 1;
+		}
 		if self.nmoves > 0 && self.moves[0] == (InputDir { dir, seen: true }) {
 			self.moves[0] = self.moves[1];
 			self.moves[1] = self.moves[2];
@@ -71,7 +84,8 @@ impl InputBuffer {
 			self.nmoves -= 1;
 		}
 	}
-	pub fn read_move(&mut self) -> Option<Compass> {
+
+	pub fn read_dir(&mut self) -> Option<Compass> {
 		if self.nmoves > 0 {
 			self.moves[0].seen = true;
 			Some(self.moves[0].dir)

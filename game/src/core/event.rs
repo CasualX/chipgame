@@ -3,7 +3,7 @@ use super::*;
 /// Pickup items.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Pickup {
+pub enum ItemPickup {
 	Chip,
 	Flippers,
 	FireBoots,
@@ -36,21 +36,22 @@ pub enum GameEvent {
 	EntityTeleport { entity: EntityHandle },
 	EntityHidden { entity: EntityHandle, hidden: bool },
 	EntityDrown { entity: EntityHandle },
-	PlayerAction { player: EntityHandle },
+	EntityTrapped { entity: EntityHandle },
+	PlayerActivity { player: EntityHandle },
 	PlayerHint { player: EntityHandle, pos: Vec2i },
-	ItemPickup { player: EntityHandle, kind: Pickup },
+	PlayerBump { player: EntityHandle },
+	BlockPush { entity: EntityHandle },
+	ItemPickup { entity: EntityHandle, item: ItemPickup },
 	BombExplode { entity: EntityHandle },
 	SocketFilled { pos: Vec2i },
 	ItemsThief { player: EntityHandle },
-	LockRemoved { pos: Vec2i, key: KeyColor },
+	LockOpened { pos: Vec2i, key: KeyColor },
 	BlueWallBumped { pos: Vec2i },
 	BlueWallCleared { pos: Vec2i },
 	HiddenWallBumped { pos: Vec2i },
 	RecessedWallRaised { pos: Vec2i },
-	GreenButton { entity: EntityHandle, pressed: bool },
-	RedButton { entity: EntityHandle, pressed: bool },
-	BrownButton { entity: EntityHandle, pressed: bool },
-	BlueButton { entity: EntityHandle, pressed: bool },
+	ButtonPress { pos: Vec2i },
+	ToggleWalls,
 	GameWin { player: EntityHandle },
 	GameOver { player: EntityHandle },
 }

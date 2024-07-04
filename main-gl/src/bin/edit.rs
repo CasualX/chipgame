@@ -2,7 +2,7 @@ use std::{fs, thread, time};
 
 fn main() {
 	let Some(file_path) = std::env::args_os().nth(1) else {
-		panic!("Usage: cargo run --example editor <level>");
+		panic!("Usage: cargo run --example edit <level>");
 	};
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);

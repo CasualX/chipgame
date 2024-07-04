@@ -8,7 +8,7 @@ pub enum TimeState {
 	/// Game is running.
 	Running,
 	/// Game is over, player won or lost.
-	Stopped,
+	Paused,
 }
 
 /// Game state.
@@ -82,7 +82,7 @@ impl GameState {
 impl GameState {
 	pub fn tick(&mut self, input: &Input) {
 		if !match self.ts {
-			TimeState::Stopped => false,
+			TimeState::Paused => false,
 			TimeState::Waiting => input.any(),
 			TimeState::Running => true,
 		} {
@@ -148,7 +148,11 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		ent.trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
+		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
+		if trapped && !ent.trapped {
+			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
+		}
+		ent.trapped = trapped;
 	}
 
 	if !ent.has_moved {
@@ -167,7 +171,8 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					*ptr = Terrain::ToggleFloor;
 				}
 			}
-			s.events.push(GameEvent::GreenButton { entity: ent.handle, pressed: true });
+			s.events.push(GameEvent::ToggleWalls);
+			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 		}
 		Terrain::RedButton => {
 			// Find the template entity connected to the red button
@@ -175,7 +180,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			let ehandle = s.qt.get(conn.dest)[0];
 			let Some(template_ent) = s.ents.get(ehandle) else { return };
 			// Raise the event before spawning the new entity
-			s.events.push(GameEvent::RedButton { entity: ent.handle, pressed: true });
+			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 			// Spawn a new entity at the template entity's position
 			let args = EntityArgs {
 				kind: template_ent.kind,
@@ -192,6 +197,9 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				s.ents.put(ent);
 			}
 		}
+		Terrain::BrownButton => {
+			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
+		}
 		Terrain::BlueButton => {
 			for other in s.ents.iter_mut() {
 				if matches!(other.kind, EntityKind::Tank) {
@@ -200,6 +208,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					}
 				}
 			}
+			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 		}
 		Terrain::Teleport => {
 

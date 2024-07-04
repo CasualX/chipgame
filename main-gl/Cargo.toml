@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 chipgame = { path = "../game" }
+
 shade = { git = "https://github.com/CasualX/shade" }
 glutin = "0.26"
 winit = "0.24"
+
+soloud = "1.0"

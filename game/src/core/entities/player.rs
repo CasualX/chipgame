@@ -30,7 +30,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	let orig_dir = ent.step_dir;
 
 	// Freeze player if game over
-	if matches!(s.ps.activity, PlayerActivity::Win | PlayerActivity::Burn | PlayerActivity::Drown | PlayerActivity::Death) {
+	if s.ps.activity.is_game_over() {
 		return;
 	}
 
@@ -44,11 +44,11 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	if s.time >= ent.step_time + ent.step_spd {
 		if ent.step_dir.is_some() {
 			if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
-				ps_activity(s, PlayerActivity::Burn);
+				ps_activity(s, PlayerActivity::Burned);
 				return;
 			}
 			if matches!(terrain, Terrain::Water) && !s.ps.flippers {
-				ps_activity(s, PlayerActivity::Drown);
+				ps_activity(s, PlayerActivity::Drowned);
 				return;
 			}
 		}
@@ -57,10 +57,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	let activity = match terrain {
-		Terrain::Water => PlayerActivity::Swim,
-		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => if s.ps.ice_skates { PlayerActivity::Skate } else { PlayerActivity::Slide },
-		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => if s.ps.suction_boots { PlayerActivity::Suction } else { PlayerActivity::Slide },
-		_ => PlayerActivity::Walk,
+		Terrain::Water => PlayerActivity::Swimming,
+		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => if s.ps.ice_skates { PlayerActivity::Skating } else { PlayerActivity::Sliding },
+		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => if s.ps.suction_boots { PlayerActivity::Suction } else { PlayerActivity::Sliding },
+		_ => PlayerActivity::Walking,
 	};
 	ps_activity(s, activity);
 
@@ -71,7 +71,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	// Wait until movement is cleared before accepting new input
 	if s.time >= ent.step_time + ent.step_spd {
-		let input_dir = s.ps.inbuf.read_move();
+		let input_dir = s.ps.inbuf.read_dir();
 
 		// Win condition
 		if matches!(terrain, Terrain::Exit) && orig_dir.is_some() {
@@ -145,13 +145,14 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				break 'end_move;
 			}
 
-			// Handle force tiles
+			// Handle force terrain
 			let force_dir = match terrain {
 				_ if s.ps.suction_boots => None,
 				Terrain::ForceW => Some(Compass::Left),
 				Terrain::ForceE => Some(Compass::Right),
 				Terrain::ForceN => Some(Compass::Up),
 				Terrain::ForceS => Some(Compass::Down),
+				Terrain::ForceRandom => Some(s.rand.compass()),
 				_ => None,
 			};
 			if let Some(force_dir) = force_dir {
@@ -161,12 +162,19 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 					Compass::Up | Compass::Down => if input_dir == Some(Compass::Left) { Some(Compass::Left) } else if input_dir == Some(Compass::Right) { Some(Compass::Right) } else { None },
 				};
 
-				s.ps.forced_move = true;
-
-				match override_dir {
-					Some(override_dir) if try_move(s, ent, override_dir) => true,
-					_ => try_move(s, ent, force_dir),
-				};
+				// Consider this a forced move if the player did not step in the direction of the force terrain
+				if let Some(override_dir) = override_dir {
+					if try_move(s, ent, override_dir) {
+						s.ps.forced_move = false;
+					}
+					else {
+						s.ps.forced_move = try_move(s, ent, force_dir);
+						bump(s, ent, override_dir);
+					}
+				}
+				else {
+					s.ps.forced_move = try_move(s, ent, force_dir)
+				}
 
 				break 'end_move;
 			}
@@ -177,36 +185,46 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			// Handle player input
 			if ent.trapped { }
 			else if let Some(dir) = input_dir {
-				try_move(s, ent, dir);
+				if !try_move(s, ent, dir) {
+					bump(s, ent, dir);
+				}
 			}
 		}
 	}
 }
 
+fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
+	ent.step_spd = ent.base_spd;
+	ent.face_dir = Some(dir);
+	s.ps.steps += 1;
+	s.events.push(GameEvent::PlayerBump { player: ent.handle });
+	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+}
+
 fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 	let new_pos = ent.pos + step_dir.to_vec();
 
-	let terrain = s.field.get_terrain(new_pos);
-	match terrain {
+	let new_terrain = s.field.get_terrain(new_pos);
+	match new_terrain {
 		Terrain::BlueLock => if s.ps.keys[KeyColor::Blue as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Blue as usize] -= 1;
-			s.events.push(GameEvent::LockRemoved { pos: new_pos, key: KeyColor::Blue });
+			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Blue });
 		}
 		Terrain::RedLock => if s.ps.keys[KeyColor::Red as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Red as usize] -= 1;
-			s.events.push(GameEvent::LockRemoved { pos: new_pos, key: KeyColor::Red });
+			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Red });
 		}
 		Terrain::GreenLock => if s.ps.keys[KeyColor::Green as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			// s.ps.keys[KeyColor::Green as usize] -= 1; // Green keys are infinite
-			s.events.push(GameEvent::LockRemoved { pos: new_pos, key: KeyColor::Green });
+			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Green });
 		}
 		Terrain::YellowLock => if s.ps.keys[KeyColor::Yellow as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Yellow as usize] -= 1;
-			s.events.push(GameEvent::LockRemoved { pos: new_pos, key: KeyColor::Yellow });
+			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Yellow });
 		}
 		Terrain::BlueWall => {
 			s.field.set_terrain(new_pos, Terrain::Wall);
@@ -246,6 +264,18 @@ fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 		}
 	}
 
+	let terrain = s.field.get_terrain(ent.pos);
+	// Set the player's move speed
+	if !s.ps.suction_boots && matches!(terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
+		ent.base_spd = BASE_SPD / 2;
+	}
+	else if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
+		ent.base_spd = BASE_SPD / 2;
+	}
+	else {
+		ent.base_spd = BASE_SPD;
+	}
+
 	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
 	ent.face_dir = Some(step_dir);
 	ent.step_time = s.time;
@@ -262,23 +292,13 @@ fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 		ent.has_moved = true;
 		interact_terrain(s, ent);
 
-		// Set the player's move speed
-		if !s.ps.suction_boots && matches!(terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS) {
-			ent.step_spd = BASE_SPD / 2;
-		}
-		else if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
-			ent.step_spd = BASE_SPD / 2;
-		}
-		else {
-			ent.step_spd = BASE_SPD;
-		}
-
 		s.ps.steps += 1;
 		s.events.push(GameEvent::EntityStep { entity: ent.handle });
 	}
 	else {
-		ent.step_spd = BASE_SPD / 2;
+		ent.base_spd = BASE_SPD;
 	}
+	ent.step_spd = ent.base_spd;
 
 	return success;
 }
@@ -289,6 +309,7 @@ fn interact(s: &mut GameState, ent: &mut Entity, ictx: &mut InteractContext) {
 			if physics::try_move(s, ent, ictx.push_dir) {
 				update_hidden_flag(s, ent.pos);
 				update_hidden_flag(s, ent.pos - ictx.push_dir.to_vec());
+				s.events.push(GameEvent::BlockPush { entity: ent.handle });
 			}
 			else {
 				ictx.blocking = true;
@@ -303,14 +324,6 @@ fn interact(s: &mut GameState, ent: &mut Entity, ictx: &mut InteractContext) {
 			else {
 				ictx.blocking = true;
 			}
-		}
-		EntityKind::Thief => {
-			ictx.blocking = false;
-			s.ps.flippers = false;
-			s.ps.fire_boots = false;
-			s.ps.ice_skates = false;
-			s.ps.suction_boots = false;
-			s.events.push(GameEvent::ItemsThief { player: s.ps.ehandle });
 		}
 		_ => {}
 	}

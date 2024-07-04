@@ -23,16 +23,15 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 
 fn think(s: &mut GameState, ent: &mut Entity) {
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Death);
+		ps_activity(s, PlayerActivity::Collided);
 	}
 
 	let terrain = s.field.get_terrain(ent.pos);
-
 	if matches!(terrain, Terrain::Water) {
 		s.field.set_terrain(ent.pos, Terrain::Dirt);
+		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
 		ent.remove = true;
 	}
-
 
 	if ent.step_dir.is_some() && s.time >= ent.step_time + ent.step_spd {
 		let step_dir = ent.step_dir.unwrap();

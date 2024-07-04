@@ -1,27 +1,4 @@
 {
-	"tiles": [
-		{ "tile": "Wall", "sprite": "Blank", "model": "Empty", "solid": 15 },
-		{ "tile": "Floor", "sprite": "Floor", "model": "Floor", "solid": 0 },
-		{ "tile": "Wall", "sprite": "Wall", "model": "Wall", "solid": 15 },
-		{ "tile": "Exit", "sprite": "Exit1", "model": "Portal", "solid": 0 },
-		{ "tile": "Hint", "sprite": "Hint", "model": "Floor", "solid": 0 },
-		{ "tile": "Water", "sprite": "Water", "model": "Floor", "solid": 0 },
-		{ "tile": "Dirt", "sprite": "Dirt", "model": "Floor", "solid": 0 },
-		{ "tile": "Ice", "sprite": "Ice", "model": "Floor", "solid": 0 },
-		{ "tile": "IceUL", "sprite": "IceUL", "model": "Floor", "solid": 0 },
-		{ "tile": "IceDL", "sprite": "IceDL", "model": "Floor", "solid": 0 },
-		{ "tile": "ForceUp", "sprite": "ForceUp", "model": "Floor", "solid": 0 },
-		{ "tile": "ForceLeft", "sprite": "ForceLeft", "model": "Floor", "solid": 0 },
-		{ "tile": "ForceDown", "sprite": "ForceDown", "model": "Floor", "solid": 0 },
-		{ "tile": "ForceRight", "sprite": "ForceRight", "model": "Floor", "solid": 0 },
-		{ "tile": "GreenSwitch", "sprite": "GreenSwitch", "model": "Floor", "solid": 0 },
-		{ "tile": "RedSwitch", "sprite": "RedSwitch", "model": "Floor", "solid": 0 },
-		{ "tile": "BrownSwitch", "sprite": "BrownSwitch", "model": "Floor", "solid": 0 },
-		{ "tile": "BlueSwitch", "sprite": "BlueSwitch", "model": "Floor", "solid": 0 },
-		{ "tile": "Floor", "sprite": "OnOffFloor", "model": "Floor", "solid": 0 },
-		{ "tile": "Floor", "sprite": "OnOffFloor", "model": "Floor", "solid": 0 },
-		{ "tile": "Floor", "sprite": "PanelSouth", "model": "Floor", "solid": 4 }
-	],
 	"sprites": {
 		"Blank": [1, 5],
 		"Floor": [0, 0],

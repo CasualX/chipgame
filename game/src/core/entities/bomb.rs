@@ -23,7 +23,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 
 fn think(s: &mut GameState, ent: &mut Entity) {
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Death);
+		ps_activity(s, PlayerActivity::Bombed);
 	}
 
 	let mut exploded = false;

@@ -1,9 +1,36 @@
 use std::{fs, thread, time};
+use std::collections::HashMap;
+
+fn load_wav(path: &str) -> soloud::Wav {
+	use soloud::*;
+	let mut wav = Wav::default();
+	wav.load(path).expect("Failed to load sound");
+	return wav;
+}
 
 fn main() {
 	let Some(file_path) = std::env::args_os().nth(1) else {
-		panic!("Usage: cargo run --example editor <level>");
+		panic!("Usage: cargo run --example play <level>");
 	};
+
+	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
+	let mut sfx = HashMap::new();
+	sfx.insert(chipgame::visual::SoundFx::GameOver, load_wav("data/sfx/death.wav"));
+	sfx.insert(chipgame::visual::SoundFx::GameWin, load_wav("data/sfx/tada.wav"));
+	sfx.insert(chipgame::visual::SoundFx::Derezz, load_wav("data/sfx/derezz.wav"));
+	sfx.insert(chipgame::visual::SoundFx::ICCollected, load_wav("data/sfx/click.wav"));
+	sfx.insert(chipgame::visual::SoundFx::ItemCollected, load_wav("data/sfx/chack.wav"));
+	sfx.insert(chipgame::visual::SoundFx::LockOpened, load_wav("data/sfx/door.wav"));
+	sfx.insert(chipgame::visual::SoundFx::SocketOpened, load_wav("data/sfx/socket.wav"));
+	sfx.insert(chipgame::visual::SoundFx::CantMove, load_wav("data/sfx/oof.wav"));
+	sfx.insert(chipgame::visual::SoundFx::BlockMoving, load_wav("data/sfx/whisk.wav"));
+	sfx.insert(chipgame::visual::SoundFx::TrapEntered, load_wav("data/sfx/traphit.wav"));
+	sfx.insert(chipgame::visual::SoundFx::BombExplodes, load_wav("data/sfx/bomb.wav"));
+	sfx.insert(chipgame::visual::SoundFx::ButtonPressed, load_wav("data/sfx/tick.wav"));
+	sfx.insert(chipgame::visual::SoundFx::Teleporting, load_wav("data/sfx/teleport.wav"));
+	sfx.insert(chipgame::visual::SoundFx::WallPopup, load_wav("data/sfx/popup.wav"));
+	sfx.insert(chipgame::visual::SoundFx::WaterSplash, load_wav("data/sfx/splash.wav"));
+	sfx.insert(chipgame::visual::SoundFx::BootsStolen, load_wav("data/sfx/thief.wav"));
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -101,6 +128,17 @@ fn main() {
 		};
 		state.update(&input);
 		state.draw(&mut g);
+
+		for e in &std::mem::replace(&mut state.events, Vec::new()) {
+			println!("Event: {:?}", e);
+			match e {
+				&chipgame::visual::Event::PlaySound(x) => {
+					if let Some(wav) = sfx.get(&x) {
+						sl.play(wav);
+					}
+				}
+			}
+		}
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();
