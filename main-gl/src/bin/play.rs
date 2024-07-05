@@ -1,6 +1,20 @@
 use std::{fs, thread, time};
 use std::collections::HashMap;
 
+#[cfg(windows)]
+fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
+	use winit::platform::windows::WindowBuilderExtWindows;
+	winit::window::WindowBuilder::new()
+		.with_inner_size(size)
+		.with_drag_and_drop(false)
+}
+#[cfg(not(windows))]
+fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
+	winit::window::WindowBuilder::new()
+		.with_inner_size(size)
+}
+
+
 fn load_wav(path: &str) -> soloud::Wav {
 	use soloud::*;
 	let mut wav = Wav::default();
@@ -10,7 +24,7 @@ fn load_wav(path: &str) -> soloud::Wav {
 
 fn main() {
 	let Some(file_path) = std::env::args_os().nth(1) else {
-		panic!("Usage: cargo run --example play <level>");
+		panic!("Usage: cargo run --bin play <level>");
 	};
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
@@ -18,8 +32,8 @@ fn main() {
 	sfx.insert(chipgame::visual::SoundFx::GameOver, load_wav("data/sfx/death.wav"));
 	sfx.insert(chipgame::visual::SoundFx::GameWin, load_wav("data/sfx/tada.wav"));
 	sfx.insert(chipgame::visual::SoundFx::Derezz, load_wav("data/sfx/derezz.wav"));
-	sfx.insert(chipgame::visual::SoundFx::ICCollected, load_wav("data/sfx/click.wav"));
-	sfx.insert(chipgame::visual::SoundFx::ItemCollected, load_wav("data/sfx/chack.wav"));
+	sfx.insert(chipgame::visual::SoundFx::ICCollected, load_wav("data/sfx/chack.wav"));
+	sfx.insert(chipgame::visual::SoundFx::ItemCollected, load_wav("data/sfx/click.wav"));
 	sfx.insert(chipgame::visual::SoundFx::LockOpened, load_wav("data/sfx/door.wav"));
 	sfx.insert(chipgame::visual::SoundFx::SocketOpened, load_wav("data/sfx/socket.wav"));
 	sfx.insert(chipgame::visual::SoundFx::CantMove, load_wav("data/sfx/oof.wav"));
@@ -35,12 +49,10 @@ fn main() {
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
 	let mut event_loop = winit::event_loop::EventLoop::new();
-	let window = winit::window::WindowBuilder::new()
-		.with_inner_size(size);
 
 	let window_context = glutin::ContextBuilder::new()
 		.with_multisampling(4)
-		.build_windowed(window, &event_loop)
+		.build_windowed(window_builder(size), &event_loop)
 		.unwrap();
 
 	let context = unsafe { window_context.make_current().unwrap() };

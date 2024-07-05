@@ -80,10 +80,9 @@ impl Field {
 
 impl Field {
 	pub fn can_move(&self, pos: Vec2i, dir: Compass, flags: &SolidFlags) -> bool {
+		// Check for panels on the current terrain
 		let cur_terrain = self.get_terrain(pos);
 		let cur_solid = cur_terrain.solid_flags();
-
-		// Check for panels on the current terrain
 		let panel = match dir {
 			Compass::Up => PANEL_N,
 			Compass::Left => PANEL_W,

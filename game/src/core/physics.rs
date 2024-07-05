@@ -22,20 +22,16 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 	let mut terrain = s.field.get_terrain(pos);
 
 	if let Some(step_dir) = step_dir {
-		// Allow movement if the terrain at the current position is solid
-		let solidf = terrain.solid_flags();
-		if solidf == SOLID_WALL {
-			return true;
-		}
-
 		// Check for panels on the current terrain
+		let solidf = terrain.solid_flags();
 		let panel = match step_dir {
 			Compass::Up => PANEL_N,
 			Compass::Left => PANEL_W,
 			Compass::Down => PANEL_S,
 			Compass::Right => PANEL_E,
 		};
-		if solidf & panel != 0 {
+		// If on a solid wall, allow movement out
+		if solidf != SOLID_WALL && (solidf & panel) != 0 {
 			return false;
 		}
 

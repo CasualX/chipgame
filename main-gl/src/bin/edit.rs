@@ -1,5 +1,18 @@
 use std::{fs, thread, time};
 
+#[cfg(windows)]
+fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
+	use winit::platform::windows::WindowBuilderExtWindows;
+	winit::window::WindowBuilder::new()
+		.with_inner_size(size)
+		.with_drag_and_drop(false)
+}
+#[cfg(not(windows))]
+fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
+	winit::window::WindowBuilder::new()
+		.with_inner_size(size)
+}
+
 fn main() {
 	let Some(file_path) = std::env::args_os().nth(1) else {
 		panic!("Usage: cargo run --example edit <level>");
@@ -8,12 +21,10 @@ fn main() {
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
 	let mut event_loop = winit::event_loop::EventLoop::new();
-	let window = winit::window::WindowBuilder::new()
-		.with_inner_size(size);
 
 	let window_context = glutin::ContextBuilder::new()
 		.with_multisampling(4)
-		.build_windowed(window, &event_loop)
+		.build_windowed(window_builder(size), &event_loop)
 		.unwrap();
 
 	let context = unsafe { window_context.make_current().unwrap() };
