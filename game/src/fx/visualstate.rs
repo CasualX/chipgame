@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Default)]
 pub struct VisualState {
+	pub ntime: i32,
 	pub time: f32,
 	pub dt: f32,
 	pub gs: core::GameState,
@@ -49,12 +50,12 @@ impl VisualState {
 				&core::GameEvent::EntityHidden { entity, hidden } => entity_hidden(self, entity, hidden),
 				&core::GameEvent::EntityTeleport { entity } => entity_teleport(self, entity),
 				&core::GameEvent::EntityDrown { entity } => entity_drown(self, entity),
-				&core::GameEvent::PlayerActivity { player } => entity_face_dir(self, player),
+				&core::GameEvent::PlayerActivity { player } => player_activity(self, player),
 				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
 				&core::GameEvent::BlueWallCleared { pos } => blue_wall_cleared(self, pos),
 				&core::GameEvent::HiddenWallBumped { pos } => hidden_wall_bumped(self, pos),
-				&core::GameEvent::RecessedWallRaised { pos } => recessed_wall_raised(self, pos),
+				&core::GameEvent::RecessedWallPopup { pos } => recessed_wall_raised(self, pos),
 				&core::GameEvent::ToggleWalls => toggle_walls(self),
 				&core::GameEvent::ButtonPress { .. } => button_press(self),
 				&core::GameEvent::GameWin { .. } => game_win(self),
@@ -64,12 +65,14 @@ impl VisualState {
 				&core::GameEvent::EntityTrapped { entity } => entity_trapped(self, entity),
 				&core::GameEvent::BombExplode { entity } => bomb_explode(self, entity),
 				&core::GameEvent::ItemsThief { player } => items_thief(self, player),
+				&core::GameEvent::DirtCleared { pos } => dirt_cleared(self, pos),
 				_ => {}
 			}
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics) {
-		let time = self.gs.time as f32 / 60.0;
+		self.ntime += 1;
+		let time = self.ntime as f32 / 60.0;
 		self.time = time;
 		self.dt = 1.0 / 60.0;
 		let size = self.resources.screen_size;

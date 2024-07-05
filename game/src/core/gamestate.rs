@@ -76,6 +76,9 @@ impl GameState {
 				update_hidden_flag(self, ent.pos);
 			}
 		}
+
+		let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
+		println!("Found {} chips", chips);
 	}
 }
 

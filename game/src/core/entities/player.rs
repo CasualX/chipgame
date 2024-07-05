@@ -67,6 +67,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	// Turn dirt to floor after stepping on it
 	if matches!(terrain, Terrain::Dirt) {
 		s.field.set_terrain(ent.pos, Terrain::Floor);
+		s.events.push(GameEvent::DirtCleared { pos: ent.pos });
 	}
 
 	// Wait until movement is cleared before accepting new input
@@ -282,7 +283,7 @@ fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 	if success {
 		let terrain = s.field.get_terrain(ent.pos);
 		if matches!(terrain, Terrain::RecessedWall) {
-			s.events.push(GameEvent::RecessedWallRaised { pos: ent.pos });
+			s.events.push(GameEvent::RecessedWallPopup { pos: ent.pos });
 			s.field.set_terrain(ent.pos, Terrain::RaisedWall);
 		}
 

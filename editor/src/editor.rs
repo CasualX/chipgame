@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use crate::visual::*;
-use crate::core;
+use chipgame::fx::*;
+use chipgame::core;
 use cvmath::*;
 
 #[derive(Clone, Default)]
@@ -113,15 +113,23 @@ impl EditorGame {
 			Some('K') => self.tool = Tool::Terrain(core::Terrain::Fire),
 			Some('L') => self.tool = Tool::Terrain(core::Terrain::Dirt),
 			Some('M') => self.tool = Tool::Terrain(core::Terrain::Gravel),
-			Some('N') => self.tool = Tool::Terrain(core::Terrain::Ice),
-			Some('O') => self.tool = Tool::Terrain(core::Terrain::IceNW),
-			Some('P') => self.tool = Tool::Terrain(core::Terrain::IceNE),
-			Some('Q') => self.tool = Tool::Terrain(core::Terrain::IceSW),
-			Some('R') => self.tool = Tool::Terrain(core::Terrain::IceSE),
-			Some('S') => self.tool = Tool::Terrain(core::Terrain::ForceN),
-			Some('T') => self.tool = Tool::Terrain(core::Terrain::ForceW),
-			Some('U') => self.tool = Tool::Terrain(core::Terrain::ForceS),
-			Some('V') => self.tool = Tool::Terrain(core::Terrain::ForceE),
+			Some('N') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Bug, pos: Vec2::ZERO, face_dir: Some(core::Compass::Up) }),
+			Some('O') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Bug, pos: Vec2::ZERO, face_dir: Some(core::Compass::Left) }),
+			Some('P') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Bug, pos: Vec2::ZERO, face_dir: Some(core::Compass::Down) }),
+			Some('Q') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Bug, pos: Vec2::ZERO, face_dir: Some(core::Compass::Right) }),
+			Some('R') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Blob, pos: Vec2::ZERO, face_dir: Some(core::Compass::Up) }),
+			// Some('N') => self.tool = Tool::Terrain(core::Terrain::Ice),
+			// Some('O') => self.tool = Tool::Terrain(core::Terrain::IceNW),
+			// Some('P') => self.tool = Tool::Terrain(core::Terrain::IceNE),
+			// Some('Q') => self.tool = Tool::Terrain(core::Terrain::IceSW),
+			// Some('R') => self.tool = Tool::Terrain(core::Terrain::IceSE),
+			// Some('S') => self.tool = Tool::Terrain(core::Terrain::ForceN),
+			// Some('T') => self.tool = Tool::Terrain(core::Terrain::ForceW),
+			// Some('U') => self.tool = Tool::Terrain(core::Terrain::ForceS),
+			// Some('V') => self.tool = Tool::Terrain(core::Terrain::ForceE),
+			Some('T') => self.tool = Tool::Terrain(core::Terrain::PanelS),
+			Some('U') => self.tool = Tool::Terrain(core::Terrain::PanelE),
+			Some('V') => self.tool = Tool::Terrain(core::Terrain::Teleport),
 			Some('W') => self.tool = Tool::Erase,
 			Some('X') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Block, pos: Vec2::ZERO, face_dir: None }),
 			Some('Y') => self.tool = Tool::Entity(core::EntityArgs { kind: core::EntityKind::Chip, pos: Vec2::ZERO, face_dir: None }),

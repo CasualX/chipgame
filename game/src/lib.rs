@@ -1,5 +1,5 @@
 
 // mod editor;
 pub mod core;
-pub mod visual;
-pub mod editor;
+pub mod fx;
+// pub mod editor;

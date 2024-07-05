@@ -97,6 +97,15 @@ pub fn entity_face_dir(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	obj.sprite = sprite_for_ent(ent, &ctx.gs.ps);
 }
 
+pub fn player_activity(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+	entity_face_dir(ctx, ehandle);
+
+	match ctx.gs.ps.activity {
+		core::PlayerActivity::Skating => ctx.events.push(Event::PlaySound(SoundFx::SkatingForward)),
+		_ => (),
+	}
+}
+
 pub fn entity_hidden(ctx: &mut VisualState, ehandle: core::EntityHandle, hidden: bool) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
@@ -262,7 +271,12 @@ pub fn item_pickup(ctx: &mut VisualState, ehandle: core::EntityHandle, item: cor
 	obj.anim = Animation::Rise;
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) });
 
-	ctx.events.push(Event::PlaySound(match item { core::ItemPickup::Chip => SoundFx::ICCollected, _ => SoundFx::ItemCollected }));
+	let sfx = match item {
+		core::ItemPickup::Chip => SoundFx::ICCollected,
+		core::ItemPickup::Flippers | core::ItemPickup::FireBoots | core::ItemPickup::IceSkates | core::ItemPickup::SuctionBoots => SoundFx::BootCollected,
+		core::ItemPickup::BlueKey | core::ItemPickup::RedKey | core::ItemPickup::GreenKey | core::ItemPickup::YellowKey => SoundFx::KeyCollected,
+	};
+	ctx.events.push(Event::PlaySound(sfx));
 }
 
 pub fn lock_opened(ctx: &mut VisualState, pos: Vec2<i32>, key: core::KeyColor) {
@@ -309,6 +323,7 @@ pub fn blue_wall_cleared(ctx: &mut VisualState, pos: Vec2<i32>) {
 		unalive_after_anim: true,
 	};
 	ctx.objects.insert(obj);
+	ctx.events.push(Event::PlaySound(SoundFx::BlueWallCleared));
 }
 
 pub fn hidden_wall_bumped(ctx: &mut VisualState, pos: Vec2<i32>) {
@@ -403,4 +418,8 @@ pub fn bomb_explode(ctx: &mut VisualState, _entity: core::EntityHandle) {
 
 pub fn items_thief(ctx: &mut VisualState, _player: core::EntityHandle) {
 	ctx.events.push(Event::PlaySound(SoundFx::BootsStolen));
+}
+
+pub fn dirt_cleared(ctx: &mut VisualState, _pos: Vec2i) {
+	ctx.events.push(Event::PlaySound(SoundFx::TileEmptied));
 }

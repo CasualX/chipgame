@@ -1,5 +1,7 @@
 use std::{fs, thread, time};
 
+mod editor;
+
 #[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	use winit::platform::windows::WindowBuilderExtWindows;
@@ -45,14 +47,14 @@ fn main() {
 
 	// Create the shader
 	let shader = g.shader_create(None).unwrap();
-	if let Err(_) = g.shader_compile(shader, include_str!("../../../data/standard.vs.glsl"), include_str!("../../../data/standard.fs.glsl")) {
+	if let Err(_) = g.shader_compile(shader, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")) {
 		panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
 	}
 
 	let mut past_now = time::Instant::now();
 
-	let mut editor = chipgame::editor::EditorGame::default();
-	let mut input = chipgame::editor::EditorInput::default();
+	let mut editor = editor::EditorGame::default();
+	let mut input = editor::EditorInput::default();
 	editor.load_level(&fs::read_to_string(&file_path).unwrap());
 
 	// Main loop
@@ -146,7 +148,7 @@ fn main() {
 		input.screen_size.x = size.width as i32;
 		input.screen_size.y = size.height as i32;
 
-		editor.init(chipgame::visual::Resources {
+		editor.init(chipgame::fx::Resources {
 			tileset,
 			tileset_size: [tex_info.width, tex_info.height].into(),
 			shader,
