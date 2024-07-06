@@ -1,3 +1,8 @@
+/*!
+Presentation layer
+==================
+ */
+
 use std::mem;
 use std::collections::HashMap;
 use cvmath::*;

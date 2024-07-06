@@ -58,3 +58,13 @@ pub struct Entity {
 	/// Entity will be removed at the end of the current tick.
 	pub remove: bool,
 }
+
+impl Entity {
+	pub fn to_entity_args(&self) -> EntityArgs {
+		EntityArgs {
+			kind: self.kind,
+			pos: self.pos,
+			face_dir: self.face_dir,
+		}
+	}
+}

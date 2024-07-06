@@ -146,7 +146,7 @@ impl ModelData {
 
 const TILE_SIZE: f32 = 32.0;
 
-fn draw_floor(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, z1: f32, z2: f32, alpha: f32, t: Transform3<f32>) {
+fn draw_floor(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, z1: f32, z2: f32, alpha: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -158,30 +158,26 @@ fn draw_floor(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, sprit
 	let z2 = z2 + pos.z;
 	let a = (alpha * 255.0) as u8;
 
-	let cx = x + TILE_SIZE * 0.5;
-	let cy = y + TILE_SIZE * 0.5;
-	let t = Transform3::translate((cx, cy, 0.0)) * t * Transform3::translate((-cx, -cy, 0.0));
-
 	let u = gfx.x as f32 * (TILE_SIZE + 2.0) + 1.0;
 	let v = gfx.y as f32 * (TILE_SIZE + 2.0) + 1.0;
 
 	p.add_vertex(Vertex {
-		pos: t * Vec3(x, y, z2),
+		pos: Vec3(x, y, z2),
 		uv: Vec2(u, v),
 		color: [255, 255, 255, a],
 	});
 	p.add_vertex(Vertex {
-		pos: t * Vec3(x, y + TILE_SIZE, z1),
+		pos: Vec3(x, y + TILE_SIZE, z1),
 		uv: Vec2(u, v + TILE_SIZE),
 		color: [255, 255, 255, a],
 	});
 	p.add_vertex(Vertex {
-		pos: t * Vec3(x + TILE_SIZE, y + TILE_SIZE, z1),
+		pos: Vec3(x + TILE_SIZE, y + TILE_SIZE, z1),
 		uv: Vec2(u + TILE_SIZE, v + TILE_SIZE),
 		color: [255, 255, 255, a],
 	});
 	p.add_vertex(Vertex {
-		pos: t * Vec3(x + TILE_SIZE, y, z2),
+		pos: Vec3(x + TILE_SIZE, y, z2),
 		uv: Vec2(u + TILE_SIZE, v),
 		color: [255, 255, 255, a],
 	});
@@ -336,24 +332,24 @@ fn draw_portal(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, spri
 	});
 }
 
-fn draw(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, model: Model, alpha: f32, t: Transform3<f32>) {
+pub fn draw(cv: &mut shade::d2::Canvas<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, model: Model, alpha: f32) {
 	match model {
 		Model::Empty => (),
-		Model::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha, t),
+		Model::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha),
 		Model::Wall => draw_wall(cv, pos, 0.0, sprite, alpha),
 		Model::ThinWall => draw_wall(cv, pos, 2.0, sprite, alpha),
-		Model::Sprite => draw_floor(cv, pos, sprite, 0.0, 20.0, alpha, t),
+		Model::Sprite => draw_floor(cv, pos, sprite, 0.0, 20.0, alpha),
 		Model::Portal => draw_portal(cv, pos, sprite),
-		Model::FlatSprite => draw_floor(cv, pos, sprite, 3.0, 12.0, alpha, t),
-		Model::ReallyFlatSprite => draw_floor(cv, pos, sprite, 6.0, 10.0, alpha, t),
-		Model::FloorSprite => draw_floor(cv, pos, sprite, 1.0, 1.0, alpha, t),
+		Model::FlatSprite => draw_floor(cv, pos, sprite, 3.0, 12.0, alpha),
+		Model::ReallyFlatSprite => draw_floor(cv, pos, sprite, 6.0, 10.0, alpha),
+		Model::FloorSprite => draw_floor(cv, pos, sprite, 1.0, 1.0, alpha),
 		_ => unimplemented!(),
 	}
 }
 
 pub fn draw_tile(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, terrain: core::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
 	let tile = tiles[terrain as usize];
-	draw(cv, pos, tile.sprite, tile.model, 1.0, Transform3::IDENTITY);
+	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
 
 pub fn field(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, state: &VisualState, time: f32) {
@@ -378,7 +374,7 @@ pub fn field(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, stat
 					_ => (),
 				}
 			}
-			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0), sprite, model, 1.0, Transform3::IDENTITY);
+			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0), sprite, model, 1.0);
 		}
 	}
 	// Render the object shadows
@@ -399,6 +395,6 @@ pub fn field(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, stat
 		if !obj.live || !obj.vis {
 			continue;
 		}
-		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha, Transform3::IDENTITY);
+		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha);
 	}
 }

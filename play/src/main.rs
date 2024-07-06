@@ -14,7 +14,6 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 		.with_inner_size(size)
 }
 
-
 fn load_wav(path: &str) -> soloud::Wav {
 	use soloud::*;
 	let mut wav = Wav::default();
