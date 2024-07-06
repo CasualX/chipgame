@@ -23,9 +23,16 @@ fn load_wav(path: &str) -> soloud::Wav {
 
 fn main() {
 	let app = clap::command!("play")
-		.arg(clap::arg!(<level> "Level file to play"));
+		.arg(clap::arg!(-n [n] "Level number to play"));
 	let matches = app.get_matches();
-	let file_path = matches.value_of("level").unwrap();
+	let level = if let Some(n) = matches.value_of("n") {
+		n.parse::<i32>().expect("Invalid level number")
+	}
+	else {
+		1
+	};
+
+	let file_path = format!("data/cc1/level{}.json", level);
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
 	let mut sfx = HashMap::new();
@@ -84,6 +91,7 @@ fn main() {
 
 	let mut state = chipgame::fx::VisualState::default();
 	state.init();
+	state.level_index = level;
 	state.load_level(&fs::read_to_string(&file_path).unwrap());
 	let mut input = chipgame::core::Input::default();
 

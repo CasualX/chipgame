@@ -54,8 +54,7 @@ fn main() {
 
 	let mut past_now = time::Instant::now();
 
-	let mut editor = editor::EditorGame::default();
-	let mut input = editor::EditorInput::default();
+	let mut editor = editor::EditorState::default();
 	editor.load_level(&fs::read_to_string(&file_path).unwrap());
 
 	// Main loop
@@ -70,6 +69,8 @@ fn main() {
 			// 	// Print only Window events to reduce noise
 			// 	println!("{:?}", event);
 			// }
+
+			editor.set_screen_size(size.width as i32, size.height as i32);
 
 			match event {
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::Resized(new_size), .. } => {
@@ -91,15 +92,11 @@ fn main() {
 					..
 				} => {
 					match virtual_keycode {
-						Some(winit::event::VirtualKeyCode::Left) => input.left = is_pressed(state),
-						Some(winit::event::VirtualKeyCode::Right) => input.right = is_pressed(state),
-						Some(winit::event::VirtualKeyCode::Up) => input.up = is_pressed(state),
-						Some(winit::event::VirtualKeyCode::Down) => input.down = is_pressed(state),
-						Some(winit::event::VirtualKeyCode::A) if is_pressed(state) => editor.tool = editor::Tool::TerrainSampler,
-						Some(winit::event::VirtualKeyCode::S) if is_pressed(state) => editor.tool = editor::Tool::EntitySampler,
-						Some(winit::event::VirtualKeyCode::D) if is_pressed(state) => editor.tool = editor::Tool::EntityMover,
-						Some(winit::event::VirtualKeyCode::F) if is_pressed(state) => editor.tool = editor::Tool::EntityEraser,
-						Some(winit::event::VirtualKeyCode::G) if is_pressed(state) => editor.tool = editor::Tool::Connector,
+						Some(winit::event::VirtualKeyCode::Left) => editor.key_left(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Right) => editor.key_right(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Up) => editor.key_up(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Down) => editor.key_down(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Delete) => editor.delete(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::F5) if is_pressed(state) => {
 							let s = editor.save_level();
 							fs::write(&file_path, s).unwrap();
@@ -109,14 +106,14 @@ fn main() {
 				}
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::MouseInput { state, button, .. }, .. } => {
 					match button {
-						winit::event::MouseButton::Left => input.left_click = is_pressed(state),
-						winit::event::MouseButton::Right => input.right_click = is_pressed(state),
+						winit::event::MouseButton::Left => editor.left_click(is_pressed(state)),
+						winit::event::MouseButton::Right => editor.right_click(is_pressed(state)),
+						winit::event::MouseButton::Middle => editor.middle_click(is_pressed(state)),
 						_ => (),
 					}
 				}
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CursorMoved { position, .. }, .. } => {
-					input.mouse.x = position.x as i32;
-					input.mouse.y = position.y as i32;
+					editor.mouse_move(position.x as i32, position.y as i32);
 				}
 				winit::event::Event::MainEventsCleared => {
 					*control_flow = winit::event_loop::ControlFlow::Exit;
@@ -125,8 +122,6 @@ fn main() {
 			}
 		});
 
-		input.screen_size.x = size.width as i32;
-		input.screen_size.y = size.height as i32;
 
 		editor.init(chipgame::fx::Resources {
 			tileset,
@@ -134,7 +129,7 @@ fn main() {
 			shader,
 			screen_size: [size.width as i32, size.height as i32].into(),
 		});
-		editor.render(&mut g, &input);
+		editor.render(&mut g);
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

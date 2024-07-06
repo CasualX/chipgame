@@ -4,6 +4,15 @@ use super::*;
 const IDLE_TIME: Time = 20;
 
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
+	// There can only be one player
+	for ehandle in s.ents.handles() {
+		if let Some(ent) = s.ents.get(ehandle) {
+			if matches!(ent.kind, EntityKind::Player) {
+				s.entity_remove(ent.handle);
+			}
+		}
+	}
+
 	let handle = s.ents.alloc();
 	s.ps.ehandle = handle;
 	s.ents.put(Entity {
@@ -12,7 +21,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		kind: args.kind,
 		pos: args.pos,
 		base_spd: BASE_SPD,
-		face_dir: args.face_dir,
+		face_dir: None,
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: -BASE_SPD,

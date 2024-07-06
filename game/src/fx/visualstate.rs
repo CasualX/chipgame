@@ -10,14 +10,18 @@ pub struct VisualState {
 	pub objects: ObjectMap,
 	pub resources: Resources,
 	pub events: Vec<Event>,
+	pub level_index: i32,
+	pub next_level_load: f32,
 	pub tiles: &'static [TileGfx],
 }
 
 impl VisualState {
 	pub fn init(&mut self) {
 		self.tiles = &TILES_PLAY;
+		self.level_index = 1;
 	}
 	pub fn load_level(&mut self, json: &str) {
+		self.objects.clear();
 		self.gs.load(json);
 		self.sync();
 		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
@@ -38,6 +42,15 @@ impl VisualState {
 	pub fn update(&mut self, input: &core::Input) {
 		self.gs.tick(input);
 		self.sync();
+
+		if self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
+			if self.gs.ps.activity == core::PlayerActivity::Win {
+				self.level_index += 1;
+			}
+			if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", self.level_index)) {
+				self.load_level(&json);
+			}
+		}
 	}
 	pub fn sync(&mut self) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {

@@ -30,7 +30,7 @@ pub struct EntityArgs {
 
 impl GameState {
 	/// Creates an entity from arguments.
-	pub fn create_entity(&mut self, data: &EntityArgs) -> EntityHandle {
+	pub fn entity_create(&mut self, data: &EntityArgs) -> EntityHandle {
 		// Don't create entities outside the field
 		if data.pos.x < 0 || data.pos.x >= self.field.width || data.pos.y < 0 || data.pos.y >= self.field.height {
 			return EntityHandle::INVALID;
@@ -67,19 +67,11 @@ impl GameState {
 	}
 
 	/// Removes an entity from the game.
-	pub fn remove_entity(&mut self, ehandle: EntityHandle) {
+	pub fn entity_remove(&mut self, ehandle: EntityHandle) -> Option<EntityArgs> {
 		let s = self;
-		if let Some(ent) = s.ents.remove(ehandle) {
-			s.qt.remove(ehandle, ent.pos);
-			s.events.push(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
-		}
-	}
-
-	pub fn set_entity_face_dir(&mut self, ehandle: EntityHandle, face_dir: Option<Compass>) {
-		let s = self;
-		if let Some(ent) = s.ents.get_mut(ehandle) {
-			ent.face_dir = face_dir;
-			s.events.push(GameEvent::EntityFaceDir { entity: ehandle });
-		}
+		let ent = s.ents.remove(ehandle)?;
+		s.qt.remove(ehandle, ent.pos);
+		s.events.push(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
+		Some(ent.to_entity_args())
 	}
 }

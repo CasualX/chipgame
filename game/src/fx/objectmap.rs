@@ -30,4 +30,9 @@ impl ObjectMap {
 	pub fn remove(&mut self, handle: ObjectHandle) -> Option<Object> {
 		self.map.remove(&handle)
 	}
+	pub fn clear(&mut self) {
+		self.map.clear();
+		self.lookup.clear();
+		self.next = ObjectHandle(0);
+	}
 }

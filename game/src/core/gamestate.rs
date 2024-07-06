@@ -44,6 +44,9 @@ impl GameState {
 		self.field.terrain.clear();
 		self.field.conns = ld.connections;
 
+		self.qt.init(ld.map.width, ld.map.height);
+		self.ents.clear();
+
 		assert!(ld.map.width > 0, "Invalid map width");
 		assert!(ld.map.height > 0, "Invalid map height");
 		let size = ld.map.width as usize * ld.map.height as usize;
@@ -65,10 +68,8 @@ impl GameState {
 			}
 		}
 
-		self.qt.init(ld.map.width, ld.map.height);
-
 		for data in &ld.entities {
-			self.create_entity(data);
+			self.entity_create(data);
 		}
 
 		for ehandle in self.ents.handles() {
@@ -190,7 +191,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				pos: template_ent.pos,
 				face_dir: template_ent.face_dir,
 			};
-			let h = s.create_entity(&args);
+			let h = s.entity_create(&args);
 			// Force the new entity to move out of the spawner
 			if let Some(mut ent) = s.ents.take(h) {
 				// If the entity movement out of the spawner fails, remove it

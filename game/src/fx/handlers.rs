@@ -394,6 +394,8 @@ pub fn button_press(ctx: &mut VisualState) {
 
 pub fn game_win(ctx: &mut VisualState) {
 	ctx.events.push(Event::PlaySound(SoundFx::GameWin));
+
+	ctx.next_level_load = ctx.time + 2.0;
 }
 
 pub fn socket_filled(ctx: &mut VisualState, _pos: Vec2<i32>) {

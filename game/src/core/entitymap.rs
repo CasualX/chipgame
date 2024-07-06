@@ -131,4 +131,8 @@ impl EntityMap {
 	pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Entity> {
 		self.slots.iter_mut().filter_map(Slot::as_mut_ent)
 	}
+	pub fn clear(&mut self) {
+		self.slots.clear();
+		self.next = EntityHandle(0);
+	}
 }

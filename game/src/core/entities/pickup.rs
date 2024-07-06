@@ -8,7 +8,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		kind: args.kind,
 		pos: args.pos,
 		base_spd: BASE_SPD,
-		face_dir: args.face_dir,
+		face_dir: None,
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,

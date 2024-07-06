@@ -3,27 +3,10 @@ use chipgame::fx::*;
 use chipgame::core;
 use cvmath::*;
 
-#[derive(Clone, Default)]
-pub struct EditorInput {
-	pub mouse: Vec2<i32>,
-	pub screen_size: Vec2<i32>,
-	pub up: bool,
-	pub left: bool,
-	pub down: bool,
-	pub right: bool,
-	pub left_click: bool,
-	pub right_click: bool,
-}
-
 #[derive(Clone, Debug)]
 pub enum Tool {
 	Terrain(core::Terrain),
-	TerrainSampler,
 	Entity(core::EntityArgs),
-	EntitySampler,
-	EntityMover,
-	EntityEraser,
-	Connector,
 }
 impl Default for Tool {
 	fn default() -> Self {
@@ -82,17 +65,31 @@ static ENTITY_SAMPLES: [(core::EntityKind, chipgame::fx::Sprite); 23] = [
 ];
 
 #[derive(Default)]
-pub struct EditorGame {
-	game: VisualState,
-	input: EditorInput,
-	pub tool: Tool,
-	mover_args: Option<core::EntityArgs>,
-	mover_pos: Vec2<i32>,
-	tile_pos: Option<Vec2<i32>>,
-	conn: core::Conn,
+struct Input {
+	left_click: bool,
+	right_click: bool,
+	key_left: bool,
+	key_right: bool,
+	key_up: bool,
+	key_down: bool,
 }
 
-impl EditorGame {
+#[derive(Default)]
+pub struct EditorState {
+	game: VisualState,
+	tool: Tool,
+
+	screen_size: Vec2<i32>,
+	cursor_pos: Vec2<i32>,
+	mouse_pos: Vec3<f32>,
+	selected_ent: core::EntityHandle,
+
+	tool_pos: Option<Vec2<i32>>,
+	conn_src: Vec2<i32>,
+	input: Input,
+}
+
+impl EditorState {
 	pub fn init(&mut self, resources: Resources) {
 		self.game.resources = resources;
 		self.game.tiles = &TILES_EDIT;
@@ -140,18 +137,60 @@ impl EditorGame {
 		};
 		serde_json::to_string(&dto).unwrap()
 	}
-	pub fn render(&mut self, g: &mut shade::Graphics, input: &EditorInput) {
-		if input.left {
+	pub fn set_screen_size(&mut self, width: i32, height: i32) {
+		self.screen_size = Vec2::new(width, height);
+	}
+	pub fn mouse_move(&mut self, mouse_x: i32, mouse_y: i32) {
+		let ndc_x = (mouse_x as f32 / self.screen_size.x as f32 - 0.5) * 2.0;
+		let ndc_y = (mouse_y as f32 / self.screen_size.y as f32 - 0.5) * -2.0;
+
+		let x = ndc_x / self.game.camera.proj_mat.a11;
+		let y = ndc_y / self.game.camera.proj_mat.a22;
+		let dir = (self.game.camera.view_mat.inverse() * Vec4::new(x, y, -1.0, 1.0)).xyz().normalize();
+
+		let ray = Ray::new(self.game.camera.target + self.game.camera.eye_offset, dir);
+		let plane = Plane::new(Vec3::Z, 0.0);
+		let mut hits = [TraceHit::default(); 2];
+		if ray.trace(&plane, &mut hits) > 0 {
+			self.mouse_pos = ray.at(hits[0].distance);
+			self.cursor_pos = self.mouse_pos.xy().map(|c| (c / 32.0).floor() as i32);
+		}
+		else {
+			self.mouse_pos = Vec3::ZERO;
+			self.cursor_pos = Vec2::ZERO;
+		}
+	}
+	pub fn key_left(&mut self, pressed: bool) {
+		self.input.key_left = pressed;
+	}
+	pub fn key_right(&mut self, pressed: bool) {
+		self.input.key_right = pressed;
+	}
+	pub fn key_up(&mut self, pressed: bool) {
+		self.input.key_up = pressed;
+	}
+	pub fn key_down(&mut self, pressed: bool) {
+		self.input.key_down = pressed;
+	}
+	pub fn render(&mut self, g: &mut shade::Graphics) {
+
+		if self.input.key_left {
 			self.game.camera.target.x -= 5.0;
 		}
-		if input.right {
+		if self.input.key_right {
 			self.game.camera.target.x += 5.0;
 		}
-		if input.up {
+		if self.input.key_up {
 			self.game.camera.target.y -= 5.0;
 		}
-		if input.down {
+		if self.input.key_down {
 			self.game.camera.target.y += 5.0;
+		}
+
+		if let Some(tool_pos) = self.tool_pos {
+			if tool_pos != self.cursor_pos {
+				self.use_tool();
+			}
 		}
 
 		self.game.camera.eye_offset = Vec3::<f32>(0.0, 8.0 * 32.0, 400.0) * 2.0;
@@ -159,185 +198,13 @@ impl EditorGame {
 
 		self.game.draw(g);
 
-		let x = (input.mouse.x as f32 / input.screen_size.x as f32 - 0.5) * 2.0;
-		let y = (input.mouse.y as f32 / input.screen_size.y as f32 - 0.5) * -2.0;
-
-		// let pt_ndsh = Vec4::new(x, y, -1.0, 1.0);
-		// let dir_eye = self.cam.proj_matrix.inverse() * pt_ndsh * 2.0;
-		// // let dir_eye = dir_eye.with_w(0.0);
-		// let dir_world = (self.cam.view_matrix.inverse() * dir_eye).xyz();
-		// let dir = dir_world.normalize();
-
-		// let inv = self.cam.view_proj_matrix.inverse();
-		// let near = inv * Vec4::new(x, y, 0.0, 1.0);
-		// let far = inv * Vec4::new(x, y, 1.0, 1.0);
-		// let dir = (far.hdiv() - near.hdiv()).normalize();
-
-		let x = x / self.game.camera.proj_mat.a11;
-		let y = y / self.game.camera.proj_mat.a22;
-		let dir = (self.game.camera.view_mat.inverse() * Vec4::new(x, y, -1.0, 1.0)).xyz().normalize();
-
-		let ray = Ray::new(self.game.camera.target + self.game.camera.eye_offset, dir);
-		let plane = Plane::new(Vec3::Z, 0.0);
-		let mut hits = [TraceHit::default(); 2];
-		let mut mouse_pos = None;
-		let mut tile_pos = None;
-		if ray.trace(&plane, &mut hits) > 0 {
-			let p = ray.at(hits[0].distance);
-			let pi = p.xy().map(|c| (c / 32.0).floor() as i32);
-			if !self.input.left_click && input.left_click {
-				println!("Click: [{},{}]", pi.x, pi.y);
-			}
-			mouse_pos = Some(p);
-			tile_pos = Some(pi);
-		}
-
-		if let Some(tile_pos) = tile_pos {
-			if self.input.left_click {
-				if tile_pos.x < -1 {
-					self.tool = Tool::TerrainSampler;
-				}
-				if tile_pos.y < -1 {
-					self.tool = Tool::EntitySampler;
-				}
-			}
-			match &self.tool {
-				Tool::Terrain(terrain) => {
-					if input.left_click {
-						if self.tile_pos != Some(tile_pos) {
-							self.game.gs.field.set_terrain(tile_pos, *terrain);
-							self.tile_pos = Some(tile_pos);
-						}
-					}
-					else {
-						self.tile_pos = None;
-					}
-				}
-				Tool::TerrainSampler => {
-					if self.input.left_click && !input.left_click {
-						if tile_pos.x < 0 {
-							if tile_pos.x == -3 && tile_pos.y >= 0 && tile_pos.y < TERRAIN_SAMPLES.len() as i32 {
-								self.tool = Tool::Terrain(TERRAIN_SAMPLES[tile_pos.y as usize][0]);
-							}
-							if tile_pos.x == -2 && tile_pos.y >= 0 && tile_pos.y < TERRAIN_SAMPLES.len() as i32 {
-								self.tool = Tool::Terrain(TERRAIN_SAMPLES[tile_pos.y as usize][1]);
-							}
-						}
-						else {
-							let terrain = self.game.gs.field.get_terrain(tile_pos);
-							self.tool = Tool::Terrain(terrain);
-						}
-					}
-				}
-				Tool::Entity(e) => {
-					if input.left_click {
-						if self.tile_pos != Some(tile_pos) {
-
-							let handles = self.game.gs.ents.iter().filter_map(|ent| if ent.pos == tile_pos { Some(ent.handle) } else { None }).collect::<Vec<_>>();
-							for ehandle in handles {
-								self.game.gs.remove_entity(ehandle);
-							}
-							// self.game.sync();
-
-							self.game.gs.create_entity(&core::EntityArgs { kind: e.kind, pos: tile_pos, face_dir: e.face_dir });
-							self.game.sync();
-							self.tile_pos = Some(tile_pos);
-						}
-					}
-					else {
-						self.tile_pos = None;
-					}
-				}
-				Tool::EntitySampler => {
-					if self.input.left_click && !input.left_click {
-						if tile_pos.y < 0 {
-							if tile_pos.y == -2 && tile_pos.x >= 0 && tile_pos.x < ENTITY_SAMPLES.len() as i32 {
-								let (kind, _) = ENTITY_SAMPLES[tile_pos.x as usize];
-								self.tool = Tool::Entity(core::EntityArgs { kind, pos: Vec2::ZERO, face_dir: None });
-							}
-						}
-						else {
-							let ehandle = self.game.gs.ents.iter().find_map(|ent| if ent.pos == tile_pos { Some(ent.handle) } else { None });
-							if let Some(ehandle) = ehandle {
-								if let Some(ent) = self.game.gs.ents.get(ehandle) {
-									self.tool = Tool::Entity(ent.to_entity_args());
-								}
-							}
-						}
-					}
-				}
-				Tool::EntityEraser => {
-					if self.input.left_click {
-						let handles = self.game.gs.ents.iter().filter_map(|ent| if ent.pos == tile_pos { Some(ent.handle) } else { None }).collect::<Vec<_>>();
-						for ehandle in handles {
-							self.game.gs.remove_entity(ehandle);
-						}
-						self.game.sync();
-					}
-				}
-				Tool::EntityMover => {
-					if !self.input.left_click && input.left_click {
-						let ehandle = self.game.gs.ents.iter().find_map(|ent| if ent.pos == tile_pos { Some(ent.handle) } else { None });
-						if let Some(ehandle) = ehandle {
-							if let Some(ent) = self.game.gs.ents.get(ehandle) {
-								self.mover_args = Some(ent.to_entity_args());
-							}
-							self.game.gs.remove_entity(ehandle);
-							// self.game.sync();
-						}
-					}
-					if self.input.left_click && !input.left_click {
-						if let Some(mover_args) = self.mover_args {
-							self.game.gs.create_entity(&core::EntityArgs { kind: mover_args.kind, pos: tile_pos, face_dir: mover_args.face_dir });
-							self.game.sync();
-						}
-					}
-					if !self.input.right_click && input.right_click {
-						self.mover_pos = tile_pos;
-					}
-					if self.input.right_click && !input.right_click {
-						let mover_pos = self.mover_pos;
-						let face_dir = match tile_pos - mover_pos {
-							Vec2 { x: 0, y: -1 } => Some(core::Compass::Up),
-							Vec2 { x: 0, y: 1 } => Some(core::Compass::Down),
-							Vec2 { x: -1, y: 0 } => Some(core::Compass::Left),
-							Vec2 { x: 1, y: 0 } => Some(core::Compass::Right),
-							_ => None,
-						};
-						let ehandle = self.game.gs.ents.iter().find_map(|ent| if ent.pos == mover_pos { Some(ent.handle) } else { None });
-						if let Some(ehandle) = ehandle {
-							self.game.gs.set_entity_face_dir(ehandle, face_dir);
-							self.game.sync();
-						}
-					}
-				}
-				Tool::Connector => {
-					if !self.input.left_click && input.left_click {
-						self.conn.src = tile_pos;
-					}
-					if self.input.left_click && !input.left_click {
-						self.conn.dest = tile_pos;
-
-						if self.conn.src != self.conn.dest {
-							if let Some(index) = self.game.gs.field.conns.iter().position(|conn| conn == &self.conn) {
-								self.game.gs.field.conns.remove(index);
-							}
-							else {
-								self.game.gs.field.conns.push(self.conn);
-							}
-						}
-					}
-				}
-			}
-		}
-
 		g.begin().unwrap();
 
-		if let Some(p) = mouse_pos {
+		let p = self.mouse_pos; {
 			let mut cv = shade::d2::Canvas::<render::Vertex, render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(input.screen_size.x as i32, input.screen_size.y as i32));
+			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
 			cv.push_uniform(render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 			{
 				let mut x = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -382,7 +249,7 @@ impl EditorGame {
 			let mut cv = shade::d2::Canvas::<render::Vertex, render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(input.screen_size.x as i32, input.screen_size.y as i32));
+			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
 			cv.push_uniform(render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 
 			struct ToVertex {
@@ -411,7 +278,167 @@ impl EditorGame {
 		}
 
 		g.end().unwrap();
+	}
 
-		self.input = input.clone();
+	pub fn left_click(&mut self, pressed: bool) {
+		let cursor = self.cursor_pos;
+		self.tool_pos = None;
+
+		if pressed {
+			if cursor.x < 0 || cursor.y < 0 {
+				self.sample();
+			}
+			else {
+				self.use_tool_start();
+			}
+		}
+		else if self.tool_pos.is_some() {
+			self.use_tool_end();
+		}
+
+		self.input.left_click = pressed;
+	}
+	pub fn right_click(&mut self, pressed: bool) {
+		let s = self;
+		if pressed {
+			let selected_ent = s.selected_ent;
+			s.sample();
+
+			if selected_ent == s.selected_ent {
+				if let Some(ent_args) = s.game.gs.entity_remove(s.selected_ent) {
+					let new_args = core::EntityArgs { kind: ent_args.kind, pos: s.cursor_pos, face_dir: next_face_dir(ent_args.face_dir) };
+					let ehandle = s.game.gs.entity_create(&new_args);
+					s.game.sync();
+					s.selected_ent = ehandle;
+					if let Some(new_args) = s.game.gs.ents.get(ehandle).map(|ent| ent.to_entity_args()) {
+						s.tool = Tool::Entity(new_args);
+						println!("FaceDir: {:?} to {:?}", ent_args.kind, new_args.face_dir);
+					}
+				}
+			}
+		}
+		else if let Some(ent) = s.game.gs.ents.get(s.selected_ent) {
+			if ent.pos != s.cursor_pos {
+				if let Some(ent_args) = s.game.gs.entity_remove(s.selected_ent) {
+					let new_args = core::EntityArgs { kind: ent_args.kind, pos: s.cursor_pos, face_dir: ent_args.face_dir };
+					s.game.gs.entity_create(&new_args);
+					s.game.sync();
+					println!("Moved: {:?} to {}", ent_args.kind, s.cursor_pos);
+				}
+			}
+		}
+
+		s.input.right_click = pressed;
+	}
+	pub fn delete(&mut self, pressed: bool) {
+		if pressed {
+			if let Some(ent) = self.game.gs.ents.get(self.selected_ent) {
+				let kind = ent.kind;
+				let pos = ent.pos;
+				self.game.gs.entity_remove(self.selected_ent);
+				self.game.sync();
+				println!("Deleted: {:?} at {}", kind, pos);
+			}
+			self.selected_ent = core::EntityHandle::INVALID;
+		}
+	}
+
+	pub fn middle_click(&mut self, pressed: bool) {
+		if pressed {
+			self.conn_src = self.cursor_pos;
+		}
+		else {
+			let new_conn = core::Conn { src: self.conn_src, dest: self.cursor_pos };
+
+			if new_conn.src != new_conn.dest {
+				if let Some(index) = self.game.gs.field.conns.iter().position(|conn| conn == &new_conn) {
+					self.game.gs.field.conns.remove(index);
+				}
+				else {
+					self.game.gs.field.conns.push(new_conn);
+				}
+			}
+		}
+	}
+
+	/// Right click to sample the terrain or entity at the cursor as the current tool
+	fn sample(&mut self) {
+		let s = self;
+		let cursor = s.cursor_pos;
+
+		// Sample from the terrain samples
+		if cursor.x < 0 {
+			if cursor.x == -3 && cursor.y >= 0 && cursor.y < TERRAIN_SAMPLES.len() as i32 {
+				s.tool = Tool::Terrain(TERRAIN_SAMPLES[cursor.y as usize][0]);
+			}
+			if cursor.x == -2 && cursor.y >= 0 && cursor.y < TERRAIN_SAMPLES.len() as i32 {
+				s.tool = Tool::Terrain(TERRAIN_SAMPLES[cursor.y as usize][1]);
+			}
+		}
+		// Sample from the entity samples
+		else if cursor.y < 0 {
+			if cursor.y == -2 && cursor.x >= 0 && cursor.x < ENTITY_SAMPLES.len() as i32 {
+				let (kind, _) = ENTITY_SAMPLES[cursor.x as usize];
+				s.tool = Tool::Entity(core::EntityArgs { kind, pos: Vec2::ZERO, face_dir: None });
+			}
+		}
+		else {
+			// Sample from the existing entities
+			let ehandle = s.game.gs.ents.iter().find_map(|ent| if ent.pos == cursor { Some(ent.handle) } else { None });
+			if let Some(ehandle) = ehandle {
+				if let Some(ent) = s.game.gs.ents.get(ehandle) {
+					s.selected_ent = ehandle;
+					println!("Selected: {:?} at {}", ent.kind, ent.pos);
+					s.tool = Tool::Entity(ent.to_entity_args());
+				}
+			}
+			// Sample from the terrain
+			else {
+				let terrain = s.game.gs.field.get_terrain(cursor);
+				s.tool = Tool::Terrain(terrain);
+			}
+		}
+
+		println!("Tool: {:?}", s.tool);
+	}
+
+	fn use_tool_start(&mut self) {
+		self.use_tool();
+	}
+	fn use_tool(&mut self) {
+		let cursor_pos = self.cursor_pos;
+		match self.tool {
+			Tool::Terrain(terrain) => {
+				self.game.gs.field.set_terrain(cursor_pos, terrain);
+			}
+			Tool::Entity(ent_args) => {
+				// Remove any existing entities at this position
+				let mut kind = None;
+				let handles = self.game.gs.ents.iter().filter_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None }).collect::<Vec<_>>();
+				for ehandle in handles {
+					kind = self.game.gs.ents.get(ehandle).map(|ent| ent.kind);
+					self.game.gs.entity_remove(ehandle);
+				}
+				if kind != Some(ent_args.kind) {
+					// Create the new entity
+					self.game.gs.entity_create(&core::EntityArgs { kind: ent_args.kind, pos: cursor_pos, face_dir: ent_args.face_dir });
+				}
+				self.game.sync();
+			}
+		}
+		self.tool_pos = Some(cursor_pos);
+	}
+	fn use_tool_end(&mut self) {
+
+	}
+}
+
+fn next_face_dir(face_dir: Option<core::Compass>) -> Option<core::Compass> {
+	match face_dir {
+		Some(core::Compass::Up) => Some(core::Compass::Right),
+		Some(core::Compass::Right) => Some(core::Compass::Down),
+		Some(core::Compass::Down) => Some(core::Compass::Left),
+		Some(core::Compass::Left) => None,
+		None => Some(core::Compass::Up),
 	}
 }
