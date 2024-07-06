@@ -11,11 +11,6 @@
 		"data": [],
 		"legend": []
 	},
-	"entities": [
-		{
-			"kind": "Player",
-			"pos": [15, 8]
-		}
-	],
+	"entities": [],
 	"connections": []
 }

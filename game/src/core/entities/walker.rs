@@ -48,12 +48,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			if try_move(s, ent, face_dir) { }
 			else {
 				// Choose a random direction to turn
-				let step_dir = if s.rand.rng.coin_flip() {
-					face_dir.turn_left()
-				}
-				else {
-					face_dir.turn_right()
-				};
+				let step_dir = s.rand.compass();
 				if try_move(s, ent, step_dir) { }
 				// Idle if there the chosen direction is blocked
 				else { }
