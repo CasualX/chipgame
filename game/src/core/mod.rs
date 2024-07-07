@@ -15,9 +15,10 @@ mod gamestate;
 mod inbuf;
 mod physics;
 mod playerstate;
-mod random;
-mod terrain;
 mod quadtree;
+mod random;
+mod soundfx;
+mod terrain;
 
 pub use self::compass::*;
 pub use self::entities::*;
@@ -29,9 +30,10 @@ pub use self::gamestate::*;
 pub use self::inbuf::*;
 pub use self::physics::*;
 pub use self::playerstate::*;
-pub use self::random::*;
-pub use self::terrain::*;
 pub use self::quadtree::*;
+pub use self::random::*;
+pub use self::soundfx::*;
+pub use self::terrain::*;
 
 /// Input data.
 #[derive(Copy, Clone, Debug, Default)]

@@ -149,12 +149,15 @@ impl GameState {
 }
 
 pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
-	let terrain = s.field.get_terrain(ent.pos);
+	// Play sound only for player and blocks to avoid a cacophony
+	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block);
 
+	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::BearTrap) {
 		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
 		if trapped && !ent.trapped {
 			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
 		}
 		ent.trapped = trapped;
 	}
@@ -177,32 +180,22 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			}
 			s.events.push(GameEvent::ToggleWalls);
 			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
+			if play_sound {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			}
 		}
 		Terrain::RedButton => {
-			// Find the template entity connected to the red button
-			let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
-			let ehandle = s.qt.get(conn.dest)[0];
-			let Some(template_ent) = s.ents.get(ehandle) else { return };
-			// Raise the event before spawning the new entity
+			// Raise the event when stepping on the red button
 			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
-			// Spawn a new entity at the template entity's position
-			let args = EntityArgs {
-				kind: template_ent.kind,
-				pos: template_ent.pos,
-				face_dir: template_ent.face_dir,
-			};
-			let h = s.entity_create(&args);
-			// Force the new entity to move out of the spawner
-			if let Some(mut ent) = s.ents.take(h) {
-				// If the entity movement out of the spawner fails, remove it
-				if !try_move(s, &mut ent, args.face_dir.unwrap()) {
-					ent.remove = true;
-				}
-				s.ents.put(ent);
+			if play_sound {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
 		}
 		Terrain::BrownButton => {
 			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
+			if play_sound {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			}
 		}
 		Terrain::BlueButton => {
 			for other in s.ents.iter_mut() {
@@ -213,11 +206,48 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				}
 			}
 			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
+			if play_sound {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			}
 		}
-		Terrain::Teleport => {
+		_ => { }
+	}
 
+	let mut from_pos = ent.pos;
+	let mut from_terrain = terrain;s.field.get_terrain(from_pos);
+	if !play_sound {
+		from_pos -= ent.face_dir.map(Compass::to_vec).unwrap_or_default();
+		from_terrain = s.field.get_terrain(from_pos);
+	}
+
+	// Red button spawns entity when stepping _off_ the button only when triggered by a creature...
+	// This 'fixes' level 45 Monster Lab... Hope it doesn't break anything else!
+	if matches!(from_terrain, Terrain::RedButton) {
+		// Find the template entity connected to the red button
+		let Some(conn) = s.field.find_conn_by_src(from_pos) else { return };
+		let template = s.qt.get(conn.dest)[0];
+		let Some(template_ent) = s.ents.get(template) else { return };
+		// Spawn a new entity at the template entity's position
+		let args = EntityArgs {
+			kind: template_ent.kind,
+			pos: template_ent.pos,
+			face_dir: template_ent.face_dir,
+		};
+		let ehandle = s.entity_create(&args);
+		// Force the new entity to move out of the spawner
+		if let Some(mut ent) = s.ents.take(ehandle) {
+			// If the entity movement out of the spawner fails, remove it
+			let mut remove = false;
+			if !try_move(s, &mut ent, args.face_dir.unwrap()) {
+				remove = true;
+			}
+			s.ents.put(ent);
+			// Level 45 here again! The level spams so many entities on a single clone machine!
+			// Remove the failed clones to prevent the game from crashing!
+			if remove {
+				s.entity_remove(ehandle);
+			}
 		}
-		_ => {}
 	}
 }
 

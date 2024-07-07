@@ -14,11 +14,24 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 		.with_inner_size(size)
 }
 
-fn load_wav(path: &str) -> soloud::Wav {
-	use soloud::*;
-	let mut wav = Wav::default();
-	wav.load(path).expect("Failed to load sound");
-	return wav;
+struct AudioPlayer {
+	sl: soloud::Soloud,
+	sfx: HashMap<chipgame::core::SoundFx, soloud::Wav>,
+}
+impl AudioPlayer {
+	fn load_wav(&mut self, fx: chipgame::core::SoundFx, path: &str) {
+		use soloud::*;
+		let mut wav = Wav::default();
+		wav.load(path).expect("Failed to load sound");
+		self.sfx.insert(fx, wav);
+	}
+}
+impl chipgame::fx::IAudioPlayer for AudioPlayer {
+	fn play(&mut self, sound: chipgame::core::SoundFx) {
+		if let Some(wav) = self.sfx.get(&sound) {
+			self.sl.play(wav);
+		}
+	}
 }
 
 fn main() {
@@ -35,26 +48,26 @@ fn main() {
 	let file_path = format!("data/cc1/level{}.json", level);
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
-	let mut sfx = HashMap::new();
-	sfx.insert(chipgame::fx::SoundFx::GameOver, load_wav("data/sfx/death.wav"));
-	sfx.insert(chipgame::fx::SoundFx::GameWin, load_wav("data/sfx/tada.wav"));
-	sfx.insert(chipgame::fx::SoundFx::Derezz, load_wav("data/sfx/derezz.wav"));
-	sfx.insert(chipgame::fx::SoundFx::ICCollected, load_wav("data/sfx/chack.wav"));
-	sfx.insert(chipgame::fx::SoundFx::KeyCollected, load_wav("data/sfx/click.wav"));
-	sfx.insert(chipgame::fx::SoundFx::BootCollected, load_wav("data/sfx/ting.wav"));
-	sfx.insert(chipgame::fx::SoundFx::LockOpened, load_wav("data/sfx/door.wav"));
-	sfx.insert(chipgame::fx::SoundFx::SocketOpened, load_wav("data/sfx2/socket unlock.wav"));
-	sfx.insert(chipgame::fx::SoundFx::CantMove, load_wav("data/sfx/oof.wav"));
-	sfx.insert(chipgame::fx::SoundFx::BlockMoving, load_wav("data/sfx/whisk.wav"));
-	sfx.insert(chipgame::fx::SoundFx::TrapEntered, load_wav("data/sfx/traphit.wav"));
-	sfx.insert(chipgame::fx::SoundFx::BombExplodes, load_wav("data/sfx/bomb.wav"));
-	sfx.insert(chipgame::fx::SoundFx::ButtonPressed, load_wav("data/sfx/tick.wav"));
-	sfx.insert(chipgame::fx::SoundFx::Teleporting, load_wav("data/sfx/teleport.wav"));
-	sfx.insert(chipgame::fx::SoundFx::WallPopup, load_wav("data/sfx/popup.wav"));
-	sfx.insert(chipgame::fx::SoundFx::WaterSplash, load_wav("data/sfx/splash.wav"));
-	sfx.insert(chipgame::fx::SoundFx::BootsStolen, load_wav("data/sfx/thief.wav"));
-	sfx.insert(chipgame::fx::SoundFx::TileEmptied, load_wav("data/sfx/whisk.wav"));
-	sfx.insert(chipgame::fx::SoundFx::BlueWallCleared, load_wav("data/sfx2/bump.wav"));
+	let mut ap = AudioPlayer { sl, sfx: HashMap::new() };
+	ap.load_wav(chipgame::core::SoundFx::GameOver, "data/sfx/death.wav");
+	ap.load_wav(chipgame::core::SoundFx::GameWin, "data/sfx/tada.wav");
+	ap.load_wav(chipgame::core::SoundFx::Derezz, "data/sfx/derezz.wav");
+	ap.load_wav(chipgame::core::SoundFx::ICCollected, "data/sfx/chack.wav");
+	ap.load_wav(chipgame::core::SoundFx::KeyCollected, "data/sfx/click.wav");
+	ap.load_wav(chipgame::core::SoundFx::BootCollected, "data/sfx/ting.wav");
+	ap.load_wav(chipgame::core::SoundFx::LockOpened, "data/sfx/door.wav");
+	ap.load_wav(chipgame::core::SoundFx::SocketOpened, "data/sfx2/socket unlock.wav");
+	ap.load_wav(chipgame::core::SoundFx::CantMove, "data/sfx/oof.wav");
+	ap.load_wav(chipgame::core::SoundFx::BlockMoving, "data/sfx/whisk.wav");
+	ap.load_wav(chipgame::core::SoundFx::TrapEntered, "data/sfx/traphit.wav");
+	ap.load_wav(chipgame::core::SoundFx::BombExplosion, "data/sfx/bomb.wav");
+	ap.load_wav(chipgame::core::SoundFx::ButtonPressed, "data/sfx/tick.wav");
+	ap.load_wav(chipgame::core::SoundFx::Teleporting, "data/sfx/teleport.wav");
+	ap.load_wav(chipgame::core::SoundFx::WallPopup, "data/sfx/popup.wav");
+	ap.load_wav(chipgame::core::SoundFx::WaterSplash, "data/sfx/splash.wav");
+	ap.load_wav(chipgame::core::SoundFx::BootsStolen, "data/sfx/thief.wav");
+	ap.load_wav(chipgame::core::SoundFx::TileEmptied, "data/sfx/whisk.wav");
+	ap.load_wav(chipgame::core::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -149,19 +162,8 @@ fn main() {
 			shader,
 			screen_size: [size.width as i32, size.height as i32].into(),
 		};
-		state.update(&input);
+		state.update(&input, Some(&mut ap));
 		state.draw(&mut g);
-
-		for e in &std::mem::replace(&mut state.events, Vec::new()) {
-			println!("Event: {:?}", e);
-			match e {
-				&chipgame::fx::Event::PlaySound(x) => {
-					if let Some(wav) = sfx.get(&x) {
-						sl.play(wav);
-					}
-				}
-			}
-		}
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

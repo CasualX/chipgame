@@ -30,6 +30,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	if matches!(terrain, Terrain::Water) {
 		s.field.set_terrain(ent.pos, Terrain::Dirt);
 		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
+		s.events.push(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
 		ent.remove = true;
 	}
 

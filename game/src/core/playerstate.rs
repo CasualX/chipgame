@@ -98,13 +98,41 @@ pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 	if s.ps.activity != activity {
 		s.ps.activity = activity;
 		s.events.push(GameEvent::PlayerActivity { player: s.ps.ehandle });
-		if matches!(activity, PlayerActivity::Win) {
+
+		if activity.is_game_over() {
 			s.ts = TimeState::Paused;
-			s.events.push(GameEvent::GameWin { player: s.ps.ehandle });
 		}
-		else if activity.is_game_over() {
-			s.ts = TimeState::Paused;
-			s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+
+		match activity {
+			PlayerActivity::Drowned => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
+			}
+			PlayerActivity::Burned => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::FireWalking });
+			}
+			PlayerActivity::Bombed => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
+			}
+			PlayerActivity::OutOfTime => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::OutOfTime });
+			}
+			PlayerActivity::Collided => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::GameOver });
+			}
+			PlayerActivity::Eaten => {
+				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::GameOver });
+			}
+			PlayerActivity::Win => {
+				s.events.push(GameEvent::GameWin { player: s.ps.ehandle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::GameWin });
+			}
+			_ => (),
 		}
 	}
 }

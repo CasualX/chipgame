@@ -46,6 +46,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	if exploded {
 		ent.remove = true;
 		s.events.push(GameEvent::BombExplode { entity: ent.handle });
+		s.events.push(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 	}
 }
 

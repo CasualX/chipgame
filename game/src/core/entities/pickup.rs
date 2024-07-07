@@ -36,20 +36,48 @@ fn pickup_item(s: &mut GameState, ent: &mut Entity) {
 
 	ent.remove = true;
 
-	let item = match ent.kind {
-		EntityKind::Chip => { s.ps.chips += 1; ItemPickup::Chip },
-		EntityKind::BlueKey => { s.ps.keys[KeyColor::Blue as usize] += 1; ItemPickup::BlueKey },
-		EntityKind::RedKey => { s.ps.keys[KeyColor::Red as usize] += 1; ItemPickup::RedKey },
-		EntityKind::GreenKey => { s.ps.keys[KeyColor::Green as usize] += 1; ItemPickup::GreenKey },
-		EntityKind::YellowKey => { s.ps.keys[KeyColor::Yellow as usize] += 1; ItemPickup::YellowKey },
-		EntityKind::Flippers => { s.ps.flippers = true; ItemPickup::Flippers },
-		EntityKind::FireBoots => { s.ps.fire_boots = true; ItemPickup::FireBoots },
-		EntityKind::IceSkates => { s.ps.ice_skates = true; ItemPickup::IceSkates },
-		EntityKind::SuctionBoots => { s.ps.suction_boots = true; ItemPickup::SuctionBoots },
+	let (item, sound) = match ent.kind {
+		EntityKind::Chip => {
+			s.ps.chips += 1;
+			(ItemPickup::Chip, SoundFx::ICCollected)
+		},
+		EntityKind::BlueKey => {
+			s.ps.keys[KeyColor::Blue as usize] += 1;
+			(ItemPickup::BlueKey, SoundFx::KeyCollected)
+		},
+		EntityKind::RedKey => {
+			s.ps.keys[KeyColor::Red as usize] += 1;
+			(ItemPickup::RedKey, SoundFx::KeyCollected)
+		},
+		EntityKind::GreenKey => {
+			s.ps.keys[KeyColor::Green as usize] += 1;
+			(ItemPickup::GreenKey, SoundFx::KeyCollected)
+		},
+		EntityKind::YellowKey => {
+			s.ps.keys[KeyColor::Yellow as usize] += 1;
+			(ItemPickup::YellowKey, SoundFx::KeyCollected)
+		},
+		EntityKind::Flippers => {
+			s.ps.flippers = true;
+			(ItemPickup::Flippers, SoundFx::BootCollected)
+		},
+		EntityKind::FireBoots => {
+			s.ps.fire_boots = true;
+			(ItemPickup::FireBoots, SoundFx::BootCollected)
+		},
+		EntityKind::IceSkates => {
+			s.ps.ice_skates = true;
+			(ItemPickup::IceSkates, SoundFx::BootCollected)
+		},
+		EntityKind::SuctionBoots => {
+			s.ps.suction_boots = true;
+			(ItemPickup::SuctionBoots, SoundFx::BootCollected)
+		},
 		_ => return,
 	};
 
 	s.events.push(GameEvent::ItemPickup { entity: ent.handle, item });
+	s.events.push(GameEvent::SoundFx { sound });
 }
 
 const FLAGS: SolidFlags = SolidFlags {

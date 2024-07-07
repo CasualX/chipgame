@@ -308,7 +308,7 @@ impl EditorState {
 				if let Some(ent_args) = s.game.gs.entity_remove(s.selected_ent) {
 					let new_args = core::EntityArgs { kind: ent_args.kind, pos: s.cursor_pos, face_dir: next_face_dir(ent_args.face_dir) };
 					let ehandle = s.game.gs.entity_create(&new_args);
-					s.game.sync();
+					s.game.sync(None);
 					s.selected_ent = ehandle;
 					if let Some(new_args) = s.game.gs.ents.get(ehandle).map(|ent| ent.to_entity_args()) {
 						s.tool = Tool::Entity(new_args);
@@ -322,7 +322,7 @@ impl EditorState {
 				if let Some(ent_args) = s.game.gs.entity_remove(s.selected_ent) {
 					let new_args = core::EntityArgs { kind: ent_args.kind, pos: s.cursor_pos, face_dir: ent_args.face_dir };
 					s.game.gs.entity_create(&new_args);
-					s.game.sync();
+					s.game.sync(None);
 					println!("Moved: {:?} to {}", ent_args.kind, s.cursor_pos);
 				}
 			}
@@ -336,7 +336,7 @@ impl EditorState {
 				let kind = ent.kind;
 				let pos = ent.pos;
 				self.game.gs.entity_remove(self.selected_ent);
-				self.game.sync();
+				self.game.sync(None);
 				println!("Deleted: {:?} at {}", kind, pos);
 			}
 			self.selected_ent = core::EntityHandle::INVALID;
@@ -423,7 +423,7 @@ impl EditorState {
 					// Create the new entity
 					self.game.gs.entity_create(&core::EntityArgs { kind: ent_args.kind, pos: cursor_pos, face_dir: ent_args.face_dir });
 				}
-				self.game.sync();
+				self.game.sync(None);
 			}
 		}
 		self.tool_pos = Some(cursor_pos);

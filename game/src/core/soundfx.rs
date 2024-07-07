@@ -4,7 +4,7 @@
 pub enum SoundFx {
 	GameOver,
 	GameWin,
-	TimeOut,
+	OutOfTime,
 	TimeLow,
 	Derezz,
 	CantMove,
@@ -20,7 +20,7 @@ pub enum SoundFx {
 	WallCreated,
 	BlueWallCleared,
 	TrapEntered,
-	BombExplodes,
+	BombExplosion,
 	WaterSplash,
 	OneShotCount,
 	BlockMoving,

@@ -9,7 +9,6 @@ pub struct VisualState {
 	pub camera: Camera,
 	pub objects: ObjectMap,
 	pub resources: Resources,
-	pub events: Vec<Event>,
 	pub level_index: i32,
 	pub next_level_load: f32,
 	pub tiles: &'static [TileGfx],
@@ -23,7 +22,7 @@ impl VisualState {
 	pub fn load_level(&mut self, json: &str) {
 		self.objects.clear();
 		self.gs.load(json);
-		self.sync();
+		self.sync(None);
 		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
 
 		for y in 0..self.gs.field.height {
@@ -39,9 +38,9 @@ impl VisualState {
 			}
 		}
 	}
-	pub fn update(&mut self, input: &core::Input) {
+	pub fn update(&mut self, input: &core::Input, audio: Option<&mut dyn IAudioPlayer>) {
 		self.gs.tick(input);
-		self.sync();
+		self.sync(audio);
 
 		if self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
 			if self.gs.ps.activity == core::PlayerActivity::Win {
@@ -52,7 +51,7 @@ impl VisualState {
 			}
 		}
 	}
-	pub fn sync(&mut self) {
+	pub fn sync(&mut self, mut audio: Option<&mut dyn IAudioPlayer>) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
 			println!("GameEvent: {:?}", ev);
 			match ev {
@@ -68,7 +67,7 @@ impl VisualState {
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
 				&core::GameEvent::BlueWallCleared { pos } => blue_wall_cleared(self, pos),
 				&core::GameEvent::HiddenWallBumped { pos } => hidden_wall_bumped(self, pos),
-				&core::GameEvent::RecessedWallPopup { pos } => recessed_wall_raised(self, pos),
+				&core::GameEvent::WallPopup { pos } => recessed_wall_raised(self, pos),
 				&core::GameEvent::ToggleWalls => toggle_walls(self),
 				&core::GameEvent::ButtonPress { .. } => button_press(self),
 				&core::GameEvent::GameWin { .. } => game_win(self),
@@ -79,6 +78,7 @@ impl VisualState {
 				&core::GameEvent::BombExplode { entity } => bomb_explode(self, entity),
 				&core::GameEvent::ItemsThief { player } => items_thief(self, player),
 				&core::GameEvent::DirtCleared { pos } => dirt_cleared(self, pos),
+				&core::GameEvent::SoundFx { sound } => if let Some(ref mut audio) = audio { audio.play(sound) },
 				_ => {}
 			}
 		}

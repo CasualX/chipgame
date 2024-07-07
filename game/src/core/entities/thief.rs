@@ -29,6 +29,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			s.ps.ice_skates = false;
 			s.ps.suction_boots = false;
 			s.events.push(GameEvent::ItemsThief { player: s.ps.ehandle });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::BootsStolen });
 		}
 	}
 }

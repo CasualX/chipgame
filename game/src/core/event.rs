@@ -49,10 +49,11 @@ pub enum GameEvent {
 	BlueWallBumped { pos: Vec2i },
 	BlueWallCleared { pos: Vec2i },
 	HiddenWallBumped { pos: Vec2i },
-	RecessedWallPopup { pos: Vec2i },
+	WallPopup { pos: Vec2i },
 	DirtCleared { pos: Vec2i },
 	ButtonPress { pos: Vec2i },
 	ToggleWalls,
 	GameWin { player: EntityHandle },
 	GameOver { player: EntityHandle },
+	SoundFx { sound: SoundFx },
 }

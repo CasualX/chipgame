@@ -208,6 +208,7 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.face_dir = Some(dir);
 	s.ps.steps += 1;
 	s.events.push(GameEvent::PlayerBump { player: ent.handle });
+	s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
 }
 
@@ -220,33 +221,40 @@ fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Blue as usize] -= 1;
 			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Blue });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
 		}
 		Terrain::RedLock => if s.ps.keys[KeyColor::Red as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Red as usize] -= 1;
 			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Red });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
 		}
 		Terrain::GreenLock => if s.ps.keys[KeyColor::Green as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			// s.ps.keys[KeyColor::Green as usize] -= 1; // Green keys are infinite
 			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Green });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
 		}
 		Terrain::YellowLock => if s.ps.keys[KeyColor::Yellow as usize] > 0 {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.ps.keys[KeyColor::Yellow as usize] -= 1;
 			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Yellow });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
 		}
 		Terrain::BlueWall => {
 			s.field.set_terrain(new_pos, Terrain::Wall);
 			s.events.push(GameEvent::BlueWallBumped { pos: new_pos });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
 		}
 		Terrain::BlueFake => {
 			s.field.set_terrain(new_pos, Terrain::Floor);
 			s.events.push(GameEvent::BlueWallCleared { pos: new_pos });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
 		}
 		Terrain::HiddenWall => {
 			s.field.set_terrain(new_pos, Terrain::HiddenWallRevealed);
 			s.events.push(GameEvent::HiddenWallBumped { pos: new_pos });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
 		}
 		_ => {}
 	}
@@ -292,7 +300,8 @@ fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 	if success {
 		let terrain = s.field.get_terrain(ent.pos);
 		if matches!(terrain, Terrain::RecessedWall) {
-			s.events.push(GameEvent::RecessedWallPopup { pos: ent.pos });
+			s.events.push(GameEvent::WallPopup { pos: ent.pos });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
 			s.field.set_terrain(ent.pos, Terrain::RaisedWall);
 		}
 
@@ -320,6 +329,7 @@ fn interact(s: &mut GameState, ent: &mut Entity, ictx: &mut InteractContext) {
 				update_hidden_flag(s, ent.pos);
 				update_hidden_flag(s, ent.pos - ictx.push_dir.to_vec());
 				s.events.push(GameEvent::BlockPush { entity: ent.handle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
 			else {
 				ictx.blocking = true;
@@ -330,6 +340,7 @@ fn interact(s: &mut GameState, ent: &mut Entity, ictx: &mut InteractContext) {
 				ent.remove = true;
 				ictx.blocking = false;
 				s.events.push(GameEvent::SocketFilled { pos: ent.pos });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
 			}
 			else {
 				ictx.blocking = true;

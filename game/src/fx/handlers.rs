@@ -79,14 +79,14 @@ pub fn entity_teleport(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	obj.lerp_pos = obj.pos;
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 
-	ctx.events.push(Event::PlaySound(SoundFx::Teleporting));
+	// ctx.events.push(Event::PlaySound(SoundFx::Teleporting));
 }
 
 pub fn entity_drown(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	// let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	// let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 
-	ctx.events.push(Event::PlaySound(SoundFx::WaterSplash));
+	// ctx.events.push(Event::PlaySound(SoundFx::WaterSplash));
 }
 
 pub fn entity_face_dir(ctx: &mut VisualState, ehandle: core::EntityHandle) {
@@ -101,7 +101,7 @@ pub fn player_activity(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	entity_face_dir(ctx, ehandle);
 
 	match ctx.gs.ps.activity {
-		core::PlayerActivity::Skating => ctx.events.push(Event::PlaySound(SoundFx::SkatingForward)),
+		// core::PlayerActivity::Skating => ctx.events.push(Event::PlaySound(SoundFx::SkatingForward)),
 		_ => (),
 	}
 }
@@ -271,12 +271,12 @@ pub fn item_pickup(ctx: &mut VisualState, ehandle: core::EntityHandle, item: cor
 	obj.anim = Animation::Rise;
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) });
 
-	let sfx = match item {
-		core::ItemPickup::Chip => SoundFx::ICCollected,
-		core::ItemPickup::Flippers | core::ItemPickup::FireBoots | core::ItemPickup::IceSkates | core::ItemPickup::SuctionBoots => SoundFx::BootCollected,
-		core::ItemPickup::BlueKey | core::ItemPickup::RedKey | core::ItemPickup::GreenKey | core::ItemPickup::YellowKey => SoundFx::KeyCollected,
-	};
-	ctx.events.push(Event::PlaySound(sfx));
+	// let sfx = match item {
+	// 	core::ItemPickup::Chip => SoundFx::ICCollected,
+	// 	core::ItemPickup::Flippers | core::ItemPickup::FireBoots | core::ItemPickup::IceSkates | core::ItemPickup::SuctionBoots => SoundFx::BootCollected,
+	// 	core::ItemPickup::BlueKey | core::ItemPickup::RedKey | core::ItemPickup::GreenKey | core::ItemPickup::YellowKey => SoundFx::KeyCollected,
+	// };
+	// ctx.events.push(Event::PlaySound(sfx));
 }
 
 pub fn lock_opened(ctx: &mut VisualState, pos: Vec2<i32>, key: core::KeyColor) {
@@ -302,7 +302,7 @@ pub fn lock_opened(ctx: &mut VisualState, pos: Vec2<i32>, key: core::KeyColor) {
 		unalive_after_anim: true,
 	};
 	ctx.objects.insert(obj);
-	ctx.events.push(Event::PlaySound(SoundFx::LockOpened));
+	// ctx.events.push(Event::PlaySound(SoundFx::LockOpened));
 }
 
 pub fn blue_wall_cleared(ctx: &mut VisualState, pos: Vec2<i32>) {
@@ -323,7 +323,7 @@ pub fn blue_wall_cleared(ctx: &mut VisualState, pos: Vec2<i32>) {
 		unalive_after_anim: true,
 	};
 	ctx.objects.insert(obj);
-	ctx.events.push(Event::PlaySound(SoundFx::BlueWallCleared));
+	// ctx.events.push(Event::PlaySound(SoundFx::BlueWallCleared));
 }
 
 pub fn hidden_wall_bumped(ctx: &mut VisualState, pos: Vec2<i32>) {
@@ -364,7 +364,7 @@ pub fn recessed_wall_raised(ctx: &mut VisualState, pos: Vec2<i32>) {
 		unalive_after_anim: false,
 	};
 	ctx.objects.insert(obj);
-	ctx.events.push(Event::PlaySound(SoundFx::WallPopup));
+	// ctx.events.push(Event::PlaySound(SoundFx::WallPopup));
 }
 
 pub fn toggle_walls(ctx: &mut VisualState) {
@@ -389,39 +389,39 @@ pub fn toggle_walls(ctx: &mut VisualState) {
 }
 
 pub fn button_press(ctx: &mut VisualState) {
-	ctx.events.push(Event::PlaySound(SoundFx::ButtonPressed));
+	// ctx.events.push(Event::PlaySound(SoundFx::ButtonPressed));
 }
 
 pub fn game_win(ctx: &mut VisualState) {
-	ctx.events.push(Event::PlaySound(SoundFx::GameWin));
+	// ctx.events.push(Event::PlaySound(SoundFx::GameWin));
 
 	ctx.next_level_load = ctx.time + 2.0;
 }
 
 pub fn socket_filled(ctx: &mut VisualState, _pos: Vec2<i32>) {
-	ctx.events.push(Event::PlaySound(SoundFx::SocketOpened));
+	// ctx.events.push(Event::PlaySound(SoundFx::SocketOpened));
 }
 
 pub fn player_bump(ctx: &mut VisualState, _player: core::EntityHandle) {
-	ctx.events.push(Event::PlaySound(SoundFx::CantMove));
+	// ctx.events.push(Event::PlaySound(SoundFx::CantMove));
 }
 
 pub fn block_push(ctx: &mut VisualState, _entity: core::EntityHandle) {
-	ctx.events.push(Event::PlaySound(SoundFx::BlockMoving));
+	// ctx.events.push(Event::PlaySound(SoundFx::BlockMoving));
 }
 
 pub fn entity_trapped(ctx: &mut VisualState, _entity: core::EntityHandle) {
-	ctx.events.push(Event::PlaySound(SoundFx::TrapEntered));
+	// ctx.events.push(Event::PlaySound(SoundFx::TrapEntered));
 }
 
 pub fn bomb_explode(ctx: &mut VisualState, _entity: core::EntityHandle) {
-	ctx.events.push(Event::PlaySound(SoundFx::BombExplodes));
+	// ctx.events.push(Event::PlaySound(SoundFx::BombExplodes));
 }
 
 pub fn items_thief(ctx: &mut VisualState, _player: core::EntityHandle) {
-	ctx.events.push(Event::PlaySound(SoundFx::BootsStolen));
+	// ctx.events.push(Event::PlaySound(SoundFx::BootsStolen));
 }
 
 pub fn dirt_cleared(ctx: &mut VisualState, _pos: Vec2i) {
-	ctx.events.push(Event::PlaySound(SoundFx::TileEmptied));
+	// ctx.events.push(Event::PlaySound(SoundFx::TileEmptied));
 }

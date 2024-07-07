@@ -162,4 +162,8 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) {
 	s.qt.update(ent.handle, ent.pos, new_pos);
 	ent.pos = new_pos;
 	s.events.push(GameEvent::EntityTeleport { entity: ent.handle });
+
+	if matches!(ent.kind, EntityKind::Player) {
+		s.events.push(GameEvent::SoundFx { sound: SoundFx::Teleporting });
+	}
 }

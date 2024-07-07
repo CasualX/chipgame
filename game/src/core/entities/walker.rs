@@ -23,7 +23,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 
 fn think(s: &mut GameState, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::CloneMachine) && ent.step_dir.is_none() {
+	if matches!(terrain, Terrain::CloneMachine) {
 		return;
 	}
 	if matches!(terrain, Terrain::Water) {
@@ -47,10 +47,21 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		if let Some(face_dir) = ent.face_dir {
 			if try_move(s, ent, face_dir) { }
 			else {
-				// Choose a random direction to turn
-				let step_dir = s.rand.compass();
-				if try_move(s, ent, step_dir) { }
-				// Idle if there the chosen direction is blocked
+				// // Choose a random direction to turn
+				// let step_dir = s.rand.compass();
+				// if try_move(s, ent, step_dir) { }
+				// // Idle if there the chosen direction is blocked
+				// else { }
+
+				// Choose a direction to turn
+				let step_dirs = [face_dir.turn_left(), face_dir.turn_right()];
+				let choice = s.rand.rng.coin_flip();
+
+				if try_move(s, ent, step_dirs[choice as usize]) { }
+				else if try_move(s, ent, step_dirs[(!choice) as usize]) { }
+				// Only turn around if the other directions are blocked
+				else if try_move(s, ent, face_dir.turn_around()) { }
+				// Softlocked! Wait until freed
 				else { }
 			}
 		}
