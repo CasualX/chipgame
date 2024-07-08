@@ -76,7 +76,8 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	// Turn dirt to floor after stepping on it
 	if matches!(terrain, Terrain::Dirt) {
 		s.field.set_terrain(ent.pos, Terrain::Floor);
-		s.events.push(GameEvent::DirtCleared { pos: ent.pos });
+		s.events.push(GameEvent::TerrainUpdated { pos: ent.pos, old: Terrain::Dirt, new: Terrain::Floor });
+		s.events.push(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 	}
 
 	// Wait until movement is cleared before accepting new input
@@ -102,7 +103,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			if let Some(orig_dir) = orig_dir {
 				if matches!(terrain, Terrain::Teleport) {
 					teleport(s, ent, orig_dir);
-					try_move(s, ent, orig_dir);
 					break 'end_move;
 				}
 				if matches!(terrain, Terrain::Hint) {
@@ -205,149 +205,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.step_spd = ent.base_spd;
+	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
-	s.ps.steps += 1;
+	s.ps.bumps += 1;
 	s.events.push(GameEvent::PlayerBump { player: ent.handle });
 	s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
-}
-
-fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
-	let new_pos = ent.pos + step_dir.to_vec();
-
-	let new_terrain = s.field.get_terrain(new_pos);
-	match new_terrain {
-		Terrain::BlueLock => if s.ps.keys[KeyColor::Blue as usize] > 0 {
-			s.field.set_terrain(new_pos, Terrain::Floor);
-			s.ps.keys[KeyColor::Blue as usize] -= 1;
-			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Blue });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
-		}
-		Terrain::RedLock => if s.ps.keys[KeyColor::Red as usize] > 0 {
-			s.field.set_terrain(new_pos, Terrain::Floor);
-			s.ps.keys[KeyColor::Red as usize] -= 1;
-			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Red });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
-		}
-		Terrain::GreenLock => if s.ps.keys[KeyColor::Green as usize] > 0 {
-			s.field.set_terrain(new_pos, Terrain::Floor);
-			// s.ps.keys[KeyColor::Green as usize] -= 1; // Green keys are infinite
-			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Green });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
-		}
-		Terrain::YellowLock => if s.ps.keys[KeyColor::Yellow as usize] > 0 {
-			s.field.set_terrain(new_pos, Terrain::Floor);
-			s.ps.keys[KeyColor::Yellow as usize] -= 1;
-			s.events.push(GameEvent::LockOpened { pos: new_pos, key: KeyColor::Yellow });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
-		}
-		Terrain::BlueWall => {
-			s.field.set_terrain(new_pos, Terrain::Wall);
-			s.events.push(GameEvent::BlueWallBumped { pos: new_pos });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
-		}
-		Terrain::BlueFake => {
-			s.field.set_terrain(new_pos, Terrain::Floor);
-			s.events.push(GameEvent::BlueWallCleared { pos: new_pos });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
-		}
-		Terrain::HiddenWall => {
-			s.field.set_terrain(new_pos, Terrain::HiddenWallRevealed);
-			s.events.push(GameEvent::HiddenWallBumped { pos: new_pos });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
-		}
-		_ => {}
-	}
-
-	let mut success = s.ps.dev_wtw || s.field.can_move(ent.pos, step_dir, &ent.data.flags);
-	if success {
-		for ehandle in s.ents.handles() {
-			let Some(mut ent) = s.ents.take(ehandle) else { continue };
-			let mut ictx = InteractContext {
-				blocking: false,
-				push_dir: step_dir,
-			};
-			if ent.pos == new_pos {
-				interact(s, &mut ent, &mut ictx);
-			}
-			s.ents.put(ent);
-			if ictx.blocking {
-				success = false;
-				// This is tricky. Consider the following:
-				// A block is on top of an item pickup (Chip, etc)
-				// If we continued and interacted with all entities, the player can interact with the item pickup through the block
-				// To prevent that break here BUT the block must be earlier in the entity list than the item pickup
-				break;
-			}
-		}
-	}
-
-	let terrain = s.field.get_terrain(ent.pos);
-	// Set the player's move speed
-	if !s.ps.suction_boots && matches!(terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
-		ent.base_spd = BASE_SPD / 2;
-	}
-	else if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
-		ent.base_spd = BASE_SPD / 2;
-	}
-	else {
-		ent.base_spd = BASE_SPD;
-	}
-
-	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
-	ent.face_dir = Some(step_dir);
-	ent.step_time = s.time;
-	if success {
-		let terrain = s.field.get_terrain(ent.pos);
-		if matches!(terrain, Terrain::RecessedWall) {
-			s.events.push(GameEvent::WallPopup { pos: ent.pos });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
-			s.field.set_terrain(ent.pos, Terrain::RaisedWall);
-		}
-
-		s.qt.update(ent.handle, ent.pos, new_pos);
-		ent.step_dir = Some(step_dir);
-		ent.pos = new_pos;
-		ent.has_moved = true;
-		interact_terrain(s, ent);
-
-		s.ps.steps += 1;
-		s.events.push(GameEvent::EntityStep { entity: ent.handle });
-	}
-	else {
-		ent.base_spd = BASE_SPD;
-	}
-	ent.step_spd = ent.base_spd;
-
-	return success;
-}
-
-fn interact(s: &mut GameState, ent: &mut Entity, ictx: &mut InteractContext) {
-	match ent.kind {
-		EntityKind::Block => {
-			if physics::try_move(s, ent, ictx.push_dir) {
-				update_hidden_flag(s, ent.pos);
-				update_hidden_flag(s, ent.pos - ictx.push_dir.to_vec());
-				s.events.push(GameEvent::BlockPush { entity: ent.handle });
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
-			}
-			else {
-				ictx.blocking = true;
-			}
-		}
-		EntityKind::Socket => {
-			if s.ps.chips >= s.field.chips {
-				ent.remove = true;
-				ictx.blocking = false;
-				s.events.push(GameEvent::SocketFilled { pos: ent.pos });
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
-			}
-			else {
-				ictx.blocking = true;
-			}
-		}
-		_ => {}
-	}
 }
 
 const FLAGS: SolidFlags = SolidFlags {

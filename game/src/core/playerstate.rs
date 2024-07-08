@@ -54,6 +54,8 @@ pub struct PlayerState {
 	pub forced_move: bool,
 	/// Total steps taken (for high score).
 	pub steps: i32,
+	/// Total bumps into walls.
+	pub bumps: i32,
 	/// Total chips collected.
 	pub chips: i32,
 	/// Keys collected.
@@ -69,10 +71,12 @@ pub struct PlayerState {
 
 impl PlayerState {
 	pub fn clear(&mut self) {
+		self.ehandle = EntityHandle::INVALID;
 		self.inbuf = InputBuffer::default();
 		self.activity = PlayerActivity::Walking;
 		self.forced_move = false;
 		self.steps = 0;
+		self.bumps = 0;
 		self.chips = 0;
 		self.keys = [0; 4];
 		self.flippers = false;

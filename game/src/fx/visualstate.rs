@@ -65,19 +65,21 @@ impl VisualState {
 				&core::GameEvent::PlayerActivity { player } => player_activity(self, player),
 				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
-				&core::GameEvent::BlueWallCleared { pos } => blue_wall_cleared(self, pos),
-				&core::GameEvent::HiddenWallBumped { pos } => hidden_wall_bumped(self, pos),
-				&core::GameEvent::WallPopup { pos } => recessed_wall_raised(self, pos),
-				&core::GameEvent::ToggleWalls => toggle_walls(self),
-				&core::GameEvent::ButtonPress { .. } => button_press(self),
+				&core::GameEvent::TerrainUpdated { pos, old, new: _ } => {
+					let mut tw = false;
+					match old {
+						core::Terrain::BlueFake => blue_wall_cleared(self, pos),
+						core::Terrain::HiddenWall => hidden_wall_bumped(self, pos),
+						core::Terrain::RecessedWall => recessed_wall_raised(self, pos),
+						core::Terrain::ToggleFloor => tw = true,
+						core::Terrain::ToggleWall => tw = true,
+						_ => {}
+					}
+					if tw {
+						toggle_walls(self);
+					}
+				},
 				&core::GameEvent::GameWin { .. } => game_win(self),
-				&core::GameEvent::SocketFilled { pos } => socket_filled(self, pos),
-				&core::GameEvent::PlayerBump { player } => player_bump(self, player),
-				&core::GameEvent::BlockPush { entity } => block_push(self, entity),
-				&core::GameEvent::EntityTrapped { entity } => entity_trapped(self, entity),
-				&core::GameEvent::BombExplode { entity } => bomb_explode(self, entity),
-				&core::GameEvent::ItemsThief { player } => items_thief(self, player),
-				&core::GameEvent::DirtCleared { pos } => dirt_cleared(self, pos),
 				&core::GameEvent::SoundFx { sound } => if let Some(ref mut audio) = audio { audio.play(sound) },
 				_ => {}
 			}

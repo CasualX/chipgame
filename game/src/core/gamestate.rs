@@ -169,30 +169,28 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 
 	match terrain {
 		Terrain::GreenButton => {
-			for ptr in s.field.terrain.iter_mut() {
-				let terrain = *ptr;
-				if matches!(terrain, Terrain::ToggleFloor) {
-					*ptr = Terrain::ToggleWall;
-				}
-				else if matches!(terrain, Terrain::ToggleWall) {
-					*ptr = Terrain::ToggleFloor;
+			for y in 0..s.field.height {
+				for x in 0..s.field.width {
+					let terrain = s.field.get_terrain(Vec2i::new(x, y));
+					let new = match terrain {
+						Terrain::ToggleFloor => Terrain::ToggleWall,
+						Terrain::ToggleWall => Terrain::ToggleFloor,
+						_ => continue,
+					};
+					s.field.set_terrain(Vec2i::new(x, y), new);
+					s.events.push(GameEvent::TerrainUpdated { pos: Vec2i::new(x, y), old: terrain, new });
 				}
 			}
-			s.events.push(GameEvent::ToggleWalls);
-			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 			if play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
 		}
 		Terrain::RedButton => {
-			// Raise the event when stepping on the red button
-			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 			if play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
 		}
 		Terrain::BrownButton => {
-			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 			if play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
@@ -205,7 +203,6 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					}
 				}
 			}
-			s.events.push(GameEvent::ButtonPress { pos: ent.pos });
 			if play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
@@ -214,7 +211,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	let mut from_pos = ent.pos;
-	let mut from_terrain = terrain;s.field.get_terrain(from_pos);
+	let mut from_terrain = terrain;
 	if !play_sound {
 		from_pos -= ent.face_dir.map(Compass::to_vec).unwrap_or_default();
 		from_terrain = s.field.get_terrain(from_pos);
@@ -247,6 +244,18 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			if remove {
 				s.entity_remove(ehandle);
 			}
+		}
+	}
+
+	if matches!(ent.kind, EntityKind::Player) {
+		let mut from_pos = ent.pos;
+		if let Some(step_dir) = ent.step_dir {
+			from_pos -= step_dir.to_vec();
+		}
+		if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
+			s.field.set_terrain(from_pos, Terrain::RaisedWall);
+			s.events.push(GameEvent::TerrainUpdated { pos: from_pos, old: Terrain::RecessedWall, new: Terrain::RaisedWall });
+			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
 		}
 	}
 }
