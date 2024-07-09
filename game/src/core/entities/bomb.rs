@@ -12,16 +12,17 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
+	}
+
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
 		ps_activity(s, PlayerActivity::Bombed);
 	}
@@ -40,11 +41,11 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		if matches!(other_ent.kind, EntityKind::Player) {
 			continue;
 		}
-		other_ent.remove = true;
+		other_ent.flags |= EF_REMOVE;
 	}
 
 	if exploded {
-		ent.remove = true;
+		ent.flags |= EF_REMOVE;
 		s.events.push(GameEvent::BombExplode { entity: ent.handle });
 		s.events.push(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 	}

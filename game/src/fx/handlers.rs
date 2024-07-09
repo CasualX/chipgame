@@ -372,3 +372,7 @@ pub fn toggle_walls(ctx: &mut VisualState) {
 pub fn game_win(ctx: &mut VisualState) {
 	ctx.next_level_load = ctx.time + 2.0;
 }
+
+pub fn game_over(ctx: &mut VisualState) {
+	ctx.next_level_load = ctx.time + 2.0;
+}

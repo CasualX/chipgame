@@ -129,7 +129,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	let is_player = matches!(ent.kind, EntityKind::Player);
 	let dev_wtw = is_player && s.ps.dev_wtw;
 
-	if ent.base_spd == 0 || ent.trapped {
+	if ent.base_spd == 0 || ent.flags & EF_TRAPPED != 0 {
 		return false;
 	}
 
@@ -220,7 +220,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			EntityKind::Chip => flags.pickup,
 			EntityKind::Socket => {
 				if is_player && s.ps.chips >= s.field.chips {
-					ent.remove = true;
+					ent.flags |= EF_REMOVE;
 					s.events.push(GameEvent::SocketFilled { pos: ent.pos });
 					s.events.push(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
 					false
@@ -292,7 +292,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_dir = Some(step_dir);
 	ent.step_time = s.time;
 	ent.pos = new_pos;
-	ent.has_moved = true;
+	ent.flags |= EF_HAS_MOVED;
 
 	if is_player {
 		s.ps.steps += 1;

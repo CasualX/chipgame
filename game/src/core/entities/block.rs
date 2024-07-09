@@ -12,18 +12,15 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Collided);
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
 	}
 
 	let terrain = s.field.get_terrain(ent.pos);
@@ -31,21 +28,23 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		s.field.set_terrain(ent.pos, Terrain::Dirt);
 		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
 		s.events.push(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
-		ent.remove = true;
+		ent.flags |= EF_REMOVE;
 	}
 
-	if ent.step_dir.is_some() && s.time >= ent.step_time + ent.step_spd {
-		let step_dir = ent.step_dir.unwrap();
-		if let Some((ice_dir, back_dir)) = ice_dir(terrain, step_dir) {
-			if try_move(s, ent, ice_dir) { }
-			else if try_move(s, ent, back_dir) { }
-			else {
-				ent.step_dir = None;
+	if s.time >= ent.step_time + ent.step_spd {
+		if let Some(step_dir) = ent.step_dir {
+			if matches!(terrain, Terrain::Teleport) {
+				teleport(s, ent, step_dir);
+			}
+			if let Some((ice_dir, back_dir)) = ice_dir(terrain, step_dir) {
+				if try_move(s, ent, ice_dir) { }
+				else if try_move(s, ent, back_dir) { }
 			}
 		}
-		else {
-			ent.step_dir = None;
-		}
+	}
+
+	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
+		ps_activity(s, PlayerActivity::Collided);
 	}
 }
 

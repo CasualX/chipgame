@@ -23,6 +23,48 @@ pub enum MoveType {
 	Vel(MoveVel),
 }
 
+pub struct StepAnim {
+	pub src: Vec2<i32>,
+	pub dest: Vec2<i32>,
+	pub move_time: f32,
+	pub move_spd: f32,
+}
+
+pub struct RiseAndFadeAnim {
+	pub start_time: f32,
+	pub duration: f32,
+}
+
+pub struct FadeOutAnim {
+	pub start_time: f32,
+	pub duration: f32,
+}
+
+pub struct FadeInAnim {
+	pub start_time: f32,
+	pub duration: f32,
+}
+
+pub struct MoveDownAnim {
+	pub start_time: f32,
+	pub duration: f32,
+}
+
+pub struct MoveUpAnim {
+	pub start_time: f32,
+	pub duration: f32,
+}
+
+pub enum AnimState {
+	Static,
+	Step(StepAnim),
+	RiseAndFade(RiseAndFadeAnim),
+	FadeOut(FadeOutAnim),
+	FadeIn(FadeInAnim),
+	MoveDown(MoveDownAnim),
+	MoveUp(MoveUpAnim),
+}
+
 #[derive(Clone, Debug)]
 pub struct Object {
 	pub handle: ObjectHandle,

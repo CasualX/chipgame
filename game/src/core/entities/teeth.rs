@@ -12,37 +12,24 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD * 2,
 		step_time: 0,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::CloneMachine) && ent.step_dir.is_none() {
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
+
+	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::Water) {
 		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		ent.remove = true;
+		ent.flags |= EF_REMOVE;
 		return;
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Eaten);
-	}
-
-	if ent.step_dir.is_some() && s.time >= ent.step_time + ent.step_spd {
-		ent.step_dir = None;
-	}
-
-	if ent.trapped || ent.hidden {
-		return;
-	}
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
 			if try_move(s, ent, first_dir) { }
@@ -55,6 +42,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				ent.face_dir = Some(first_dir);
 			}
 		}
+	}
+
+	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
+		ps_activity(s, PlayerActivity::Eaten);
 	}
 }
 

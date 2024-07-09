@@ -12,32 +12,17 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::CloneMachine) && ent.step_dir.is_none() {
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Eaten);
-	}
-
-	if ent.step_dir.is_some() && s.time >= ent.step_time + ent.step_spd {
-		ent.step_dir = None;
-	}
-
-	if ent.trapped || ent.hidden {
-		return;
-	}
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some(face_dir) = ent.face_dir {
 			// Try to move forward
@@ -51,6 +36,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			// Trapped! Wait until freed
 			else { }
 		}
+	}
+
+	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
+		ps_activity(s, PlayerActivity::Eaten);
 	}
 }
 

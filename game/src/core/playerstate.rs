@@ -122,7 +122,7 @@ pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 			}
 			PlayerActivity::OutOfTime => {
 				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::OutOfTime });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::GameOver });
 			}
 			PlayerActivity::Collided => {
 				s.events.push(GameEvent::GameOver { player: s.ps.ehandle });

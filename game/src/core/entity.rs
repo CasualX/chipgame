@@ -49,14 +49,7 @@ pub struct Entity {
 	pub step_dir: Option<Compass>,
 	pub step_spd: Time,
 	pub step_time: Time,
-	/// Entity is trapped and cannot move.
-	pub trapped: bool,
-	/// Entity is hidden under a block.
-	pub hidden: bool,
-	/// Entity has moved since the last tick.
-	pub has_moved: bool,
-	/// Entity will be removed at the end of the current tick.
-	pub remove: bool,
+	pub flags: u8,
 }
 
 impl Entity {
@@ -68,3 +61,14 @@ impl Entity {
 		}
 	}
 }
+
+/// Entity will be removed at the end of the current tick.
+pub const EF_REMOVE: u8 = 1 << 0;
+/// Entity is trapped and cannot move.
+pub const EF_TRAPPED: u8 = 1 << 1;
+/// Entity is hidden under a block.
+pub const EF_HIDDEN: u8 = 1 << 2;
+/// Entity has moved since the last tick.
+pub const EF_HAS_MOVED: u8 = 1 << 3;
+/// Entity is a template for cloning.
+pub const EF_TEMPLATE: u8 = 1 << 4;

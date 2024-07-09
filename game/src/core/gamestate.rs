@@ -78,6 +78,22 @@ impl GameState {
 			}
 		}
 
+		// Find red buttons and mark the connected entities as templates
+		for conn in &self.field.conns {
+			let terrain = self.field.get_terrain(conn.src);
+			if matches!(terrain, Terrain::RedButton) {
+				let template = self.qt.get(conn.dest)[0];
+				if let Some(template_ent) = self.ents.get_mut(template) {
+					let valid = matches!(template_ent.kind,
+						EntityKind::Block | EntityKind::Bug | EntityKind::FireBall | EntityKind::PinkBall | EntityKind::Tank |
+						EntityKind::Glider | EntityKind::Teeth | EntityKind::Walker | EntityKind::Blob | EntityKind::Paramecium);
+					if valid {
+						template_ent.flags |= EF_TEMPLATE;
+					}
+				}
+			}
+		}
+
 		let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
 		println!("Found {} chips", chips);
 	}
@@ -125,7 +141,7 @@ impl GameState {
 
 		// Remove entities marked for removal
 		for ehandle in self.ents.handles() {
-			if self.ents.get(ehandle).map(|ent| ent.remove).unwrap_or(false) {
+			if self.ents.get(ehandle).map(|ent| ent.flags & EF_REMOVE != 0).unwrap_or(false) {
 				if let Some(ent) = self.ents.remove(ehandle) {
 					self.qt.remove(ehandle, ent.pos);
 					self.events.push(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
@@ -155,17 +171,17 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::BearTrap) {
 		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
-		if trapped && !ent.trapped {
+		if trapped && ent.flags & EF_TRAPPED == 0 {
 			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
 			s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
 		}
-		ent.trapped = trapped;
+		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
 	}
 
-	if !ent.has_moved {
+	if ent.flags & EF_HAS_MOVED == 0 {
 		return;
 	}
-	ent.has_moved = false;
+	ent.flags &= !EF_HAS_MOVED;
 
 	match terrain {
 		Terrain::GreenButton => {
@@ -224,6 +240,9 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		let Some(conn) = s.field.find_conn_by_src(from_pos) else { return };
 		let template = s.qt.get(conn.dest)[0];
 		let Some(template_ent) = s.ents.get(template) else { return };
+		if template_ent.flags & EF_TEMPLATE == 0 {
+			return;
+		}
 		// Spawn a new entity at the template entity's position
 		let args = EntityArgs {
 			kind: template_ent.kind,
@@ -281,8 +300,8 @@ pub(super) fn update_hidden_flag(s: &mut GameState, pos: Vec2i) {
 			if !hide_all && matches!(ent.kind, EntityKind::Block) {
 				continue;
 			}
-			if ent.hidden != hidden {
-				ent.hidden = hidden;
+			if (ent.flags & EF_HIDDEN != 0) != hidden {
+				ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
 				s.events.push(GameEvent::EntityHidden { entity: ent.handle, hidden });
 			}
 		}

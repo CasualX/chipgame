@@ -4,7 +4,6 @@
 pub enum SoundFx {
 	GameOver,
 	GameWin,
-	OutOfTime,
 	TimeLow,
 	Derezz,
 	CantMove,

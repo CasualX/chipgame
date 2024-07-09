@@ -25,10 +25,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: -BASE_SPD,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
@@ -36,7 +33,6 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 
 fn think(s: &mut GameState, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
-	let orig_dir = ent.step_dir;
 
 	// Freeze player if game over
 	if s.ps.activity.is_game_over() {
@@ -51,18 +47,19 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		ent.face_dir = None;
 	}
 	if s.time >= ent.step_time + ent.step_spd {
-		if ent.step_dir.is_some() {
-			if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
-				ps_activity(s, PlayerActivity::Burned);
-				return;
-			}
-			if matches!(terrain, Terrain::Water) && !s.ps.flippers {
-				ps_activity(s, PlayerActivity::Drowned);
-				return;
-			}
+		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
+			ps_activity(s, PlayerActivity::Burned);
+			return;
 		}
-
-		ent.step_dir = None;
+		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
+			ps_activity(s, PlayerActivity::Drowned);
+			return;
+		}
+		if matches!(terrain, Terrain::Exit) {
+			s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+			ps_activity(s, PlayerActivity::Win);
+			return;
+		}
 	}
 
 	let activity = match terrain {
@@ -84,13 +81,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	if s.time >= ent.step_time + ent.step_spd {
 		let input_dir = s.ps.inbuf.read_dir();
 
-		// Win condition
-		if matches!(terrain, Terrain::Exit) && orig_dir.is_some() {
-			s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
-			ps_activity(s, PlayerActivity::Win);
-			return;
-		}
-
 		if s.ps.dev_wtw {
 			if let Some(input_dir) = input_dir {
 				try_move(s, ent, input_dir);
@@ -99,10 +89,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 
 		'end_move: {
-			// First tick after stepping on a new tile
-			if let Some(orig_dir) = orig_dir {
+			if let Some(step_dir) = ent.step_dir {
 				if matches!(terrain, Terrain::Teleport) {
-					teleport(s, ent, orig_dir);
+					teleport(s, ent, step_dir);
 					break 'end_move;
 				}
 				if matches!(terrain, Terrain::Hint) {
@@ -111,34 +100,34 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 				// Handle ice physics
 				if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNW | Terrain::IceNE | Terrain::IceSW | Terrain::IceSE) {
-					let (ice_dir, back_dir) = match orig_dir {
+					let (ice_dir, back_dir) = match step_dir {
 						Compass::Up => match terrain {
 							Terrain::IceNW => (Compass::Right, Compass::Down),
 							Terrain::IceNE => (Compass::Left, Compass::Down),
 							Terrain::IceSE => (Compass::Up, Compass::Left),
 							Terrain::IceSW => (Compass::Up, Compass::Right),
-							_ => (orig_dir, orig_dir.turn_around()),
+							_ => (step_dir, step_dir.turn_around()),
 						},
 						Compass::Left => match terrain {
 							Terrain::IceNW => (Compass::Down, Compass::Right),
 							Terrain::IceNE => (Compass::Left, Compass::Down),
 							Terrain::IceSE => (Compass::Left, Compass::Up),
 							Terrain::IceSW => (Compass::Up, Compass::Right),
-							_ => (orig_dir, orig_dir.turn_around()),
+							_ => (step_dir, step_dir.turn_around()),
 						},
 						Compass::Down => match terrain {
 							Terrain::IceNW => (Compass::Down, Compass::Right),
 							Terrain::IceNE => (Compass::Down, Compass::Left),
 							Terrain::IceSE => (Compass::Left, Compass::Up),
 							Terrain::IceSW => (Compass::Right, Compass::Up),
-							_ => (orig_dir, orig_dir.turn_around()),
+							_ => (step_dir, step_dir.turn_around()),
 						},
 						Compass::Right => match terrain {
 							Terrain::IceNW => (Compass::Right, Compass::Down),
 							Terrain::IceNE => (Compass::Down, Compass::Left),
 							Terrain::IceSE => (Compass::Up, Compass::Left),
 							Terrain::IceSW => (Compass::Right, Compass::Up),
-							_ => (orig_dir, orig_dir.turn_around()),
+							_ => (step_dir, step_dir.turn_around()),
 						},
 					};
 					// If the player is blocked, try to turn around
@@ -151,7 +140,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				}
 			}
 
-			if ent.trapped {
+			if ent.flags & EF_TRAPPED != 0 {
 				break 'end_move;
 			}
 
@@ -167,7 +156,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			};
 			if let Some(force_dir) = force_dir {
 				let override_dir = match force_dir {
-					_ if !s.ps.forced_move || ent.trapped => None,
+					_ if !s.ps.forced_move || ent.flags & EF_TRAPPED != 0 => None,
 					Compass::Left | Compass::Right => if input_dir == Some(Compass::Up) { Some(Compass::Up) } else if input_dir == Some(Compass::Down) { Some(Compass::Down) } else { None },
 					Compass::Up | Compass::Down => if input_dir == Some(Compass::Left) { Some(Compass::Left) } else if input_dir == Some(Compass::Right) { Some(Compass::Right) } else { None },
 				};
@@ -193,7 +182,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			}
 
 			// Handle player input
-			if ent.trapped { }
+			if ent.flags & EF_TRAPPED != 0 { }
 			else if let Some(dir) = input_dir {
 				if !try_move(s, ent, dir) {
 					bump(s, ent, dir);

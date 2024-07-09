@@ -68,6 +68,7 @@ fn main() {
 	ap.load_wav(chipgame::core::SoundFx::BootsStolen, "data/sfx/thief.wav");
 	ap.load_wav(chipgame::core::SoundFx::TileEmptied, "data/sfx/whisk.wav");
 	ap.load_wav(chipgame::core::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
+	ap.load_wav(chipgame::core::SoundFx::FireWalking, "data/sfx/crackle.wav");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -174,4 +175,7 @@ fn main() {
 		past_now = now;
 		thread::sleep(sleep_dur);
 	}
+
+	// App crashes when dropping soloud...
+	std::mem::forget(ap.sl);
 }

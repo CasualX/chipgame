@@ -12,10 +12,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
-		trapped: false,
-		hidden: false,
-		has_moved: false,
-		remove: false,
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
@@ -30,11 +27,11 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 }
 
 fn pickup_item(s: &mut GameState, ent: &mut Entity) {
-	if /*ent.hidden || */ent.remove {
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
 
-	ent.remove = true;
+	ent.flags |= EF_REMOVE;
 
 	let (item, sound) = match ent.kind {
 		EntityKind::Chip => {

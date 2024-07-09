@@ -80,6 +80,7 @@ impl VisualState {
 					}
 				},
 				&core::GameEvent::GameWin { .. } => game_win(self),
+				&core::GameEvent::GameOver { .. } => game_win(self),
 				&core::GameEvent::SoundFx { sound } => if let Some(ref mut audio) = audio { audio.play(sound) },
 				_ => {}
 			}
