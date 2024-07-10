@@ -1,6 +1,7 @@
 use std::{fs, thread, time};
 
 mod editor;
+mod tool;
 
 #[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
@@ -101,6 +102,9 @@ fn main() {
 							let s = editor.save_level();
 							fs::write(&file_path, s).unwrap();
 						}
+						Some(winit::event::VirtualKeyCode::T) => editor.tool_terrain(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::E) => editor.tool_entity(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::C) => editor.tool_connection(is_pressed(state)),
 						_ => (),
 					}
 				}
@@ -108,7 +112,6 @@ fn main() {
 					match button {
 						winit::event::MouseButton::Left => editor.left_click(is_pressed(state)),
 						winit::event::MouseButton::Right => editor.right_click(is_pressed(state)),
-						winit::event::MouseButton::Middle => editor.middle_click(is_pressed(state)),
 						_ => (),
 					}
 				}
