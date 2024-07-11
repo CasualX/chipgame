@@ -31,14 +31,14 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
-			if try_terrain_move(s, ent, ent.face_dir.unwrap_or(Compass::Up)) { }
-			else if try_move(s, ent, first_dir) { }
+		if try_terrain_move(s, ent, ent.step_dir) { }
+		else if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
+			if try_move(s, ent, first_dir) { }
 			else if try_move(s, ent, second_dir) { }
 			// If no legal move, stay put and face in the first direction
 			else {
 				if ent.face_dir != Some(first_dir) {
-					s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+					s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 				}
 				ent.face_dir = Some(first_dir);
 			}
@@ -52,56 +52,61 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 fn chase_dirs(s: &GameState, ent: &Entity) -> Option<(Compass, Compass)> {
 	let pl = s.ents.get(s.ps.ehandle)?;
-	let d = pl.pos - ent.pos;
+	let Vec2i { x, y } = pl.pos - ent.pos;
 
 	// Teeth moves either vertically or horizontally toward Chip one square at a time, always taking the longer path, and vertically if tied.
 	// However, if this move would be illegal because of some obstacle, it will go the other way if that is a legal move, and if not,
 	// it will stay put until Chip moves somewhere that allows it to make another move.
 
-	if d.y == 0 {
-		if d.x > 0 {
-			Some((Compass::Right, Compass::Right))
-		}
-		else if d.x < 0 {
-			Some((Compass::Left, Compass::Left))
-		}
-		else {
-			None
-		}
+	if x == 0 && y == 0 {
+		None
 	}
-	else if d.y > 0 {
-		if d.x > d.y {
-			Some((Compass::Right, Compass::Down))
-		}
-		else if d.x > 0 {
-			Some((Compass::Down, Compass::Right))
-		}
-		else if d.x == 0 {
-			Some((Compass::Down, Compass::Down))
-		}
-		else if d.x < d.y {
-			Some((Compass::Left, Compass::Down))
-		}
-		else {
-			Some((Compass::Down, Compass::Left))
-		}
-	}
-	else/* if d.y < 0*/ {
-		if d.x > -d.y {
-			Some((Compass::Right, Compass::Up))
-		}
-		else if d.x > 0 {
+	else if x.abs() <= -y {
+		if x > 0 {
 			Some((Compass::Up, Compass::Right))
 		}
-		else if d.x == 0 {
+		else if x < 0 {
+			Some((Compass::Up, Compass::Left))
+		}
+		else {
 			Some((Compass::Up, Compass::Up))
 		}
-		else if d.x < -d.y {
+	}
+	else if x.abs() <= y {
+		if x > 0 {
+			Some((Compass::Down, Compass::Right))
+		}
+		else if x < 0 {
+			Some((Compass::Down, Compass::Left))
+		}
+		else {
+			Some((Compass::Down, Compass::Down))
+		}
+	}
+	else if x < 0 {
+		if y > 0 {
+			Some((Compass::Left, Compass::Down))
+		}
+		else if y < 0 {
 			Some((Compass::Left, Compass::Up))
 		}
 		else {
-			Some((Compass::Up, Compass::Left))
+			Some((Compass::Left, Compass::Left))
 		}
+	}
+	else if x > 0 {
+		if y > 0 {
+			Some((Compass::Right, Compass::Down))
+		}
+		else if y < 0 {
+			Some((Compass::Right, Compass::Up))
+		}
+		else {
+			Some((Compass::Right, Compass::Right))
+		}
+	}
+	else {
+		None
 	}
 }
 

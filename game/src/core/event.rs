@@ -32,7 +32,7 @@ pub enum GameEvent {
 	EntityCreated { entity: EntityHandle, kind: EntityKind },
 	EntityRemoved { entity: EntityHandle, kind: EntityKind },
 	EntityStep { entity: EntityHandle },
-	EntityFaceDir { entity: EntityHandle },
+	EntityTurn { entity: EntityHandle },
 	EntityTeleport { entity: EntityHandle },
 	EntityHidden { entity: EntityHandle, hidden: bool },
 	EntityDrown { entity: EntityHandle },

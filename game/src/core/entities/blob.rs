@@ -31,11 +31,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if let Some(step_dir) = ent.step_dir {
-			if try_terrain_move(s, ent, step_dir) { }
-			// The direction of the blob means nothing, it is completely random
-			else if { let step_dir = s.rand.compass(); try_move(s, ent, step_dir) } { }
-		}
+		if try_terrain_move(s, ent, ent.step_dir) { }
+		// The direction of the blob means nothing, it is completely random
+		else if { let step_dir = s.rand.compass(); try_move(s, ent, step_dir) } { }
 	}
 
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {

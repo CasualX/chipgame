@@ -32,9 +32,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if let Some(step_dir) = ent.step_dir {
-			if try_terrain_move(s, ent, step_dir) { }
-		}
+		if try_terrain_move(s, ent, ent.step_dir) { }
 	}
 
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
@@ -42,46 +40,8 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 }
 
-pub fn ice_dir(terrain: Terrain, dir: Compass) -> Option<(Compass, Compass)> {
-	let x = match dir {
-		Compass::Up => match terrain {
-			Terrain::IceNW => (Compass::Right, Compass::Down),
-			Terrain::IceNE => (Compass::Left, Compass::Down),
-			Terrain::IceSE => (Compass::Up, Compass::Left),
-			Terrain::IceSW => (Compass::Up, Compass::Right),
-			Terrain::Ice => (dir, dir.turn_around()),
-			_ => return None,
-		},
-		Compass::Left => match terrain {
-			Terrain::IceNW => (Compass::Down, Compass::Right),
-			Terrain::IceNE => (Compass::Left, Compass::Down),
-			Terrain::IceSE => (Compass::Left, Compass::Up),
-			Terrain::IceSW => (Compass::Up, Compass::Right),
-			Terrain::Ice => (dir, dir.turn_around()),
-			_ => return None,
-		},
-		Compass::Down => match terrain {
-			Terrain::IceNW => (Compass::Down, Compass::Right),
-			Terrain::IceNE => (Compass::Down, Compass::Left),
-			Terrain::IceSE => (Compass::Left, Compass::Up),
-			Terrain::IceSW => (Compass::Right, Compass::Up),
-			Terrain::Ice => (dir, dir.turn_around()),
-			_ => return None,
-		},
-		Compass::Right => match terrain {
-			Terrain::IceNW => (Compass::Right, Compass::Down),
-			Terrain::IceNE => (Compass::Down, Compass::Left),
-			Terrain::IceSE => (Compass::Up, Compass::Left),
-			Terrain::IceSW => (Compass::Right, Compass::Up),
-			Terrain::Ice => (dir, dir.turn_around()),
-			_ => return None,
-		},
-	};
-	Some(x)
-}
-
 const FLAGS: SolidFlags = SolidFlags {
-	gravel: true,
+	gravel: false,
 	fire: false,
 	dirt: true,
 	water: false,

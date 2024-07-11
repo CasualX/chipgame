@@ -219,16 +219,6 @@ impl EditorState {
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
 			cv.push_uniform(render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
-			{
-				let mut x = cv.begin(shade::PrimType::Triangles, 4, 2);
-				x.add_indices_quad();
-				let s = 2.0;
-				let z = 40.0;
-				x.add_vertex(render::Vertex { pos: Vec3::new(p.x-s, p.y-s, p.z), uv: Vec2::new(0.0, 0.0), color: [255, 0, 0, 255] });
-				x.add_vertex(render::Vertex { pos: Vec3::new(p.x+s, p.y-s, p.z), uv: Vec2::new(1.0, 0.0), color: [255, 0, 0, 255] });
-				x.add_vertex(render::Vertex { pos: Vec3::new(p.x+s, p.y+s, p.z + z), uv: Vec2::new(1.0, 1.0), color: [255, 0, 0, 255] });
-				x.add_vertex(render::Vertex { pos: Vec3::new(p.x-s, p.y+s, p.z + z), uv: Vec2::new(0.0, 1.0), color: [255, 0, 0, 255] });
-			}
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {

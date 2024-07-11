@@ -297,13 +297,53 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	if is_player {
 		s.ps.steps += 1;
 	}
-	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+	s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 	s.events.push(GameEvent::EntityStep { entity: ent.handle });
 	return true;
 }
 
-pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
-	false
+pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
+	let terrain = s.field.get_terrain(ent.pos);
+	match terrain {
+		Terrain::Ice => match step_dir {
+			Some(dir) => !try_move(s, ent, dir) && try_move(s, ent, dir.turn_around()),
+			None => return false,
+		}
+		Terrain::IceNW => match step_dir {
+			Some(Compass::Up) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Down),
+			Some(Compass::Left) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Right),
+			Some(Compass::Down) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Right),
+			Some(Compass::Right) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Down),
+			_ => return false,
+		}
+		Terrain::IceNE => match step_dir {
+			Some(Compass::Up) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Down),
+			Some(Compass::Left) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Down),
+			Some(Compass::Down) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Left),
+			Some(Compass::Right) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Left),
+			_ => return false,
+		}
+		Terrain::IceSE => match step_dir {
+			Some(Compass::Up) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Left),
+			Some(Compass::Left) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Up),
+			Some(Compass::Down) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Up),
+			Some(Compass::Right) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Left),
+			_ => return false,
+		}
+		Terrain::IceSW => match step_dir {
+			Some(Compass::Up) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Right),
+			Some(Compass::Left) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Right),
+			Some(Compass::Down) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Up),
+			Some(Compass::Right) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Up),
+			_ => return false,
+		}
+		Terrain::ForceN => try_move(s, ent, Compass::Up),
+		Terrain::ForceW => try_move(s, ent, Compass::Left),
+		Terrain::ForceS => try_move(s, ent, Compass::Down),
+		Terrain::ForceE => try_move(s, ent, Compass::Right),
+		_ => return false,
+	};
+	return true;
 }
 
 /// Teleports the entity to the destination of a teleporter.

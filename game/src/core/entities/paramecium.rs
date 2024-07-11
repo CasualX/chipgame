@@ -31,39 +31,18 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		let terrain = s.field.get_terrain(ent.pos);
-		match terrain {
-			Terrain::ForceE => {
-				try_move(s, ent, Compass::Right);
-			}
-			Terrain::ForceW => {
-				try_move(s, ent, Compass::Left);
-			}
-			Terrain::ForceN => {
-				try_move(s, ent, Compass::Up);
-			}
-			Terrain::ForceS => {
-				try_move(s, ent, Compass::Down);
-			}
-			Terrain::ForceRandom => {
-				let step_dir = s.rand.compass();
-				try_move(s, ent, step_dir);
-			}
-			_ => {
-				if let Some(face_dir) = ent.face_dir {
-					if try_terrain_move(s, ent, face_dir) { }
-					// If paramecium can turn right, turn right
-					else if try_move(s, ent, face_dir.turn_right()) { }
-					// Otherwise try to move forward
-					else if try_move(s, ent, face_dir) { }
-					// If forward is blocked, try to turn left
-					else if try_move(s, ent, face_dir.turn_left()) { }
-					// At this point, can't turn right, can't go forward, can't turn left so try to turn around
-					else if try_move(s, ent, face_dir.turn_around()) { }
-					// Trapped! Wait until freed
-					else { }
-				}
-			},
+		if try_terrain_move(s, ent, ent.step_dir) { }
+		else if let Some(face_dir) = ent.face_dir {
+			// If paramecium can turn right, turn right
+			if try_move(s, ent, face_dir.turn_right()) { }
+			// Otherwise try to move forward
+			else if try_move(s, ent, face_dir) { }
+			// If forward is blocked, try to turn left
+			else if try_move(s, ent, face_dir.turn_left()) { }
+			// At this point, can't turn right, can't go forward, can't turn left so try to turn around
+			else if try_move(s, ent, face_dir.turn_around()) { }
+			// Trapped! Wait until freed
+			else { }
 		}
 	}
 

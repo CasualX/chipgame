@@ -58,7 +58,7 @@ impl VisualState {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
 				&core::GameEvent::EntityRemoved { entity, kind } => entity_removed(self, entity, kind),
 				&core::GameEvent::EntityStep { entity } => entity_step(self, entity),
-				&core::GameEvent::EntityFaceDir { entity } => entity_face_dir(self, entity),
+				&core::GameEvent::EntityTurn { entity } => entity_face_dir(self, entity),
 				&core::GameEvent::EntityHidden { entity, hidden } => entity_hidden(self, entity, hidden),
 				&core::GameEvent::EntityTeleport { entity } => entity_teleport(self, entity),
 				&core::GameEvent::EntityDrown { entity } => entity_drown(self, entity),

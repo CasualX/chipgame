@@ -216,6 +216,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				if matches!(other.kind, EntityKind::Tank) {
 					if let Some(face_dir) = other.face_dir {
 						other.face_dir = Some(face_dir.turn_around());
+						s.events.push(GameEvent::EntityTurn { entity: other.handle });
 					}
 				}
 			}
@@ -224,6 +225,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			if matches!(ent.kind, EntityKind::Tank) {
 				if let Some(face_dir) = ent.face_dir {
 					ent.face_dir = Some(face_dir.turn_around());
+					s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 				}
 			}
 			if play_sound {

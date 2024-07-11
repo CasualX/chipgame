@@ -42,7 +42,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	// Clear movement after a delay
 	if s.time >= ent.step_time + IDLE_TIME {
 		if ent.face_dir.is_some() {
-			s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+			s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 		}
 		ent.face_dir = None;
 	}
@@ -56,7 +56,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			return;
 		}
 		if matches!(terrain, Terrain::Exit) {
-			s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+			s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 			ps_activity(s, PlayerActivity::Win);
 			return;
 		}
@@ -167,12 +167,14 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 						s.ps.forced_move = false;
 					}
 					else {
-						s.ps.forced_move = try_move(s, ent, force_dir);
+						try_move(s, ent, force_dir);
 						bump(s, ent, override_dir);
+						s.ps.forced_move = true;
 					}
 				}
 				else {
-					s.ps.forced_move = try_move(s, ent, force_dir)
+					try_move(s, ent, force_dir);
+					s.ps.forced_move = true;
 				}
 
 				break 'end_move;
@@ -193,13 +195,13 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 }
 
 fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
-	ent.step_spd = ent.base_spd;
+	// ent.step_spd = ent.base_spd;
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
 	s.ps.bumps += 1;
 	s.events.push(GameEvent::PlayerBump { player: ent.handle });
 	s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
-	s.events.push(GameEvent::EntityFaceDir { entity: ent.handle });
+	s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 }
 
 const FLAGS: SolidFlags = SolidFlags {
