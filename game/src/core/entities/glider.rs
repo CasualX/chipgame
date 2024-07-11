@@ -25,8 +25,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some(face_dir) = ent.face_dir {
+			if try_terrain_move(s, ent, face_dir) { }
 			// Try to move forward
-			if try_move(s, ent, face_dir) { }
+			else if try_move(s, ent, face_dir) { }
 			// If it can turn left, turn left
 			else if try_move(s, ent, face_dir.turn_left()) { }
 			// If it can turn right, turn right

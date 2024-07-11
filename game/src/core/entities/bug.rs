@@ -32,8 +32,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some(face_dir) = ent.face_dir {
+			if try_terrain_move(s, ent, face_dir) { }
 			// If bug can turn left, turn left
-			if try_move(s, ent, face_dir.turn_left()) { }
+			else if try_move(s, ent, face_dir.turn_left()) { }
 			// Otherwise try to move forward
 			else if try_move(s, ent, face_dir) { }
 			// If forward is blocked, try to turn right

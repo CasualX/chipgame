@@ -32,7 +32,8 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
-			if try_move(s, ent, first_dir) { }
+			if try_terrain_move(s, ent, ent.face_dir.unwrap_or(Compass::Up)) { }
+			else if try_move(s, ent, first_dir) { }
 			else if try_move(s, ent, second_dir) { }
 			// If no legal move, stay put and face in the first direction
 			else {

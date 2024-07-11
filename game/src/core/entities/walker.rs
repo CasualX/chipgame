@@ -32,7 +32,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some(face_dir) = ent.face_dir {
-			if try_move(s, ent, face_dir) { }
+
+			if try_terrain_move(s, ent, ent.step_dir.unwrap_or(Compass::Up)) { }
+			else if try_move(s, ent, face_dir) { }
 			else {
 				// // Choose a random direction to turn
 				// let step_dir = s.rand.compass();

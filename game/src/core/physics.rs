@@ -302,6 +302,10 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	return true;
 }
 
+pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
+	false
+}
+
 /// Teleports the entity to the destination of a teleporter.
 pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) {
 	let old_pos = ent.pos;

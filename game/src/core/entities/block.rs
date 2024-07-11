@@ -33,13 +33,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if let Some(step_dir) = ent.step_dir {
-			if matches!(terrain, Terrain::Teleport) {
-				teleport(s, ent, step_dir);
-			}
-			if let Some((ice_dir, back_dir)) = ice_dir(terrain, step_dir) {
-				if try_move(s, ent, ice_dir) { }
-				else if try_move(s, ent, back_dir) { }
-			}
+			if try_terrain_move(s, ent, step_dir) { }
 		}
 	}
 

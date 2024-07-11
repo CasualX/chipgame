@@ -51,8 +51,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			}
 			_ => {
 				if let Some(face_dir) = ent.face_dir {
+					if try_terrain_move(s, ent, face_dir) { }
 					// If paramecium can turn right, turn right
-					if try_move(s, ent, face_dir.turn_right()) { }
+					else if try_move(s, ent, face_dir.turn_right()) { }
 					// Otherwise try to move forward
 					else if try_move(s, ent, face_dir) { }
 					// If forward is blocked, try to turn left

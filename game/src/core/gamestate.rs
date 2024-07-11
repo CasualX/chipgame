@@ -219,6 +219,13 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					}
 				}
 			}
+			// Handle the Tank which triggered the button separately
+			// as it has been taken out of the entity list
+			if matches!(ent.kind, EntityKind::Tank) {
+				if let Some(face_dir) = ent.face_dir {
+					ent.face_dir = Some(face_dir.turn_around());
+				}
+			}
 			if play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}

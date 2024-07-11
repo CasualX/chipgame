@@ -13,7 +13,8 @@ pub struct MapDto {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct FieldDto {
 	pub name: String,
-	pub hint: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub hint: Option<String>,
 	pub password: String,
 	pub seed: u64,
 	pub time: i32,
@@ -40,7 +41,7 @@ pub struct Conn {
 #[derive(Default)]
 pub struct Field {
 	pub name: String,
-	pub hint: String,
+	pub hint: Option<String>,
 	pub password: String,
 	pub seed: u64,
 	pub time: i32,
