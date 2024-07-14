@@ -9,6 +9,7 @@ pub struct SolidFlags {
 	pub water: bool,
 	pub exit: bool,
 	pub blue_fake: bool,
+	pub recessed_wall: bool,
 	pub pickup: bool,
 	pub creature: bool,
 	pub player: bool,
@@ -56,23 +57,15 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 	}
 
 	// Check if allowed to move on certain terrains
-	if flags.gravel && matches!(terrain, Terrain::Gravel) {
-		return false;
-	}
-	if flags.fire && matches!(terrain, Terrain::Fire) {
-		return false;
-	}
-	if flags.dirt && matches!(terrain, Terrain::Dirt) {
-		return false;
-	}
-	if flags.exit && matches!(terrain, Terrain::Exit) {
-		return false;
-	}
-	if flags.water && matches!(terrain, Terrain::Water) {
-		return false;
-	}
-	if flags.blue_fake && matches!(terrain, Terrain::BlueFake) {
-		return false;
+	match terrain {
+		Terrain::Gravel if flags.gravel => return false,
+		Terrain::Fire if flags.fire => return false,
+		Terrain::Dirt if flags.dirt => return false,
+		Terrain::Exit if flags.exit => return false,
+		Terrain::Water if flags.water => return false,
+		Terrain::BlueFake if flags.blue_fake => return false,
+		Terrain::RecessedWall if flags.recessed_wall => return false,
+		_ => (),
 	}
 
 	for ehandle in s.qt.get(pos) {
@@ -207,7 +200,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Terrain::Exit if flags.exit => return false,
 			Terrain::Water if flags.water => return false,
 			Terrain::BlueFake if flags.blue_fake => return false,
-
+			Terrain::RecessedWall if flags.recessed_wall => return false,
 			_ => (),
 		}
 	}
@@ -341,17 +334,18 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::ForceW => try_move(s, ent, Compass::Left),
 		Terrain::ForceS => try_move(s, ent, Compass::Down),
 		Terrain::ForceE => try_move(s, ent, Compass::Right),
+		Terrain::Teleport => if let Some(step_dir) = step_dir { teleport(s, ent, step_dir) } else { false },
 		_ => return false,
 	};
 	return true;
 }
 
 /// Teleports the entity to the destination of a teleporter.
-pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) {
+pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 	let old_pos = ent.pos;
 	loop {
 		// Find the teleport connection
-		let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
+		let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return false };
 		// Teleport the entity
 		s.qt.update(ent.handle, ent.pos, conn.dest);
 		ent.pos = conn.dest;
@@ -361,7 +355,7 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) {
 		}
 		// Do nothing if no valid teleport exit is found
 		if old_pos == ent.pos {
-			return;
+			return false;
 		}
 	}
 
@@ -370,4 +364,5 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) {
 	if matches!(ent.kind, EntityKind::Player) {
 		s.events.push(GameEvent::SoundFx { sound: SoundFx::Teleporting });
 	}
+	return true;
 }

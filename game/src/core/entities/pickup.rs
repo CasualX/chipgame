@@ -84,6 +84,7 @@ const FLAGS: SolidFlags = SolidFlags {
 	water: true,
 	exit: true,
 	blue_fake: true,
+	recessed_wall: true,
 	pickup: true,
 	creature: true,
 	player: false,

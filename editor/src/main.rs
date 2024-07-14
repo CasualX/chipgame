@@ -1,7 +1,6 @@
 use std::{fs, thread, time};
 
-mod editor;
-mod tool;
+use chipgame::editor;
 
 #[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {

@@ -36,6 +36,7 @@ pub enum GameEvent {
 	EntityTeleport { entity: EntityHandle },
 	EntityHidden { entity: EntityHandle, hidden: bool },
 	EntityDrown { entity: EntityHandle },
+	EntityBurn { entity: EntityHandle },
 	EntityTrapped { entity: EntityHandle },
 	PlayerActivity { player: EntityHandle },
 	PlayerHint { player: EntityHandle, pos: Vec2i },

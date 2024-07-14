@@ -1,8 +1,10 @@
 use std::collections::HashMap;
-use chipgame::fx::*;
-use chipgame::core;
+use crate::fx;
+use crate::core;
 use cvmath::*;
-use crate::tool;
+
+mod tool;
+mod tiles;
 
 #[derive(Clone, Debug)]
 pub enum Tool {
@@ -40,30 +42,30 @@ static TERRAIN_SAMPLES: [[core::Terrain; 2]; 21] = [
 	[core::Terrain::ForceN, core::Terrain::ForceW],
 ];
 
-static ENTITY_SAMPLES: [(core::EntityKind, chipgame::fx::Sprite); 23] = [
-	(core::EntityKind::Player, chipgame::fx::Sprite::PlayerWalkNeutral),
-	(core::EntityKind::Chip, chipgame::fx::Sprite::Chip),
-	(core::EntityKind::Socket, chipgame::fx::Sprite::Socket),
-	(core::EntityKind::Block, chipgame::fx::Sprite::Block),
-	(core::EntityKind::Flippers, chipgame::fx::Sprite::PowerFlippers),
-	(core::EntityKind::FireBoots, chipgame::fx::Sprite::PowerFireBoots),
-	(core::EntityKind::IceSkates, chipgame::fx::Sprite::PowerIceSkates),
-	(core::EntityKind::SuctionBoots, chipgame::fx::Sprite::PowerSuctionBoots),
-	(core::EntityKind::BlueKey, chipgame::fx::Sprite::BlueKey),
-	(core::EntityKind::RedKey, chipgame::fx::Sprite::RedKey),
-	(core::EntityKind::GreenKey, chipgame::fx::Sprite::GreenKey),
-	(core::EntityKind::YellowKey, chipgame::fx::Sprite::YellowKey),
-	(core::EntityKind::Thief, chipgame::fx::Sprite::Thief),
-	(core::EntityKind::Bomb, chipgame::fx::Sprite::Bomb),
-	(core::EntityKind::Bug, chipgame::fx::Sprite::BugUp),
-	(core::EntityKind::FireBall, chipgame::fx::Sprite::FireBall),
-	(core::EntityKind::PinkBall, chipgame::fx::Sprite::PinkBall),
-	(core::EntityKind::Tank, chipgame::fx::Sprite::TankUp),
-	(core::EntityKind::Glider, chipgame::fx::Sprite::GliderUp),
-	(core::EntityKind::Teeth, chipgame::fx::Sprite::TeethUp),
-	(core::EntityKind::Walker, chipgame::fx::Sprite::WalkerUpDown),
-	(core::EntityKind::Blob, chipgame::fx::Sprite::Blob),
-	(core::EntityKind::Paramecium, chipgame::fx::Sprite::ParameciumUpDown),
+static ENTITY_SAMPLES: [(core::EntityKind, fx::Sprite); 23] = [
+	(core::EntityKind::Player, fx::Sprite::PlayerWalkNeutral),
+	(core::EntityKind::Chip, fx::Sprite::Chip),
+	(core::EntityKind::Socket, fx::Sprite::Socket),
+	(core::EntityKind::Block, fx::Sprite::Block),
+	(core::EntityKind::Flippers, fx::Sprite::PowerFlippers),
+	(core::EntityKind::FireBoots, fx::Sprite::PowerFireBoots),
+	(core::EntityKind::IceSkates, fx::Sprite::PowerIceSkates),
+	(core::EntityKind::SuctionBoots, fx::Sprite::PowerSuctionBoots),
+	(core::EntityKind::BlueKey, fx::Sprite::BlueKey),
+	(core::EntityKind::RedKey, fx::Sprite::RedKey),
+	(core::EntityKind::GreenKey, fx::Sprite::GreenKey),
+	(core::EntityKind::YellowKey, fx::Sprite::YellowKey),
+	(core::EntityKind::Thief, fx::Sprite::Thief),
+	(core::EntityKind::Bomb, fx::Sprite::Bomb),
+	(core::EntityKind::Bug, fx::Sprite::BugUp),
+	(core::EntityKind::FireBall, fx::Sprite::FireBall),
+	(core::EntityKind::PinkBall, fx::Sprite::PinkBall),
+	(core::EntityKind::Tank, fx::Sprite::TankUp),
+	(core::EntityKind::Glider, fx::Sprite::GliderUp),
+	(core::EntityKind::Teeth, fx::Sprite::TeethUp),
+	(core::EntityKind::Walker, fx::Sprite::WalkerUpDown),
+	(core::EntityKind::Blob, fx::Sprite::Blob),
+	(core::EntityKind::Paramecium, fx::Sprite::ParameciumUpDown),
 ];
 
 #[derive(Default)]
@@ -78,7 +80,7 @@ pub struct Input {
 
 #[derive(Default)]
 pub struct EditorState {
-	pub game: VisualState,
+	pub game: fx::VisualState,
 	pub tool: Tool,
 
 	pub screen_size: Vec2<i32>,
@@ -95,9 +97,9 @@ pub struct EditorState {
 }
 
 impl EditorState {
-	pub fn init(&mut self, resources: Resources) {
+	pub fn init(&mut self, resources: fx::Resources) {
 		self.game.resources = resources;
-		self.game.tiles = &TILES_EDIT;
+		self.game.tiles = &tiles::TILES_EDIT;
 	}
 	pub fn load_level(&mut self, json: &str) {
 		self.game.load_level(json);
@@ -214,29 +216,29 @@ impl EditorState {
 		g.begin().unwrap();
 
 		let p = self.mouse_pos; {
-			let mut cv = shade::d2::Canvas::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::d2::Canvas::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
-			cv.push_uniform(render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
+			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
 					let terrain = TERRAIN_SAMPLES[y as usize][x as usize];
 					let pos = Vec3::new((x - 3) as f32 * 32.0, y as f32 * 32.0, 0.0);
-					render::draw_tile(&mut cv, terrain, pos, &self.game.tiles);
+					fx::render::draw_tile(&mut cv, terrain, pos, &self.game.tiles);
 				}
 			}
 
 			for i in 0..ENTITY_SAMPLES.len() as i32 {
 				let (_, sprite) = ENTITY_SAMPLES[i as usize];
 				let pos = Vec3::new(i as f32 * 32.0, -2.0 * 32.0, 0.0);
-				render::draw(&mut cv, pos, sprite, chipgame::fx::Model::ReallyFlatSprite, 1.0);
+				fx::render::draw(&mut cv, pos, sprite, fx::Model::ReallyFlatSprite, 1.0);
 			}
 
 			match self.tool {
 				Tool::Terrain => {
-					render::draw_tile(&mut cv, self.selected_terrain, p, &self.game.tiles);
+					fx::render::draw_tile(&mut cv, self.selected_terrain, p, &self.game.tiles);
 				}
 				_ => (),
 			}
@@ -249,18 +251,18 @@ impl EditorState {
 		}
 
 		{
-			let mut cv = shade::d2::Canvas::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::d2::Canvas::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
-			cv.push_uniform(render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
+			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 
 			struct ToVertex {
 				color: [u8; 4],
 			}
-			impl shade::d2::ToVertex<render::Vertex> for ToVertex {
-				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> render::Vertex {
-					render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
+			impl shade::d2::ToVertex<fx::render::Vertex> for ToVertex {
+				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> fx::render::Vertex {
+					fx::render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
 				}
 			}
 			let pen = shade::d2::Pen { template: ToVertex { color: [0, 0, 255, 255] }, segments: 0 };
@@ -329,7 +331,6 @@ impl EditorState {
 		}
 	}
 
-	/// Right click to sample the terrain or entity at the cursor as the current tool
 	pub fn sample(&mut self) {
 		let s = self;
 		let cursor_pos = s.cursor_pos;

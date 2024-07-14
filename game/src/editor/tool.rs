@@ -1,6 +1,4 @@
 use super::*;
-use editor::*;
-use chipgame::core;
 
 pub mod terrain;
 pub mod entity;
