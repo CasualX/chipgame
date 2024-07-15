@@ -7,7 +7,7 @@ pub enum TimeState {
 	Waiting,
 	/// Game is running.
 	Running,
-	/// Game is over, player won or lost.
+	/// Game is paused.
 	Paused,
 }
 
@@ -23,6 +23,7 @@ pub struct GameState {
 	pub events: Vec<GameEvent>,
 	pub ts: TimeState,
 	pub input: Input,
+	pub inputs: Vec<u8>,
 }
 
 impl GameState {
@@ -46,6 +47,8 @@ impl GameState {
 
 		self.qt.init(ld.map.width, ld.map.height);
 		self.ents.clear();
+
+		self.inputs.clear();
 
 		assert!(ld.map.width > 0, "Invalid map width");
 		assert!(ld.map.height > 0, "Invalid map height");
@@ -109,9 +112,9 @@ impl GameState {
 			return;
 		}
 		self.ts = TimeState::Running;
-
 		self.time += 1;
 
+		input.encode(&mut self.inputs);
 		ps_update_inbuf(self, input);
 
 		// Let entities think

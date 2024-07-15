@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn entity_created(ctx: &mut VisualState, ehandle: core::EntityHandle, kind: core::EntityKind) {
+pub fn entity_created(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core::EntityKind) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 	let handle = ctx.objects.alloc();
 	let obj = Object {
@@ -27,7 +27,7 @@ pub fn entity_created(ctx: &mut VisualState, ehandle: core::EntityHandle, kind: 
 	ctx.objects.lookup.insert(ent.handle, handle);
 }
 
-pub fn entity_removed(ctx: &mut VisualState, ehandle: core::EntityHandle, kind: core::EntityKind) {
+pub fn entity_removed(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core::EntityKind) {
 	let Some(obj_handle) = ctx.objects.lookup.remove(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 
@@ -55,7 +55,7 @@ pub fn entity_removed(ctx: &mut VisualState, ehandle: core::EntityHandle, kind: 
 	}
 }
 
-pub fn entity_step(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+pub fn entity_step(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
@@ -70,7 +70,7 @@ pub fn entity_step(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	});
 }
 
-pub fn entity_teleport(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+pub fn entity_teleport(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
@@ -80,12 +80,12 @@ pub fn entity_teleport(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 }
 
-pub fn entity_drown(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+pub fn entity_drown(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	// let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	// let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 }
 
-pub fn entity_face_dir(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+pub fn entity_face_dir(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
@@ -93,18 +93,18 @@ pub fn entity_face_dir(ctx: &mut VisualState, ehandle: core::EntityHandle) {
 	obj.sprite = sprite_for_ent(ent, &ctx.gs.ps);
 }
 
-pub fn player_activity(ctx: &mut VisualState, ehandle: core::EntityHandle) {
+pub fn player_activity(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	entity_face_dir(ctx, ehandle);
 }
 
-pub fn entity_hidden(ctx: &mut VisualState, ehandle: core::EntityHandle, hidden: bool) {
+pub fn entity_hidden(ctx: &mut FxState, ehandle: core::EntityHandle, hidden: bool) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 
 	obj.vis = !hidden;
 }
 
-pub fn create_fire(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -124,7 +124,7 @@ pub fn create_fire(ctx: &mut VisualState, pos: Vec2<i32>) {
 	ctx.objects.insert(obj);
 }
 
-pub fn create_toggle_floor(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn create_toggle_floor(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -144,7 +144,7 @@ pub fn create_toggle_floor(ctx: &mut VisualState, pos: Vec2<i32>) {
 	ctx.objects.insert(obj);
 }
 
-pub fn create_toggle_wall(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -255,7 +255,7 @@ fn sprite_for_ent(ent: &core::Entity, pl: &core::PlayerState) -> Sprite {
 	}
 }
 
-pub fn item_pickup(ctx: &mut VisualState, ehandle: core::EntityHandle, item: core::ItemPickup) {
+pub fn item_pickup(ctx: &mut FxState, ehandle: core::EntityHandle, item: core::ItemPickup) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 
@@ -263,7 +263,7 @@ pub fn item_pickup(ctx: &mut VisualState, ehandle: core::EntityHandle, item: cor
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) });
 }
 
-pub fn lock_opened(ctx: &mut VisualState, pos: Vec2<i32>, key: core::KeyColor) {
+pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: core::KeyColor) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -288,7 +288,7 @@ pub fn lock_opened(ctx: &mut VisualState, pos: Vec2<i32>, key: core::KeyColor) {
 	ctx.objects.insert(obj);
 }
 
-pub fn blue_wall_cleared(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -308,7 +308,7 @@ pub fn blue_wall_cleared(ctx: &mut VisualState, pos: Vec2<i32>) {
 	ctx.objects.insert(obj);
 }
 
-pub fn hidden_wall_bumped(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn hidden_wall_bumped(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -328,7 +328,7 @@ pub fn hidden_wall_bumped(ctx: &mut VisualState, pos: Vec2<i32>) {
 	ctx.objects.insert(obj);
 }
 
-pub fn recessed_wall_raised(ctx: &mut VisualState, pos: Vec2<i32>) {
+pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
@@ -348,7 +348,7 @@ pub fn recessed_wall_raised(ctx: &mut VisualState, pos: Vec2<i32>) {
 	ctx.objects.insert(obj);
 }
 
-pub fn toggle_walls(ctx: &mut VisualState) {
+pub fn toggle_walls(ctx: &mut FxState) {
 	for obj in ctx.objects.map.values_mut() {
 		if obj.model != Model::ThinWall {
 			continue;
@@ -369,10 +369,10 @@ pub fn toggle_walls(ctx: &mut VisualState) {
 	}
 }
 
-pub fn game_win(ctx: &mut VisualState) {
+pub fn game_win(ctx: &mut FxState) {
 	ctx.next_level_load = ctx.time + 2.0;
 }
 
-pub fn game_over(ctx: &mut VisualState) {
+pub fn game_over(ctx: &mut FxState) {
 	ctx.next_level_load = ctx.time + 2.0;
 }

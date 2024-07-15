@@ -83,7 +83,7 @@ pub struct Object {
 }
 
 impl Object {
-	pub fn update(&mut self, ctx: &mut VisualState) {
+	pub fn update(&mut self, ctx: &mut FxState) {
 		if !self.live {
 			return;
 		}

@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Default)]
-pub struct VisualState {
+pub struct FxState {
 	pub ntime: i32,
 	pub time: f32,
 	pub dt: f32,
@@ -11,13 +11,15 @@ pub struct VisualState {
 	pub resources: Resources,
 	pub level_index: i32,
 	pub next_level_load: f32,
+	pub music_enabled: bool,
 	pub tiles: &'static [TileGfx],
 }
 
-impl VisualState {
+impl FxState {
 	pub fn init(&mut self) {
 		self.tiles = &TILES_PLAY;
 		self.level_index = 1;
+		self.music_enabled = true;
 	}
 	pub fn load_level(&mut self, json: &str) {
 		self.objects.clear();
@@ -38,7 +40,15 @@ impl VisualState {
 			}
 		}
 	}
-	pub fn update(&mut self, input: &core::Input, audio: Option<&mut dyn IAudioPlayer>) {
+	pub fn update(&mut self, input: &core::Input, mut audio: Option<&mut dyn IAudioPlayer>) {
+		if let Some(audio) = &mut audio {
+			let music = if !self.music_enabled { None } else { Some(match self.level_index.wrapping_sub(1) % 2 {
+				0 => MusicId::Chip1,
+				_ => MusicId::Chip2,
+				// _ => MusicId::Canyon,
+			}) };
+			audio.play_music(music);
+		}
 		self.gs.tick(input);
 		self.sync(audio);
 
@@ -50,6 +60,7 @@ impl VisualState {
 				self.load_level(&json);
 			}
 		}
+
 	}
 	pub fn sync(&mut self, mut audio: Option<&mut dyn IAudioPlayer>) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {

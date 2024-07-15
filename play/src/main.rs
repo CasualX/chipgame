@@ -17,6 +17,8 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 struct AudioPlayer {
 	sl: soloud::Soloud,
 	sfx: HashMap<chipgame::core::SoundFx, soloud::Wav>,
+	music: HashMap<chipgame::MusicId, soloud::Wav>,
+	cur_music: Option<(chipgame::MusicId, soloud::Handle)>,
 }
 impl AudioPlayer {
 	fn load_wav(&mut self, fx: chipgame::core::SoundFx, path: &str) {
@@ -25,11 +27,34 @@ impl AudioPlayer {
 		wav.load(path).expect("Failed to load sound");
 		self.sfx.insert(fx, wav);
 	}
+	fn load_music(&mut self, music: chipgame::MusicId, path: &str) {
+		use soloud::*;
+		let mut wav = Wav::default();
+		wav.load(path).expect("Failed to load sound");
+		wav.set_looping(true);
+		wav.set_volume(0.5);
+		self.music.insert(music, wav);
+	}
 }
 impl chipgame::fx::IAudioPlayer for AudioPlayer {
 	fn play(&mut self, sound: chipgame::core::SoundFx) {
 		if let Some(wav) = self.sfx.get(&sound) {
 			self.sl.play(wav);
+		}
+	}
+	fn play_music(&mut self, music: Option<chipgame::MusicId>) {
+		if self.cur_music.map(|(music, _)| music) != music {
+			dbg!(music);
+			if let Some((_, handle)) = self.cur_music {
+				self.sl.stop(handle);
+			}
+			self.cur_music = None;
+			if let Some(music) = music {
+				if let Some(wav) = self.music.get(&music) {
+					let handle = self.sl.play(wav);
+					self.cur_music = Some((music, handle));
+				}
+			}
 		}
 	}
 }
@@ -48,13 +73,18 @@ fn main() {
 	let file_path = format!("data/cc1/level{}.json", level);
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
-	let mut ap = AudioPlayer { sl, sfx: HashMap::new() };
+	let mut ap = AudioPlayer {
+		sl,
+		sfx: HashMap::new(),
+		music: HashMap::new(),
+		cur_music: None,
+	};
 	ap.load_wav(chipgame::core::SoundFx::GameOver, "data/sfx/death.wav");
 	ap.load_wav(chipgame::core::SoundFx::GameWin, "data/sfx/tada.wav");
 	ap.load_wav(chipgame::core::SoundFx::Derezz, "data/sfx/derezz.wav");
 	ap.load_wav(chipgame::core::SoundFx::ICCollected, "data/sfx/chack.wav");
 	ap.load_wav(chipgame::core::SoundFx::KeyCollected, "data/sfx/click.wav");
-	ap.load_wav(chipgame::core::SoundFx::BootCollected, "data/sfx/ting.wav");
+	ap.load_wav(chipgame::core::SoundFx::BootCollected, "data/sfx/click.wav");
 	ap.load_wav(chipgame::core::SoundFx::LockOpened, "data/sfx/door.wav");
 	ap.load_wav(chipgame::core::SoundFx::SocketOpened, "data/sfx2/socket unlock.wav");
 	ap.load_wav(chipgame::core::SoundFx::CantMove, "data/sfx/oof.wav");
@@ -69,6 +99,9 @@ fn main() {
 	ap.load_wav(chipgame::core::SoundFx::TileEmptied, "data/sfx/whisk.wav");
 	ap.load_wav(chipgame::core::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
 	ap.load_wav(chipgame::core::SoundFx::FireWalking, "data/sfx/crackle.wav");
+	ap.load_music(chipgame::MusicId::Chip1, "data/music/2Chip1.ogg");
+	ap.load_music(chipgame::MusicId::Chip2, "data/music/2Chip2.ogg");
+	ap.load_music(chipgame::MusicId::Canyon, "data/music/2Canyon.ogg");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -103,7 +136,7 @@ fn main() {
 
 	let mut past_now = time::Instant::now();
 
-	let mut state = chipgame::fx::VisualState::default();
+	let mut state = chipgame::fx::FxState::default();
 	state.init();
 	state.level_index = level;
 	state.load_level(&fs::read_to_string(&file_path).unwrap());
@@ -131,23 +164,17 @@ fn main() {
 					quit = true;
 				}
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::KeyboardInput { input: keyboard_input, .. }, .. } => {
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::Left) {
-						input.left = keyboard_input.state == winit::event::ElementState::Pressed;
-					}
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::Right) {
-						input.right = keyboard_input.state == winit::event::ElementState::Pressed;
-					}
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::Up) {
-						input.up = keyboard_input.state == winit::event::ElementState::Pressed;
-					}
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::Down) {
-						input.down = keyboard_input.state == winit::event::ElementState::Pressed;
-					}
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::A) {
-						input.a = keyboard_input.state == winit::event::ElementState::Pressed;
-					}
-					if keyboard_input.virtual_keycode == Some(winit::event::VirtualKeyCode::B) {
-						input.b = keyboard_input.state == winit::event::ElementState::Pressed;
+					match keyboard_input.virtual_keycode {
+						Some(winit::event::VirtualKeyCode::Left) => input.left = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Right) => input.right = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Up) => input.up = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Down) => input.down = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::A) => input.a = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::B) => input.b = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) {
+							state.music_enabled = !state.music_enabled;
+						},
+						_ => (),
 					}
 				}
 				winit::event::Event::MainEventsCleared => {
@@ -178,4 +205,11 @@ fn main() {
 
 	// App crashes when dropping soloud...
 	std::mem::forget(ap.sl);
+}
+
+fn is_pressed(state: winit::event::ElementState) -> bool {
+	match state {
+		winit::event::ElementState::Pressed => true,
+		winit::event::ElementState::Released => false,
+	}
 }

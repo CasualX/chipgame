@@ -80,7 +80,7 @@ pub struct Input {
 
 #[derive(Default)]
 pub struct EditorState {
-	pub game: fx::VisualState,
+	pub game: fx::FxState,
 	pub tool: Tool,
 
 	pub screen_size: Vec2<i32>,

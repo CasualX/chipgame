@@ -17,7 +17,7 @@ pub struct Camera {
 	pub view_proj_mat: Mat4<f32>,
 }
 
-impl VisualState {
+impl FxState {
 	pub fn set_game_camera(&mut self) {
 		let size = self.resources.screen_size;
 

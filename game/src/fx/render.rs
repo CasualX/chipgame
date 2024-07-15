@@ -352,7 +352,7 @@ pub fn draw_tile(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, 
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
 
-pub fn field(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, state: &VisualState, time: f32) {
+pub fn field(cv: &mut shade::d2::Canvas::<render::Vertex, render::Uniform>, state: &FxState, time: f32) {
 	let i = (time * 8.0) as i32;
 	let field = &state.gs.field;
 	// let resx = &state.resources;
