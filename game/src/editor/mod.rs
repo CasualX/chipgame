@@ -127,7 +127,12 @@ impl EditorState {
 		entities.sort_unstable_by_key(|ent| (ent.kind as i32, ent.pos.y, ent.pos.x));
 
 		// Generate a new seed if zero, otherwise keep the existing seed
-		let seed = if self.game.gs.field.seed == 0 { urandom::new().next_u64() } else { self.game.gs.field.seed };
+		let seed = if self.game.gs.field.seed == 0 {
+			urandom::new().next_u32() as u64
+		}
+		else {
+			self.game.gs.field.seed
+		};
 
 		let dto = core::FieldDto {
 			name: self.game.gs.field.name.clone(),
