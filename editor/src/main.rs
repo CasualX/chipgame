@@ -46,15 +46,50 @@ fn main() {
 	}, Some(&mut shade::png::gutter(32, 32, 4))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset).unwrap();
 
+	let texdigits = shade::png::load(&mut g, Some("digits"), "data/digits.png", &shade::png::TextureProps {
+		filter_min: shade::TextureFilter::Linear,
+		filter_mag: shade::TextureFilter::Linear,
+		wrap_u: shade::TextureWrap::ClampEdge,
+		wrap_v: shade::TextureWrap::ClampEdge,
+	}, None).unwrap();
+
+	let fonttexture = shade::png::load(&mut g, Some("font"), "data/font.png", &shade::png::TextureProps {
+		filter_min: shade::TextureFilter::Linear,
+		filter_mag: shade::TextureFilter::Linear,
+		wrap_u: shade::TextureWrap::ClampEdge,
+		wrap_v: shade::TextureWrap::ClampEdge,
+	}, None).unwrap();
+
 	// Create the shader
 	let shader = g.shader_create(None).unwrap();
 	if let Err(_) = g.shader_compile(shader, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")) {
 		panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
 	}
+	let uishader = g.shader_create(None).unwrap();
+	if let Err(_) = g.shader_compile(uishader, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")) {
+		panic!("Failed to compile shader: {}", g.shader_compile_log(uishader).unwrap());
+	}
+	let fontshader = g.shader_create(None).unwrap();
+	if let Err(_) = g.shader_compile(fontshader, include_str!("../../data/font.vs.glsl"), include_str!("../../data/font.fs.glsl")) {
+		panic!("Failed to compile shader: {}", g.shader_compile_log(fontshader).unwrap());
+	}
 
 	let mut past_now = time::Instant::now();
 
+	let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
+
 	let mut editor = editor::EditorState::default();
+	editor.init(chipgame::fx::Resources {
+		tileset,
+		tileset_size: [tex_info.width, tex_info.height].into(),
+		shader,
+		screen_size: [size.width as i32, size.height as i32].into(),
+		uishader,
+		texdigits,
+		font: Some(font),
+		fontshader,
+		fonttexture,
+	});
 	editor.load_level(&fs::read_to_string(&file_path).unwrap());
 
 	// Main loop
@@ -124,13 +159,7 @@ fn main() {
 			}
 		});
 
-
-		editor.init(chipgame::fx::Resources {
-			tileset,
-			tileset_size: [tex_info.width, tex_info.height].into(),
-			shader,
-			screen_size: [size.width as i32, size.height as i32].into(),
-		});
+		editor.game.resources.screen_size = [size.width as i32, size.height as i32].into();
 		editor.render(&mut g);
 
 		// Swap the buffers and wait for the next frame

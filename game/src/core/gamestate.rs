@@ -114,6 +114,12 @@ impl GameState {
 		self.ts = TimeState::Running;
 		self.time += 1;
 
+		if self.field.time > 0 && self.time >= self.field.time * 60 {
+			ps_activity(self, PlayerActivity::OutOfTime);
+			self.events.push(GameEvent::GameOver { player: self.ps.ehandle });
+			return;
+		}
+
 		input.encode(&mut self.inputs);
 		ps_update_inbuf(self, input);
 

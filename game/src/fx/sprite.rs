@@ -199,4 +199,7 @@ impl Sprite {
 			Sprite::ParameciumLeftRight => Vec2(6, 1),
 		}
 	}
+	pub fn uv(self, tex_size: Vec2<i32>) -> Vec2<f32> {
+		self.index().map(|c| c as f32 * 34.0 + 1.0) / tex_size.map(|c| c as f32)
+	}
 }

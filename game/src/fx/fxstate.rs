@@ -122,10 +122,10 @@ impl FxState {
 
 		self.set_game_camera();
 
-		let mut cv = shade::d2::Canvas::<render::Vertex, render::Uniform>::new();
+		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
 		cv.shader = self.resources.shader;
 		cv.depth_test = Some(shade::DepthTest::Less);
-		cv.viewport = cvmath::Rect::vec(cvmath::Vec2(size.x as i32, size.y as i32));
+		cv.viewport = cvmath::Rect::vec(size);
 		// cv.cull_mode = Some(shade::CullMode::CW);
 		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: self.resources.tileset, texture_size: self.resources.tileset_size.map(|c| c as f32).into() });
 		render::field(&mut cv, self, time);

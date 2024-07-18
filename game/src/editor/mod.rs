@@ -221,10 +221,10 @@ impl EditorState {
 		g.begin().unwrap();
 
 		let p = self.mouse_pos; {
-			let mut cv = shade::d2::Canvas::<fx::render::Vertex, fx::render::Uniform>::new();
+			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
+			cv.viewport = cvmath::Rect::vec(self.screen_size);
 			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
@@ -256,10 +256,10 @@ impl EditorState {
 		}
 
 		{
-			let mut cv = shade::d2::Canvas::<fx::render::Vertex, fx::render::Uniform>::new();
+			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = self.game.resources.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(cvmath::Vec2(self.screen_size.x as i32, self.screen_size.y as i32));
+			cv.viewport = cvmath::Rect::vec(self.screen_size);
 			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
 
 			struct ToVertex {
@@ -270,14 +270,14 @@ impl EditorState {
 					fx::render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
 				}
 			}
-			let pen = shade::d2::Pen { template: ToVertex { color: [0, 0, 255, 255] }, segments: 0 };
+			let pen = shade::d2::Pen { template: ToVertex { color: [0, 0, 255, 255] } };
 			for conn in &self.game.gs.field.conns {
 				let src = conn.src.map(|c| c as f32 * 32.0 + 16.0);
 				let dest = conn.dest.map(|c| c as f32 * 32.0 + 16.0);
 				cv.draw_arrow(&pen, src, dest, 12.0);
 			}
 
-			let pen = shade::d2::Pen { template: ToVertex { color: [255, 0, 0, 255] }, segments: 0 };
+			let pen = shade::d2::Pen { template: ToVertex { color: [255, 0, 0, 255] } };
 			for ent in self.game.gs.ents.iter() {
 				if let Some(face_dir) = ent.face_dir {
 					let pos = ent.pos.map(|c| c as f32 * 32.0 + 16.0);
