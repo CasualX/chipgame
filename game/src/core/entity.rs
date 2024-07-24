@@ -72,3 +72,5 @@ pub const EF_HIDDEN: u8 = 1 << 2;
 pub const EF_HAS_MOVED: u8 = 1 << 3;
 /// Entity is a template for cloning.
 pub const EF_TEMPLATE: u8 = 1 << 4;
+/// Entity has been forced to move.
+pub const EF_FORCED_MOVE: u8 = 1 << 5;

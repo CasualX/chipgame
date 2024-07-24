@@ -94,9 +94,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 					teleport(s, ent, step_dir);
 					break 'end_move;
 				}
-				if matches!(terrain, Terrain::Hint) {
-					s.events.push(GameEvent::PlayerHint { player: ent.handle, pos: ent.pos });
-				}
 
 				// Handle ice physics
 				if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNW | Terrain::IceNE | Terrain::IceSW | Terrain::IceSE) {
@@ -212,8 +209,9 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: false,
 	blue_fake: false,
 	recessed_wall: false,
-	pickup: false,
-	creature: false,
+	items: false,
+	chips: false,
+	creatures: false,
 	player: false,
 	thief: false,
 };

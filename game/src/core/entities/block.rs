@@ -32,12 +32,26 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if try_terrain_move(s, ent, ent.step_dir) { }
+		if try_special_move(s, ent) { }
+		else if try_terrain_move(s, ent, ent.step_dir) { }
 	}
 
 	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
 		ps_activity(s, PlayerActivity::Collided);
 	}
+}
+
+fn try_special_move(s: &mut GameState, ent: &mut Entity) -> bool {
+	// Simulate Lynx behavior when an object is released from a trap
+	// This is relevant to solve level 109 (Torturechamber)
+	// FIXME: Do this for all objects that are released from traps
+	let terrain = s.field.get_terrain(ent.pos);
+	if ent.flags & EF_FORCED_MOVE != 0 && matches!(terrain, Terrain::BearTrap) {
+		if let Some(step_dir) = ent.step_dir {
+			return try_move(s, ent, step_dir);
+		}
+	}
+	return false;
 }
 
 const FLAGS: SolidFlags = SolidFlags {
@@ -48,8 +62,9 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: true,
 	blue_fake: true,
 	recessed_wall: false,
-	pickup: true,
-	creature: true,
+	items: false,
+	chips: true,
+	creatures: true,
 	player: false,
 	thief: true,
 };

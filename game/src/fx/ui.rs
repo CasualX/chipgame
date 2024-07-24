@@ -1,88 +1,10 @@
 use super::*;
 
+mod v;
+mod u;
 
-#[derive(Copy, Clone, Debug, Default, dataview::Pod)]
-#[repr(C)]
-pub struct UiVertex {
-	pub pos: Vec2f,
-	pub uv: Vec2f,
-	pub color: [u8; 4],
-}
-
-unsafe impl shade::TVertex for UiVertex {
-	const VERTEX_LAYOUT: &'static shade::VertexLayout = &shade::VertexLayout {
-		size: mem::size_of::<UiVertex>() as u16,
-		alignment: mem::align_of::<UiVertex>() as u16,
-		attributes: &[
-			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 2,
-				offset: dataview::offset_of!(UiVertex.pos) as u16,
-			},
-			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 2,
-				offset: dataview::offset_of!(UiVertex.uv) as u16,
-			},
-			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::U8Norm,
-				len: 4,
-				offset: dataview::offset_of!(UiVertex.color) as u16,
-			},
-		],
-	};
-}
-
-impl shade::d2::ToVertex<UiVertex> for UiVertex {
-	fn to_vertex(&self, pos: Vec2f, _index: usize) -> UiVertex {
-		UiVertex { pos, ..*self }
-	}
-}
-
-#[derive(Copy, Clone, Debug, dataview::Pod)]
-#[repr(C)]
-pub struct UiUniforms {
-	pub transform: Transform2f,
-	pub texture: shade::Texture2D,
-	pub color: [f32; 4],
-}
-
-impl Default for UiUniforms {
-	fn default() -> Self {
-		UiUniforms {
-			transform: cvmath::Transform2f::IDENTITY,
-			texture: shade::Texture2D::INVALID,
-			color: [1.0, 1.0, 1.0, 1.0],
-		}
-	}
-}
-
-unsafe impl shade::TUniform for UiUniforms {
-	const UNIFORM_LAYOUT: &'static shade::UniformLayout = &shade::UniformLayout {
-		size: mem::size_of::<UiUniforms>() as u16,
-		alignment: mem::align_of::<UiUniforms>() as u16,
-		attributes: &[
-			shade::UniformAttribute {
-				name: "transform",
-				ty: shade::UniformType::Mat3x2 { order: shade::UniformMatOrder::RowMajor },
-				offset: dataview::offset_of!(UiUniforms.transform) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "tex",
-				ty: shade::UniformType::Sampler2D(0),
-				offset: dataview::offset_of!(UiUniforms.texture) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "color",
-				ty: shade::UniformType::F4,
-				offset: dataview::offset_of!(UiUniforms.color) as u16,
-				len: 1,
-			},
-		],
-	};
-}
+use self::v::UiVertex;
+use self::u::UiUniform;
 
 fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
@@ -99,37 +21,31 @@ impl FxState {
 
 		let ss = self.resources.screen_size;
 
-		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniforms>::new();
-
-		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
-		// let transform = Transform2f::IDENTITY;
-
-		cv.push_uniform(ui::UiUniforms {
-			transform,//: Transform2f::IDENTITY,
-			texture: self.resources.texdigits,
-			color: [1.0, 1.0, 1.0, 1.0],
-		});
-
+		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
 		cv.shader = self.resources.uishader;
 		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.viewport = Bounds::vec(ss);
+
+		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+
+		cv.push_uniform(ui::UiUniform {
+			transform,
+			texture: self.resources.texdigits,
+			..Default::default()
+		});
 
 		let paint = shade::d2::Paint {
 			template: UiVertex {
 				pos: Vec2f::ZERO,
 				uv: Vec2f::ZERO,
-				color: [255, 255, 255, 128],
+				color: [255, 255, 255, 255],
 			},
 		};
-		let a = 32.0;
-		// cv.fill_rect(&paint, &Rect::c(-1.0, -1.0 + 64.0 / ss.y as f32 * 2.0, 1.0, -1.0));
-		// cv.fill_rect(&paint, &Rect(transform * Vec2(0.0, ss.y as f32 - 64.0), transform * Vec2(ss.x as f32, ss.y as f32)));
-		// cv.fill_rect(&paint, &Rect::c(0.0, ss.y as f32 - 64.0, ss.x as f32, ss.y as f32));
-		// cv.fill_rect(&paint, &Rect::c(ss.x as f32 - 200.0, 0.0, ss.x as f32, ss.y as f32));
-		cv.fill_rect(&paint, &Rect::c(0.0, 0.0, a * 4.0, a * 2.0));
+		let a = ss.y as f32 * 0.05;
+		cv.fill_rect(&paint, &Rect::c(0.0, 0.0, ss.x as f32, a + a));
 
 		cv.push_uniform_f(|u| {
-			ui::UiUniforms {
+			ui::UiUniform {
 				texture: self.resources.tileset,
 				..*u
 			}
@@ -138,33 +54,33 @@ impl FxState {
 		let ref gs = self.gs;
 
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(&mut cv, Sprite::BlueKey, self.resources.tileset_size, Vec2(a * 0.0, 0.0));
+			draw_sprite(&mut cv, Sprite::BlueKey, self.resources.tileset_size, Vec2(a * 0.0, 0.0), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(&mut cv, Sprite::RedKey, self.resources.tileset_size, Vec2(a * 1.0, 0.0));
+			draw_sprite(&mut cv, Sprite::RedKey, self.resources.tileset_size, Vec2(a * 1.0, 0.0), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(&mut cv, Sprite::GreenKey, self.resources.tileset_size, Vec2(a * 2.0, 0.0));
+			draw_sprite(&mut cv, Sprite::GreenKey, self.resources.tileset_size, Vec2(a * 2.0, 0.0), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(&mut cv, Sprite::YellowKey, self.resources.tileset_size, Vec2(a * 3.0, 0.0));
+			draw_sprite(&mut cv, Sprite::YellowKey, self.resources.tileset_size, Vec2(a * 3.0, 0.0), a);
 		}
 
 		if gs.ps.flippers {
-			draw_sprite(&mut cv, Sprite::PowerFlippers, self.resources.tileset_size, Vec2(a * 0.0, a));
+			draw_sprite(&mut cv, Sprite::PowerFlippers, self.resources.tileset_size, Vec2(a * 0.0, a), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(&mut cv, Sprite::PowerFireBoots, self.resources.tileset_size, Vec2(a * 1.0, a));
+			draw_sprite(&mut cv, Sprite::PowerFireBoots, self.resources.tileset_size, Vec2(a * 1.0, a), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(&mut cv, Sprite::PowerIceSkates, self.resources.tileset_size, Vec2(a * 2.0, a));
+			draw_sprite(&mut cv, Sprite::PowerIceSkates, self.resources.tileset_size, Vec2(a * 2.0, a), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(&mut cv, Sprite::PowerSuctionBoots, self.resources.tileset_size, Vec2(a * 3.0, a));
+			draw_sprite(&mut cv, Sprite::PowerSuctionBoots, self.resources.tileset_size, Vec2(a * 3.0, a), a);
 		}
 
 		cv.push_uniform_f(|u| {
-			ui::UiUniforms {
+			ui::UiUniform {
 				texture: self.resources.texdigits,
 				..*u
 			}
@@ -179,34 +95,62 @@ impl FxState {
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
-			if let Some(hint) = &self.gs.field.hint {
-				if let Some(font) = &self.resources.font {
-					let mut tbuf = shade::d2::TextBuffer::new();
-					tbuf.shader = self.resources.fontshader;
-					tbuf.viewport = cvmath::Rect::vec(ss);
+			let mut tbuf = shade::d2::TextBuffer::new();
+			tbuf.shader = self.resources.fontshader;
+			tbuf.viewport = cvmath::Rect::vec(ss);
+			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-					let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
-					tbuf.push_uniform(shade::d2::TextUniform {
-						transform,
-						texture: self.resources.fonttexture,
-						outline_width_absolute: 0.8,
-						unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
-						..Default::default()
-					});
-					let scribe = shade::d2::Scribe {
-						font_size: 32.0,
-						font_width_scale: 1.0,
-						line_height: 32.0,
-						baseline: 0.0,
-						x_pos: 0.0,
-						letter_spacing: 0.0,
-						top_skew: 0.0,
-						color: Vec4(255, 255, 255, 255),
-						outline: Vec4(0, 0, 0, 255),
-					};
-					tbuf.text_write(&scribe, font, &mut Vec2(0.0, 0.0), hint);
-					tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
-				}
+			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+			tbuf.push_uniform(shade::d2::TextUniform {
+				transform,
+				texture: self.resources.fonttexture,
+				outline_width_absolute: 0.8,
+				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
+				..Default::default()
+			});
+			let size = ss.y as f32 * 0.05;
+			let scribe = shade::d2::Scribe {
+				font_size: size,
+				line_height: size,
+				color: Vec4(255, 255, 0, 255),
+				outline: Vec4(0, 0, 0, 255),
+				..Default::default()
+			};
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, &self.gs.field.name);
+			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
+			let password = format!("Password: {}", self.gs.field.password);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, &password);
+			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size), &password);
+			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		}
+		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
+			if let Some(hint) = &self.gs.field.hint {
+				let mut tbuf = shade::d2::TextBuffer::new();
+				tbuf.shader = self.resources.fontshader;
+				tbuf.viewport = cvmath::Rect::vec(ss);
+				tbuf.blend_mode = shade::BlendMode::Alpha;
+
+				let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+				tbuf.push_uniform(shade::d2::TextUniform {
+					transform,
+					texture: self.resources.fonttexture,
+					outline_width_absolute: 0.8,
+					unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
+					..Default::default()
+				});
+				let size = ss.y as f32 * 0.05;
+				let scribe = shade::d2::Scribe {
+					font_size: size,
+					line_height: size,
+					color: Vec4(255, 255, 255, 255),
+					outline: Vec4(0, 0, 0, 255),
+					..Default::default()
+				};
+				let hint = hint.replace(". ", ".\n");
+				tbuf.text_box(&self.resources.font, &scribe, &Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
+				// let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, hint);
+				// tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
+				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 			}
 		}
 
@@ -214,8 +158,7 @@ impl FxState {
 	}
 }
 
-fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniforms>, sprite: Sprite, tex_size: Vec2<i32>, pos: Vec2<f32>) {
-	let a = 32.0;
+fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, sprite: Sprite, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
 	let uv = sprite.uv(tex_size);
 	let tex_size = tex_size.map(|c| c as f32);
 	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };
@@ -223,10 +166,10 @@ fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniforms>, sprite: 
 	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 0.0) / tex_size, color: [255, 255, 255, 255] };
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let stamp = shade::d2::Stamp { bottom_left, top_left, top_right, bottom_right };
-	cv.stamp_rect(&stamp, &Rect(pos, pos + Vec2(a, a)));
+	cv.stamp_rect(&stamp, &Rect(pos, pos + Vec2(size, size)));
 }
 
-fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniforms>, n: i32, pos: Vec2<f32>, color: u32) {
+fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
 	if n < 0 {
 		draw_digit(cv, None, pos + (0.0, 0.0), color);
 		draw_digit(cv, None, pos + (17.0, 0.0), color);
@@ -247,7 +190,7 @@ fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniforms>, n: i32, 
 	}
 }
 
-fn draw_digit(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniforms>, digit: Option<char>, pos: Vec2<f32>, color: u32) {
+fn draw_digit(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, digit: Option<char>, pos: Vec2<f32>, color: u32) {
 	let index = match digit {
 		Some('0') => 1,
 		Some('1') => 2,

@@ -39,7 +39,6 @@ pub enum GameEvent {
 	EntityBurn { entity: EntityHandle },
 	EntityTrapped { entity: EntityHandle },
 	PlayerActivity { player: EntityHandle },
-	PlayerHint { player: EntityHandle, pos: Vec2i },
 	PlayerBump { player: EntityHandle },
 	BlockPush { entity: EntityHandle },
 	ItemPickup { entity: EntityHandle, item: ItemPickup },

@@ -1,18 +1,19 @@
 #version 330 core
 
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-layout (location = 2) in vec4 aColor;
+layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec2 a_texcoord;
+layout (location = 2) in vec4 a_color;
 
-out vec4 VertexColor;
-out vec2 TexCoord;
+out vec4 v_color;
+out vec2 v_texcoord;
 
-uniform mat3x2 transform;
-uniform vec4 color;
+uniform mat3x2 u_transform;
+uniform vec4 u_color;
+uniform float u_gamma;
 
 void main()
 {
-	VertexColor = aColor * color;
-	TexCoord = aTexCoord;
-	gl_Position = vec4(transform * vec3(aPos, 1.0), 0.0, 1.0);
+	v_color = pow(a_color, vec4(u_gamma, u_gamma, u_gamma, 1.0)) * u_color;
+	v_texcoord = a_texcoord;
+	gl_Position = vec4(u_transform * vec3(a_pos, 1.0), 0.0, 1.0);
 }

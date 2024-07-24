@@ -59,8 +59,9 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: false,
 	blue_fake: false,
 	recessed_wall: false,
-	pickup: false,
-	creature: false,
+	items: false,
+	chips: false,
+	creatures: false,
 	player: false,
 	thief: false,
 };

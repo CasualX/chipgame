@@ -112,7 +112,6 @@ impl GameState {
 			return;
 		}
 		self.ts = TimeState::Running;
-		self.time += 1;
 
 		if self.field.time > 0 && self.time >= self.field.time * 60 {
 			ps_activity(self, PlayerActivity::OutOfTime);
@@ -151,14 +150,12 @@ impl GameState {
 		// Remove entities marked for removal
 		for ehandle in self.ents.handles() {
 			if self.ents.get(ehandle).map(|ent| ent.flags & EF_REMOVE != 0).unwrap_or(false) {
-				if let Some(ent) = self.ents.remove(ehandle) {
-					self.qt.remove(ehandle, ent.pos);
-					self.events.push(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
-				}
+				self.entity_remove(ehandle);
 			}
 		}
 
 		self.input = *input;
+		self.time += 1;
 	}
 
 	fn get_trap_state(&self, pos: Vec2i) -> TrapState {
@@ -171,6 +168,12 @@ impl GameState {
 		}
 		return TrapState::Closed;
 	}
+
+	pub fn is_show_hint(&self) -> bool {
+		let Some(pl) = self.ents.get(self.ps.ehandle) else { return false };
+		let terrain = self.field.get_terrain(pl.pos);
+		matches!(terrain, Terrain::Hint)
+	}
 }
 
 pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
@@ -182,7 +185,10 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
 		if trapped && ent.flags & EF_TRAPPED == 0 {
 			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+			// Avoid audio spam when the level is initially loaded
+			if s.time != 0 {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+			}
 		}
 		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
 	}

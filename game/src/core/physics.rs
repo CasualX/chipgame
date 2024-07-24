@@ -10,8 +10,9 @@ pub struct SolidFlags {
 	pub exit: bool,
 	pub blue_fake: bool,
 	pub recessed_wall: bool,
-	pub pickup: bool,
-	pub creature: bool,
+	pub items: bool,
+	pub chips: bool,
+	pub creatures: bool,
 	pub player: bool,
 	pub thief: bool,
 }
@@ -72,28 +73,28 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 		let Some(ent) = s.ents.get(ehandle) else { continue };
 		let solid = match ent.kind {
 			EntityKind::Player => flags.player,
-			EntityKind::Chip => flags.pickup,
+			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => true,
 			EntityKind::Block => true,
-			EntityKind::Flippers => flags.pickup,
-			EntityKind::FireBoots => flags.pickup,
-			EntityKind::IceSkates => flags.pickup,
-			EntityKind::SuctionBoots => flags.pickup,
-			EntityKind::BlueKey => flags.pickup,
-			EntityKind::RedKey => flags.pickup,
-			EntityKind::GreenKey => flags.pickup,
-			EntityKind::YellowKey => flags.pickup,
+			EntityKind::Flippers => flags.items,
+			EntityKind::FireBoots => flags.items,
+			EntityKind::IceSkates => flags.items,
+			EntityKind::SuctionBoots => flags.items,
+			EntityKind::BlueKey => flags.items,
+			EntityKind::RedKey => flags.items,
+			EntityKind::GreenKey => flags.items,
+			EntityKind::YellowKey => flags.items,
 			EntityKind::Thief => flags.thief,
 			EntityKind::Bomb => false,
-			EntityKind::Bug => flags.creature,
-			EntityKind::FireBall => flags.creature,
-			EntityKind::PinkBall => flags.creature,
-			EntityKind::Tank => flags.creature,
-			EntityKind::Glider => flags.creature,
-			EntityKind::Teeth => flags.creature,
-			EntityKind::Walker => flags.creature,
-			EntityKind::Blob => flags.creature,
-			EntityKind::Paramecium => flags.creature,
+			EntityKind::Bug => flags.creatures,
+			EntityKind::FireBall => flags.creatures,
+			EntityKind::PinkBall => flags.creatures,
+			EntityKind::Tank => flags.creatures,
+			EntityKind::Glider => flags.creatures,
+			EntityKind::Teeth => flags.creatures,
+			EntityKind::Walker => flags.creatures,
+			EntityKind::Blob => flags.creatures,
+			EntityKind::Paramecium => flags.creatures,
 		};
 		if solid {
 			return false;
@@ -210,7 +211,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 		let solid = match ent.kind {
 			EntityKind::Player => flags.player,
-			EntityKind::Chip => flags.pickup,
+			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => {
 				if is_player && s.ps.chips >= s.field.chips {
 					ent.flags |= EF_REMOVE;
@@ -234,25 +235,25 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 					true
 				}
 			}
-			EntityKind::Flippers => flags.pickup,
-			EntityKind::FireBoots => flags.pickup,
-			EntityKind::IceSkates => flags.pickup,
-			EntityKind::SuctionBoots => flags.pickup,
-			EntityKind::BlueKey => flags.pickup,
-			EntityKind::RedKey => flags.pickup,
-			EntityKind::GreenKey => flags.pickup,
-			EntityKind::YellowKey => flags.pickup,
+			EntityKind::Flippers => flags.items,
+			EntityKind::FireBoots => flags.items,
+			EntityKind::IceSkates => flags.items,
+			EntityKind::SuctionBoots => flags.items,
+			EntityKind::BlueKey => flags.items,
+			EntityKind::RedKey => flags.items,
+			EntityKind::GreenKey => flags.items,
+			EntityKind::YellowKey => flags.items,
 			EntityKind::Thief => flags.thief,
 			EntityKind::Bomb => false,
-			EntityKind::Bug => flags.creature,
-			EntityKind::FireBall => flags.creature,
-			EntityKind::PinkBall => flags.creature,
-			EntityKind::Tank => flags.creature,
-			EntityKind::Glider => flags.creature,
-			EntityKind::Teeth => flags.creature,
-			EntityKind::Walker => flags.creature,
-			EntityKind::Blob => flags.creature,
-			EntityKind::Paramecium => flags.creature,
+			EntityKind::Bug => flags.creatures,
+			EntityKind::FireBall => flags.creatures,
+			EntityKind::PinkBall => flags.creatures,
+			EntityKind::Tank => flags.creatures,
+			EntityKind::Glider => flags.creatures,
+			EntityKind::Teeth => flags.creatures,
+			EntityKind::Walker => flags.creatures,
+			EntityKind::Blob => flags.creatures,
+			EntityKind::Paramecium => flags.creatures,
 		};
 		s.ents.put(ent);
 		if solid {
@@ -286,6 +287,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_time = s.time;
 	ent.pos = new_pos;
 	ent.flags |= EF_HAS_MOVED;
+	ent.flags &= !EF_FORCED_MOVE;
 
 	if is_player {
 		s.ps.steps += 1;
@@ -337,6 +339,7 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::Teleport => if let Some(step_dir) = step_dir { teleport(s, ent, step_dir) } else { false },
 		_ => return false,
 	};
+	ent.flags |= EF_FORCED_MOVE;
 	return true;
 }
 
