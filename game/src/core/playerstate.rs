@@ -65,8 +65,13 @@ pub struct PlayerState {
 	pub fire_boots: bool,
 	pub ice_skates: bool,
 	pub suction_boots: bool,
-
 	pub dev_wtw: bool,
+
+	pub cs_enable: bool,
+	pub cs_wtw: CodeSequenceState,
+	pub cs_giveall: CodeSequenceState,
+	pub cs_inftime: CodeSequenceState,
+	pub cs_win: CodeSequenceState,
 }
 
 impl PlayerState {
@@ -87,15 +92,57 @@ impl PlayerState {
 	}
 }
 
-pub(super) fn ps_update_inbuf(s: &mut GameState, input: &Input) {
-	if !(s.input.a && s.input.b) && input.a && input.b {
-		s.ps.dev_wtw = !s.ps.dev_wtw;
-	}
-
+pub(super) fn ps_input(s: &mut GameState, input: &Input) {
 	s.ps.inbuf.handle(Compass::Left,  input.left,  s.input.left);
 	s.ps.inbuf.handle(Compass::Right, input.right, s.input.right);
 	s.ps.inbuf.handle(Compass::Up,    input.up,    s.input.up);
 	s.ps.inbuf.handle(Compass::Down,  input.down,  s.input.down);
+
+	if s.ps.cs_enable {
+		if input.left && !s.input.left {
+			ps_nextcs(s, Button::Left);
+		}
+		if input.right && !s.input.right {
+			ps_nextcs(s, Button::Right);
+		}
+		if input.up && !s.input.up {
+			ps_nextcs(s, Button::Up);
+		}
+		if input.down && !s.input.down {
+			ps_nextcs(s, Button::Down);
+		}
+		if input.a && !s.input.a {
+			ps_nextcs(s, Button::A);
+		}
+		if input.b && !s.input.b {
+			ps_nextcs(s, Button::B);
+		}
+		if input.start && !s.input.start {
+			ps_nextcs(s, Button::Start);
+		}
+		if input.select && !s.input.select {
+			ps_nextcs(s, Button::Select);
+		}
+	}
+}
+
+fn ps_nextcs(s: &mut GameState, btn: Button) {
+	if s.ps.cs_wtw.next(btn, &CODE_WTW) {
+		s.ps.dev_wtw = !s.ps.dev_wtw;
+	}
+	if s.ps.cs_giveall.next(btn, &CODE_GIVEALL) {
+		s.ps.flippers = true;
+		s.ps.fire_boots = true;
+		s.ps.ice_skates = true;
+		s.ps.suction_boots = true;
+		s.ps.keys = [99; 4];
+	}
+	if s.ps.cs_inftime.next(btn, &CODE_INFTIME) {
+		s.field.time = 0;
+	}
+	if s.ps.cs_win.next(btn, &CODE_WIN) {
+		ps_activity(s, PlayerActivity::Win);
+	}
 }
 
 pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {

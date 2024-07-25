@@ -61,7 +61,8 @@ impl chipgame::fx::IAudioPlayer for AudioPlayer {
 
 fn main() {
 	let app = clap::command!("play")
-		.arg(clap::arg!(-n [n] "Level number to play"));
+		.arg(clap::arg!(-n [n] "Level number to play"))
+		.arg(clap::arg!(--dev "Enable developer mode"));
 	let matches = app.get_matches();
 	let level = if let Some(n) = matches.value_of("n") {
 		n.parse::<i32>().expect("Invalid level number")
@@ -69,6 +70,7 @@ fn main() {
 	else {
 		1
 	};
+	let is_dev = matches.is_present("dev");
 
 	let file_path = format!("data/cc1/level{}.json", level);
 
@@ -176,6 +178,7 @@ fn main() {
 
 	state.init();
 	state.level_index = level;
+	state.gs.ps.cs_enable = is_dev;
 	state.load_level(&fs::read_to_string(&file_path).unwrap());
 	let mut input = chipgame::core::Input::default();
 

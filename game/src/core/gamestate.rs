@@ -120,7 +120,7 @@ impl GameState {
 		}
 
 		input.encode(&mut self.inputs);
-		ps_update_inbuf(self, input);
+		ps_input(self, input);
 
 		// Let entities think
 		let handles = self.ents.handles();
