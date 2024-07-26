@@ -137,13 +137,6 @@ fn main() {
 		wrap_v: shade::TextureWrap::ClampEdge,
 	}, None).unwrap();
 
-	let fonttexture = shade::png::load(&mut g, Some("font"), "data/font.png", &shade::png::TextureProps {
-		filter_min: shade::TextureFilter::Linear,
-		filter_mag: shade::TextureFilter::Linear,
-		wrap_u: shade::TextureWrap::ClampEdge,
-		wrap_v: shade::TextureWrap::ClampEdge,
-	}, None).unwrap();
-
 	// Create the shader
 	let shader = g.shader_create(None).unwrap();
 	if let Err(_) = g.shader_compile(shader, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")) {
@@ -153,14 +146,27 @@ fn main() {
 	if let Err(_) = g.shader_compile(uishader, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")) {
 		panic!("Failed to compile shader: {}", g.shader_compile_log(uishader).unwrap());
 	}
-	let fontshader = g.shader_create(None).unwrap();
-	if let Err(_) = g.shader_compile(fontshader, include_str!("../../data/font.vs.glsl"), include_str!("../../data/font.fs.glsl")) {
-		panic!("Failed to compile shader: {}", g.shader_compile_log(fontshader).unwrap());
-	}
 
 	let mut past_now = time::Instant::now();
 
-	let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
+	let font = {
+		let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
+		let font = Some(font);
+
+		let shader = g.shader_create(None).unwrap();
+		if let Err(_) = g.shader_compile(shader, include_str!("../../data/font.vs.glsl"), include_str!("../../data/font.fs.glsl")) {
+			panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
+		}
+
+		let texture = shade::png::load(&mut g, Some("font"), "data/font.png", &shade::png::TextureProps {
+			filter_min: shade::TextureFilter::Linear,
+			filter_mag: shade::TextureFilter::Linear,
+			wrap_u: shade::TextureWrap::ClampEdge,
+			wrap_v: shade::TextureWrap::ClampEdge,
+		}, None).unwrap();
+
+		shade::d2::FontResource { font, shader, texture }
+	};
 
 	let mut state = chipgame::fx::FxState::default();
 
@@ -171,9 +177,7 @@ fn main() {
 		screen_size: [size.width as i32, size.height as i32].into(),
 		uishader,
 		texdigits,
-		font: Some(font),
-		fontshader,
-		fonttexture,
+		font,
 	};
 
 	state.init();

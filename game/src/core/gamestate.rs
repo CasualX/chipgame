@@ -159,14 +159,17 @@ impl GameState {
 	}
 
 	fn get_trap_state(&self, pos: Vec2i) -> TrapState {
-		if let Some(conn) = self.field.find_conn_by_dest(pos) {
-			for ehandle in self.qt.get(conn.src) {
-				if self.ents.is_valid(ehandle) {
-					return TrapState::Open;
+		let mut state = TrapState::Closed;
+		for conn in &self.field.conns {
+			if conn.dest == pos {
+				for ehandle in self.qt.get(conn.src) {
+					if self.ents.is_valid(ehandle) {
+						state = TrapState::Open;
+					}
 				}
 			}
 		}
-		return TrapState::Closed;
+		return state;
 	}
 
 	pub fn is_show_hint(&self) -> bool {

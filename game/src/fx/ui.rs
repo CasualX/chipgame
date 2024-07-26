@@ -96,14 +96,14 @@ impl FxState {
 
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
 			let mut tbuf = shade::d2::TextBuffer::new();
-			tbuf.shader = self.resources.fontshader;
+			tbuf.shader = self.resources.font.shader;
 			tbuf.viewport = cvmath::Rect::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
 
 			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
 			tbuf.push_uniform(shade::d2::TextUniform {
 				transform,
-				texture: self.resources.fonttexture,
+				texture: self.resources.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
@@ -116,24 +116,24 @@ impl FxState {
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, &self.gs.field.name);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font.font, &self.gs.field.name);
 			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
 			let password = format!("Password: {}", self.gs.field.password);
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, &password);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font.font, &password);
 			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size), &password);
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
 		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
 			if let Some(hint) = &self.gs.field.hint {
 				let mut tbuf = shade::d2::TextBuffer::new();
-				tbuf.shader = self.resources.fontshader;
+				tbuf.shader = self.resources.font.shader;
 				tbuf.viewport = cvmath::Rect::vec(ss);
 				tbuf.blend_mode = shade::BlendMode::Alpha;
 
 				let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
 				tbuf.push_uniform(shade::d2::TextUniform {
 					transform,
-					texture: self.resources.fonttexture,
+					texture: self.resources.font.texture,
 					outline_width_absolute: 0.8,
 					unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 					..Default::default()
