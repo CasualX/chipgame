@@ -123,6 +123,15 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	};
 	ctx.objects.insert(obj);
 }
+pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
+	for obj in ctx.objects.map.values_mut() {
+		if obj.pos.xy().map(|c| (c / 32.0) as i32) == pos {
+			obj.anim = Animation::FadeOut;
+			obj.mover = MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) });
+			obj.unalive_after_anim = true;
+		}
+	}
+}
 
 pub fn create_toggle_floor(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();

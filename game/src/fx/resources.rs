@@ -7,6 +7,7 @@ pub struct Resources {
 	pub shader: shade::Shader,
 	pub screen_size: Vec2<i32>,
 
+	pub colorshader: shade::Shader,
 	pub uishader: shade::Shader,
 	pub texdigits: shade::Texture2D,
 

@@ -17,8 +17,6 @@ fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 
 impl FxState {
 	pub fn render_ui(&self, g: &mut shade::Graphics) {
-		g.begin().unwrap();
-
 		let ss = self.resources.screen_size;
 
 		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
@@ -153,8 +151,6 @@ impl FxState {
 				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 			}
 		}
-
-		g.end().unwrap();
 	}
 }
 

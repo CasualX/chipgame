@@ -58,6 +58,10 @@ fn main() {
 	if let Err(_) = g.shader_compile(shader, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")) {
 		panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
 	}
+	let colorshader = g.shader_create(None).unwrap();
+	if let Err(_) = g.shader_compile(colorshader, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl")) {
+		panic!("Failed to compile shader: {}", g.shader_compile_log(colorshader).unwrap());
+	}
 	let uishader = g.shader_create(None).unwrap();
 	if let Err(_) = g.shader_compile(uishader, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")) {
 		panic!("Failed to compile shader: {}", g.shader_compile_log(uishader).unwrap());
@@ -90,6 +94,7 @@ fn main() {
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
 		screen_size: [size.width as i32, size.height as i32].into(),
+		colorshader,
 		uishader,
 		texdigits,
 		font,

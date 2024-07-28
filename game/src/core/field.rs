@@ -61,7 +61,7 @@ impl Field {
 		let index = (y * self.width + x) as usize;
 		self.terrain.get(index).cloned().unwrap_or(Terrain::Blank)
 	}
-	pub fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
+	pub(super) fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
 		let Vec2i { x, y } = pos;
 		if x < 0 || y < 0 || x >= self.width || y >= self.height {
 			return;
@@ -73,8 +73,5 @@ impl Field {
 	}
 	pub fn find_conn_by_src(&self, pos: Vec2i) -> Option<&Conn> {
 		self.conns.iter().find(|conn| conn.src == pos)
-	}
-	pub fn find_conn_by_dest(&self, pos: Vec2i) -> Option<&Conn> {
-		self.conns.iter().find(|conn| conn.dest == pos)
 	}
 }

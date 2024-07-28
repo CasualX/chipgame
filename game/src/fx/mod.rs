@@ -21,6 +21,7 @@ mod resources;
 pub mod render;
 mod tile;
 mod ui;
+mod menu;
 
 pub use self::audio::*;
 pub use self::camera::*;
@@ -33,5 +34,6 @@ pub use self::fxstate::*;
 pub use self::resources::*;
 pub use self::render::*;
 pub use self::tile::*;
+pub use self::menu::*;
 
 use crate::MusicId;

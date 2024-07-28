@@ -102,7 +102,7 @@ impl EditorState {
 		self.game.tiles = &tiles::TILES_EDIT;
 	}
 	pub fn load_level(&mut self, json: &str) {
-		self.game.load_level(json);
+		self.game.load_level_from_str(json);
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();

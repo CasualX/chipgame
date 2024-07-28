@@ -6,12 +6,14 @@ pub struct FxState {
 	pub time: f32,
 	pub dt: f32,
 	pub gs: core::GameState,
+	pub menu: Option<MainMenu>,
 	pub camera: Camera,
 	pub objects: ObjectMap,
 	pub resources: Resources,
 	pub level_index: i32,
 	pub next_level_load: f32,
 	pub music_enabled: bool,
+	pub hud_enabled: bool,
 	pub tiles: &'static [TileGfx],
 }
 
@@ -20,8 +22,17 @@ impl FxState {
 		self.tiles = &TILES_PLAY;
 		self.level_index = 1;
 		self.music_enabled = true;
+		// self.menu = Some(MainMenu::default());
 	}
-	pub fn load_level(&mut self, json: &str) {
+	pub fn load_level_by_index(&mut self, level_index: i32) -> bool {
+		if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", level_index)) {
+			self.level_index = level_index;
+			self.load_level_from_str(&json);
+			return true;
+		}
+		return false;
+	}
+	pub fn load_level_from_str(&mut self, json: &str) {
 		self.objects.clear();
 		self.gs.load(json);
 		self.sync(None);
@@ -49,18 +60,20 @@ impl FxState {
 			}) };
 			audio.play_music(music);
 		}
-		self.gs.tick(input);
-		self.sync(audio);
 
-		if self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
-			if self.gs.ps.activity == core::PlayerActivity::Win {
-				self.level_index += 1;
-			}
-			if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", self.level_index)) {
-				self.load_level(&json);
+		if let Some(menu) = &mut self.menu {
+			menu.update(input, &self.gs.input);
+			self.gs.input = input.clone();
+		}
+		else {
+			self.gs.tick(input);
+			self.sync(audio);
+
+			if self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
+				let level_index = self.level_index + if self.gs.ps.activity == core::PlayerActivity::Win { 1 } else { 0 };
+				self.load_level_by_index(level_index);
 			}
 		}
-
 	}
 	pub fn sync(&mut self, mut audio: Option<&mut dyn IAudioPlayer>) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
@@ -76,7 +89,7 @@ impl FxState {
 				&core::GameEvent::PlayerActivity { player } => player_activity(self, player),
 				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
-				&core::GameEvent::TerrainUpdated { pos, old, new: _ } => {
+				&core::GameEvent::TerrainUpdated { pos, old, new } => {
 					let mut tw = false;
 					match old {
 						core::Terrain::BlueFake => blue_wall_cleared(self, pos),
@@ -84,10 +97,15 @@ impl FxState {
 						core::Terrain::RecessedWall => recessed_wall_raised(self, pos),
 						core::Terrain::ToggleFloor => tw = true,
 						core::Terrain::ToggleWall => tw = true,
+						core::Terrain::Fire => remove_fire(self, pos),
 						_ => {}
 					}
 					if tw {
 						toggle_walls(self);
+					}
+					match new {
+						core::Terrain::Fire => create_fire(self, pos),
+						_ => {}
 					}
 				},
 				&core::GameEvent::GameWin { .. } => game_win(self),
@@ -130,6 +148,14 @@ impl FxState {
 		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: self.resources.tileset, texture_size: self.resources.tileset_size.map(|c| c as f32).into() });
 		render::field(&mut cv, self, time);
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+
+		if self.hud_enabled {
+			self.render_ui(g);
+
+			if let Some(menu) = &mut self.menu {
+				menu.draw(g, &self.resources);
+			}
+		}
 
 		g.end().unwrap();
 

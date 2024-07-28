@@ -6,7 +6,8 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 			s.sample();
 		}
 		s.tool_pos = Some(s.cursor_pos);
-		s.game.gs.field.set_terrain(s.cursor_pos, s.selected_terrain);
+		s.game.gs.set_terrain(s.cursor_pos, s.selected_terrain);
+		s.game.sync(None);
 	}
 }
 
@@ -18,6 +19,7 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 
 pub fn think(s: &mut EditorState) {
 	if s.input.left_click {
-		s.game.gs.field.set_terrain(s.cursor_pos, s.selected_terrain);
+		s.game.gs.set_terrain(s.cursor_pos, s.selected_terrain);
+		s.game.sync(None);
 	}
 }
