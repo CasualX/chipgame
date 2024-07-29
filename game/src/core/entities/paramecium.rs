@@ -26,7 +26,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::Water) {
 		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		ent.flags = EF_REMOVE;
+		ent.flags |= EF_REMOVE;
+		return;
+	}
+	if matches!(terrain, Terrain::Fire) {
+		s.events.push(GameEvent::EntityBurn { entity: ent.handle });
+		ent.flags |= EF_REMOVE;
 		return;
 	}
 
@@ -53,13 +58,13 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 const FLAGS: SolidFlags = SolidFlags {
 	gravel: true,
-	fire: true,
+	fire: false,
 	dirt: true,
 	water: false,
 	exit: true,
 	blue_fake: true,
 	recessed_wall: true,
-	items: true,
+	items: false,
 	chips: true,
 	creatures: true,
 	player: false,

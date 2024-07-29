@@ -173,9 +173,9 @@ impl GameState {
 	}
 
 	pub fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
-		let old = self.field.get_terrain(pos);
-		self.field.set_terrain(pos, terrain);
-		self.events.push(GameEvent::TerrainUpdated { pos, old, new: terrain });
+		if let Some(old) = self.field.set_terrain(pos, terrain) {
+			self.events.push(GameEvent::TerrainUpdated { pos, old, new: terrain });
+		}
 	}
 
 	pub fn is_show_hint(&self) -> bool {

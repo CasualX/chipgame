@@ -54,7 +54,7 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: true,
 	blue_fake: true,
 	recessed_wall: true,
-	items: true,
+	items: false,
 	chips: true,
 	creatures: true,
 	player: false,

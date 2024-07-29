@@ -94,7 +94,6 @@ impl FxState {
 					match old {
 						core::Terrain::BlueFake => blue_wall_cleared(self, pos),
 						core::Terrain::HiddenWall => hidden_wall_bumped(self, pos),
-						core::Terrain::RecessedWall => recessed_wall_raised(self, pos),
 						core::Terrain::ToggleFloor => tw = true,
 						core::Terrain::ToggleWall => tw = true,
 						core::Terrain::Fire => remove_fire(self, pos),
@@ -105,6 +104,7 @@ impl FxState {
 					}
 					match new {
 						core::Terrain::Fire => create_fire(self, pos),
+						core::Terrain::RaisedWall => recessed_wall_raised(self, pos),
 						_ => {}
 					}
 				},

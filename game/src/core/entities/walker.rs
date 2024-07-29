@@ -29,6 +29,11 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		ent.flags |= EF_REMOVE;
 		return;
 	}
+	if matches!(terrain, Terrain::Fire) {
+		s.events.push(GameEvent::EntityBurn { entity: ent.handle });
+		ent.flags |= EF_REMOVE;
+		return;
+	}
 
 	if s.time >= ent.step_time + ent.step_spd {
 		if try_terrain_move(s, ent, ent.step_dir) { }
@@ -68,7 +73,7 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: true,
 	blue_fake: true,
 	recessed_wall: true,
-	items: true,
+	items: false,
 	chips: true,
 	creatures: true,
 	player: false,
