@@ -195,7 +195,7 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	// ent.step_spd = ent.base_spd;
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
-	s.ps.bumps += 1;
+	s.ps.bonks += 1;
 	s.events.push(GameEvent::PlayerBump { player: ent.handle });
 	s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.push(GameEvent::EntityTurn { entity: ent.handle });

@@ -2,6 +2,7 @@
 pub mod core;
 pub mod fx;
 pub mod editor;
+pub mod play;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]

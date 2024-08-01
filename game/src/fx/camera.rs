@@ -18,8 +18,8 @@ pub struct Camera {
 }
 
 impl FxState {
-	pub fn set_game_camera(&mut self) {
-		let size = self.resources.screen_size;
+	pub fn set_game_camera(&mut self, resx: &Resources) {
+		let size = resx.screen_size;
 
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
 			self.camera.eye_offset = Vec3::new(0.0, 8.0 * 32.0, 400.0);

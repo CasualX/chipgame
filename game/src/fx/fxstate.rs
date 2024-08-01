@@ -6,10 +6,9 @@ pub struct FxState {
 	pub time: f32,
 	pub dt: f32,
 	pub gs: core::GameState,
-	pub menu: Option<MainMenu>,
+	pub menu: Option<GameWinMenu>,
 	pub camera: Camera,
 	pub objects: ObjectMap,
-	pub resources: Resources,
 	pub level_index: i32,
 	pub next_level_load: f32,
 	pub music_enabled: bool,
@@ -22,7 +21,6 @@ impl FxState {
 		self.tiles = &TILES_PLAY;
 		self.level_index = 1;
 		self.music_enabled = true;
-		// self.menu = Some(MainMenu::default());
 	}
 	pub fn load_level_by_index(&mut self, level_index: i32) -> bool {
 		if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", level_index)) {
@@ -51,7 +49,7 @@ impl FxState {
 			}
 		}
 	}
-	pub fn update(&mut self, input: &core::Input, mut audio: Option<&mut dyn IAudioPlayer>) {
+	pub fn think(&mut self, input: &core::Input, mut audio: Option<&mut dyn IAudioPlayer>) {
 		if let Some(audio) = &mut audio {
 			let music = if !self.music_enabled { None } else { Some(match self.level_index.wrapping_sub(1) % 2 {
 				0 => MusicId::Chip1,
@@ -62,16 +60,28 @@ impl FxState {
 		}
 
 		if let Some(menu) = &mut self.menu {
-			menu.update(input, &self.gs.input);
+			menu.think(input);
 			self.gs.input = input.clone();
 		}
 		else {
 			self.gs.tick(input);
 			self.sync(audio);
 
-			if self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
-				let level_index = self.level_index + if self.gs.ps.activity == core::PlayerActivity::Win { 1 } else { 0 };
-				self.load_level_by_index(level_index);
+			if self.menu.is_none() && self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
+				// let level_index = self.level_index + if self.gs.ps.activity == core::PlayerActivity::Win { 1 } else { 0 };
+				// self.load_level_by_index(level_index);
+				self.menu = Some(GameWinMenu {
+					attempts: self.gs.ps.attempts,
+					selected: 0,
+					level_index: self.level_index,
+					level_name: self.gs.field.name.clone(),
+					time: self.gs.time,
+					steps: self.gs.ps.steps,
+					bonks: self.gs.ps.bonks,
+					input: Default::default(),
+					events: Vec::new(),
+				});
+				self.hud_enabled = false;
 			}
 		}
 	}
@@ -115,12 +125,12 @@ impl FxState {
 			}
 		}
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		self.ntime += 1;
 		let time = self.ntime as f32 / 60.0;
 		self.time = time;
 		self.dt = 1.0 / 60.0;
-		let size = self.resources.screen_size;
+		let size = resx.screen_size;
 
 		for handle in self.objects.map.keys().cloned().collect::<Vec<_>>() {
 			let Some(mut obj) = self.objects.remove(handle) else { continue };
@@ -138,23 +148,24 @@ impl FxState {
 			..Default::default()
 		}).unwrap();
 
-		self.set_game_camera();
+		self.set_game_camera(resx);
 
 		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
-		cv.shader = self.resources.shader;
+		cv.shader = resx.shader;
 		cv.depth_test = Some(shade::DepthTest::Less);
 		cv.viewport = cvmath::Rect::vec(size);
 		// cv.cull_mode = Some(shade::CullMode::CW);
-		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: self.resources.tileset, texture_size: self.resources.tileset_size.map(|c| c as f32).into() });
+		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
 		render::field(&mut cv, self, time);
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 
 		if self.hud_enabled {
-			self.render_ui(g);
+			self.render_ui(g, resx);
 
-			if let Some(menu) = &mut self.menu {
-				menu.draw(g, &self.resources);
-			}
+		}
+
+		if let Some(menu) = &mut self.menu {
+			menu.draw(g, resx);
 		}
 
 		g.end().unwrap();

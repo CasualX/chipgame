@@ -97,8 +97,7 @@ pub struct EditorState {
 }
 
 impl EditorState {
-	pub fn init(&mut self, resources: fx::Resources) {
-		self.game.resources = resources;
+	pub fn init(&mut self) {
 		self.game.tiles = &tiles::TILES_EDIT;
 	}
 	pub fn load_level(&mut self, json: &str) {
@@ -187,8 +186,7 @@ impl EditorState {
 	pub fn key_down(&mut self, pressed: bool) {
 		self.input.key_down = pressed;
 	}
-	pub fn render(&mut self, g: &mut shade::Graphics) {
-
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
 		if self.input.key_left {
 			self.game.camera.target.x -= 5.0;
 		}
@@ -216,16 +214,16 @@ impl EditorState {
 		self.game.camera.eye_offset = Vec3::<f32>(0.0, 8.0 * 32.0, 400.0) * 2.0;
 		self.game.camera.object_h = None;
 
-		self.game.draw(g);
+		self.game.draw(g, resx);
 
 		g.begin().unwrap();
 
 		let p = self.mouse_pos; {
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = self.game.resources.shader;
+			cv.shader = resx.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = cvmath::Rect::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
+			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -257,10 +255,10 @@ impl EditorState {
 
 		{
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = self.game.resources.shader;
+			cv.shader = resx.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = cvmath::Rect::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: self.game.resources.tileset, texture_size: self.game.resources.tileset_size.map(|c| c as f32).into() });
+			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
 
 			struct ToVertex {
 				color: [u8; 4],

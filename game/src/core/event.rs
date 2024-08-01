@@ -27,7 +27,7 @@ pub enum KeyColor {
 }
 
 /// Game events.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum GameEvent {
 	EntityCreated { entity: EntityHandle, kind: EntityKind },
 	EntityRemoved { entity: EntityHandle, kind: EntityKind },

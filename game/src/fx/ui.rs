@@ -3,8 +3,8 @@ use super::*;
 mod v;
 mod u;
 
-use self::v::UiVertex;
-use self::u::UiUniform;
+pub use self::v::UiVertex;
+pub use self::u::UiUniform;
 
 fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
@@ -16,11 +16,11 @@ fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 }
 
 impl FxState {
-	pub fn render_ui(&self, g: &mut shade::Graphics) {
-		let ss = self.resources.screen_size;
+	pub fn render_ui(&self, g: &mut shade::Graphics, resx: &Resources) {
+		let ss = resx.screen_size;
 
 		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
-		cv.shader = self.resources.uishader;
+		cv.shader = resx.uishader;
 		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.viewport = Bounds::vec(ss);
 
@@ -28,7 +28,7 @@ impl FxState {
 
 		cv.push_uniform(ui::UiUniform {
 			transform,
-			texture: self.resources.texdigits,
+			texture: resx.texdigits,
 			..Default::default()
 		});
 
@@ -44,7 +44,7 @@ impl FxState {
 
 		cv.push_uniform_f(|u| {
 			ui::UiUniform {
-				texture: self.resources.tileset,
+				texture: resx.tileset,
 				..*u
 			}
 		});
@@ -52,34 +52,34 @@ impl FxState {
 		let ref gs = self.gs;
 
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(&mut cv, Sprite::BlueKey, self.resources.tileset_size, Vec2(a * 0.0, 0.0), a);
+			draw_sprite(&mut cv, Sprite::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(&mut cv, Sprite::RedKey, self.resources.tileset_size, Vec2(a * 1.0, 0.0), a);
+			draw_sprite(&mut cv, Sprite::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(&mut cv, Sprite::GreenKey, self.resources.tileset_size, Vec2(a * 2.0, 0.0), a);
+			draw_sprite(&mut cv, Sprite::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(&mut cv, Sprite::YellowKey, self.resources.tileset_size, Vec2(a * 3.0, 0.0), a);
+			draw_sprite(&mut cv, Sprite::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
 		}
 
 		if gs.ps.flippers {
-			draw_sprite(&mut cv, Sprite::PowerFlippers, self.resources.tileset_size, Vec2(a * 0.0, a), a);
+			draw_sprite(&mut cv, Sprite::PowerFlippers, resx.tileset_size, Vec2(a * 0.0, a), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(&mut cv, Sprite::PowerFireBoots, self.resources.tileset_size, Vec2(a * 1.0, a), a);
+			draw_sprite(&mut cv, Sprite::PowerFireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(&mut cv, Sprite::PowerIceSkates, self.resources.tileset_size, Vec2(a * 2.0, a), a);
+			draw_sprite(&mut cv, Sprite::PowerIceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(&mut cv, Sprite::PowerSuctionBoots, self.resources.tileset_size, Vec2(a * 3.0, a), a);
+			draw_sprite(&mut cv, Sprite::PowerSuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
 		}
 
 		cv.push_uniform_f(|u| {
 			ui::UiUniform {
-				texture: self.resources.texdigits,
+				texture: resx.texdigits,
 				..*u
 			}
 		});
@@ -94,14 +94,14 @@ impl FxState {
 
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
 			let mut tbuf = shade::d2::TextBuffer::new();
-			tbuf.shader = self.resources.font.shader;
+			tbuf.shader = resx.font.shader;
 			tbuf.viewport = cvmath::Rect::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
 
 			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
 			tbuf.push_uniform(shade::d2::TextUniform {
 				transform,
-				texture: self.resources.font.texture,
+				texture: resx.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
@@ -114,24 +114,24 @@ impl FxState {
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font.font, &self.gs.field.name);
-			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);
+			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
 			let password = format!("Password: {}", self.gs.field.password);
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font.font, &password);
-			tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size), &password);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
+			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size), &password);
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
 		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
 			if let Some(hint) = &self.gs.field.hint {
 				let mut tbuf = shade::d2::TextBuffer::new();
-				tbuf.shader = self.resources.font.shader;
+				tbuf.shader = resx.font.shader;
 				tbuf.viewport = cvmath::Rect::vec(ss);
 				tbuf.blend_mode = shade::BlendMode::Alpha;
 
 				let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
 				tbuf.push_uniform(shade::d2::TextUniform {
 					transform,
-					texture: self.resources.font.texture,
+					texture: resx.font.texture,
 					outline_width_absolute: 0.8,
 					unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 					..Default::default()
@@ -145,9 +145,9 @@ impl FxState {
 					..Default::default()
 				};
 				let hint = hint.replace(". ", ".\n");
-				tbuf.text_box(&self.resources.font, &scribe, &Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
-				// let width = scribe.text_width(&mut {Vec2::ZERO}, &self.resources.font, hint);
-				// tbuf.text_write(&self.resources.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
+				tbuf.text_box(&resx.font, &scribe, &Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
+				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
+				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
 				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 			}
 		}

@@ -88,8 +88,7 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	let mut editor = editor::EditorState::default();
-	editor.init(chipgame::fx::Resources {
+	let mut resx = chipgame::fx::Resources {
 		tileset,
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
@@ -98,7 +97,10 @@ fn main() {
 		uishader,
 		texdigits,
 		font,
-	});
+	};
+
+	let mut editor = editor::EditorState::default();
+	editor.init();
 	editor.load_level(&fs::read_to_string(&file_path).unwrap());
 
 	// Main loop
@@ -168,8 +170,8 @@ fn main() {
 			}
 		});
 
-		editor.game.resources.screen_size = [size.width as i32, size.height as i32].into();
-		editor.render(&mut g);
+		resx.screen_size = [size.width as i32, size.height as i32].into();
+		editor.draw(&mut g, &resx);
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

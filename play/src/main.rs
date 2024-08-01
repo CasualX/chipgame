@@ -172,9 +172,7 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	let mut state = chipgame::fx::FxState::default();
-
-	state.resources = chipgame::fx::Resources {
+	let mut resx = chipgame::fx::Resources {
 		tileset,
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
@@ -184,6 +182,7 @@ fn main() {
 		texdigits,
 		font,
 	};
+	let mut state = chipgame::fx::FxState::default();
 
 	state.init();
 	state.level_index = level;
@@ -234,9 +233,9 @@ fn main() {
 			}
 		});
 
-		state.resources.screen_size = [size.width as i32, size.height as i32].into();
-		state.update(&input, Some(&mut ap));
-		state.draw(&mut g);
+		resx.screen_size = [size.width as i32, size.height as i32].into();
+		state.think(&input, Some(&mut ap));
+		state.draw(&mut g, &resx);
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

@@ -54,8 +54,10 @@ pub struct PlayerState {
 	pub forced_move: bool,
 	/// Total steps taken (for high score).
 	pub steps: i32,
-	/// Total bumps into walls.
-	pub bumps: i32,
+	/// Total bonks into walls.
+	pub bonks: i32,
+	/// Number of attempts (for high score).
+	pub attempts: i32,
 	/// Total chips collected.
 	pub chips: i32,
 	/// Keys collected.
@@ -81,7 +83,8 @@ impl PlayerState {
 		self.activity = PlayerActivity::Walking;
 		self.forced_move = false;
 		self.steps = 0;
-		self.bumps = 0;
+		self.bonks = 0;
+		self.attempts += 1;
 		self.chips = 0;
 		self.keys = [0; 4];
 		self.flippers = false;
