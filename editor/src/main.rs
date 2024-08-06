@@ -171,7 +171,10 @@ fn main() {
 		});
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
+
+		g.begin().unwrap();
 		editor.draw(&mut g, &resx);
+		g.end().unwrap();
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

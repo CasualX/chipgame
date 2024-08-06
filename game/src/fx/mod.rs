@@ -9,8 +9,8 @@ use cvmath::*;
 
 use crate::core;
 
-mod audio;
 mod camera;
+mod event;
 mod model;
 mod handlers;
 mod object;
@@ -20,11 +20,10 @@ mod fxstate;
 mod resources;
 pub mod render;
 mod tile;
-mod ui;
-mod menu;
+mod hud;
 
-pub use self::audio::*;
 pub use self::camera::*;
+pub use self::event::*;
 pub use self::model::*;
 pub use self::handlers::*;
 pub use self::object::*;
@@ -34,6 +33,5 @@ pub use self::fxstate::*;
 pub use self::resources::*;
 pub use self::render::*;
 pub use self::tile::*;
-pub use self::menu::*;
 
 use crate::MusicId;

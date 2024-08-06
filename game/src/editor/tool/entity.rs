@@ -23,7 +23,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 				if let Some(args) = s.selected_args {
 					s.selected_ent = s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
 				}
-				s.game.sync(None);
+				s.game.sync();
 			}
 		}
 	}
@@ -33,7 +33,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 			if ent.pos != cursor_pos {
 				if let Some(args) = s.game.gs.entity_remove(s.selected_ent) {
 					s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
-					s.game.sync(None);
+					s.game.sync();
 				}
 			}
 		}
@@ -69,7 +69,7 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 					s.selected_args = Some(new_args);
 					s.selected_ent = s.game.gs.entity_create(&new_args);
 					println!("Rotated: {:?} at {}", kind, pos);
-					s.game.sync(None);
+					s.game.sync();
 				}
 			}
 		}
@@ -82,7 +82,7 @@ pub fn delete(s: &mut EditorState, pressed: bool) {
 			let kind = ent.kind;
 			let pos = ent.pos;
 			s.game.gs.entity_remove(s.selected_ent);
-			s.game.sync(None);
+			s.game.sync();
 			println!("Deleted: {:?} at {}", kind, pos);
 		}
 		s.selected_ent = core::EntityHandle::INVALID;

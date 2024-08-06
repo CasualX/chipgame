@@ -187,6 +187,14 @@ impl EditorState {
 		self.input.key_down = pressed;
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
+		// Clear the screen
+		g.clear(&shade::ClearArgs {
+			surface: shade::Surface::BACK_BUFFER,
+			color: Some(cvmath::Vec4(0.2, 0.2, 0.5, 1.0)),
+			depth: Some(1.0),
+			..Default::default()
+		}).unwrap();
+
 		if self.input.key_left {
 			self.game.camera.target.x -= 5.0;
 		}
@@ -215,8 +223,6 @@ impl EditorState {
 		self.game.camera.object_h = None;
 
 		self.game.draw(g, resx);
-
-		g.begin().unwrap();
 
 		let p = self.mouse_pos; {
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
@@ -284,8 +290,6 @@ impl EditorState {
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
-
-		g.end().unwrap();
 	}
 
 	pub fn tool_terrain(&mut self, pressed: bool) {

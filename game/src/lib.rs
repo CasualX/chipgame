@@ -1,7 +1,8 @@
 
 pub mod core;
-pub mod fx;
 pub mod editor;
+pub mod fx;
+pub mod menu;
 pub mod play;
 
 #[derive(serde::Serialize, serde::Deserialize)]

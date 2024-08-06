@@ -6,14 +6,15 @@ pub struct FxState {
 	pub time: f32,
 	pub dt: f32,
 	pub gs: core::GameState,
-	pub menu: Option<GameWinMenu>,
 	pub camera: Camera,
 	pub objects: ObjectMap,
 	pub level_index: i32,
 	pub next_level_load: f32,
 	pub music_enabled: bool,
+	pub music: Option<MusicId>,
 	pub hud_enabled: bool,
 	pub tiles: &'static [TileGfx],
+	pub events: Vec<FxEvent>,
 }
 
 impl FxState {
@@ -33,7 +34,7 @@ impl FxState {
 	pub fn load_level_from_str(&mut self, json: &str) {
 		self.objects.clear();
 		self.gs.load(json);
-		self.sync(None);
+		self.sync();
 		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
 
 		for y in 0..self.gs.field.height {
@@ -49,44 +50,45 @@ impl FxState {
 			}
 		}
 	}
-	pub fn think(&mut self, input: &core::Input, mut audio: Option<&mut dyn IAudioPlayer>) {
-		if let Some(audio) = &mut audio {
-			let music = if !self.music_enabled { None } else { Some(match self.level_index.wrapping_sub(1) % 2 {
+	pub fn pause(&mut self) {
+		if matches!(self.gs.ts, core::TimeState::Running) {
+			self.gs.ts = core::TimeState::Paused;
+			self.events.push(FxEvent::Pause);
+		}
+	}
+	pub fn unpause(&mut self) {
+		if matches!(self.gs.ts, core::TimeState::Paused) {
+			self.gs.ts = core::TimeState::Running;
+			self.events.push(FxEvent::Unpause);
+		}
+	}
+	pub fn think(&mut self, input: &core::Input) {
+		let music = if self.music_enabled {
+			let music = match self.level_index.wrapping_sub(1) % 2 {
 				0 => MusicId::Chip1,
 				_ => MusicId::Chip2,
 				// _ => MusicId::Canyon,
-			}) };
-			audio.play_music(music);
-		}
-
-		if let Some(menu) = &mut self.menu {
-			menu.think(input);
-			self.gs.input = input.clone();
+			};
+			Some(music)
 		}
 		else {
-			self.gs.tick(input);
-			self.sync(audio);
-
-			if self.menu.is_none() && self.gs.ps.activity.is_game_over() && self.time >= self.next_level_load {
-				// let level_index = self.level_index + if self.gs.ps.activity == core::PlayerActivity::Win { 1 } else { 0 };
-				// self.load_level_by_index(level_index);
-				self.menu = Some(GameWinMenu {
-					attempts: self.gs.ps.attempts,
-					selected: 0,
-					level_index: self.level_index,
-					level_name: self.gs.field.name.clone(),
-					time: self.gs.time,
-					steps: self.gs.ps.steps,
-					bonks: self.gs.ps.bonks,
-					input: Default::default(),
-					events: Vec::new(),
-				});
-				self.hud_enabled = false;
-			}
+			None
+		};
+		if music != self.music {
+			self.music = music;
+			self.events.push(FxEvent::PlayMusic { music });
 		}
+
+		if input.start && !self.gs.input.start {
+			self.pause();
+		}
+
+		self.gs.tick(input);
+		self.sync();
 	}
-	pub fn sync(&mut self, mut audio: Option<&mut dyn IAudioPlayer>) {
+	pub fn sync(&mut self) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
+
 			println!("GameEvent: {:?}", ev);
 			match ev {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
@@ -120,7 +122,7 @@ impl FxState {
 				},
 				&core::GameEvent::GameWin { .. } => game_win(self),
 				&core::GameEvent::GameOver { .. } => game_win(self),
-				&core::GameEvent::SoundFx { sound } => if let Some(ref mut audio) = audio { audio.play(sound) },
+				&core::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
 				_ => {}
 			}
 		}
@@ -138,16 +140,6 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		g.begin().unwrap();
-
-		// Clear the screen
-		g.clear(&shade::ClearArgs {
-			surface: shade::Surface::BACK_BUFFER,
-			color: Some(cvmath::Vec4(0.2, 0.2, 0.5, 1.0)),
-			depth: Some(1.0),
-			..Default::default()
-		}).unwrap();
-
 		self.set_game_camera(resx);
 
 		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
@@ -161,14 +153,7 @@ impl FxState {
 
 		if self.hud_enabled {
 			self.render_ui(g, resx);
-
 		}
-
-		if let Some(menu) = &mut self.menu {
-			menu.draw(g, resx);
-		}
-
-		g.end().unwrap();
 
 		self.objects.map.retain(|_, obj| obj.live);
 	}

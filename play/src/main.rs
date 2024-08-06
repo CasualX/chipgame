@@ -1,4 +1,4 @@
-use std::{fs, thread, time};
+use std::{fs, mem, thread, time};
 use std::collections::HashMap;
 
 #[cfg(windows)]
@@ -36,7 +36,7 @@ impl AudioPlayer {
 		self.music.insert(music, wav);
 	}
 }
-impl chipgame::fx::IAudioPlayer for AudioPlayer {
+impl AudioPlayer {
 	fn play(&mut self, sound: chipgame::core::SoundFx) {
 		if let Some(wav) = self.sfx.get(&sound) {
 			self.sl.play(wav);
@@ -65,14 +65,12 @@ fn main() {
 		.arg(clap::arg!(--dev "Enable developer mode"));
 	let matches = app.get_matches();
 	let level = if let Some(n) = matches.value_of("n") {
-		n.parse::<i32>().expect("Invalid level number")
+		Some(n.parse::<i32>().expect("Invalid level number"))
 	}
 	else {
-		1
+		None
 	};
 	let is_dev = matches.is_present("dev");
-
-	let file_path = format!("data/cc1/level{}.json", level);
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
 	let mut ap = AudioPlayer {
@@ -182,13 +180,18 @@ fn main() {
 		texdigits,
 		font,
 	};
-	let mut state = chipgame::fx::FxState::default();
+	let mut state = chipgame::play::PlayState::default();
+	state.launch();
 
-	state.init();
-	state.level_index = level;
-	state.gs.ps.cs_enable = is_dev;
-	state.load_level_from_str(&fs::read_to_string(&file_path).unwrap());
-	state.hud_enabled = true;
+	if let Some(level) = level {
+		state.load_level(level);
+	}
+
+	// state.init();
+	// state.level_index = level;
+	// state.gs.ps.cs_enable = is_dev;
+	// state.load_level_from_str(&fs::read_to_string(&file_path).unwrap());
+	// state.hud_enabled = true;
 	let mut input = chipgame::core::Input::default();
 
 	// Main loop
@@ -221,7 +224,9 @@ fn main() {
 						Some(winit::event::VirtualKeyCode::A) => input.a = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::B) => input.b = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) {
-							state.music_enabled = !state.music_enabled;
+							if let Some(fx) = &mut state.fx {
+								fx.music_enabled = !fx.music_enabled;
+							}
 						},
 						_ => (),
 					}
@@ -234,8 +239,18 @@ fn main() {
 		});
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
-		state.think(&input, Some(&mut ap));
+		state.think(&input);
+
+		g.begin().unwrap();
 		state.draw(&mut g, &resx);
+		g.end().unwrap();
+
+		for evt in &mem::replace(&mut state.events, Vec::new()) {
+			match evt {
+				&chipgame::play::PlayEvent::PlaySound { sound } => ap.play(sound),
+				&chipgame::play::PlayEvent::PlayMusic { music } => ap.play_music(music),
+			}
+		}
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

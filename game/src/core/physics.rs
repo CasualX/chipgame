@@ -120,6 +120,11 @@ fn try_unlock(s: &mut GameState, pos: Vec2i, key: KeyColor) -> bool {
 
 /// Tries to move the entity in the given step direction.
 pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
+	// Template entities cannot be moved
+	if ent.flags & EF_TEMPLATE != 0 {
+		return false;
+	}
+
 	let is_player = matches!(ent.kind, EntityKind::Player);
 	let dev_wtw = is_player && s.ps.dev_wtw;
 
