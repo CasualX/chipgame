@@ -1,6 +1,6 @@
 /*!
-Core game logic.
- */
+Core chipgame gameplay code.
+*/
 
 use std::cmp;
 use cvmath::Vec2i;

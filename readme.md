@@ -4,11 +4,19 @@ Chip's Challenge Remake
 Organization
 ------------
 
-### Game engine: [./game](./game)
+### Game: [./game](./game)
 
-Platform independent gameplay implementation.
+Platform independent game implementation.
 
-### Game data: [./data](./data)
+Includes menus, game logic, rendering, audio, input handling, etc.
+
+### Gameplay: [./gameplay](./gameplay)
+
+Platform independent core gameplay implementation.
+
+Just the game logic, to simulate the game without rendering or audio.
+
+### Data: [./data](./data)
 
 Game data files.
 

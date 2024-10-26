@@ -1,5 +1,6 @@
 use super::*;
 
+/// Time state.
 #[derive(Default)]
 pub enum TimeState {
 	/// Wait for player input to start the game.
@@ -104,6 +105,7 @@ impl GameState {
 
 impl GameState {
 	pub fn tick(&mut self, input: &Input) {
+		// Wait for the player to press any direction key to start the game
 		if !match self.ts {
 			TimeState::Paused => false,
 			TimeState::Waiting => input.any_arrows(),
@@ -113,18 +115,19 @@ impl GameState {
 		}
 		self.ts = TimeState::Running;
 
+		// Check if the player has run out of time
 		if self.field.time > 0 && self.time >= self.field.time * 60 {
 			ps_activity(self, PlayerActivity::OutOfTime);
 			self.events.push(GameEvent::GameOver { player: self.ps.ehandle });
 			return;
 		}
 
+		// Handle player input
 		input.encode(&mut self.inputs);
 		ps_input(self, input);
 
 		// Let entities think
-		let handles = self.ents.handles();
-		for ehandle in handles.clone() {
+		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
 				if !matches!(ent.kind, EntityKind::Player) {
 					(ent.data.think)(self, &mut ent);
@@ -140,7 +143,7 @@ impl GameState {
 		}
 
 		// Handle entity-terrain interactions
-		for ehandle in handles.clone() {
+		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
 				interact_terrain(self, &mut ent);
 				self.ents.put(ent);
