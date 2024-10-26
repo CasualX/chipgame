@@ -106,7 +106,7 @@ impl GameState {
 	pub fn tick(&mut self, input: &Input) {
 		if !match self.ts {
 			TimeState::Paused => false,
-			TimeState::Waiting => input.any(),
+			TimeState::Waiting => input.any_arrows(),
 			TimeState::Running => true,
 		} {
 			return;

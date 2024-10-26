@@ -3,12 +3,13 @@ use super::*;
 #[derive(Default)]
 pub struct PauseMenu {
 	selected: u8,
-	pub events: Vec<MenuEvent>,
 }
 
 impl PauseMenu {
-	pub fn think(&mut self, input: &core::Input) {
-
+	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		if input.start.is_pressed() {
+			events.push(MenuEvent::Resume);
+		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		darken(g, resx, 128);

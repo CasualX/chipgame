@@ -16,8 +16,8 @@ pub struct Input {
 }
 
 impl Input {
-	pub fn any(&self) -> bool {
-		self.up | self.left | self.down | self.right | self.a | self.b | self.start | self.select
+	pub fn any_arrows(&self) -> bool {
+		self.up | self.left | self.down | self.right
 	}
 
 	pub fn encode(&self, buf: &mut Vec<u8>) {

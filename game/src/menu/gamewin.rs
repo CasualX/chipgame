@@ -9,34 +9,31 @@ pub struct GameWinMenu {
 	pub time: i32,
 	pub steps: i32,
 	pub bonks: i32,
-	pub input: core::Input,
-	pub events: Vec<MenuEvent>,
 }
 
 impl GameWinMenu {
 	const ITEMS: [&'static str; 3] = ["Next level", "Retry", "Main menu"];
-	pub fn think(&mut self, input: &core::Input) {
-		if input.up && !self.input.up {
+	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		if input.up.is_pressed() {
 			if self.selected > 0 {
 				self.selected -= 1;
-				self.events.push(MenuEvent::CursorMove);
+				// events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.down && !self.input.down {
+		if input.down.is_pressed() {
 			if self.selected < Self::ITEMS.len() as u8 - 1 {
 				self.selected += 1;
-				self.events.push(MenuEvent::CursorMove);
+				// events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a && !self.input.a || input.start && !self.input.start {
+		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::NextLevel,
 				1 => MenuEvent::Retry,
 				_ => MenuEvent::BackToMainMenu,
 			};
-			self.events.push(evt);
+			events.push(evt);
 		}
-		self.input = *input;
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		darken(g, resx, 128);

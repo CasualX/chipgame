@@ -35,3 +35,4 @@ pub use self::render::*;
 pub use self::tile::*;
 
 use crate::MusicId;
+use crate::menu::Input;

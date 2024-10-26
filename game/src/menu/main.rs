@@ -3,20 +3,18 @@ use super::*;
 #[derive(Default)]
 pub struct MainMenu {
 	pub selected: u8,
-	pub input: core::Input,
-	pub events: Vec<MenuEvent>,
 }
 
 impl MainMenu {
 	const ITEMS: [&'static str; 7] = ["New game", "Continue", "Go to level", "High scores", "Options", "About", "Exit"];
-	pub fn think(&mut self, input: &core::Input) {
-		if input.up && !self.input.up {
+	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		if input.up.is_pressed() {
 			self.selected = if self.selected > 0 { self.selected - 1 } else { self.selected };
 		}
-		if input.down && !self.input.down {
+		if input.down.is_pressed() {
 			self.selected = if self.selected < Self::ITEMS.len() as u8 - 1 { self.selected + 1 } else { self.selected };
 		}
-		if input.a && !self.input.a || input.start && !self.input.start {
+		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::NewGame,
 				1 => MenuEvent::Continue,
@@ -27,9 +25,8 @@ impl MainMenu {
 				_ => MenuEvent::Exit,
 				// _ => MenuEvent::None,
 			};
-			self.events.push(evt);
+			events.push(evt);
 		}
-		self.input = *input;
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();

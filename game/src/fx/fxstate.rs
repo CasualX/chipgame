@@ -10,6 +10,7 @@ pub struct FxState {
 	pub objects: ObjectMap,
 	pub level_index: i32,
 	pub next_level_load: f32,
+	pub next_level_triggered: bool,
 	pub music_enabled: bool,
 	pub music: Option<MusicId>,
 	pub hud_enabled: bool,
@@ -49,6 +50,9 @@ impl FxState {
 				}
 			}
 		}
+
+		self.next_level_load = 0.0;
+		self.next_level_triggered = false;
 	}
 	pub fn pause(&mut self) {
 		if matches!(self.gs.ts, core::TimeState::Running) {
@@ -62,7 +66,7 @@ impl FxState {
 			self.events.push(FxEvent::Unpause);
 		}
 	}
-	pub fn think(&mut self, input: &core::Input) {
+	pub fn think(&mut self, input: &Input) {
 		let music = if self.music_enabled {
 			let music = match self.level_index.wrapping_sub(1) % 2 {
 				0 => MusicId::Chip1,
@@ -79,11 +83,20 @@ impl FxState {
 			self.events.push(FxEvent::PlayMusic { music });
 		}
 
-		if input.start && !self.gs.input.start {
+		if input.start.is_pressed() {
 			self.pause();
 		}
 
-		self.gs.tick(input);
+		self.gs.tick(&core::Input {
+			a: input.a.is_held(),
+			b: input.b.is_held(),
+			up: input.up.is_held(),
+			down: input.down.is_held(),
+			left: input.left.is_held(),
+			right: input.right.is_held(),
+			start: input.start.is_held(),
+			select: input.select.is_held(),
+		});
 		self.sync();
 	}
 	pub fn sync(&mut self) {
@@ -125,6 +138,11 @@ impl FxState {
 				&core::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
 				_ => {}
 			}
+		}
+
+		if !self.next_level_triggered && self.next_level_load != 0.0 && self.time > self.next_level_load {
+			self.next_level_triggered = true;
+			self.events.push(FxEvent::GameWin);
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {

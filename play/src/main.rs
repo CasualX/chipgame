@@ -223,6 +223,8 @@ fn main() {
 						Some(winit::event::VirtualKeyCode::Down) => input.down = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::A) => input.a = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::B) => input.b = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Return) => input.start = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Space) => input.select = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) {
 							if let Some(fx) = &mut state.fx {
 								fx.music_enabled = !fx.music_enabled;
