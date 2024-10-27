@@ -22,7 +22,7 @@ impl FxState {
 	pub fn init(&mut self) {
 		self.tiles = &TILES_PLAY;
 		self.level_index = 1;
-		self.music_enabled = true;
+		self.music_enabled = false;
 	}
 	pub fn load_level_by_index(&mut self, level_index: i32) -> bool {
 		if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", level_index)) {

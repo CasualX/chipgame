@@ -5,14 +5,18 @@ use crate::fx::Resources;
 mod event;
 mod main;
 mod gamewin;
-mod pausemenu;
+mod pause;
+mod options;
+mod levelselect;
 mod u;
 mod v;
 
 pub use self::event::*;
 pub use self::main::*;
 pub use self::gamewin::*;
-pub use self::pausemenu::*;
+pub use self::pause::*;
+pub use self::options::*;
+pub use self::levelselect::*;
 pub use self::u::*;
 pub use self::v::*;
 
@@ -51,6 +55,8 @@ pub enum Menu {
 	Main(MainMenu),
 	Finished(GameWinMenu),
 	Pause(PauseMenu),
+	Options(OptionsMenu),
+	LevelSelect(levelselect::LevelSelectMenu),
 }
 impl Menu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
@@ -58,6 +64,8 @@ impl Menu {
 			Menu::Main(menu) => menu.think(input, events),
 			Menu::Finished(menu) => menu.think(input, events),
 			Menu::Pause(menu) => menu.think(input, events),
+			Menu::Options(menu) => menu.think(input, events),
+			Menu::LevelSelect(menu) => menu.think(input, events),
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
@@ -65,6 +73,17 @@ impl Menu {
 			Menu::Main(menu) => menu.draw(g, resx),
 			Menu::Finished(menu) => menu.draw(g, resx),
 			Menu::Pause(menu) => menu.draw(g, resx),
+			Menu::Options(menu) => menu.draw(g, resx),
+			Menu::LevelSelect(menu) => menu.draw(g, resx),
+		}
+	}
+	pub fn to_menu_event(&self) -> MenuEvent {
+		match self {
+			Menu::Main(_) => MenuEvent::MainMenu,
+			Menu::Finished(_) => MenuEvent::MainMenu,
+			Menu::Pause(_) => MenuEvent::PauseMenu,
+			Menu::Options(_) => MenuEvent::Options,
+			Menu::LevelSelect(_) => MenuEvent::LevelSelect,
 		}
 	}
 }
@@ -92,6 +111,9 @@ impl MenuState {
 	pub fn open_main(&mut self) {
 		self.menu = Some(Menu::Main(MainMenu::default()));
 	}
+	pub fn to_menu_event(&self) -> Option<MenuEvent> {
+		self.menu.as_ref().map(|m| m.to_menu_event())
+	}
 }
 
 fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
@@ -103,7 +125,7 @@ fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 	}
 }
 
-fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
+pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 	let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
 
 	cv.blend_mode = shade::BlendMode::Alpha;

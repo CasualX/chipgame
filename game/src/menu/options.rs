@@ -1,12 +1,16 @@
 use super::*;
 
 #[derive(Default)]
-pub struct MainMenu {
+pub struct OptionsMenu {
 	pub selected: u8,
+	pub bg_music: bool,
+	pub sound_fx: bool,
+	pub dev_mode: bool,
+	pub back_menu: Option<MenuEvent>,
 }
 
-impl MainMenu {
-	const ITEMS: [&'static str; 7] = ["New game", "Continue", "Go to level", "High scores", "Options", "About", "Exit"];
+impl OptionsMenu {
+	const ITEMS: [&'static str; 4] = ["Background music: ", "Sound effects: ", "Developer mode: ", "Back"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			self.selected = if self.selected > 0 { self.selected - 1 } else { self.selected };
@@ -16,14 +20,19 @@ impl MainMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::NewGame,
-				1 => MenuEvent::Continue,
-				2 => MenuEvent::LevelSelect,
-				3 => MenuEvent::HighScores,
-				4 => MenuEvent::Options,
-				5 => MenuEvent::About,
-				_ => MenuEvent::Exit,
-				// _ => MenuEvent::None,
+				0 => {
+					self.bg_music = !self.bg_music;
+					if self.bg_music { MenuEvent::BgMusicOn } else { MenuEvent::BgMusicOff }
+				}
+				1 => {
+					self.sound_fx = !self.sound_fx;
+					if self.sound_fx { MenuEvent::SoundFxOn } else { MenuEvent::SoundFxOff }
+				}
+				2 => {
+					self.dev_mode = !self.dev_mode;
+					if self.dev_mode { MenuEvent::DevModeOn } else { MenuEvent::DevModeOff }
+				}
+				_ => self.back_menu.clone().unwrap_or(MenuEvent::MainMenu),
 			};
 			events.push(evt);
 		}

@@ -39,6 +39,20 @@ Q W E R T Y U I O P
  A S D F G H J K L 
    Z X C V B N M   
 
+# Game pause
+
+Level 1: Lesson 1
+
+Attempts: ##
+Time:     ##:##
+Steps:    ###
+Bonks:    ##
+
+- Resume
+- Restart
+- Options
+- Main menu
+
 # Game Win
 
 Level 1: Lesson 1

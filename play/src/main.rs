@@ -181,6 +181,7 @@ fn main() {
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
+	state.load_pack("data/cc1/index.json");
 	state.launch();
 
 	if let Some(level) = level {
@@ -251,11 +252,13 @@ fn main() {
 			match evt {
 				&chipgame::play::PlayEvent::PlaySound { sound } => ap.play(sound),
 				&chipgame::play::PlayEvent::PlayMusic { music } => ap.play_music(music),
+				&chipgame::play::PlayEvent::Quit => quit = true,
 			}
 		}
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();
+
 
 		// Sleep with a target frame rate of 60 FPS
 		let now = time::Instant::now();

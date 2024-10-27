@@ -6,33 +6,32 @@ pub enum MenuEvent {
 	// Main Events
 	NewGame,
 	Continue,
-	GoToLevel,
+	LevelSelect,
 	HighScores,
 	Options,
 	About,
 	Exit,
-	BackToMainMenu,
+	MainMenu,
 
 	// Pause Events
 	Resume,
 	Restart,
-	BackToPauseMenu,
+	PauseMenu,
 
 	// Options Events
-	BackgroundMusicOn,
-	BackgroundMusicOff,
-	SoundEffectsOn,
-	SoundEffectsOff,
+	BgMusicOn,
+	BgMusicOff,
+	SoundFxOn,
+	SoundFxOff,
 	DevModeOn,
 	DevModeOff,
 
 	// Level select Events
 	UnlockLevel,
-	SelectLevel { level_index: i32 },
+	GoToLevel { level_index: i32 },
 
 	// Unlock level Events
 	EnterPassword { code: [u8; 4] },
-	BackToLevelSelect,
 
 	// Game Over Events
 	NextLevel,
