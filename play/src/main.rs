@@ -181,18 +181,13 @@ fn main() {
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
-	state.load_pack("data/cc1/index.json");
+	state.load_pack(&format!("{}index.json", chipgame::LEVEL_PACK));
 	state.launch();
 
 	if let Some(level) = level {
-		state.load_level(level);
+		state.play_level(level);
 	}
 
-	// state.init();
-	// state.level_index = level;
-	// state.gs.ps.cs_enable = is_dev;
-	// state.load_level_from_str(&fs::read_to_string(&file_path).unwrap());
-	// state.hud_enabled = true;
 	let mut input = chipgame::core::Input::default();
 
 	// Main loop

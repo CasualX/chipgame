@@ -15,3 +15,5 @@ pub enum MusicId {
 	Chip2,
 	Canyon,
 }
+
+pub const LEVEL_PACK: &str = "data/cclp1/";

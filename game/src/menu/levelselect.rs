@@ -17,7 +17,7 @@ impl LevelSelectMenu {
 	pub fn load_items(&mut self, lp: &crate::play::LevelPack) {
 		self.items.clear();
 		self.items.push("Unlock level".to_string());
-		for (index, ld) in lp.levels.iter().enumerate() {
+		for (index, ld) in lp.lv_info.iter().enumerate() {
 			self.items.push(format!("Level {}: {}", index + 1, ld.name));
 		}
 	}

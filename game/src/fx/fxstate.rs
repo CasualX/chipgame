@@ -10,7 +10,7 @@ pub struct FxState {
 	pub objects: ObjectMap,
 	pub level_index: i32,
 	pub next_level_load: f32,
-	pub next_level_triggered: bool,
+	pub game_win: bool,
 	pub music_enabled: bool,
 	pub music: Option<MusicId>,
 	pub hud_enabled: bool,
@@ -21,20 +21,12 @@ pub struct FxState {
 impl FxState {
 	pub fn init(&mut self) {
 		self.tiles = &TILES_PLAY;
-		self.level_index = 1;
+		self.level_index = 0;
 		self.music_enabled = false;
 	}
-	pub fn load_level_by_index(&mut self, level_index: i32) -> bool {
-		if let Ok(json) = std::fs::read_to_string(format!("data/cc1/level{}.json", level_index)) {
-			self.level_index = level_index;
-			self.load_level_from_str(&json);
-			return true;
-		}
-		return false;
-	}
-	pub fn load_level_from_str(&mut self, json: &str) {
+	pub fn parse_level(&mut self, level_index: i32, json: &str) {
 		self.objects.clear();
-		self.gs.load(json);
+		self.gs.parse(json);
 		self.sync();
 		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
 
@@ -51,8 +43,8 @@ impl FxState {
 			}
 		}
 
+		self.level_index = level_index;
 		self.next_level_load = 0.0;
-		self.next_level_triggered = false;
 	}
 	pub fn pause(&mut self) {
 		if matches!(self.gs.ts, core::TimeState::Running) {
@@ -101,7 +93,6 @@ impl FxState {
 	}
 	pub fn sync(&mut self) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
-
 			println!("GameEvent: {:?}", ev);
 			match ev {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
@@ -134,15 +125,15 @@ impl FxState {
 					}
 				},
 				&core::GameEvent::GameWin { .. } => game_win(self),
-				&core::GameEvent::GameOver { .. } => game_win(self),
+				&core::GameEvent::GameOver { .. } => game_over(self),
 				&core::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
 				_ => {}
 			}
 		}
 
-		if !self.next_level_triggered && self.next_level_load != 0.0 && self.time > self.next_level_load {
-			self.next_level_triggered = true;
-			self.events.push(FxEvent::GameWin);
+		if self.next_level_load != 0.0 && self.time > self.next_level_load {
+			self.next_level_load = 0.0;
+			self.events.push(if self.game_win { FxEvent::GameWin } else { FxEvent::GameOver });
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {

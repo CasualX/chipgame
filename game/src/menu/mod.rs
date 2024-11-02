@@ -5,6 +5,7 @@ use crate::fx::Resources;
 mod event;
 mod main;
 mod gamewin;
+mod gameover;
 mod pause;
 mod options;
 mod levelselect;
@@ -14,6 +15,7 @@ mod v;
 pub use self::event::*;
 pub use self::main::*;
 pub use self::gamewin::*;
+pub use self::gameover::*;
 pub use self::pause::*;
 pub use self::options::*;
 pub use self::levelselect::*;
@@ -53,7 +55,8 @@ pub struct Input {
 
 pub enum Menu {
 	Main(MainMenu),
-	Finished(GameWinMenu),
+	GameWin(GameWinMenu),
+	GameOver(GameOverMenu),
 	Pause(PauseMenu),
 	Options(OptionsMenu),
 	LevelSelect(levelselect::LevelSelectMenu),
@@ -62,7 +65,8 @@ impl Menu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		match self {
 			Menu::Main(menu) => menu.think(input, events),
-			Menu::Finished(menu) => menu.think(input, events),
+			Menu::GameWin(menu) => menu.think(input, events),
+			Menu::GameOver(menu) => menu.think(input, events),
 			Menu::Pause(menu) => menu.think(input, events),
 			Menu::Options(menu) => menu.think(input, events),
 			Menu::LevelSelect(menu) => menu.think(input, events),
@@ -71,7 +75,8 @@ impl Menu {
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		match self {
 			Menu::Main(menu) => menu.draw(g, resx),
-			Menu::Finished(menu) => menu.draw(g, resx),
+			Menu::GameWin(menu) => menu.draw(g, resx),
+			Menu::GameOver(menu) => menu.draw(g, resx),
 			Menu::Pause(menu) => menu.draw(g, resx),
 			Menu::Options(menu) => menu.draw(g, resx),
 			Menu::LevelSelect(menu) => menu.draw(g, resx),
@@ -80,7 +85,8 @@ impl Menu {
 	pub fn to_menu_event(&self) -> MenuEvent {
 		match self {
 			Menu::Main(_) => MenuEvent::MainMenu,
-			Menu::Finished(_) => MenuEvent::MainMenu,
+			Menu::GameWin(_) => MenuEvent::MainMenu,
+			Menu::GameOver(_) => MenuEvent::MainMenu,
 			Menu::Pause(_) => MenuEvent::PauseMenu,
 			Menu::Options(_) => MenuEvent::Options,
 			Menu::LevelSelect(_) => MenuEvent::LevelSelect,

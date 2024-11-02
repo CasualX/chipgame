@@ -1,0 +1,14 @@
+{
+	"name": "CCLP1",
+	"title": "Chip's Challenge Level Pack 1",
+	"levels": [
+		"lv/level1.json",
+		"lv/level2.json",
+		"lv/level3.json",
+		"lv/level4.json",
+		"lv/level5.json",
+		"lv/level6.json",
+		"lv/level7.json",
+		"lv/level8.json"
+	]
+}

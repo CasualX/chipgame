@@ -28,7 +28,7 @@ pub struct GameState {
 }
 
 impl GameState {
-	pub fn load(&mut self, json: &str) {
+	pub fn parse(&mut self, json: &str) {
 		self.time = 0;
 		self.ts = TimeState::Waiting;
 		self.ps.clear();

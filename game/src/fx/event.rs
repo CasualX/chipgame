@@ -7,4 +7,5 @@ pub enum FxEvent {
 	Pause,
 	Unpause,
 	GameWin,
+	GameOver,
 }

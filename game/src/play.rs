@@ -27,7 +27,8 @@ pub struct LevelData {
 pub struct LevelPack {
 	pub name: String,
 	pub title: String,
-	pub levels: Vec<LevelData>,
+	pub lv_data: Vec<String>,
+	pub lv_info: Vec<LevelData>,
 }
 
 #[derive(Default)]
@@ -53,30 +54,24 @@ impl PlayState {
 	pub fn load_pack(&mut self, path: &str) {
 		let json = std::fs::read_to_string(path).unwrap();
 		let pack: LevelPackDto = serde_json::from_str(&json).unwrap();
-		let mut levels = Vec::new();
+		let mut lv_info = Vec::new();
+		let mut lv_data = Vec::new();
 		for level in &pack.levels {
-			let s = std::fs::read_to_string(format!("data/cc1/{}", level)).unwrap();
+			let s = std::fs::read_to_string(format!("{}{}", crate::LEVEL_PACK, level)).unwrap();
 			let ld: LevelData = serde_json::from_str(&s).unwrap();
-			levels.push(ld);
+			lv_info.push(ld);
+			lv_data.push(s);
 		}
 		self.level_pack = LevelPack {
 			name: pack.name,
 			title: pack.title,
-			levels,
+			lv_data,
+			lv_info,
 		};
 	}
 
 	pub fn launch(&mut self) {
 		self.menu.open_main();
-	}
-
-	pub fn load_level(&mut self, level_index: i32) {
-		self.menu.close_all();
-		self.fx = Some(fx::FxState::default());
-		let fx = self.fx.as_mut().unwrap();
-
-		fx.init();
-		fx.load_level_by_index(level_index);
 	}
 
 	pub fn think(&mut self, input: &core::Input) {
@@ -100,24 +95,25 @@ impl PlayState {
 		}
 		self.input = *input;
 
-
 		self.sync();
 	}
 
 	pub fn play_level(&mut self, level_index: i32) {
 		self.menu.close_all();
+		let attempts = if let Some(fx) = &self.fx { if fx.level_index == level_index { fx.gs.ps.attempts } else { 0 } } else { 0 };
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
 
 		fx.init();
-		fx.load_level_by_index(level_index);
+		fx.gs.ps.attempts = attempts;
+		let lv_data = self.level_pack.lv_data[(level_index - 1) as usize].as_str();
+		fx.parse_level(level_index, lv_data);
 	}
 
 	pub fn sync(&mut self) {
-		// dbg!(self.menu.to_menu_event());
 		let events = mem::replace(&mut self.menu.events, Vec::new());
 		for evt in events {
-			dbg!(&evt);
+			println!("MenuEvent: {:?}", evt);
 			match evt {
 				menu::MenuEvent::NewGame => {
 					self.play_level(1);
@@ -213,7 +209,7 @@ impl PlayState {
 		if let Some(fx) = &mut self.fx {
 			let events = mem::replace(&mut fx.events, Vec::new());
 			for evt in events {
-				dbg!(&evt);
+				println!("FxEvent: {:?}", evt);
 				match evt {
 					fx::FxEvent::PlaySound { sound } => {
 						self.events.push(PlayEvent::PlaySound { sound });
@@ -233,6 +229,9 @@ impl PlayState {
 						};
 						self.menu.menu = Some(menu::Menu::Pause(menu));
 					}
+					fx::FxEvent::Unpause => {
+						self.menu.close_all();
+					}
 					fx::FxEvent::GameWin => {
 						let menu = menu::GameWinMenu {
 							selected: 0,
@@ -243,9 +242,21 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
 						};
-						self.menu.menu = Some(menu::Menu::Finished(menu));
+						self.menu.menu = Some(menu::Menu::GameWin(menu));
 					}
-					_ => {}
+					fx::FxEvent::GameOver => {
+						let menu = menu::GameOverMenu {
+							selected: 0,
+							level_index: fx.level_index,
+							level_name: fx.gs.field.name.clone(),
+							attempts: fx.gs.ps.attempts,
+							time: fx.gs.time,
+							steps: fx.gs.ps.steps,
+							bonks: fx.gs.ps.bonks,
+						};
+						self.menu.menu = Some(menu::Menu::GameOver(menu));
+					}
+					// _ => {}
 				}
 			}
 		}
