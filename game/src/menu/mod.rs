@@ -96,29 +96,30 @@ impl Menu {
 
 #[derive(Default)]
 pub struct MenuState {
-	pub menu: Option<Menu>,
+	pub stack: Vec<Menu>,
 	pub events: Vec<MenuEvent>,
 }
 
 impl MenuState {
 	pub fn think(&mut self, input: &Input) {
-		if let Some(menu) = &mut self.menu {
+		if let Some(menu) = self.stack.last_mut() {
 			menu.think(input, &mut self.events);
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
-		if let Some(menu) = &mut self.menu {
+		if let Some(menu) = self.stack.last_mut() {
 			menu.draw(g, resx);
 		}
 	}
 	pub fn close_all(&mut self) {
-		self.menu = None;
+		self.stack.clear();
+	}
+	pub fn close_menu(&mut self) {
+		let _ = self.stack.pop();
 	}
 	pub fn open_main(&mut self) {
-		self.menu = Some(Menu::Main(MainMenu::default()));
-	}
-	pub fn to_menu_event(&self) -> Option<MenuEvent> {
-		self.menu.as_ref().map(|m| m.to_menu_event())
+		self.stack.clear();
+		self.stack.push(Menu::Main(MainMenu::default()));
 	}
 }
 

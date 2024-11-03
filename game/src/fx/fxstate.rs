@@ -43,19 +43,22 @@ impl FxState {
 			}
 		}
 
+		self.hud_enabled = true;
 		self.level_index = level_index;
 		self.next_level_load = 0.0;
 	}
 	pub fn pause(&mut self) {
-		if matches!(self.gs.ts, core::TimeState::Running) {
+		// if matches!(self.gs.ts, core::TimeState::Running) {
 			self.gs.ts = core::TimeState::Paused;
 			self.events.push(FxEvent::Pause);
-		}
+			self.hud_enabled = false;
+		// }
 	}
 	pub fn unpause(&mut self) {
 		if matches!(self.gs.ts, core::TimeState::Paused) {
 			self.gs.ts = core::TimeState::Running;
 			self.events.push(FxEvent::Unpause);
+			self.hud_enabled = true;
 		}
 	}
 	pub fn think(&mut self, input: &Input) {

@@ -36,6 +36,7 @@ impl GameState {
 
 		let ld: FieldDto = serde_json::from_str(json).unwrap();
 		self.field.name = ld.name;
+		self.field.author = ld.author;
 		self.field.hint = ld.hint;
 		self.field.password = ld.password;
 		self.rand.rng = urandom::rng::Xoshiro256::from_seed(ld.seed);

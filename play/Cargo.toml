@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 chipgame = { path = "../game" }
 
-serde = { version = "1.0", features=["derive"] }
-serde_json = "1.0"
+serde.workspace = true
+serde_json.workspace = true
 
-clap = { version = "3.2", features = ["cargo"] }
+clap.workspace = true
 
 shade = { git = "https://github.com/CasualX/shade", features = ["msdfgen"] }
 glutin = "0.26"

@@ -87,7 +87,7 @@ impl PlayState {
 				select: menu::KeyState::w(self.input.select, input.select),
 			};
 			self.menu.think(&input);
-			if self.menu.menu.is_none() {
+			if self.menu.stack.is_empty() {
 				if let Some(fx) = &mut self.fx {
 					fx.think(&input);
 				}
@@ -120,7 +120,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::MainMenu => {
 					self.fx = None;
-					self.menu.menu = Some(menu::Menu::Main(menu::MainMenu::default()));
+					self.menu.open_main();
 				}
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu {
@@ -129,7 +129,7 @@ impl PlayState {
 						items: Vec::new(),
 					};
 					menu.load_items(&self.level_pack);
-					self.menu.menu = Some(menu::Menu::LevelSelect(menu));
+					self.menu.stack.push(menu::Menu::LevelSelect(menu));
 				}
 				menu::MenuEvent::GoToLevel { level_index } => {
 					self.play_level(level_index);
@@ -163,9 +163,8 @@ impl PlayState {
 						bg_music: self.data.bg_music,
 						sound_fx: self.data.sound_fx,
 						dev_mode: self.data.dev_mode,
-						back_menu: dbg!(self.menu.to_menu_event()),
 					};
-					self.menu.menu = Some(menu::Menu::Options(menu));
+					self.menu.stack.push(menu::Menu::Options(menu));
 				}
 				menu::MenuEvent::PauseMenu => {
 					if let Some(fx) = &mut self.fx {
@@ -178,7 +177,7 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
 						};
-						self.menu.menu = Some(menu::Menu::Pause(menu));
+						self.menu.stack.push(menu::Menu::Pause(menu));
 					}
 				}
 				menu::MenuEvent::BgMusicOn => {
@@ -202,6 +201,9 @@ impl PlayState {
 					self.data.dev_mode = false;
 				}
 				menu::MenuEvent::CursorMove => {}
+				menu::MenuEvent::CloseMenu => {
+					self.menu.close_menu();
+				}
 				_ => unimplemented!("{:?}", evt),
 			}
 		}
@@ -227,7 +229,7 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
 						};
-						self.menu.menu = Some(menu::Menu::Pause(menu));
+						self.menu.stack.push(menu::Menu::Pause(menu));
 					}
 					fx::FxEvent::Unpause => {
 						self.menu.close_all();
@@ -242,7 +244,7 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
 						};
-						self.menu.menu = Some(menu::Menu::GameWin(menu));
+						self.menu.stack.push(menu::Menu::GameWin(menu));
 					}
 					fx::FxEvent::GameOver => {
 						let menu = menu::GameOverMenu {
@@ -254,7 +256,7 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
 						};
-						self.menu.menu = Some(menu::Menu::GameOver(menu));
+						self.menu.stack.push(menu::Menu::GameOver(menu));
 					}
 					// _ => {}
 				}
@@ -274,7 +276,7 @@ impl PlayState {
 		if let Some(fx) = &mut self.fx {
 			fx.draw(g, resx);
 		}
-		if self.fx.is_some() && self.menu.menu.is_some() {
+		if self.fx.is_some() && !self.menu.stack.is_empty() {
 			menu::darken(g, resx, 128);
 		}
 		self.menu.draw(g, resx);

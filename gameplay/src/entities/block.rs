@@ -46,7 +46,7 @@ fn try_special_move(s: &mut GameState, ent: &mut Entity) -> bool {
 	// This is relevant to solve level 109 (Torturechamber)
 	// FIXME: Do this for all objects that are released from traps
 	let terrain = s.field.get_terrain(ent.pos);
-	if ent.flags & EF_FORCED_MOVE != 0 && matches!(terrain, Terrain::BearTrap) {
+	if matches!(terrain, Terrain::BearTrap) {
 		if let Some(step_dir) = ent.step_dir {
 			return try_move(s, ent, step_dir);
 		}

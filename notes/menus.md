@@ -63,8 +63,9 @@ Time:     ##:## (New record!)
 Steps:    ###   (New record!)
 Bonks:    ##
 
-- Next level
+- Onward!
 - Retry
+- Save replay
 - Main menu
 
 # Game Over

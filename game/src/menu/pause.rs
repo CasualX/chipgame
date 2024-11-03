@@ -85,9 +85,6 @@ impl PauseMenu {
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleRight, &format!("{}\n{}.{:02}\n{}\n{}", self.attempts, seconds, frames, self.steps, self.bonks));
 		}
 
-		// let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 - size * 3.0));
-		// scribe.color = cvmath::Vec4(255, 255, 255, 255);
-		// buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::BottomCenter, "Next level\nRetry\nMain menu");
 		for (i, item) in Self::ITEMS.iter().enumerate() {
 			let color = if i == self.selected as usize { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) };
 			scribe.color = color;

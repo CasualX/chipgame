@@ -6,7 +6,6 @@ pub struct OptionsMenu {
 	pub bg_music: bool,
 	pub sound_fx: bool,
 	pub dev_mode: bool,
-	pub back_menu: Option<MenuEvent>,
 }
 
 impl OptionsMenu {
@@ -32,7 +31,7 @@ impl OptionsMenu {
 					self.dev_mode = !self.dev_mode;
 					if self.dev_mode { MenuEvent::DevModeOn } else { MenuEvent::DevModeOff }
 				}
-				_ => self.back_menu.clone().unwrap_or(MenuEvent::MainMenu),
+				_ => MenuEvent::CloseMenu,
 			};
 			events.push(evt);
 		}

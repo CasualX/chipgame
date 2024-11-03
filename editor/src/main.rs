@@ -150,6 +150,10 @@ fn main() {
 						Some(winit::event::VirtualKeyCode::T) => editor.tool_terrain(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::E) => editor.tool_entity(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::C) => editor.tool_connection(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Numpad8) => editor.crop_top(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Numpad2) => editor.crop_bottom(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Numpad4) => editor.crop_left(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::Numpad6) => editor.crop_right(is_pressed(state)),
 						_ => (),
 					}
 				}

@@ -7,7 +7,7 @@ edition = "2021"
 chipgameplay = { path = "../gameplay" }
 dataview = "1.0"
 urandom = "0.1"
-cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
+cvmath.workspace = true
 shade = { git = "https://github.com/CasualX/shade", no-default-features = true }
 serde = { version = "1.0", features=["derive"] }
 serde_json = "1.0"

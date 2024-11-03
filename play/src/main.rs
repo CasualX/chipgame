@@ -44,7 +44,6 @@ impl AudioPlayer {
 	}
 	fn play_music(&mut self, music: Option<chipgame::MusicId>) {
 		if self.cur_music.map(|(music, _)| music) != music {
-			dbg!(music);
 			if let Some((_, handle)) = self.cur_music {
 				self.sl.stop(handle);
 			}

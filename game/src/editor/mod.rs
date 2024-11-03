@@ -102,6 +102,7 @@ impl EditorState {
 	}
 	pub fn load_level(&mut self, json: &str) {
 		self.game.parse_level(0, json);
+		self.game.hud_enabled = false;
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();
@@ -135,6 +136,7 @@ impl EditorState {
 
 		let dto = core::FieldDto {
 			name: self.game.gs.field.name.clone(),
+			author: self.game.gs.field.author.clone(),
 			hint: self.game.gs.field.hint.clone(),
 			password: self.game.gs.field.password.clone(),
 			seed,
@@ -311,6 +313,47 @@ impl EditorState {
 		if pressed {
 			self.tool = Tool::Connection;
 			self.tool_pos = None;
+		}
+	}
+
+	fn offset_positions(&mut self, offset: Vec2i) {
+		for ent in self.game.gs.ents.iter_mut() {
+			ent.pos += offset;
+		}
+		for conn in self.game.gs.field.conns.iter_mut() {
+			conn.src += offset;
+			conn.dest += offset;
+		}
+	}
+
+	pub fn crop_top(&mut self, pressed: bool) {
+		if pressed {
+			self.game.gs.field.terrain.drain(0..self.game.gs.field.width as usize);
+			self.game.gs.field.height -= 1;
+			self.offset_positions(Vec2::new(0, -1));
+		}
+	}
+	pub fn crop_bottom(&mut self, pressed: bool) {
+		if pressed {
+			self.game.gs.field.terrain.drain(self.game.gs.field.width as usize * (self.game.gs.field.height - 1) as usize..);
+			self.game.gs.field.height -= 1;
+		}
+	}
+	pub fn crop_left(&mut self, pressed: bool) {
+		if pressed {
+			for y in (0..self.game.gs.field.height as usize).rev() {
+				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize);
+			}
+			self.game.gs.field.width -= 1;
+			self.offset_positions(Vec2::new(-1, 0));
+		}
+	}
+	pub fn crop_right(&mut self, pressed: bool) {
+		if pressed {
+			for y in (0..self.game.gs.field.height as usize).rev() {
+				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize + self.game.gs.field.width as usize - 1);
+			}
+			self.game.gs.field.width -= 1;
 		}
 	}
 

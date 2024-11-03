@@ -2,6 +2,7 @@
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MenuEvent {
 	CursorMove,
+	CloseMenu,
 
 	// Main Events
 	NewGame,
@@ -36,4 +37,5 @@ pub enum MenuEvent {
 	// Game Over Events
 	NextLevel,
 	Retry,
+	SaveReplay,
 }
