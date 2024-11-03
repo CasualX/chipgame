@@ -253,7 +253,6 @@ fn main() {
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();
 
-
 		// Sleep with a target frame rate of 60 FPS
 		let now = time::Instant::now();
 		let sleep_dur = time::Duration::from_millis(24).saturating_sub(now - past_now);

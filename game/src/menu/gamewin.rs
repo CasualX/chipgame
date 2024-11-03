@@ -64,7 +64,7 @@ impl GameWinMenu {
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &format!("Level {}: {}", self.level_index, self.level_name));
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 3.0 + scribe.line_height));
 		scribe.color = cvmath::Vec4(0, 255, 128, 255);
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Finished!");
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Complete!");
 
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5 - size * 4.0, resx.screen_size.y as f32 * 0.5));
 		scribe.color = cvmath::Vec4(255, 255, 255, 255);

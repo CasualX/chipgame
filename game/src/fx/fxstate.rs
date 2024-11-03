@@ -78,7 +78,7 @@ impl FxState {
 			self.events.push(FxEvent::PlayMusic { music });
 		}
 
-		if input.start.is_pressed() {
+		if input.start.is_pressed() && !self.gs.ps.activity.is_game_over() {
 			self.pause();
 		}
 

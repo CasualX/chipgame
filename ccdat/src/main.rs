@@ -67,13 +67,6 @@ fn read_level(data: &[u8]) {
 		conns.push(*lnk);
 	}
 
-	// for y in (0..32).rev() {
-	// 	for x in (0..32).rev() {
-	// 		let index = y as usize * 32 + x as usize;
-	// 		if map[]
-	// 	}
-	// }
-
 	let field = chipgameplay::FieldDto {
 		name: md.title,
 		author: md.author,
@@ -290,6 +283,7 @@ fn ent_args(kind: chipgameplay::EntityKind, pos: cvmath::Vec2i, face_dir: Option
 	chipgameplay::EntityArgs { kind, pos, face_dir }
 }
 
+#[allow(dead_code)]
 struct Metadata {
 	time_limit: i32,
 	required_chips: i32,

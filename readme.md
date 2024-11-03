@@ -14,7 +14,7 @@ Includes menus, game logic, rendering, audio, input handling, etc.
 
 Platform independent core gameplay implementation.
 
-Just the game logic, to simulate the game without rendering or audio.
+Just the core game logic, to simulate the game without rendering or audio.
 
 ### Data: [./data](./data)
 
@@ -25,6 +25,10 @@ Game data files.
 Uses winit, glutin for windowing, shade for OpenGL rendering, soloud for audio.
 
 ### Level editor: [./editor](./editor)
+
+### CCDAT: [./ccdat](./ccdat)
+
+Chip's Challenge level extractor.
 
 License
 -------

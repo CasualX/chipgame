@@ -249,6 +249,7 @@ impl PlayState {
 					fx::FxEvent::GameOver => {
 						let menu = menu::GameOverMenu {
 							selected: 0,
+							activity: fx.gs.ps.activity,
 							level_index: fx.level_index,
 							level_name: fx.gs.field.name.clone(),
 							attempts: fx.gs.ps.attempts,
@@ -277,7 +278,7 @@ impl PlayState {
 			fx.draw(g, resx);
 		}
 		if self.fx.is_some() && !self.menu.stack.is_empty() {
-			menu::darken(g, resx, 128);
+			menu::darken(g, resx, 168);
 		}
 		self.menu.draw(g, resx);
 	}

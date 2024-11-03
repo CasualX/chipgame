@@ -3,6 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct GameOverMenu {
 	pub selected: u8,
+	pub activity: crate::core::PlayerActivity,
 	pub level_index: i32,
 	pub level_name: String,
 	pub attempts: i32,
@@ -62,7 +63,21 @@ impl GameOverMenu {
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &format!("Level {}: {}", self.level_index, self.level_name));
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 3.0 + scribe.line_height));
 		scribe.color = cvmath::Vec4(255, 0, 128, 255);
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Game Over!");
+
+		let reason = {
+				use crate::core::PlayerActivity as PA;
+				match self.activity {
+					PA::Drowned => "Ooops! Chip can't swim without flippers!",
+					PA::Burned => "Ooops! Don't step in the fire without fire boots!",
+					PA::Bombed => "Ooops! Don't touch the bombs!",
+					PA::OutOfTime => "Ooops! Out of time!",
+					PA::Collided => "Ooops! Watch out for moving blocks!",
+					PA::Eaten => "Ooops! Look out for creatures!",
+					PA::NotOkay => "Ooops! You're not okay!",
+				_ => "Game Over!",
+			}
+		};
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, reason);
 
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5 - size * 4.0, resx.screen_size.y as f32 * 0.5));
 		scribe.color = cvmath::Vec4(255, 255, 255, 255);
