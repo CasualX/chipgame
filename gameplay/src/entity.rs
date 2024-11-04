@@ -68,9 +68,11 @@ pub const EF_REMOVE: u8 = 1 << 0;
 pub const EF_TRAPPED: u8 = 1 << 1;
 /// Entity is hidden under a block.
 pub const EF_HIDDEN: u8 = 1 << 2;
-/// Entity has moved since the last tick.
-pub const EF_HAS_MOVED: u8 = 1 << 3;
 /// Entity is a template for cloning.
 pub const EF_TEMPLATE: u8 = 1 << 4;
 /// Entity has been forced to move.
-pub const EF_FORCED_MOVE: u8 = 1 << 5;
+pub const EF_MOMENTUM: u8 = 1 << 5;
+/// Entity has a new position.
+///
+/// This flag is set when try_move successfully moves the entity, otherwise it is cleared.
+pub const EF_NEW_POS: u8 = 1 << 6;

@@ -109,7 +109,7 @@ fn try_unlock(s: &mut GameState, pos: Vec2i, key: KeyColor) -> bool {
 	if s.ps.keys[key as usize] <= 0 {
 		return false;
 	}
-	s.field.set_terrain(pos, Terrain::Floor);
+	s.set_terrain(pos, Terrain::Floor);
 	if !matches!(key, KeyColor::Green) {
 		s.ps.keys[key as usize] -= 1;
 	}
@@ -120,6 +120,8 @@ fn try_unlock(s: &mut GameState, pos: Vec2i, key: KeyColor) -> bool {
 
 /// Tries to move the entity in the given step direction.
 pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
+	ent.flags &= !EF_NEW_POS;
+
 	// Template entities cannot be moved
 	if ent.flags & EF_TEMPLATE != 0 {
 		return false;
@@ -157,19 +159,16 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				Terrain::GreenLock => !try_unlock(s, new_pos, KeyColor::Green),
 				Terrain::YellowLock => !try_unlock(s, new_pos, KeyColor::Yellow),
 				Terrain::BlueWall => {
-					s.field.set_terrain(new_pos, Terrain::Wall);
-					s.events.push(GameEvent::TerrainUpdated { pos: new_pos, old: Terrain::BlueWall, new: Terrain::Wall });
+					s.set_terrain(new_pos, Terrain::Wall);
 					true
 				}
 				Terrain::BlueFake => {
-					s.field.set_terrain(new_pos, Terrain::Floor);
-					s.events.push(GameEvent::TerrainUpdated { pos: new_pos, old: Terrain::BlueFake, new: Terrain::Floor });
+					s.set_terrain(new_pos, Terrain::Floor);
 					s.events.push(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
 					false
 				}
 				Terrain::HiddenWall => {
-					s.field.set_terrain(new_pos, Terrain::HiddenWallRevealed);
-					s.events.push(GameEvent::TerrainUpdated { pos: new_pos, old: Terrain::HiddenWall, new: Terrain::HiddenWallRevealed });
+					s.set_terrain(new_pos, Terrain::HiddenWallRevealed);
 					true
 				}
 				_ => false,
@@ -291,8 +290,12 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_dir = Some(step_dir);
 	ent.step_time = s.time;
 	ent.pos = new_pos;
-	ent.flags |= EF_HAS_MOVED;
-	ent.flags &= !EF_FORCED_MOVE;
+	ent.flags |= EF_NEW_POS;
+
+	// Retain momentum when entity lands on a Trap
+	if !matches!(s.field.get_terrain(new_pos), Terrain::BearTrap) {
+		ent.flags &= !EF_MOMENTUM;
+	}
 
 	if is_player {
 		s.ps.steps += 1;
@@ -344,7 +347,7 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::Teleport => if let Some(step_dir) = step_dir { teleport(s, ent, step_dir) } else { false },
 		_ => return false,
 	};
-	ent.flags |= EF_FORCED_MOVE;
+	ent.flags |= EF_MOMENTUM;
 	return true;
 }
 

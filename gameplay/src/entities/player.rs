@@ -55,7 +55,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			ps_activity(s, PlayerActivity::Drowned);
 			return;
 		}
-		if matches!(terrain, Terrain::Exit) {
+		if ent.flags & EF_NEW_POS != 0 && matches!(terrain, Terrain::Exit) {
 			s.events.push(GameEvent::EntityTurn { entity: ent.handle });
 			ps_activity(s, PlayerActivity::Win);
 			return;
@@ -72,8 +72,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	// Turn dirt to floor after stepping on it
 	if matches!(terrain, Terrain::Dirt) {
-		s.field.set_terrain(ent.pos, Terrain::Floor);
-		s.events.push(GameEvent::TerrainUpdated { pos: ent.pos, old: Terrain::Dirt, new: Terrain::Floor });
+		s.set_terrain(ent.pos, Terrain::Floor);
 		s.events.push(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 	}
 

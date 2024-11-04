@@ -206,10 +206,9 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
 	}
 
-	if ent.flags & EF_HAS_MOVED == 0 {
+	if ent.step_time != s.time {
 		return;
 	}
-	ent.flags &= !EF_HAS_MOVED;
 
 	match terrain {
 		Terrain::GreenButton => {
@@ -221,8 +220,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 						Terrain::ToggleWall => Terrain::ToggleFloor,
 						_ => continue,
 					};
-					s.field.set_terrain(Vec2i::new(x, y), new);
-					s.events.push(GameEvent::TerrainUpdated { pos: Vec2i::new(x, y), old: terrain, new });
+					s.set_terrain(Vec2i::new(x, y), new);
 				}
 			}
 			if play_sound {
@@ -309,8 +307,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			from_pos -= step_dir.to_vec();
 		}
 		if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
-			s.field.set_terrain(from_pos, Terrain::RaisedWall);
-			s.events.push(GameEvent::TerrainUpdated { pos: from_pos, old: Terrain::RecessedWall, new: Terrain::RaisedWall });
+			s.set_terrain(from_pos, Terrain::RaisedWall);
 			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
 		}
 	}
