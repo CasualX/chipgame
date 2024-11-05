@@ -22,6 +22,8 @@ pub use self::levelselect::*;
 pub use self::u::*;
 pub use self::v::*;
 
+const FONT_SIZE: f32 = 1.0 / 20.0;
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum KeyState { Release, Press, Down, Up }
 

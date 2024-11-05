@@ -43,10 +43,12 @@ impl MainMenu {
 			..Default::default()
 		});
 
+		let size = resx.screen_size.y as f32 * FONT_SIZE;
+
 		// let mut pos = Vec2::ZERO;
 		let mut scribe = shade::d2::Scribe {
-			font_size: 32.0,
-			line_height: 40.0,
+			font_size: size,
+			line_height: size * (5.0 / 4.0),
 			..Default::default()
 		};
 

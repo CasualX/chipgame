@@ -50,7 +50,7 @@ impl GameOverMenu {
 			..Default::default()
 		});
 
-		let size = resx.screen_size.y as f32 / 20.0;
+		let size = resx.screen_size.y as f32 * FONT_SIZE;
 
 		let mut scribe = shade::d2::Scribe {
 			font_size: size,

@@ -206,7 +206,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
 	}
 
-	if ent.step_time != s.time {
+	if !(ent.step_time == s.time && ent.flags & EF_NEW_POS != 0) {
 		return;
 	}
 
