@@ -23,7 +23,7 @@ impl FxState {
 
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
 			self.camera.eye_offset = Vec3::new(0.0, 8.0 * 32.0, 400.0);
-			obj.lerp_pos + (0.0, 32.0 * 1.5, 0.0)
+			obj.lerp_pos + (16.0, 32.0 * 1.5, 0.0)
 		}
 		else {
 			self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 800.0);

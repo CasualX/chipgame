@@ -275,6 +275,7 @@ impl PlayState {
 		}).unwrap();
 
 		if let Some(fx) = &mut self.fx {
+			fx.hud_enabled = self.menu.stack.is_empty();
 			fx.draw(g, resx);
 		}
 		if self.fx.is_some() && !self.menu.stack.is_empty() {

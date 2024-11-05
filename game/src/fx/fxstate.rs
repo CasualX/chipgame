@@ -14,6 +14,9 @@ pub struct FxState {
 	pub music_enabled: bool,
 	pub music: Option<MusicId>,
 	pub hud_enabled: bool,
+	pub darken: bool,
+	pub darken_changed: bool,
+	pub darken_time: f32,
 	pub tiles: &'static [TileGfx],
 	pub events: Vec<FxEvent>,
 }

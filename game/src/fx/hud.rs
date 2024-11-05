@@ -12,8 +12,15 @@ fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
 }
 
 impl FxState {
-	pub fn render_ui(&self, g: &mut shade::Graphics, resx: &Resources) {
+	pub fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let ss = resx.screen_size;
+
+		let darken_time = f32::min(1.0, (self.time - self.darken_time) / 0.2);
+		let alpha = if self.darken { darken_time } else { 1.0 - darken_time };
+		if alpha > 0.0 {
+			let alpha = (alpha * 0.625 * 255.0) as u8;
+			crate::menu::darken(g, resx, alpha);
+		}
 
 		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
 		cv.shader = resx.uishader;
@@ -28,15 +35,15 @@ impl FxState {
 			..Default::default()
 		});
 
-		let paint = shade::d2::Paint {
-			template: UiVertex {
-				pos: Vec2f::ZERO,
-				uv: Vec2f::ZERO,
-				color: [255, 255, 255, 255],
-			},
-		};
-		let a = ss.y as f32 * 0.05;
-		cv.fill_rect(&paint, &Rect::c(0.0, 0.0, ss.x as f32, a + a));
+		// let paint = shade::d2::Paint {
+		// 	template: UiVertex {
+		// 		pos: Vec2f::ZERO,
+		// 		uv: Vec2f::ZERO,
+		// 		color: [255, 255, 255, 255],
+		// 	},
+		// };
+		let a = ss.y as f32 * 0.075;
+		// cv.fill_rect(&paint, &Rect::c(0.0, 0.0, ss.x as f32, a + a));
 
 		cv.push_uniform_f(|u| {
 			UiUniform {
@@ -80,14 +87,69 @@ impl FxState {
 			}
 		});
 		let chips_remaining = i32::max(0, gs.field.chips - gs.ps.chips);
-		let color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(&mut cv, chips_remaining, Vec2(a * 4.0, a * 2.0), color);
+		let chips_color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
+		draw_digits(&mut cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
 		let time_remaining = if gs.field.time <= 0 { -1 } else { f32::ceil((gs.field.time * 60 - gs.time) as f32 / 60.0) as i32 };
-		let color = if time_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(&mut cv, time_remaining, Vec2(a * 4.0, a * 2.0 + 25.0), color);
+		let time_color = if time_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
+		draw_digits(&mut cv, time_remaining, Vec2(ss.x as f32 - a * 1.4, a * 1.2).round(), time_color);
 
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 
+		{
+			let mut tbuf = shade::d2::TextBuffer::new();
+			tbuf.shader = resx.font.shader;
+			tbuf.viewport = cvmath::Rect::vec(ss);
+			tbuf.blend_mode = shade::BlendMode::Alpha;
+
+			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+			tbuf.push_uniform(shade::d2::TextUniform {
+				transform,
+				texture: resx.font.texture,
+				outline_width_absolute: 0.8,
+				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
+				..Default::default()
+			});
+			let size = ss.y as f32 * 0.025;
+			let mut scribe = shade::d2::Scribe {
+				font_size: size,
+				line_height: size,
+				// color: Vec4(255, 255, 0, 255),
+				outline: Vec4(0, 0, 0, 255),
+				..Default::default()
+			};
+			for i in 0..gs.ps.keys.len() {
+				if gs.ps.keys[i] >= 2 {
+					scribe.color = match i {
+						0 => Vec4(0, 255, 255, 255),
+						1 => Vec4(255, 0, 0, 255),
+						2 => Vec4(0, 255, 0, 255),
+						3 => Vec4(255, 255, 0, 255),
+						_ => Vec4(255, 255, 255, 255),
+					};
+					tbuf.text_box(&resx.font, &scribe, &Rect::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::BoxAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
+				}
+			}
+
+
+			// let a = a * 0.75;
+			scribe.font_size = a * 0.5;
+			scribe.line_height = scribe.font_size * 1.2;
+			scribe.color = Vec4(255, 0, 128, 255);
+
+			// scribe.color = Vec4::unpack8(chips_color);
+			// let chips_display = format!("Chips: {:0>3}", chips_remaining);
+			// tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, &chips_display);
+			tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, "CHIPS");
+
+			// scribe.color = Vec4::unpack8(time_color);
+			// let time_display = if time_remaining > 0 { format!("Time:  {:0>3}", time_remaining) } else { String::from("Time:  -") };
+			// tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, &time_display);
+			tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, "TIME");
+
+			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		}
+
+		let mut darken = false;
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
 			let mut tbuf = shade::d2::TextBuffer::new();
 			tbuf.shader = resx.font.shader;
@@ -103,22 +165,28 @@ impl FxState {
 				..Default::default()
 			});
 			let size = ss.y as f32 * 0.05;
-			let scribe = shade::d2::Scribe {
+			let mut scribe = shade::d2::Scribe {
 				font_size: size,
 				line_height: size,
-				color: Vec4(255, 255, 0, 255),
+				color: Vec4(255, 255, 255, 255),
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
+			let level_index = format!("Level {}:", self.level_index);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &level_index);
+			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 - size * 1.2), &level_index);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);
+			scribe.color = Vec4(255, 255, 0, 255);
 			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
 			let password = format!("Password: {}", self.gs.field.password);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
-			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size), &password);
+			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
 		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
 			if let Some(hint) = &self.gs.field.hint {
+				darken = true;
+
 				let mut tbuf = shade::d2::TextBuffer::new();
 				tbuf.shader = resx.font.shader;
 				tbuf.viewport = cvmath::Rect::vec(ss);
@@ -135,7 +203,7 @@ impl FxState {
 				let size = ss.y as f32 * 0.05;
 				let scribe = shade::d2::Scribe {
 					font_size: size,
-					line_height: size,
+					line_height: size * 1.2,
 					color: Vec4(255, 255, 255, 255),
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
@@ -146,6 +214,11 @@ impl FxState {
 				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
 				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 			}
+		}
+
+		if self.darken != darken {
+			self.darken = darken;
+			self.darken_time = self.time;
 		}
 	}
 }
