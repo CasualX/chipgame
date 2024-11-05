@@ -20,7 +20,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 
 fn think(s: &mut GameState, ent: &mut Entity) {
 	if let Some(pl) = s.ents.get(s.ps.ehandle) {
-		if pl.pos == ent.pos {
+		if pl.pos == ent.pos && pl.flags & EF_NEW_POS != 0 {
 			pickup_item(s, ent);
 		}
 	}
@@ -85,7 +85,8 @@ const FLAGS: SolidFlags = SolidFlags {
 	exit: true,
 	blue_fake: true,
 	recessed_wall: true,
-	items: true,
+	keys: true,
+	boots: true,
 	chips: true,
 	creatures: true,
 	player: false,
