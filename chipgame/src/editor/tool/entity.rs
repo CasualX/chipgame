@@ -40,7 +40,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 	}
 }
 
-pub fn think(s: &mut EditorState) {
+pub fn think(_s: &mut EditorState) {
 	// if s.input.left_click {
 	// 	if let Some(args) = s.selected_args {
 	// 		s.selected_ent = s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: s.cursor_pos, face_dir: args.face_dir });

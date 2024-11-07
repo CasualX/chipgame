@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["./ccdat", "./game", "./gameplay", "./play", "./editor"]
+members = [
+	"./ccdat",
+	"./chipcore",
+	"./chipgame",
+	"./editor",
+	"./play",
+]
 
 [workspace.dependencies]
 serde = { version = "1.0", features=["derive"] }

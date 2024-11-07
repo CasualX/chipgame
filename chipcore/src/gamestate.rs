@@ -58,9 +58,7 @@ impl GameState {
 		self.field.terrain.reserve_exact(size);
 
 		if ld.map.data.is_empty() {
-			for _ in 0..size {
-				self.field.terrain.push(Terrain::Floor);
-			}
+			self.field.terrain.resize(size, Terrain::Floor);
 		}
 		else {
 			assert_eq!(ld.map.data.len(), size, "Invalid map data length");
@@ -292,6 +290,8 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			if !try_move(s, &mut ent, args.face_dir.unwrap()) {
 				remove = true;
 			}
+			// HACK? Make the newly spawned entity interact with the terrain
+			interact_terrain(s, &mut ent);
 			s.ents.put(ent);
 			// Level 45 here again! The level spams so many entities on a single clone machine!
 			// Remove the failed clones to prevent the game from crashing!

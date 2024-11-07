@@ -69,7 +69,7 @@ fn main() {
 	else {
 		None
 	};
-	let is_dev = matches.is_present("dev");
+	// let is_dev = matches.is_present("dev");
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
 	let mut ap = AudioPlayer {

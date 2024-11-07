@@ -1,6 +1,6 @@
 
 // pub mod core;
-pub use chipgameplay as core;
+pub use chipcore as core;
 
 pub mod editor;
 pub mod fx;
