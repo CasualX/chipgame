@@ -7,7 +7,7 @@ pub struct TileGfx {
 	pub model: Model,
 }
 
-pub static TILES_PLAY: [TileGfx; 45] = [
+pub static TILES_PLAY: [TileGfx; 43] = [
 	TileGfx { sprite: Sprite::Blank, model: Model::Empty }, // Terrain::Blank
 	TileGfx { sprite: Sprite::Floor, model: Model::Floor }, // Terrain::Floor
 	TileGfx { sprite: Sprite::Wall, model: Model::Wall }, // Terrain::Wall
@@ -35,16 +35,15 @@ pub static TILES_PLAY: [TileGfx; 45] = [
 	TileGfx { sprite: Sprite::CloneMachine, model: Model::Wall }, // Terrain::CloneMachine
 	TileGfx { sprite: Sprite::OnOffFloor, model: Model::Floor }, // Terrain::ToggleFloor
 	TileGfx { sprite: Sprite::OnOffFloor, model: Model::Floor }, // Terrain::ToggleWall
-	TileGfx { sprite: Sprite::PanelNorth, model: Model::Floor }, // Terrain::PanelN
-	TileGfx { sprite: Sprite::PanelWest, model: Model::Floor }, // Terrain::PanelW
-	TileGfx { sprite: Sprite::PanelSouth, model: Model::Floor }, // Terrain::PanelS
-	TileGfx { sprite: Sprite::PanelEast, model: Model::Floor }, // Terrain::PanelE
-	TileGfx { sprite: Sprite::PanelSE, model: Model::Floor }, // Terrain::PanelSE
+	TileGfx { sprite: Sprite::PanelNorth, model: Model::Floor }, // Terrain::ThinWallN
+	TileGfx { sprite: Sprite::PanelWest, model: Model::Floor }, // Terrain::ThinWallW
+	TileGfx { sprite: Sprite::PanelSouth, model: Model::Floor }, // Terrain::ThinWallS
+	TileGfx { sprite: Sprite::PanelEast, model: Model::Floor }, // Terrain::ThinWallE
+	TileGfx { sprite: Sprite::PanelSE, model: Model::Floor }, // Terrain::ThinWallSE
 	TileGfx { sprite: Sprite::Floor, model: Model::Floor }, // Terrain::HiddenWall
-	TileGfx { sprite: Sprite::Floor, model: Model::Floor }, // Terrain::HiddenWallRevealed
-	TileGfx { sprite: Sprite::Floor, model: Model::Floor }, // Terrain::InvisWall
-	TileGfx { sprite: Sprite::BlueWall, model: Model::Wall }, // Terrain::BlueWall
-	TileGfx { sprite: Sprite::BlueWall, model: Model::Wall }, // Terrain::BlueFake
+	TileGfx { sprite: Sprite::Floor, model: Model::Floor }, // Terrain::InvisibleWall
+	TileGfx { sprite: Sprite::BlueWall, model: Model::Wall }, // Terrain::RealBlueWall
+	TileGfx { sprite: Sprite::BlueWall, model: Model::Wall }, // Terrain::FakeBlueWall
 	TileGfx { sprite: Sprite::GreenSwitch, model: Model::Floor }, // Terrain::GreenButton
 	TileGfx { sprite: Sprite::RedSwitch, model: Model::Floor }, // Terrain::RedButton
 	TileGfx { sprite: Sprite::BrownSwitch, model: Model::Floor }, // Terrain::BrownButton
@@ -52,5 +51,4 @@ pub static TILES_PLAY: [TileGfx; 45] = [
 	TileGfx { sprite: Sprite::Teleport, model: Model::Floor }, // Terrain::Teleport
 	TileGfx { sprite: Sprite::BearTrap, model: Model::Floor }, // Terrain::BearTrap
 	TileGfx { sprite: Sprite::RecessedWall, model: Model::Floor }, // Terrain::RecessedWall
-	TileGfx { sprite: Sprite::RecessedWall, model: Model::Floor }, // Terrain::RaisedWall
 ];

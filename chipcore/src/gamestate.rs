@@ -40,8 +40,8 @@ impl GameState {
 		self.field.hint = ld.hint;
 		self.field.password = ld.password;
 		self.rand.rng = urandom::rng::Xoshiro256::from_seed(ld.seed);
-		self.field.time = ld.time;
-		self.field.chips = ld.chips;
+		self.field.time_limit = ld.time_limit;
+		self.field.required_chips = ld.required_chips;
 		self.field.width = ld.map.width;
 		self.field.height = ld.map.height;
 		self.field.terrain.clear();
@@ -115,7 +115,7 @@ impl GameState {
 		self.ts = TimeState::Running;
 
 		// Check if the player has run out of time
-		if self.field.time > 0 && self.time >= self.field.time * 60 {
+		if self.field.time_limit > 0 && self.time >= self.field.time_limit * 60 {
 			ps_activity(self, PlayerActivity::OutOfTime);
 			self.events.push(GameEvent::GameOver { player: self.ps.ehandle });
 			return;
@@ -307,7 +307,7 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			from_pos -= step_dir.to_vec();
 		}
 		if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
-			s.set_terrain(from_pos, Terrain::RaisedWall);
+			s.set_terrain(from_pos, Terrain::Wall);
 			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
 		}
 	}

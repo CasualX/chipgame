@@ -28,10 +28,10 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 		// Check for panels on the current terrain
 		let solidf = terrain.solid_flags();
 		let panel = match step_dir {
-			Compass::Up => PANEL_N,
-			Compass::Left => PANEL_W,
-			Compass::Down => PANEL_S,
-			Compass::Right => PANEL_E,
+			Compass::Up => THIN_WALL_N,
+			Compass::Left => THIN_WALL_W,
+			Compass::Down => THIN_WALL_S,
+			Compass::Right => THIN_WALL_E,
 		};
 		// If on a solid wall, allow movement out
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
@@ -43,10 +43,10 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 
 		// Check the solid flags of the next terrain
 		let panel = match step_dir {
-			Compass::Up => PANEL_S,
-			Compass::Left => PANEL_E,
-			Compass::Down => PANEL_N,
-			Compass::Right => PANEL_W,
+			Compass::Up => THIN_WALL_S,
+			Compass::Left => THIN_WALL_E,
+			Compass::Down => THIN_WALL_N,
+			Compass::Right => THIN_WALL_W,
 		};
 		if terrain.solid_flags() & panel != 0 {
 			return false;
@@ -65,7 +65,7 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 		Terrain::Dirt if flags.dirt => return false,
 		Terrain::Exit if flags.exit => return false,
 		Terrain::Water if flags.water => return false,
-		Terrain::BlueFake if flags.blue_fake => return false,
+		Terrain::FakeBlueWall if flags.blue_fake => return false,
 		Terrain::RecessedWall if flags.recessed_wall => return false,
 		_ => (),
 	}
@@ -142,10 +142,10 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		// Check for panels on the current terrain
 		let solidf = from_terrain.solid_flags();
 		let panel = match step_dir {
-			Compass::Up => PANEL_N,
-			Compass::Left => PANEL_W,
-			Compass::Down => PANEL_S,
-			Compass::Right => PANEL_E,
+			Compass::Up => THIN_WALL_N,
+			Compass::Left => THIN_WALL_W,
+			Compass::Down => THIN_WALL_S,
+			Compass::Right => THIN_WALL_E,
 		};
 		// If on a solid wall, allow movement out
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
@@ -159,17 +159,17 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				Terrain::RedLock => !try_unlock(s, new_pos, KeyColor::Red),
 				Terrain::GreenLock => !try_unlock(s, new_pos, KeyColor::Green),
 				Terrain::YellowLock => !try_unlock(s, new_pos, KeyColor::Yellow),
-				Terrain::BlueWall => {
+				Terrain::RealBlueWall => {
 					s.set_terrain(new_pos, Terrain::Wall);
 					true
 				}
-				Terrain::BlueFake => {
+				Terrain::FakeBlueWall => {
 					s.set_terrain(new_pos, Terrain::Floor);
 					s.events.push(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
 					false
 				}
 				Terrain::HiddenWall => {
-					s.set_terrain(new_pos, Terrain::HiddenWallRevealed);
+					s.set_terrain(new_pos, Terrain::Wall);
 					true
 				}
 				_ => false,
@@ -183,10 +183,10 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 		// Check the solid flags of the next terrain
 		let panel = match step_dir {
-			Compass::Up => PANEL_S,
-			Compass::Left => PANEL_E,
-			Compass::Down => PANEL_N,
-			Compass::Right => PANEL_W,
+			Compass::Up => THIN_WALL_S,
+			Compass::Left => THIN_WALL_E,
+			Compass::Down => THIN_WALL_N,
+			Compass::Right => THIN_WALL_W,
 		};
 		if to_terrain.solid_flags() & panel != 0 {
 			return false;
@@ -205,7 +205,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Terrain::Dirt if flags.dirt => return false,
 			Terrain::Exit if flags.exit => return false,
 			Terrain::Water if flags.water => return false,
-			Terrain::BlueFake if flags.blue_fake => return false,
+			Terrain::FakeBlueWall if flags.blue_fake => return false,
 			Terrain::RecessedWall if flags.recessed_wall => return false,
 			_ => (),
 		}
@@ -218,7 +218,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			EntityKind::Player => flags.player,
 			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => {
-				if is_player && s.ps.chips >= s.field.chips {
+				if is_player && s.ps.chips >= s.field.required_chips {
 					ent.flags |= EF_REMOVE;
 					s.events.push(GameEvent::SocketFilled { pos: ent.pos });
 					s.events.push(GameEvent::SoundFx { sound: SoundFx::SocketOpened });

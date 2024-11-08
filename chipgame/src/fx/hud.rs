@@ -86,10 +86,10 @@ impl FxState {
 				..*u
 			}
 		});
-		let chips_remaining = i32::max(0, gs.field.chips - gs.ps.chips);
+		let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
 		let chips_color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
 		draw_digits(&mut cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
-		let time_remaining = if gs.field.time <= 0 { -1 } else { f32::ceil((gs.field.time * 60 - gs.time) as f32 / 60.0) as i32 };
+		let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
 		let time_color = if time_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
 		draw_digits(&mut cv, time_remaining, Vec2(ss.x as f32 - a * 1.4, a * 1.2).round(), time_color);
 

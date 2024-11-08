@@ -4,8 +4,8 @@
 	"hint": "",
 	"password": "",
 	"seed": 0,
-	"time": 0,
-	"chips": 0,
+	"time_limit": 0,
+	"required_chips": 0,
 	"map": {
 		"width": 32,
 		"height": 32,

@@ -141,7 +141,7 @@ fn ps_nextcs(s: &mut GameState, btn: Button) {
 		s.ps.keys = [99; 4];
 	}
 	if s.ps.cs_inftime.next(btn, &CODE_INFTIME) {
-		s.field.time = 0;
+		s.field.time_limit = 0;
 	}
 	if s.ps.cs_win.next(btn, &CODE_WIN) {
 		ps_activity(s, PlayerActivity::Win);

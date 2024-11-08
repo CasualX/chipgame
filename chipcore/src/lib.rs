@@ -46,9 +46,9 @@ enum TrapState {
 }
 
 const SOLID_WALL: u8 = 0xf;
-const PANEL_N: u8 = 0x1;
-const PANEL_E: u8 = 0x2;
-const PANEL_S: u8 = 0x4;
-const PANEL_W: u8 = 0x8;
+const THIN_WALL_N: u8 = 0x1;
+const THIN_WALL_E: u8 = 0x2;
+const THIN_WALL_S: u8 = 0x4;
+const THIN_WALL_W: u8 = 0x8;
 
 type Time = i32;
