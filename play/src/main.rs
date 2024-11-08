@@ -1,12 +1,6 @@
 use std::{fs, mem, thread, time};
 use std::collections::HashMap;
 
-#[cfg(windows)]
-#[path = "xinput-windows.rs"]
-mod xinput;
-
-#[cfg(not(windows))]
-#[path = "xinput-dummy.rs"]
 mod xinput;
 
 #[cfg(windows)]
@@ -81,6 +75,8 @@ fn main() {
 		None
 	};
 	// let is_dev = matches.is_present("dev");
+
+	let xinput = xinput::XInput::new();
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
 	let mut ap = AudioPlayer {
@@ -245,6 +241,8 @@ fn main() {
 				_ => (),
 			}
 		});
+
+		xinput.get_state(&mut input);
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
 		state.think(&input);

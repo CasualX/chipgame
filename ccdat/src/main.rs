@@ -1,4 +1,8 @@
-use std::{collections::HashMap, ffi::CStr, fs};
+use std::collections::HashMap;
+use std::ffi::CStr;
+use std::fs;
+
+use chipcore::{Compass, Conn, EntityArgs, EntityKind, FieldDto, MapDto, Terrain};
 
 fn main() {
 	let app = clap::command!("ccdat")
@@ -67,7 +71,7 @@ fn read_level(data: &[u8]) {
 		conns.push(*lnk);
 	}
 
-	let field = chipcore::FieldDto {
+	let field = FieldDto {
 		name: md.title,
 		author: md.author,
 		hint: md.hint,
@@ -81,7 +85,7 @@ fn read_level(data: &[u8]) {
 	};
 
 	let json = serde_json::to_string(&field).unwrap();
-	println!("{}", json);
+	print!("{}", json);
 }
 
 fn decode_content(data: &[u8]) -> Vec<u8> {
@@ -102,123 +106,123 @@ fn decode_content(data: &[u8]) -> Vec<u8> {
 	return tiles;
 }
 
-fn process_tile(terrain: &mut Vec<chipcore::Terrain>, entities: &mut Vec<chipcore::EntityArgs>, pos: cvmath::Vec2<i32>, tile: u8) {
+fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos: cvmath::Vec2<i32>, tile: u8) {
 	let index = (pos.y * 32 + pos.x) as usize;
 	match tile {
-		0x00 => (),//terrain[index] = chipcore::Terrain::Floor,
-		0x01 => terrain[index] = chipcore::Terrain::Wall,
-		0x02 => entities.push(ent_args(chipcore::EntityKind::Chip, pos, None)),
-		0x03 => terrain[index] = chipcore::Terrain::Water,
-		0x04 => terrain[index] = chipcore::Terrain::Fire,
-		0x05 => terrain[index] = chipcore::Terrain::InvisWall,
-		0x06 => terrain[index] = chipcore::Terrain::PanelN,
-		0x07 => terrain[index] = chipcore::Terrain::PanelW,
-		0x08 => terrain[index] = chipcore::Terrain::PanelS,
-		0x09 => terrain[index] = chipcore::Terrain::PanelE,
-		0x0a => entities.push(ent_args(chipcore::EntityKind::Block, pos, None)),
-		0x0b => terrain[index] = chipcore::Terrain::Dirt,
-		0x0c => terrain[index] = chipcore::Terrain::Ice,
-		0x0d => terrain[index] = chipcore::Terrain::ForceS,
-		0x0e => entities.push(ent_args(chipcore::EntityKind::Block, pos, Some(chipcore::Compass::Up))),
-		0x0f => entities.push(ent_args(chipcore::EntityKind::Block, pos, Some(chipcore::Compass::Left))),
+		0x00 => (),//terrain[index] = Terrain::Floor,
+		0x01 => terrain[index] = Terrain::Wall,
+		0x02 => entities.push(ent_args(EntityKind::Chip, pos, None)),
+		0x03 => terrain[index] = Terrain::Water,
+		0x04 => terrain[index] = Terrain::Fire,
+		0x05 => terrain[index] = Terrain::InvisWall,
+		0x06 => terrain[index] = Terrain::PanelN,
+		0x07 => terrain[index] = Terrain::PanelW,
+		0x08 => terrain[index] = Terrain::PanelS,
+		0x09 => terrain[index] = Terrain::PanelE,
+		0x0a => entities.push(ent_args(EntityKind::Block, pos, None)),
+		0x0b => terrain[index] = Terrain::Dirt,
+		0x0c => terrain[index] = Terrain::Ice,
+		0x0d => terrain[index] = Terrain::ForceS,
+		0x0e => entities.push(ent_args(EntityKind::Block, pos, Some(Compass::Up))),
+		0x0f => entities.push(ent_args(EntityKind::Block, pos, Some(Compass::Left))),
 
-		0x10 => entities.push(ent_args(chipcore::EntityKind::Block, pos, Some(chipcore::Compass::Down))),
-		0x11 => entities.push(ent_args(chipcore::EntityKind::Block, pos, Some(chipcore::Compass::Right))),
-		0x12 => terrain[index] = chipcore::Terrain::ForceN,
-		0x13 => terrain[index] = chipcore::Terrain::ForceE,
-		0x14 => terrain[index] = chipcore::Terrain::ForceW,
-		0x15 => terrain[index] = chipcore::Terrain::Exit,
-		0x16 => terrain[index] = chipcore::Terrain::BlueLock,
-		0x17 => terrain[index] = chipcore::Terrain::RedLock,
-		0x18 => terrain[index] = chipcore::Terrain::GreenLock,
-		0x19 => terrain[index] = chipcore::Terrain::YellowLock,
-		0x1a => terrain[index] = chipcore::Terrain::IceNW,
-		0x1b => terrain[index] = chipcore::Terrain::IceNE,
-		0x1c => terrain[index] = chipcore::Terrain::IceSE,
-		0x1d => terrain[index] = chipcore::Terrain::IceSW,
-		0x1e => terrain[index] = chipcore::Terrain::BlueFake,
-		0x1f => terrain[index] = chipcore::Terrain::BlueWall,
+		0x10 => entities.push(ent_args(EntityKind::Block, pos, Some(Compass::Down))),
+		0x11 => entities.push(ent_args(EntityKind::Block, pos, Some(Compass::Right))),
+		0x12 => terrain[index] = Terrain::ForceN,
+		0x13 => terrain[index] = Terrain::ForceE,
+		0x14 => terrain[index] = Terrain::ForceW,
+		0x15 => terrain[index] = Terrain::Exit,
+		0x16 => terrain[index] = Terrain::BlueLock,
+		0x17 => terrain[index] = Terrain::RedLock,
+		0x18 => terrain[index] = Terrain::GreenLock,
+		0x19 => terrain[index] = Terrain::YellowLock,
+		0x1a => terrain[index] = Terrain::IceNW,
+		0x1b => terrain[index] = Terrain::IceNE,
+		0x1c => terrain[index] = Terrain::IceSE,
+		0x1d => terrain[index] = Terrain::IceSW,
+		0x1e => terrain[index] = Terrain::BlueFake,
+		0x1f => terrain[index] = Terrain::BlueWall,
 
-		0x21 => entities.push(ent_args(chipcore::EntityKind::Thief, pos, None)),
-		0x22 => entities.push(ent_args(chipcore::EntityKind::Socket, pos, None)),
-		0x23 => terrain[index] = chipcore::Terrain::GreenButton,
-		0x24 => terrain[index] = chipcore::Terrain::RedButton,
-		0x25 => terrain[index] = chipcore::Terrain::ToggleWall,
-		0x26 => terrain[index] = chipcore::Terrain::ToggleFloor,
-		0x27 => terrain[index] = chipcore::Terrain::BrownButton,
-		0x28 => terrain[index] = chipcore::Terrain::BlueButton,
-		0x29 => terrain[index] = chipcore::Terrain::Teleport,
-		0x2a => entities.push(ent_args(chipcore::EntityKind::Bomb, pos, None)),
-		0x2b => terrain[index] = chipcore::Terrain::BearTrap,
-		0x2c => terrain[index] = chipcore::Terrain::HiddenWall,
-		0x2d => terrain[index] = chipcore::Terrain::Gravel,
-		0x2e => terrain[index] = chipcore::Terrain::RecessedWall,
-		0x2f => terrain[index] = chipcore::Terrain::Hint,
+		0x21 => entities.push(ent_args(EntityKind::Thief, pos, None)),
+		0x22 => entities.push(ent_args(EntityKind::Socket, pos, None)),
+		0x23 => terrain[index] = Terrain::GreenButton,
+		0x24 => terrain[index] = Terrain::RedButton,
+		0x25 => terrain[index] = Terrain::ToggleWall,
+		0x26 => terrain[index] = Terrain::ToggleFloor,
+		0x27 => terrain[index] = Terrain::BrownButton,
+		0x28 => terrain[index] = Terrain::BlueButton,
+		0x29 => terrain[index] = Terrain::Teleport,
+		0x2a => entities.push(ent_args(EntityKind::Bomb, pos, None)),
+		0x2b => terrain[index] = Terrain::BearTrap,
+		0x2c => terrain[index] = Terrain::HiddenWall,
+		0x2d => terrain[index] = Terrain::Gravel,
+		0x2e => terrain[index] = Terrain::RecessedWall,
+		0x2f => terrain[index] = Terrain::Hint,
 
-		0x30 => terrain[index] = chipcore::Terrain::PanelSE,
-		0x31 => terrain[index] = chipcore::Terrain::CloneMachine,
-		0x32 => terrain[index] = chipcore::Terrain::ForceRandom,
+		0x30 => terrain[index] = Terrain::PanelSE,
+		0x31 => terrain[index] = Terrain::CloneMachine,
+		0x32 => terrain[index] = Terrain::ForceRandom,
 
-		0x40 => entities.push(ent_args(chipcore::EntityKind::Bug, pos, Some(chipcore::Compass::Up))),
-		0x41 => entities.push(ent_args(chipcore::EntityKind::Bug, pos, Some(chipcore::Compass::Left))),
-		0x42 => entities.push(ent_args(chipcore::EntityKind::Bug, pos, Some(chipcore::Compass::Down))),
-		0x43 => entities.push(ent_args(chipcore::EntityKind::Bug, pos, Some(chipcore::Compass::Right))),
+		0x40 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Up))),
+		0x41 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Left))),
+		0x42 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Down))),
+		0x43 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Right))),
 
-		0x44 => entities.push(ent_args(chipcore::EntityKind::FireBall, pos, Some(chipcore::Compass::Up))),
-		0x45 => entities.push(ent_args(chipcore::EntityKind::FireBall, pos, Some(chipcore::Compass::Left))),
-		0x46 => entities.push(ent_args(chipcore::EntityKind::FireBall, pos, Some(chipcore::Compass::Down))),
-		0x47 => entities.push(ent_args(chipcore::EntityKind::FireBall, pos, Some(chipcore::Compass::Right))),
+		0x44 => entities.push(ent_args(EntityKind::FireBall, pos, Some(Compass::Up))),
+		0x45 => entities.push(ent_args(EntityKind::FireBall, pos, Some(Compass::Left))),
+		0x46 => entities.push(ent_args(EntityKind::FireBall, pos, Some(Compass::Down))),
+		0x47 => entities.push(ent_args(EntityKind::FireBall, pos, Some(Compass::Right))),
 
-		0x48 => entities.push(ent_args(chipcore::EntityKind::PinkBall, pos, Some(chipcore::Compass::Up))),
-		0x49 => entities.push(ent_args(chipcore::EntityKind::PinkBall, pos, Some(chipcore::Compass::Left))),
-		0x4a => entities.push(ent_args(chipcore::EntityKind::PinkBall, pos, Some(chipcore::Compass::Down))),
-		0x4b => entities.push(ent_args(chipcore::EntityKind::PinkBall, pos, Some(chipcore::Compass::Right))),
+		0x48 => entities.push(ent_args(EntityKind::PinkBall, pos, Some(Compass::Up))),
+		0x49 => entities.push(ent_args(EntityKind::PinkBall, pos, Some(Compass::Left))),
+		0x4a => entities.push(ent_args(EntityKind::PinkBall, pos, Some(Compass::Down))),
+		0x4b => entities.push(ent_args(EntityKind::PinkBall, pos, Some(Compass::Right))),
 
-		0x4c => entities.push(ent_args(chipcore::EntityKind::Tank, pos, Some(chipcore::Compass::Up))),
-		0x4d => entities.push(ent_args(chipcore::EntityKind::Tank, pos, Some(chipcore::Compass::Left))),
-		0x4e => entities.push(ent_args(chipcore::EntityKind::Tank, pos, Some(chipcore::Compass::Down))),
-		0x4f => entities.push(ent_args(chipcore::EntityKind::Tank, pos, Some(chipcore::Compass::Right))),
+		0x4c => entities.push(ent_args(EntityKind::Tank, pos, Some(Compass::Up))),
+		0x4d => entities.push(ent_args(EntityKind::Tank, pos, Some(Compass::Left))),
+		0x4e => entities.push(ent_args(EntityKind::Tank, pos, Some(Compass::Down))),
+		0x4f => entities.push(ent_args(EntityKind::Tank, pos, Some(Compass::Right))),
 
-		0x50 => entities.push(ent_args(chipcore::EntityKind::Glider, pos, Some(chipcore::Compass::Up))),
-		0x51 => entities.push(ent_args(chipcore::EntityKind::Glider, pos, Some(chipcore::Compass::Left))),
-		0x52 => entities.push(ent_args(chipcore::EntityKind::Glider, pos, Some(chipcore::Compass::Down))),
-		0x53 => entities.push(ent_args(chipcore::EntityKind::Glider, pos, Some(chipcore::Compass::Right))),
+		0x50 => entities.push(ent_args(EntityKind::Glider, pos, Some(Compass::Up))),
+		0x51 => entities.push(ent_args(EntityKind::Glider, pos, Some(Compass::Left))),
+		0x52 => entities.push(ent_args(EntityKind::Glider, pos, Some(Compass::Down))),
+		0x53 => entities.push(ent_args(EntityKind::Glider, pos, Some(Compass::Right))),
 
-		0x54 => entities.push(ent_args(chipcore::EntityKind::Teeth, pos, Some(chipcore::Compass::Up))),
-		0x55 => entities.push(ent_args(chipcore::EntityKind::Teeth, pos, Some(chipcore::Compass::Left))),
-		0x56 => entities.push(ent_args(chipcore::EntityKind::Teeth, pos, Some(chipcore::Compass::Down))),
-		0x57 => entities.push(ent_args(chipcore::EntityKind::Teeth, pos, Some(chipcore::Compass::Right))),
+		0x54 => entities.push(ent_args(EntityKind::Teeth, pos, Some(Compass::Up))),
+		0x55 => entities.push(ent_args(EntityKind::Teeth, pos, Some(Compass::Left))),
+		0x56 => entities.push(ent_args(EntityKind::Teeth, pos, Some(Compass::Down))),
+		0x57 => entities.push(ent_args(EntityKind::Teeth, pos, Some(Compass::Right))),
 
-		0x58 => entities.push(ent_args(chipcore::EntityKind::Walker, pos, Some(chipcore::Compass::Up))),
-		0x59 => entities.push(ent_args(chipcore::EntityKind::Walker, pos, Some(chipcore::Compass::Left))),
-		0x5a => entities.push(ent_args(chipcore::EntityKind::Walker, pos, Some(chipcore::Compass::Down))),
-		0x5b => entities.push(ent_args(chipcore::EntityKind::Walker, pos, Some(chipcore::Compass::Right))),
+		0x58 => entities.push(ent_args(EntityKind::Walker, pos, Some(Compass::Up))),
+		0x59 => entities.push(ent_args(EntityKind::Walker, pos, Some(Compass::Left))),
+		0x5a => entities.push(ent_args(EntityKind::Walker, pos, Some(Compass::Down))),
+		0x5b => entities.push(ent_args(EntityKind::Walker, pos, Some(Compass::Right))),
 
-		0x5c => entities.push(ent_args(chipcore::EntityKind::Blob, pos, Some(chipcore::Compass::Up))),
-		0x5d => entities.push(ent_args(chipcore::EntityKind::Blob, pos, Some(chipcore::Compass::Left))),
-		0x5e => entities.push(ent_args(chipcore::EntityKind::Blob, pos, Some(chipcore::Compass::Down))),
-		0x5f => entities.push(ent_args(chipcore::EntityKind::Blob, pos, Some(chipcore::Compass::Right))),
+		0x5c => entities.push(ent_args(EntityKind::Blob, pos, Some(Compass::Up))),
+		0x5d => entities.push(ent_args(EntityKind::Blob, pos, Some(Compass::Left))),
+		0x5e => entities.push(ent_args(EntityKind::Blob, pos, Some(Compass::Down))),
+		0x5f => entities.push(ent_args(EntityKind::Blob, pos, Some(Compass::Right))),
 
-		0x60 => entities.push(ent_args(chipcore::EntityKind::Paramecium, pos, Some(chipcore::Compass::Up))),
-		0x61 => entities.push(ent_args(chipcore::EntityKind::Paramecium, pos, Some(chipcore::Compass::Left))),
-		0x62 => entities.push(ent_args(chipcore::EntityKind::Paramecium, pos, Some(chipcore::Compass::Down))),
-		0x63 => entities.push(ent_args(chipcore::EntityKind::Paramecium, pos, Some(chipcore::Compass::Right))),
+		0x60 => entities.push(ent_args(EntityKind::Paramecium, pos, Some(Compass::Up))),
+		0x61 => entities.push(ent_args(EntityKind::Paramecium, pos, Some(Compass::Left))),
+		0x62 => entities.push(ent_args(EntityKind::Paramecium, pos, Some(Compass::Down))),
+		0x63 => entities.push(ent_args(EntityKind::Paramecium, pos, Some(Compass::Right))),
 
-		0x64 => entities.push(ent_args(chipcore::EntityKind::BlueKey, pos, None)),
-		0x65 => entities.push(ent_args(chipcore::EntityKind::RedKey, pos, None)),
-		0x66 => entities.push(ent_args(chipcore::EntityKind::GreenKey, pos, None)),
-		0x67 => entities.push(ent_args(chipcore::EntityKind::YellowKey, pos, None)),
-		0x68 => entities.push(ent_args(chipcore::EntityKind::Flippers, pos, None)),
-		0x69 => entities.push(ent_args(chipcore::EntityKind::FireBoots, pos, None)),
-		0x6a => entities.push(ent_args(chipcore::EntityKind::IceSkates, pos, None)),
-		0x6b => entities.push(ent_args(chipcore::EntityKind::SuctionBoots, pos, None)),
-		0x6e => entities.push(ent_args(chipcore::EntityKind::Player, pos, None)),
+		0x64 => entities.push(ent_args(EntityKind::BlueKey, pos, None)),
+		0x65 => entities.push(ent_args(EntityKind::RedKey, pos, None)),
+		0x66 => entities.push(ent_args(EntityKind::GreenKey, pos, None)),
+		0x67 => entities.push(ent_args(EntityKind::YellowKey, pos, None)),
+		0x68 => entities.push(ent_args(EntityKind::Flippers, pos, None)),
+		0x69 => entities.push(ent_args(EntityKind::FireBoots, pos, None)),
+		0x6a => entities.push(ent_args(EntityKind::IceSkates, pos, None)),
+		0x6b => entities.push(ent_args(EntityKind::SuctionBoots, pos, None)),
+		0x6e => entities.push(ent_args(EntityKind::Player, pos, None)),
 		value => unimplemented!("Tile: ${:02x}", value),
 	}
 }
 
-fn parse_content(upper: &[u8], lower: &[u8]) -> (chipcore::MapDto, Vec<chipcore::EntityArgs>, Vec<chipcore::Conn>) {
-	let mut terrain = vec![chipcore::Terrain::Floor; 32 * 32];
+fn parse_content(upper: &[u8], lower: &[u8]) -> (MapDto, Vec<EntityArgs>, Vec<Conn>) {
+	let mut terrain = vec![Terrain::Floor; 32 * 32];
 	let mut entities = Vec::new();
 
 	for y in 0..32 {
@@ -239,12 +243,12 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (chipcore::MapDto, Vec<chipcore:
 			let index = y as usize * 32 + x as usize;
 			let pos = cvmath::Vec2i(x as i32, y as i32);
 
-			if terrain[index] == chipcore::Terrain::Teleport {
+			if terrain[index] == Terrain::Teleport {
 				if last_teleport.is_none() {
 					last_teleport = Some(pos);
 				}
 				if let Some(prev_teleport) = prev_teleport {
-					conns.push(chipcore::Conn { src: prev_teleport, dest: pos });
+					conns.push(Conn { src: prev_teleport, dest: pos });
 				}
 				prev_teleport = Some(pos);
 			}
@@ -252,18 +256,18 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (chipcore::MapDto, Vec<chipcore:
 	}
 	if let Some(last_teleport) = last_teleport {
 		if let Some(prev_teleport) = prev_teleport {
-			conns.push(chipcore::Conn { src: prev_teleport, dest: last_teleport });
+			conns.push(Conn { src: prev_teleport, dest: last_teleport });
 		}
 	}
 
 	let mut legend = Vec::new();
 	let data = {
 		let mut legend_map = HashMap::new();
-		legend_map.insert(chipcore::Terrain::Blank, 0); legend.push(chipcore::Terrain::Blank);
-		legend_map.insert(chipcore::Terrain::Floor, 1); legend.push(chipcore::Terrain::Floor);
+		legend_map.insert(Terrain::Blank, 0); legend.push(Terrain::Blank);
+		legend_map.insert(Terrain::Floor, 1); legend.push(Terrain::Floor);
 		let mut idx = 2;
 		for &terrain in terrain.iter() {
-			if terrain == chipcore::Terrain::Teleport {
+			if terrain == Terrain::Teleport {
 				eprintln!("---- TELEPORT DETECTED!! ----");
 			}
 			if !legend_map.contains_key(&terrain) {
@@ -275,12 +279,12 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (chipcore::MapDto, Vec<chipcore:
 		terrain.iter().map(|&terrain| legend_map[&terrain]).collect()
 	};
 
-	let map = chipcore::MapDto { width: 32, height: 32, data, legend };
+	let map = MapDto { width: 32, height: 32, data, legend };
 	return (map, entities, conns);
 }
 
-fn ent_args(kind: chipcore::EntityKind, pos: cvmath::Vec2i, face_dir: Option<chipcore::Compass>) -> chipcore::EntityArgs {
-	chipcore::EntityArgs { kind, pos, face_dir }
+fn ent_args(kind: EntityKind, pos: cvmath::Vec2i, face_dir: Option<Compass>) -> EntityArgs {
+	EntityArgs { kind, pos, face_dir }
 }
 
 #[allow(dead_code)]
@@ -288,8 +292,8 @@ struct Metadata {
 	time_limit: i32,
 	required_chips: i32,
 	title: String,
-	trap_linkage: Vec<chipcore::Conn>,
-	cloner_linkage: Vec<chipcore::Conn>,
+	trap_linkage: Vec<Conn>,
+	cloner_linkage: Vec<Conn>,
 	password: String,
 	hint: Option<String>,
 	author: Option<String>,
@@ -336,7 +340,7 @@ fn read_metadata(data: &[u8]) -> Metadata {
 					let trap_y = view.read::<u16>(j + 6);
 					let src = cvmath::Vec2i(brown_x as i32, brown_y as i32);
 					let dest = cvmath::Vec2i(trap_x as i32, trap_y as i32);
-					trap_linkage.push(chipcore::Conn { src, dest });
+					trap_linkage.push(Conn { src, dest });
 					j += 10;
 				}
 			}
@@ -349,7 +353,7 @@ fn read_metadata(data: &[u8]) -> Metadata {
 					let cloner_y = view.read::<u16>(j + 6);
 					let src = cvmath::Vec2i(red_x as i32, red_y as i32);
 					let dest = cvmath::Vec2i(cloner_x as i32, cloner_y as i32);
-					cloner_linkage.push(chipcore::Conn { src, dest });
+					cloner_linkage.push(Conn { src, dest });
 					j += 8;
 				}
 			}

@@ -32,6 +32,8 @@ Then use the following controls:
 
 * `F5`: Save the level
 
+* `NUMPAD8`, `NUMPAD2`, `NUMPAD4`, `NUMPAD6`: Trim the level boundaries from the corresponding direction
+
 Click on the terrain samples on the left to change to the Terrain Tool. Click on the entity samples up top to change to the Entity Tool.
 
 Don't forget to place the player entity!
