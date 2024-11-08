@@ -1,4 +1,5 @@
 use std::mem;
+use std::path;
 
 use super::*;
 
@@ -51,13 +52,13 @@ pub struct PlayState {
 }
 
 impl PlayState {
-	pub fn load_pack(&mut self, path: &str) {
-		let json = std::fs::read_to_string(path).unwrap();
+	pub fn load_pack(&mut self, path: &path::Path) {
+		let json = std::fs::read_to_string(path.join("index.json")).unwrap();
 		let pack: LevelPackDto = serde_json::from_str(&json).unwrap();
 		let mut lv_info = Vec::new();
 		let mut lv_data = Vec::new();
 		for level in &pack.levels {
-			let s = std::fs::read_to_string(format!("{}{}", crate::LEVEL_PACK, level)).unwrap();
+			let s = std::fs::read_to_string(path.join(level)).unwrap();
 			let ld: LevelData = serde_json::from_str(&s).unwrap();
 			lv_info.push(ld);
 			lv_data.push(s);

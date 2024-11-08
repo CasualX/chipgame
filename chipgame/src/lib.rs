@@ -17,4 +17,4 @@ pub enum MusicId {
 	Canyon,
 }
 
-pub const LEVEL_PACK: &str = "data/packs/cclp1/";
+// pub const LEVEL_PACK: &str = "data/packs/cclp1/";

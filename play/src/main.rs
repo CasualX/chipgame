@@ -2,6 +2,14 @@ use std::{fs, mem, thread, time};
 use std::collections::HashMap;
 
 #[cfg(windows)]
+#[path = "xinput-windows.rs"]
+mod xinput;
+
+#[cfg(not(windows))]
+#[path = "xinput-dummy.rs"]
+mod xinput;
+
+#[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	use winit::platform::windows::WindowBuilderExtWindows;
 	winit::window::WindowBuilder::new()
@@ -60,9 +68,12 @@ impl AudioPlayer {
 
 fn main() {
 	let app = clap::command!("play")
+		.arg(clap::arg!(--"level-pack" -p [level_pack] "Level pack to play"))
 		.arg(clap::arg!(-n [n] "Level number to play"))
 		.arg(clap::arg!(--dev "Enable developer mode"));
 	let matches = app.get_matches();
+	let level_pack = matches.value_of("level-pack").expect("Level pack not specified");
+	let level_pack = std::path::Path::new(level_pack);
 	let level = if let Some(n) = matches.value_of("n") {
 		Some(n.parse::<i32>().expect("Invalid level number"))
 	}
@@ -180,7 +191,7 @@ fn main() {
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
-	state.load_pack(&format!("{}index.json", chipgame::LEVEL_PACK));
+	state.load_pack(&level_pack);
 	state.launch();
 
 	if let Some(level) = level {
