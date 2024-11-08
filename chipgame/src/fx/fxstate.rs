@@ -112,13 +112,12 @@ impl FxState {
 				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
 				&core::GameEvent::TerrainUpdated { pos, old, new } => {
-					assert_ne!(old, new);
 					let mut tw = false;
 					match (old, new) {
 						(core::Terrain::FakeBlueWall, _) => blue_wall_cleared(self, pos),
 						(core::Terrain::HiddenWall, _) => hidden_wall_bumped(self, pos),
-						(core::Terrain::ToggleFloor, core::Terrain::ToggleWall) => tw = true,
-						(core::Terrain::ToggleWall, core::Terrain::ToggleFloor) => tw = true,
+						(core::Terrain::ToggleFloor, _) => tw = true,
+						(core::Terrain::ToggleWall, _) => tw = true,
 						(core::Terrain::Fire, _) => remove_fire(self, pos),
 						(_, core::Terrain::Fire) => create_fire(self, pos),
 						(core::Terrain::RecessedWall, core::Terrain::Wall) => recessed_wall_raised(self, pos),

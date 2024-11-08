@@ -69,7 +69,7 @@ pub struct PlayerState {
 	pub suction_boots: bool,
 	pub dev_wtw: bool,
 
-	pub cs_enable: bool,
+	pub cheats_enable: bool,
 	pub cs_wtw: CodeSequenceState,
 	pub cs_giveall: CodeSequenceState,
 	pub cs_inftime: CodeSequenceState,
@@ -101,7 +101,7 @@ pub(super) fn ps_input(s: &mut GameState, input: &Input) {
 	s.ps.inbuf.handle(Compass::Up,    input.up,    s.input.up);
 	s.ps.inbuf.handle(Compass::Down,  input.down,  s.input.down);
 
-	if s.ps.cs_enable {
+	if s.ps.cheats_enable {
 		if input.left && !s.input.left {
 			ps_nextcs(s, Button::Left);
 		}
