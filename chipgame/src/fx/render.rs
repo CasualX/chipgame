@@ -146,7 +146,7 @@ impl ModelData {
 
 const TILE_SIZE: f32 = 32.0;
 
-fn draw_floor(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, z1: f32, z2: f32, alpha: f32) {
+fn draw_floor(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, z1: f32, z2: f32, alpha: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -183,7 +183,7 @@ fn draw_floor(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>
 	});
 }
 
-fn draw_shadow(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, skew: f32, a: f32) {
+fn draw_shadow(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, skew: f32, a: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -219,7 +219,7 @@ fn draw_shadow(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32
 	});
 }
 
-fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, w: f32, sprite: Sprite, alpha: f32) {
+fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, w: f32, sprite: data::SpriteId, alpha: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
@@ -240,7 +240,7 @@ fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>,
 	let u = gfx.x as f32 * (TILE_SIZE + 2.0) + 1.0;
 	let v = gfx.y as f32 * (TILE_SIZE + 2.0) + 1.0;
 
-	let s = 4.0 + w;//if matches!(sprite, Sprite::Wall) { 0.0 } else { 4.0 };
+	let s = 4.0 + w;//if matches!(sprite, data::Sprite::Wall) { 0.0 } else { 4.0 };
 	let t = 4.0;
 	let h = 20.0; //if block.is_door() { 15.0 } else { 20.0 };
 
@@ -287,7 +287,7 @@ fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>,
 	});
 }
 
-fn draw_portal(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite) {
+fn draw_portal(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 5, 4);
@@ -332,17 +332,17 @@ fn draw_portal(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32
 	});
 }
 
-pub fn draw(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: Sprite, model: Model, alpha: f32) {
+pub fn draw(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, model: data::ModelId, alpha: f32) {
 	match model {
-		Model::Empty => (),
-		Model::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha),
-		Model::Wall => draw_wall(cv, pos, 0.0, sprite, alpha),
-		Model::ThinWall => draw_wall(cv, pos, 2.0, sprite, alpha),
-		Model::Sprite => draw_floor(cv, pos, sprite, 0.0, 20.0, alpha),
-		Model::Portal => draw_portal(cv, pos, sprite),
-		Model::FlatSprite => draw_floor(cv, pos, sprite, 3.0, 12.0, alpha),
-		Model::ReallyFlatSprite => draw_floor(cv, pos, sprite, 6.0, 10.0, alpha),
-		Model::FloorSprite => draw_floor(cv, pos, sprite, 1.0, 1.0, alpha),
+		data::ModelId::Empty => (),
+		data::ModelId::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha),
+		data::ModelId::Wall => draw_wall(cv, pos, 0.0, sprite, alpha),
+		data::ModelId::ThinWall => draw_wall(cv, pos, 2.0, sprite, alpha),
+		data::ModelId::Sprite => draw_floor(cv, pos, sprite, 0.0, 20.0, alpha),
+		data::ModelId::Portal => draw_portal(cv, pos, sprite),
+		data::ModelId::FlatSprite => draw_floor(cv, pos, sprite, 3.0, 12.0, alpha),
+		data::ModelId::ReallyFlatSprite => draw_floor(cv, pos, sprite, 6.0, 10.0, alpha),
+		data::ModelId::FloorSprite => draw_floor(cv, pos, sprite, 1.0, 1.0, alpha),
 		_ => unimplemented!(),
 	}
 }
@@ -362,15 +362,15 @@ pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform
 		for x in 0..field.width {
 			let tile = field.get_terrain(Vec2(x, y));
 			let tile = state.tiles[tile as usize];
-			if tile.sprite == Sprite::Blank || tile.model == Model::Empty {
+			if tile.sprite == data::SpriteId::Blank || tile.model == data::ModelId::Empty {
 				continue;
 			}
 			let (mut sprite, model) = (tile.sprite, tile.model);
-			if tile.sprite == Sprite::Exit1 {
+			if tile.sprite == data::SpriteId::Exit1 {
 				match i % 3 {
-					2 => sprite = Sprite::Exit1,
-					1 => sprite = Sprite::Exit2,
-					0 => sprite = Sprite::Exit3,
+					2 => sprite = data::SpriteId::Exit1,
+					1 => sprite = data::SpriteId::Exit2,
+					0 => sprite = data::SpriteId::Exit3,
 					_ => (),
 				}
 			}
@@ -383,10 +383,10 @@ pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform
 		if !obj.live || !obj.vis {
 			continue;
 		}
-		if matches!(obj.model, Model::Sprite | Model::FlatSprite) {
+		if matches!(obj.model, data::ModelId::Sprite | data::ModelId::FlatSprite) {
 			draw_shadow(cv, obj.pos, obj.sprite, 10.0, obj.alpha);
 		}
-		if matches!(obj.model, Model::ReallyFlatSprite) {
+		if matches!(obj.model, data::ModelId::ReallyFlatSprite) {
 			draw_shadow(cv, obj.pos, obj.sprite, 2.0, obj.alpha);
 		}
 	}

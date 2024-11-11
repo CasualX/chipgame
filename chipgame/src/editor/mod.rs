@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use crate::fx;
 use crate::core;
+use crate::data;
 use cvmath::*;
 
 mod tool;
@@ -18,7 +19,7 @@ impl Default for Tool {
 	}
 }
 
-static TERRAIN_SAMPLES: [[core::Terrain; 2]; 21] = [
+static TERRAIN_SAMPLES: [[core::Terrain; 2]; 23] = [
 	[core::Terrain::Blank, core::Terrain::Floor],
 	[core::Terrain::Dirt, core::Terrain::Gravel],
 	[core::Terrain::Wall, core::Terrain::CloneMachine],
@@ -40,32 +41,34 @@ static TERRAIN_SAMPLES: [[core::Terrain; 2]; 21] = [
 	[core::Terrain::Teleport, core::Terrain::ForceRandom],
 	[core::Terrain::ForceE, core::Terrain::ForceS],
 	[core::Terrain::ForceN, core::Terrain::ForceW],
+	[core::Terrain::CloneBlockE, core::Terrain::CloneBlockS],
+	[core::Terrain::CloneBlockN, core::Terrain::CloneBlockW],
 ];
 
-static ENTITY_SAMPLES: [(core::EntityKind, fx::Sprite); 23] = [
-	(core::EntityKind::Player, fx::Sprite::PlayerWalkNeutral),
-	(core::EntityKind::Chip, fx::Sprite::Chip),
-	(core::EntityKind::Socket, fx::Sprite::Socket),
-	(core::EntityKind::Block, fx::Sprite::Block),
-	(core::EntityKind::Flippers, fx::Sprite::PowerFlippers),
-	(core::EntityKind::FireBoots, fx::Sprite::PowerFireBoots),
-	(core::EntityKind::IceSkates, fx::Sprite::PowerIceSkates),
-	(core::EntityKind::SuctionBoots, fx::Sprite::PowerSuctionBoots),
-	(core::EntityKind::BlueKey, fx::Sprite::BlueKey),
-	(core::EntityKind::RedKey, fx::Sprite::RedKey),
-	(core::EntityKind::GreenKey, fx::Sprite::GreenKey),
-	(core::EntityKind::YellowKey, fx::Sprite::YellowKey),
-	(core::EntityKind::Thief, fx::Sprite::Thief),
-	(core::EntityKind::Bomb, fx::Sprite::Bomb),
-	(core::EntityKind::Bug, fx::Sprite::BugUp),
-	(core::EntityKind::FireBall, fx::Sprite::FireBall),
-	(core::EntityKind::PinkBall, fx::Sprite::PinkBall),
-	(core::EntityKind::Tank, fx::Sprite::TankUp),
-	(core::EntityKind::Glider, fx::Sprite::GliderUp),
-	(core::EntityKind::Teeth, fx::Sprite::TeethUp),
-	(core::EntityKind::Walker, fx::Sprite::WalkerUpDown),
-	(core::EntityKind::Blob, fx::Sprite::Blob),
-	(core::EntityKind::Paramecium, fx::Sprite::ParameciumUpDown),
+static ENTITY_SAMPLES: [(core::EntityKind, data::SpriteId); 23] = [
+	(core::EntityKind::Player, data::SpriteId::PlayerWalkNeutral),
+	(core::EntityKind::Chip, data::SpriteId::Chip),
+	(core::EntityKind::Socket, data::SpriteId::Socket),
+	(core::EntityKind::Block, data::SpriteId::DirtBlock),
+	(core::EntityKind::Flippers, data::SpriteId::Flippers),
+	(core::EntityKind::FireBoots, data::SpriteId::FireBoots),
+	(core::EntityKind::IceSkates, data::SpriteId::IceSkates),
+	(core::EntityKind::SuctionBoots, data::SpriteId::SuctionBoots),
+	(core::EntityKind::BlueKey, data::SpriteId::BlueKey),
+	(core::EntityKind::RedKey, data::SpriteId::RedKey),
+	(core::EntityKind::GreenKey, data::SpriteId::GreenKey),
+	(core::EntityKind::YellowKey, data::SpriteId::YellowKey),
+	(core::EntityKind::Thief, data::SpriteId::Thief),
+	(core::EntityKind::Bomb, data::SpriteId::Bomb),
+	(core::EntityKind::Bug, data::SpriteId::BugUp),
+	(core::EntityKind::FireBall, data::SpriteId::FireBall),
+	(core::EntityKind::PinkBall, data::SpriteId::PinkBall),
+	(core::EntityKind::Tank, data::SpriteId::TankUp),
+	(core::EntityKind::Glider, data::SpriteId::GliderUp),
+	(core::EntityKind::Teeth, data::SpriteId::TeethUp),
+	(core::EntityKind::Walker, data::SpriteId::WalkerUpDown),
+	(core::EntityKind::Blob, data::SpriteId::Blob),
+	(core::EntityKind::Paramecium, data::SpriteId::ParameciumUpDown),
 ];
 
 #[derive(Default)]
@@ -244,7 +247,7 @@ impl EditorState {
 			for i in 0..ENTITY_SAMPLES.len() as i32 {
 				let (_, sprite) = ENTITY_SAMPLES[i as usize];
 				let pos = Vec3::new(i as f32 * 32.0, -2.0 * 32.0, 0.0);
-				fx::render::draw(&mut cv, pos, sprite, fx::Model::ReallyFlatSprite, 1.0);
+				fx::render::draw(&mut cv, pos, sprite, data::ModelId::ReallyFlatSprite, 1.0);
 			}
 
 			match self.tool {

@@ -55,29 +55,29 @@ impl FxState {
 		let ref gs = self.gs;
 
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(&mut cv, Sprite::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
+			draw_sprite(&mut cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(&mut cv, Sprite::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
+			draw_sprite(&mut cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(&mut cv, Sprite::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
+			draw_sprite(&mut cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(&mut cv, Sprite::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
+			draw_sprite(&mut cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
 		}
 
 		if gs.ps.flippers {
-			draw_sprite(&mut cv, Sprite::PowerFlippers, resx.tileset_size, Vec2(a * 0.0, a), a);
+			draw_sprite(&mut cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(a * 0.0, a), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(&mut cv, Sprite::PowerFireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
+			draw_sprite(&mut cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(&mut cv, Sprite::PowerIceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
+			draw_sprite(&mut cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(&mut cv, Sprite::PowerSuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
+			draw_sprite(&mut cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
 		}
 
 		cv.push_uniform_f(|u| {
@@ -151,6 +151,7 @@ impl FxState {
 
 		let mut darken = false;
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
+			darken = true;
 			let mut tbuf = shade::d2::TextBuffer::new();
 			tbuf.shader = resx.font.shader;
 			tbuf.viewport = cvmath::Rect::vec(ss);
@@ -178,9 +179,11 @@ impl FxState {
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);
 			scribe.color = Vec4(255, 255, 0, 255);
 			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
-			let password = format!("Password: {}", self.gs.field.password);
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
-			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
+			if let Some(password) = &self.gs.field.password {
+				let password = format!("Password: {}", password);
+				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
+				tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
+			}
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
 		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
@@ -223,7 +226,7 @@ impl FxState {
 	}
 }
 
-fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, sprite: Sprite, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
+fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, sprite: data::SpriteId, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
 	let uv = sprite.uv(tex_size);
 	let tex_size = tex_size.map(|c| c as f32);
 	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };

@@ -12,7 +12,7 @@ pub struct FxState {
 	pub next_level_load: f32,
 	pub game_win: bool,
 	pub music_enabled: bool,
-	pub music: Option<MusicId>,
+	pub music: Option<data::MusicId>,
 	pub hud_enabled: bool,
 	pub darken: bool,
 	pub darken_changed: bool,
@@ -49,6 +49,8 @@ impl FxState {
 		self.hud_enabled = true;
 		self.level_index = level_index;
 		self.next_level_load = 0.0;
+		self.darken = true;
+		self.darken_time = -1.0;
 	}
 	pub fn pause(&mut self) {
 		// if matches!(self.gs.ts, core::TimeState::Running) {
@@ -67,9 +69,9 @@ impl FxState {
 	pub fn think(&mut self, input: &Input) {
 		let music = if self.music_enabled {
 			let music = match self.level_index.wrapping_sub(1) % 2 {
-				0 => MusicId::Chip1,
-				_ => MusicId::Chip2,
-				// _ => MusicId::Canyon,
+				0 => data::MusicId::Chip1,
+				_ => data::MusicId::Chip2,
+				// _ => data::MusicId::Canyon,
 			};
 			Some(music)
 		}

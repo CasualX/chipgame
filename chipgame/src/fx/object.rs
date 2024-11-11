@@ -72,9 +72,9 @@ pub struct Object {
 	pub pos: Vec3<f32>,
 	pub lerp_pos: Vec3<f32>,
 	pub mover: MoveType,
-	pub sprite: Sprite,
-	pub model: Model,
-	pub anim: Animation,
+	pub sprite: data::SpriteId,
+	pub model: data::ModelId,
+	pub anim: data::AnimationId,
 	pub atime: f32,
 	pub alpha: f32,
 	pub vis: bool,
@@ -109,7 +109,7 @@ impl Object {
 		}
 
 		match self.anim {
-			Animation::Rise | Animation::FadeOut => {
+			data::AnimationId::Rise | data::AnimationId::FadeOut => {
 				if self.atime == 0.0 {
 					self.atime = ctx.time;
 				}
@@ -121,7 +121,7 @@ impl Object {
 					}
 				}
 			}
-			Animation::FadeIn => {
+			data::AnimationId::FadeIn => {
 				if self.atime == 0.0 {
 					self.atime = ctx.time;
 				}
@@ -130,7 +130,7 @@ impl Object {
 					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 				}
 			}
-			Animation::Fall => {
+			data::AnimationId::Fall => {
 				if self.atime == 0.0 {
 					self.atime = ctx.time;
 				}
@@ -142,7 +142,7 @@ impl Object {
 					}
 				}
 			}
-			Animation::Raise => {
+			data::AnimationId::Raise => {
 				if self.atime == 0.0 {
 					self.atime = ctx.time;
 					self.mover = MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 200.0) });
@@ -156,7 +156,7 @@ impl Object {
 					}
 				}
 			}
-			Animation::None => {
+			data::AnimationId::None => {
 				if self.unalive_after_anim {
 					self.live = false;
 				}

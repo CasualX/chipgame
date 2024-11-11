@@ -1,11 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-	"./ccdat",
 	"./chipcore",
 	"./chipgame",
 	"./editor",
 	"./play",
+	"./scripts/ccdat",
+	"./scripts/fixer",
 ]
 
 [workspace.dependencies]

@@ -63,11 +63,12 @@ impl PauseMenu {
 			..Default::default()
 		};
 
-		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 3.0));
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &format!("Level {}: {}", self.level_index, self.level_name));
-		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 3.0 + scribe.line_height));
-		scribe.color = cvmath::Vec4(0, 255, 128, 255);
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Paused!");
+		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, scribe.line_height));
+		buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
+			format_args!("~ Level {} ~", self.level_index),
+			format_args!("\x1b[color=#ff0]{}", self.level_name),
+			format_args!("\x1b[color=#0f0]Paused!"),
+		]);
 
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5 - size * 4.0, resx.screen_size.y as f32 * 0.5));
 		scribe.color = cvmath::Vec4(255, 255, 255, 255);

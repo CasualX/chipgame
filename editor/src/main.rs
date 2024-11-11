@@ -6,12 +6,14 @@ use chipgame::editor;
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	use winit::platform::windows::WindowBuilderExtWindows;
 	winit::window::WindowBuilder::new()
+		.with_title("ChipEdit")
 		.with_inner_size(size)
 		.with_drag_and_drop(false)
 }
 #[cfg(not(windows))]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	winit::window::WindowBuilder::new()
+		.with_title("ChipEdit")
 		.with_inner_size(size)
 }
 
@@ -102,6 +104,8 @@ fn main() {
 	let mut editor = editor::EditorState::default();
 	editor.init();
 	editor.load_level(&fs::read_to_string(&file_path).unwrap());
+
+	context.window().set_title(&format!("ChipEdit - {}", file_path));
 
 	// Main loop
 	let mut quit = false;

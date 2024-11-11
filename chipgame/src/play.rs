@@ -6,8 +6,9 @@ use super::*;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PlayEvent {
 	PlaySound { sound: core::SoundFx },
-	PlayMusic { music: Option<MusicId> },
+	PlayMusic { music: Option<data::MusicId> },
 	Quit,
+	PlayLevel,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -22,7 +23,8 @@ pub struct LevelData {
 	pub name: String,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub hint: Option<String>,
-	pub password: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub password: Option<String>,
 }
 #[derive(Default)]
 pub struct LevelPack {
@@ -109,6 +111,8 @@ impl PlayState {
 		fx.gs.ps.attempts = attempts;
 		let lv_data = self.level_pack.lv_data[(level_index - 1) as usize].as_str();
 		fx.parse_level(level_index, lv_data);
+
+		self.events.push(PlayEvent::PlayLevel);
 	}
 
 	pub fn sync(&mut self) {
@@ -121,6 +125,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::MainMenu => {
 					self.fx = None;
+					self.events.push(PlayEvent::PlayLevel);
 					self.menu.open_main();
 				}
 				menu::MenuEvent::LevelSelect => {
@@ -183,7 +188,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::BgMusicOn => {
 					self.data.bg_music = true;
-					self.events.push(PlayEvent::PlayMusic { music: Some(MusicId::Canyon) });
+					self.events.push(PlayEvent::PlayMusic { music: Some(data::MusicId::Canyon) });
 				}
 				menu::MenuEvent::BgMusicOff => {
 					self.data.bg_music = false;

@@ -1,0 +1,7 @@
+{
+	"name": "CCLP2",
+	"title": "Chip's Challenge Level Pack 2",
+	"levels": [
+		"lv/level1.json"
+	]
+}

@@ -7,20 +7,22 @@ mod xinput;
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	use winit::platform::windows::WindowBuilderExtWindows;
 	winit::window::WindowBuilder::new()
+		.with_title("Play ChipGame")
 		.with_inner_size(size)
 		.with_drag_and_drop(false)
 }
 #[cfg(not(windows))]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
 	winit::window::WindowBuilder::new()
+		.with_title("Play ChipGame")
 		.with_inner_size(size)
 }
 
 struct AudioPlayer {
 	sl: soloud::Soloud,
 	sfx: HashMap<chipgame::core::SoundFx, soloud::Wav>,
-	music: HashMap<chipgame::MusicId, soloud::Wav>,
-	cur_music: Option<(chipgame::MusicId, soloud::Handle)>,
+	music: HashMap<chipgame::data::MusicId, soloud::Wav>,
+	cur_music: Option<(chipgame::data::MusicId, soloud::Handle)>,
 }
 impl AudioPlayer {
 	fn load_wav(&mut self, fx: chipgame::core::SoundFx, path: &str) {
@@ -29,7 +31,7 @@ impl AudioPlayer {
 		wav.load(path).expect("Failed to load sound");
 		self.sfx.insert(fx, wav);
 	}
-	fn load_music(&mut self, music: chipgame::MusicId, path: &str) {
+	fn load_music(&mut self, music: chipgame::data::MusicId, path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
 		wav.load(path).expect("Failed to load sound");
@@ -44,7 +46,7 @@ impl AudioPlayer {
 			self.sl.play(wav);
 		}
 	}
-	fn play_music(&mut self, music: Option<chipgame::MusicId>) {
+	fn play_music(&mut self, music: Option<chipgame::data::MusicId>) {
 		if self.cur_music.map(|(music, _)| music) != music {
 			if let Some((_, handle)) = self.cur_music {
 				self.sl.stop(handle);
@@ -105,9 +107,9 @@ fn main() {
 	ap.load_wav(chipgame::core::SoundFx::TileEmptied, "data/sfx/whisk.wav");
 	ap.load_wav(chipgame::core::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
 	ap.load_wav(chipgame::core::SoundFx::FireWalking, "data/sfx/crackle.wav");
-	ap.load_music(chipgame::MusicId::Chip1, "data/music/2Chip1.ogg");
-	ap.load_music(chipgame::MusicId::Chip2, "data/music/2Chip2.ogg");
-	ap.load_music(chipgame::MusicId::Canyon, "data/music/2Canyon.ogg");
+	ap.load_music(chipgame::data::MusicId::Chip1, "data/music/2Chip1.ogg");
+	ap.load_music(chipgame::data::MusicId::Chip2, "data/music/2Chip2.ogg");
+	ap.load_music(chipgame::data::MusicId::Canyon, "data/music/2Canyon.ogg");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -119,6 +121,8 @@ fn main() {
 		.unwrap();
 
 	let context = unsafe { window_context.make_current().unwrap() };
+
+	context.window().set_cursor_visible(false);
 
 	shade::gl::capi::load_with(|s| context.get_proc_address(s) as *const _);
 
@@ -256,6 +260,14 @@ fn main() {
 				&chipgame::play::PlayEvent::PlaySound { sound } => ap.play(sound),
 				&chipgame::play::PlayEvent::PlayMusic { music } => ap.play_music(music),
 				&chipgame::play::PlayEvent::Quit => quit = true,
+				&chipgame::play::PlayEvent::PlayLevel => {
+					if let Some(fx) = &state.fx {
+						context.window().set_title(&format!("ChipGame - {}", fx.gs.field.name));
+					}
+					else {
+						context.window().set_title("ChipGame");
+					}
+				}
 			}
 		}
 

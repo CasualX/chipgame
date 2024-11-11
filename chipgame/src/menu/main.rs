@@ -9,10 +9,16 @@ impl MainMenu {
 	const ITEMS: [&'static str; 7] = ["New game", "Continue", "Go to level", "High scores", "Options", "About", "Exit"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
-			self.selected = if self.selected > 0 { self.selected - 1 } else { self.selected };
+			if self.selected > 0 {
+				self.selected = self.selected - 1;
+				events.push(MenuEvent::CursorMove);
+			}
 		}
 		if input.down.is_pressed() {
-			self.selected = if self.selected < Self::ITEMS.len() as u8 - 1 { self.selected + 1 } else { self.selected };
+			if self.selected < Self::ITEMS.len() as u8 - 1 {
+				self.selected = self.selected + 1;
+				events.push(MenuEvent::CursorMove);
+			}
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {

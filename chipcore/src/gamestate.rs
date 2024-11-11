@@ -269,20 +269,35 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	// Red button spawns entity when stepping _off_ the button only when triggered by a creature...
 	// This 'fixes' level 45 Monster Lab... Hope it doesn't break anything else!
 	if matches!(from_terrain, Terrain::RedButton) {
-		// Find the template entity connected to the red button
 		let Some(conn) = s.field.find_conn_by_src(from_pos) else { return };
-		let template = s.qt.get(conn.dest)[0];
-		let Some(template_ent) = s.ents.get(template) else { return };
-		if template_ent.flags & EF_TEMPLATE == 0 {
-			return;
+
+		let clone_block_dir = match s.field.get_terrain(conn.dest) {
+			Terrain::CloneBlockN => Some(Compass::Up),
+			Terrain::CloneBlockW => Some(Compass::Left),
+			Terrain::CloneBlockS => Some(Compass::Down),
+			Terrain::CloneBlockE => Some(Compass::Right),
+			_ => None,
+		};
+
+		// Spawn a new entity
+		let args = if let Some(clone_block_dir) = clone_block_dir {
+			EntityArgs {
+				kind: EntityKind::Block,
+				pos: conn.dest,
+				face_dir: Some(clone_block_dir),
+			}
 		}
-		// Spawn a new entity at the template entity's position
-		let args = EntityArgs {
-			kind: template_ent.kind,
-			pos: template_ent.pos,
-			face_dir: template_ent.face_dir,
+		else {
+			// Find the template entity connected to the red button
+			let template = s.qt.get(conn.dest)[0];
+			let Some(template_ent) = s.ents.get(template) else { return };
+			if template_ent.flags & EF_TEMPLATE == 0 {
+				return;
+			}
+			template_ent.to_entity_args()
 		};
 		let ehandle = s.entity_create(&args);
+
 		// Force the new entity to move out of the spawner
 		if let Some(mut ent) = s.ents.take(ehandle) {
 			// If the entity movement out of the spawner fails, remove it
