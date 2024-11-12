@@ -40,7 +40,7 @@ pub use self::soundfx::*;
 pub use self::terrain::*;
 
 #[derive(Copy, Clone, Debug)]
-enum TrapState {
+pub enum TrapState {
 	Closed,
 	Open,
 }

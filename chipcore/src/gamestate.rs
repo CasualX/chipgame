@@ -78,7 +78,7 @@ impl GameState {
 
 		for ehandle in self.ents.handles() {
 			if let Some(ent) = self.ents.get(ehandle) {
-				update_hidden_flag(self, ent.pos);
+				self.update_hidden_flag(ent.pos);
 			}
 		}
 
@@ -127,7 +127,7 @@ impl GameState {
 		ps_input(self, input);
 
 		// Spawn the cloned entities
-		spawn_clones(self);
+		self.spawn_clones();
 
 		// Let entities think
 		for ehandle in self.ents.handles() {
@@ -164,7 +164,7 @@ impl GameState {
 		self.time += 1;
 	}
 
-	fn get_trap_state(&self, pos: Vec2i) -> TrapState {
+	pub fn get_trap_state(&self, pos: Vec2i) -> TrapState {
 		let mut state = TrapState::Closed;
 		for conn in &self.field.conns {
 			if conn.dest == pos {
@@ -178,6 +178,35 @@ impl GameState {
 		return state;
 	}
 
+	fn spawn_clones(&mut self) {
+		let s = self;
+		for i in 0..s.spawns.len() {
+			let args = &{s.spawns[i]};
+
+			// Clones are forced out of the spawner, so they must have a direction
+			let Some(face_dir) = args.face_dir else { continue };
+
+			let ehandle = s.entity_create(args);
+
+			if let Some(mut ent) = s.ents.take(ehandle) {
+				let mut remove = false;
+				// Force the new entity to move out of the spawner
+				if !try_move(s, &mut ent, face_dir) {
+					remove = true;
+				}
+				s.ents.put(ent);
+				// If the entity movement out of the spawner fails, remove it
+				// This indicates that there's a lot of entities being spawned
+				if remove {
+					s.entity_remove(ehandle);
+				}
+			}
+		}
+
+		// Clear the spawn list
+		s.spawns.clear();
+	}
+
 	pub fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
 		if let Some(old) = self.field.set_terrain(pos, terrain) {
 			self.events.push(GameEvent::TerrainUpdated { pos, old, new: terrain });
@@ -189,184 +218,34 @@ impl GameState {
 		let terrain = self.field.get_terrain(pl.pos);
 		matches!(terrain, Terrain::Hint)
 	}
-}
 
-pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
-	// Play sound only for player and blocks to avoid a cacophony
-	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block);
+	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i) {
+		let s = self;
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::BearTrap) {
-		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
-		if trapped && ent.flags & EF_TRAPPED == 0 {
-			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
-			// Avoid audio spam when the level is initially loaded
-			if s.time != 0 {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
-			}
-		}
-		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
-	}
+		// Hide all template entities on clone machines
+		let hide_all = matches!(s.field.get_terrain(pos), Terrain::CloneMachine);
 
-	if matches!(ent.kind, EntityKind::Player) {
-		if let Some(step_dir) = ent.step_dir {
-			let from_pos = ent.pos - step_dir.to_vec();
-			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
-				s.set_terrain(from_pos, Terrain::Wall);
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
-			}
-		}
-	}
-
-	#[inline]
-	fn press_once(ent: &mut Entity) -> bool {
-		let state = ent.flags & EF_BUTTON_DOWN == 0;
-		ent.flags |= EF_BUTTON_DOWN;
-		state
-	}
-
-	match terrain {
-		Terrain::GreenButton => {
-			if press_once(ent) {
-				for y in 0..s.field.height {
-					for x in 0..s.field.width {
-						let terrain = s.field.get_terrain(Vec2i::new(x, y));
-						let new = match terrain {
-							Terrain::ToggleFloor => Terrain::ToggleWall,
-							Terrain::ToggleWall => Terrain::ToggleFloor,
-							_ => continue,
-						};
-						s.set_terrain(Vec2i::new(x, y), new);
+		let mut hidden = hide_all;
+		if !hidden {
+			for ehandle in s.qt.get(pos) {
+				if let Some(ent) = s.ents.get(ehandle) {
+					if matches!(ent.kind, EntityKind::Block) {
+						hidden = true;
+						break;
 					}
 				}
-				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
 			}
 		}
-		Terrain::RedButton => {
-			if press_once(ent) {
-				let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
 
-				// Handle CloneBlock tiles separately
-				let clone_block_dir = match s.field.get_terrain(conn.dest) {
-					Terrain::CloneBlockN => Some(Compass::Up),
-					Terrain::CloneBlockW => Some(Compass::Left),
-					Terrain::CloneBlockS => Some(Compass::Down),
-					Terrain::CloneBlockE => Some(Compass::Right),
-					_ => None,
-				};
-
-				// Spawn a new entity
-				let args = if let Some(clone_block_dir) = clone_block_dir {
-					EntityArgs {
-						kind: EntityKind::Block,
-						pos: conn.dest,
-						face_dir: Some(clone_block_dir),
-					}
-				}
-				else {
-					// Find the template entity connected to the red button
-					let template = s.qt.get(conn.dest)[0];
-					let Some(template_ent) = s.ents.get(template) else { return };
-					if template_ent.flags & EF_TEMPLATE == 0 {
-						return;
-					}
-					template_ent.to_entity_args()
-				};
-				s.spawns.push(args);
-
-				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
-			}
-		}
-		Terrain::BrownButton => {
-			if press_once(ent) && play_sound {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-			}
-		}
-		Terrain::BlueButton => {
-			if press_once(ent) {
-				for other in s.ents.iter_mut() {
-					if matches!(other.kind, EntityKind::Tank) {
-						if let Some(face_dir) = other.face_dir {
-							other.face_dir = Some(face_dir.turn_around());
-							s.events.push(GameEvent::EntityTurn { entity: other.handle });
-						}
-					}
-				}
-				// Handle the Tank which triggered the button separately
-				// as it has been taken out of the entity list
-				if matches!(ent.kind, EntityKind::Tank) {
-					if let Some(face_dir) = ent.face_dir {
-						ent.face_dir = Some(face_dir.turn_around());
-						s.events.push(GameEvent::EntityTurn { entity: ent.handle });
-					}
-				}
-				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
-			}
-		}
-		_ => {
-			ent.flags &= !EF_BUTTON_DOWN;
-		}
-	}
-}
-
-fn spawn_clones(s: &mut GameState) {
-	for i in 0..s.spawns.len() {
-		let args = &{s.spawns[i]};
-
-		// Clones are forced out of the spawner, so they must have a direction
-		let Some(face_dir) = args.face_dir else { continue };
-
-		let ehandle = s.entity_create(args);
-
-		if let Some(mut ent) = s.ents.take(ehandle) {
-			let mut remove = false;
-			// Force the new entity to move out of the spawner
-			if !try_move(s, &mut ent, face_dir) {
-				remove = true;
-			}
-			s.ents.put(ent);
-			// If the entity movement out of the spawner fails, remove it
-			// This indicates that there's a lot of entities being spawned
-			if remove {
-				s.entity_remove(ehandle);
-			}
-		}
-	}
-
-	// Clear the spawn list
-	s.spawns.clear();
-}
-
-pub(super) fn update_hidden_flag(s: &mut GameState, pos: Vec2i) {
-	// Hide all template entities on clone machines
-	let hide_all = matches!(s.field.get_terrain(pos), Terrain::CloneMachine);
-
-	let mut hidden = hide_all;
-	if !hidden {
 		for ehandle in s.qt.get(pos) {
-			if let Some(ent) = s.ents.get(ehandle) {
-				if matches!(ent.kind, EntityKind::Block) {
-					hidden = true;
-					break;
+			if let Some(ent) = s.ents.get_mut(ehandle) {
+				if !hide_all && matches!(ent.kind, EntityKind::Block) {
+					continue;
 				}
-			}
-		}
-	}
-
-	for ehandle in s.qt.get(pos) {
-		if let Some(ent) = s.ents.get_mut(ehandle) {
-			if !hide_all && matches!(ent.kind, EntityKind::Block) {
-				continue;
-			}
-			if (ent.flags & EF_HIDDEN != 0) != hidden {
-				ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
-				s.events.push(GameEvent::EntityHidden { entity: ent.handle, hidden });
+				if (ent.flags & EF_HIDDEN != 0) != hidden {
+					ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
+					s.events.push(GameEvent::EntityHidden { entity: ent.handle, hidden });
+				}
 			}
 		}
 	}

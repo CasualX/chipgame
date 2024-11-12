@@ -149,6 +149,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		};
 		// If on a solid wall, allow movement out
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
+			flick(s, &new_pos, step_dir);
 			return false;
 		}
 
@@ -189,6 +190,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Right => THIN_WALL_W,
 		};
 		if to_terrain.solid_flags() & panel != 0 {
+			flick(s, &new_pos, step_dir);
 			return false;
 		}
 
@@ -230,8 +232,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 			EntityKind::Block => {
 				if is_player && try_move(s, &mut ent, step_dir) {
-					update_hidden_flag(s, ent.pos);
-					update_hidden_flag(s, ent.pos - step_dir.to_vec());
+					s.update_hidden_flag(ent.pos);
+					s.update_hidden_flag(ent.pos - step_dir.to_vec());
 					s.events.push(GameEvent::BlockPush { entity: ent.handle });
 					s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					false
@@ -306,6 +308,24 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	return true;
 }
 
+/// To flick a block is to push it off of a tile that Chip cannot enter.
+fn flick(s: &mut GameState, &new_pos: &Vec2i, step_dir: Compass) {
+	for ehandle in s.qt.get(new_pos) {
+		let Some(mut ent) = s.ents.take(ehandle) else { continue };
+
+		if matches!(ent.kind, EntityKind::Block) {
+			if try_move(s, &mut ent, step_dir) {
+				s.update_hidden_flag(ent.pos);
+				s.update_hidden_flag(ent.pos - step_dir.to_vec());
+				s.events.push(GameEvent::BlockPush { entity: ent.handle });
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+			}
+		}
+
+		s.ents.put(ent);
+	}
+}
+
 pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
 	let terrain = s.field.get_terrain(ent.pos);
 	match terrain {
@@ -378,4 +398,128 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		s.events.push(GameEvent::SoundFx { sound: SoundFx::Teleporting });
 	}
 	return true;
+}
+
+pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
+	// Play sound only for player and blocks to avoid a cacophony
+	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block);
+
+	let terrain = s.field.get_terrain(ent.pos);
+	if matches!(terrain, Terrain::BearTrap) {
+		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
+		if trapped && ent.flags & EF_TRAPPED == 0 {
+			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
+			// Avoid audio spam when the level is initially loaded
+			if s.time != 0 {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+			}
+		}
+		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
+	}
+
+	if matches!(ent.kind, EntityKind::Player) {
+		if let Some(step_dir) = ent.step_dir {
+			let from_pos = ent.pos - step_dir.to_vec();
+			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
+				s.set_terrain(from_pos, Terrain::Wall);
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
+			}
+		}
+	}
+
+	#[inline]
+	fn press_once(ent: &mut Entity) -> bool {
+		let state = ent.flags & EF_BUTTON_DOWN == 0;
+		ent.flags |= EF_BUTTON_DOWN;
+		state
+	}
+
+	match terrain {
+		Terrain::GreenButton => {
+			if press_once(ent) {
+				for y in 0..s.field.height {
+					for x in 0..s.field.width {
+						let terrain = s.field.get_terrain(Vec2i::new(x, y));
+						let new = match terrain {
+							Terrain::ToggleFloor => Terrain::ToggleWall,
+							Terrain::ToggleWall => Terrain::ToggleFloor,
+							_ => continue,
+						};
+						s.set_terrain(Vec2i::new(x, y), new);
+					}
+				}
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				}
+			}
+		}
+		Terrain::RedButton => {
+			if press_once(ent) {
+				let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
+
+				// Handle CloneBlock tiles separately
+				let clone_block_dir = match s.field.get_terrain(conn.dest) {
+					Terrain::CloneBlockN => Some(Compass::Up),
+					Terrain::CloneBlockW => Some(Compass::Left),
+					Terrain::CloneBlockS => Some(Compass::Down),
+					Terrain::CloneBlockE => Some(Compass::Right),
+					_ => None,
+				};
+
+				// Spawn a new entity
+				let args = if let Some(clone_block_dir) = clone_block_dir {
+					EntityArgs {
+						kind: EntityKind::Block,
+						pos: conn.dest,
+						face_dir: Some(clone_block_dir),
+					}
+				}
+				else {
+					// Find the template entity connected to the red button
+					let template = s.qt.get(conn.dest)[0];
+					let Some(template_ent) = s.ents.get(template) else { return };
+					if template_ent.flags & EF_TEMPLATE == 0 {
+						return;
+					}
+					template_ent.to_entity_args()
+				};
+				s.spawns.push(args);
+
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				}
+			}
+		}
+		Terrain::BrownButton => {
+			if press_once(ent) && play_sound {
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			}
+		}
+		Terrain::BlueButton => {
+			if press_once(ent) {
+				for other in s.ents.iter_mut() {
+					if matches!(other.kind, EntityKind::Tank) {
+						if let Some(face_dir) = other.face_dir {
+							other.face_dir = Some(face_dir.turn_around());
+							s.events.push(GameEvent::EntityTurn { entity: other.handle });
+						}
+					}
+				}
+				// Handle the Tank which triggered the button separately
+				// as it has been taken out of the entity list
+				if matches!(ent.kind, EntityKind::Tank) {
+					if let Some(face_dir) = ent.face_dir {
+						ent.face_dir = Some(face_dir.turn_around());
+						s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+					}
+				}
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				}
+			}
+		}
+		_ => {
+			ent.flags &= !EF_BUTTON_DOWN;
+		}
+	}
 }
