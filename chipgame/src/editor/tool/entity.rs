@@ -78,6 +78,10 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 
 pub fn delete(s: &mut EditorState, pressed: bool) {
 	if pressed {
+		if s.selected_ent == core::EntityHandle::INVALID {
+			let cursor_pos = s.cursor_pos;
+			s.selected_ent = s.game.gs.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None }).unwrap_or(core::EntityHandle::INVALID);
+		}
 		if let Some(ent) = s.game.gs.ents.get(s.selected_ent) {
 			let kind = ent.kind;
 			let pos = ent.pos;

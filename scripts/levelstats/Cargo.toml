@@ -1,0 +1,11 @@
+[package]
+name = "levelstats"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap.workspace = true
+dataview = "1.0"
+chipcore = { path = "../../chipcore" }
+cvmath.workspace = true
+serde_json.workspace = true

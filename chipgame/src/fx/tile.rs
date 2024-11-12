@@ -7,7 +7,7 @@ pub struct TileGfx {
 	pub model: data::ModelId,
 }
 
-pub static TILES_PLAY: [TileGfx; 49] = [
+pub static TILES_PLAY: [TileGfx; 50] = [
 	TileGfx { sprite: data::SpriteId::Blank, model: data::ModelId::Empty }, // Terrain::Blank
 	TileGfx { sprite: data::SpriteId::Floor, model: data::ModelId::Floor }, // Terrain::Floor
 	TileGfx { sprite: data::SpriteId::Wall, model: data::ModelId::Wall }, // Terrain::Wall
@@ -23,6 +23,7 @@ pub static TILES_PLAY: [TileGfx; 49] = [
 	TileGfx { sprite: data::SpriteId::WaterSplash, model: data::ModelId::Floor }, // Terrain::WaterHazard
 	TileGfx { sprite: data::SpriteId::Floor, model: data::ModelId::Floor }, // Terrain::Fire
 	TileGfx { sprite: data::SpriteId::Dirt, model: data::ModelId::Floor }, // Terrain::Dirt
+	TileGfx { sprite: data::SpriteId::DirtBlock, model: data::ModelId::Wall }, // Terrain::DirtBlock
 	TileGfx { sprite: data::SpriteId::Gravel, model: data::ModelId::Floor }, // Terrain::Gravel
 	TileGfx { sprite: data::SpriteId::Ice, model: data::ModelId::Floor }, // Terrain::Ice
 	TileGfx { sprite: data::SpriteId::IceCornerNW, model: data::ModelId::Floor }, // Terrain::IceNW

@@ -1,7 +1,9 @@
 
+const LEVEL_PACK: &str = "data/packs/cclp1";
+
 fn main() {
 	for i in 1..150 {
-		let path = format!("data/packs/cclp2/lv/level{}.json", i);
+		let path = format!("{}/lv/level{}.json", LEVEL_PACK, i);
 		// dbg!(&path);
 		let Ok(content) = std::fs::read_to_string(&path)
 		else {

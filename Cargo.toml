@@ -7,6 +7,7 @@ members = [
 	"./play",
 	"./scripts/ccdat",
 	"./scripts/fixer",
+	"./scripts/levelstats",
 ]
 
 [workspace.dependencies]

@@ -19,7 +19,7 @@ impl Default for Tool {
 	}
 }
 
-static TERRAIN_SAMPLES: [[core::Terrain; 2]; 23] = [
+static TERRAIN_SAMPLES: [[core::Terrain; 2]; 24] = [
 	[core::Terrain::Blank, core::Terrain::Floor],
 	[core::Terrain::Dirt, core::Terrain::Gravel],
 	[core::Terrain::Wall, core::Terrain::CloneMachine],
@@ -29,6 +29,7 @@ static TERRAIN_SAMPLES: [[core::Terrain; 2]; 23] = [
 	[core::Terrain::GreenLock, core::Terrain::YellowLock],
 	[core::Terrain::Exit, core::Terrain::Hint],
 	[core::Terrain::Water, core::Terrain::Fire],
+	[core::Terrain::WaterHazard, core::Terrain::DirtBlock],
 	[core::Terrain::ThinWallE, core::Terrain::ThinWallS],
 	[core::Terrain::ThinWallN, core::Terrain::ThinWallW],
 	[core::Terrain::ThinWallSE, core::Terrain::Ice],
