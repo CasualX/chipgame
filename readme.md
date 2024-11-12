@@ -30,6 +30,12 @@ Uses winit, glutin for windowing, shade for OpenGL rendering, soloud for audio.
 
 Chip's Challenge level extractor.
 
+References
+----------
+
+* https://wiki.bitbusters.club/Main_Page
+* https://tilde.town/~magical/chip/
+
 License
 -------
 

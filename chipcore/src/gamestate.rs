@@ -19,6 +19,7 @@ pub struct GameState {
 	pub ps: PlayerState,
 	pub field: Field,
 	pub ents: EntityMap,
+	pub spawns: Vec<EntityArgs>,
 	pub qt: QuadTree,
 	pub rand: Random,
 	pub events: Vec<GameEvent>,
@@ -125,6 +126,9 @@ impl GameState {
 		input.encode(&mut self.inputs);
 		ps_input(self, input);
 
+		// Spawn the cloned entities
+		spawn_clones(self);
+
 		// Let entities think
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
@@ -204,128 +208,139 @@ pub(super) fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
 	}
 
-	if !(ent.step_time == s.time && ent.flags & EF_NEW_POS != 0) {
-		return;
+	if matches!(ent.kind, EntityKind::Player) {
+		if let Some(step_dir) = ent.step_dir {
+			let from_pos = ent.pos - step_dir.to_vec();
+			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
+				s.set_terrain(from_pos, Terrain::Wall);
+				s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
+			}
+		}
+	}
+
+	#[inline]
+	fn press_once(ent: &mut Entity) -> bool {
+		let state = ent.flags & EF_BUTTON_DOWN == 0;
+		ent.flags |= EF_BUTTON_DOWN;
+		state
 	}
 
 	match terrain {
 		Terrain::GreenButton => {
-			for y in 0..s.field.height {
-				for x in 0..s.field.width {
-					let terrain = s.field.get_terrain(Vec2i::new(x, y));
-					let new = match terrain {
-						Terrain::ToggleFloor => Terrain::ToggleWall,
-						Terrain::ToggleWall => Terrain::ToggleFloor,
-						_ => continue,
-					};
-					s.set_terrain(Vec2i::new(x, y), new);
+			if press_once(ent) {
+				for y in 0..s.field.height {
+					for x in 0..s.field.width {
+						let terrain = s.field.get_terrain(Vec2i::new(x, y));
+						let new = match terrain {
+							Terrain::ToggleFloor => Terrain::ToggleWall,
+							Terrain::ToggleWall => Terrain::ToggleFloor,
+							_ => continue,
+						};
+						s.set_terrain(Vec2i::new(x, y), new);
+					}
 				}
-			}
-			if play_sound {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				}
 			}
 		}
 		Terrain::RedButton => {
-			if play_sound {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			if press_once(ent) {
+				let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
+
+				// Handle CloneBlock tiles separately
+				let clone_block_dir = match s.field.get_terrain(conn.dest) {
+					Terrain::CloneBlockN => Some(Compass::Up),
+					Terrain::CloneBlockW => Some(Compass::Left),
+					Terrain::CloneBlockS => Some(Compass::Down),
+					Terrain::CloneBlockE => Some(Compass::Right),
+					_ => None,
+				};
+
+				// Spawn a new entity
+				let args = if let Some(clone_block_dir) = clone_block_dir {
+					EntityArgs {
+						kind: EntityKind::Block,
+						pos: conn.dest,
+						face_dir: Some(clone_block_dir),
+					}
+				}
+				else {
+					// Find the template entity connected to the red button
+					let template = s.qt.get(conn.dest)[0];
+					let Some(template_ent) = s.ents.get(template) else { return };
+					if template_ent.flags & EF_TEMPLATE == 0 {
+						return;
+					}
+					template_ent.to_entity_args()
+				};
+				s.spawns.push(args);
+
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				}
 			}
 		}
 		Terrain::BrownButton => {
-			if play_sound {
+			if press_once(ent) && play_sound {
 				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
 		}
 		Terrain::BlueButton => {
-			for other in s.ents.iter_mut() {
-				if matches!(other.kind, EntityKind::Tank) {
-					if let Some(face_dir) = other.face_dir {
-						other.face_dir = Some(face_dir.turn_around());
-						s.events.push(GameEvent::EntityTurn { entity: other.handle });
+			if press_once(ent) {
+				for other in s.ents.iter_mut() {
+					if matches!(other.kind, EntityKind::Tank) {
+						if let Some(face_dir) = other.face_dir {
+							other.face_dir = Some(face_dir.turn_around());
+							s.events.push(GameEvent::EntityTurn { entity: other.handle });
+						}
 					}
 				}
-			}
-			// Handle the Tank which triggered the button separately
-			// as it has been taken out of the entity list
-			if matches!(ent.kind, EntityKind::Tank) {
-				if let Some(face_dir) = ent.face_dir {
-					ent.face_dir = Some(face_dir.turn_around());
-					s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+				// Handle the Tank which triggered the button separately
+				// as it has been taken out of the entity list
+				if matches!(ent.kind, EntityKind::Tank) {
+					if let Some(face_dir) = ent.face_dir {
+						ent.face_dir = Some(face_dir.turn_around());
+						s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+					}
+				}
+				if play_sound {
+					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
 			}
-			if play_sound {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-			}
 		}
-		_ => { }
-	}
-
-	let mut from_pos = ent.pos;
-	let mut from_terrain = terrain;
-	if !play_sound {
-		from_pos -= ent.face_dir.map(Compass::to_vec).unwrap_or_default();
-		from_terrain = s.field.get_terrain(from_pos);
-	}
-
-	// Red button spawns entity when stepping _off_ the button only when triggered by a creature...
-	// This 'fixes' level 45 Monster Lab... Hope it doesn't break anything else!
-	if matches!(from_terrain, Terrain::RedButton) {
-		let Some(conn) = s.field.find_conn_by_src(from_pos) else { return };
-
-		let clone_block_dir = match s.field.get_terrain(conn.dest) {
-			Terrain::CloneBlockN => Some(Compass::Up),
-			Terrain::CloneBlockW => Some(Compass::Left),
-			Terrain::CloneBlockS => Some(Compass::Down),
-			Terrain::CloneBlockE => Some(Compass::Right),
-			_ => None,
-		};
-
-		// Spawn a new entity
-		let args = if let Some(clone_block_dir) = clone_block_dir {
-			EntityArgs {
-				kind: EntityKind::Block,
-				pos: conn.dest,
-				face_dir: Some(clone_block_dir),
-			}
+		_ => {
+			ent.flags &= !EF_BUTTON_DOWN;
 		}
-		else {
-			// Find the template entity connected to the red button
-			let template = s.qt.get(conn.dest)[0];
-			let Some(template_ent) = s.ents.get(template) else { return };
-			if template_ent.flags & EF_TEMPLATE == 0 {
-				return;
-			}
-			template_ent.to_entity_args()
-		};
-		let ehandle = s.entity_create(&args);
+	}
+}
 
-		// Force the new entity to move out of the spawner
+fn spawn_clones(s: &mut GameState) {
+	for i in 0..s.spawns.len() {
+		let args = &{s.spawns[i]};
+
+		// Clones are forced out of the spawner, so they must have a direction
+		let Some(face_dir) = args.face_dir else { continue };
+
+		let ehandle = s.entity_create(args);
+
 		if let Some(mut ent) = s.ents.take(ehandle) {
-			// If the entity movement out of the spawner fails, remove it
 			let mut remove = false;
-			if !try_move(s, &mut ent, args.face_dir.unwrap()) {
+			// Force the new entity to move out of the spawner
+			if !try_move(s, &mut ent, face_dir) {
 				remove = true;
 			}
-			// HACK? Make the newly spawned entity interact with the terrain
-			interact_terrain(s, &mut ent);
 			s.ents.put(ent);
-			// Level 45 here again! The level spams so many entities on a single clone machine!
-			// Remove the failed clones to prevent the game from crashing!
+			// If the entity movement out of the spawner fails, remove it
+			// This indicates that there's a lot of entities being spawned
 			if remove {
 				s.entity_remove(ehandle);
 			}
 		}
 	}
 
-	if matches!(ent.kind, EntityKind::Player) {
-		let mut from_pos = ent.pos;
-		if let Some(step_dir) = ent.step_dir {
-			from_pos -= step_dir.to_vec();
-		}
-		if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
-			s.set_terrain(from_pos, Terrain::Wall);
-			s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
-		}
-	}
+	// Clear the spawn list
+	s.spawns.clear();
 }
 
 pub(super) fn update_hidden_flag(s: &mut GameState, pos: Vec2i) {

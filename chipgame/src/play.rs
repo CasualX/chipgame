@@ -60,7 +60,7 @@ impl PlayState {
 		let mut lv_info = Vec::new();
 		let mut lv_data = Vec::new();
 		for level in &pack.levels {
-			let s = std::fs::read_to_string(path.join(level)).unwrap();
+			let s = std::fs::read_to_string(path.join(level)).expect(level);
 			let ld: LevelData = serde_json::from_str(&s).unwrap();
 			lv_info.push(ld);
 			lv_data.push(s);

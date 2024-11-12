@@ -39,3 +39,8 @@ cargo run --bin ccdat -- -f %CCDAT% -n %N% > %LEVEL_PACK%\lv\level%N%.json && ca
 rem Edit level
 cargo run --bin edit -- %LEVEL_PACK%\lv\level%N%.json
 ```
+
+References
+----------
+
+* https://wiki.bitbusters.club/DAT
