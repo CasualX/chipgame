@@ -119,9 +119,12 @@ impl MenuState {
 	pub fn close_menu(&mut self) {
 		let _ = self.stack.pop();
 	}
-	pub fn open_main(&mut self) {
+	pub fn open_main(&mut self, start_from_continue: bool) {
 		self.stack.clear();
-		self.stack.push(Menu::Main(MainMenu::default()));
+		let menu = MainMenu {
+			selected: if start_from_continue { 1 } else { 0 },
+		};
+		self.stack.push(Menu::Main(menu));
 	}
 }
 

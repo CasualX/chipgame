@@ -43,7 +43,7 @@ impl LevelSelectMenu {
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::UnlockLevel,
-				index => MenuEvent::GoToLevel { level_index: index },
+				index => MenuEvent::PlayLevel { level_number: index },
 			};
 			events.push(evt);
 		}

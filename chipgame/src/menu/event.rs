@@ -29,7 +29,7 @@ pub enum MenuEvent {
 
 	// Level select Events
 	UnlockLevel,
-	GoToLevel { level_index: i32 },
+	PlayLevel { level_number: i32 },
 
 	// Unlock level Events
 	EnterPassword { code: [u8; 4] },

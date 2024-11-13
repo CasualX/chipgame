@@ -8,7 +8,7 @@ pub struct FxState {
 	pub gs: core::GameState,
 	pub camera: Camera,
 	pub objects: ObjectMap,
-	pub level_index: i32,
+	pub level_number: i32,
 	pub next_level_load: f32,
 	pub game_win: bool,
 	pub music_enabled: bool,
@@ -24,10 +24,10 @@ pub struct FxState {
 impl FxState {
 	pub fn init(&mut self) {
 		self.tiles = &TILES_PLAY;
-		self.level_index = 0;
+		self.level_number = 0;
 		self.music_enabled = false;
 	}
-	pub fn parse_level(&mut self, level_index: i32, json: &str) {
+	pub fn parse_level(&mut self, level_number: i32, json: &str) {
 		self.objects.clear();
 		self.gs.parse(json);
 		self.sync();
@@ -47,7 +47,7 @@ impl FxState {
 		}
 
 		self.hud_enabled = true;
-		self.level_index = level_index;
+		self.level_number = level_number;
 		self.next_level_load = 0.0;
 		self.darken = true;
 		self.darken_time = -1.0;
@@ -68,7 +68,7 @@ impl FxState {
 	}
 	pub fn think(&mut self, input: &Input) {
 		let music = if self.music_enabled {
-			let music = match self.level_index.wrapping_sub(1) % 2 {
+			let music = match self.level_number.wrapping_sub(1) % 2 {
 				0 => data::MusicId::Chip1,
 				_ => data::MusicId::Chip2,
 				// _ => data::MusicId::Canyon,

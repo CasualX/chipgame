@@ -173,7 +173,7 @@ impl FxState {
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
-			let level_index = format!("~ Level {} ~", self.level_index);
+			let level_index = format!("~ Level {} ~", self.level_number);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &level_index);
 			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 - size * 1.2), &level_index);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);

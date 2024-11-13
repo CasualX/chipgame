@@ -4,7 +4,7 @@ use super::*;
 pub struct GameOverMenu {
 	pub selected: u8,
 	pub activity: crate::core::PlayerActivity,
-	pub level_index: i32,
+	pub level_number: i32,
 	pub level_name: String,
 	pub attempts: i32,
 	pub time: i32,
@@ -74,7 +74,7 @@ impl GameOverMenu {
 		};
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, scribe.line_height));
 		buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
-			format_args!("~ Level {} ~", self.level_index),
+			format_args!("~ Level {} ~", self.level_number),
 			format_args!("\x1b[color=#ff0]{}", self.level_name),
 			format_args!("\x1b[color=#f08]{}", reason),
 		]);

@@ -1,6 +1,7 @@
 {
 	"name": "CCLP1",
 	"title": "Chip's Challenge Level Pack 1",
+	"splash": "splash.png",
 	"levels": [
 		"lv/level1.json",
 		"lv/level2.json",

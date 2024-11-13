@@ -3,7 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct PauseMenu {
 	pub selected: u8,
-	pub level_index: i32,
+	pub level_number: i32,
 	pub level_name: String,
 	pub attempts: i32,
 	pub time: i32,
@@ -65,7 +65,7 @@ impl PauseMenu {
 
 		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, scribe.line_height));
 		buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
-			format_args!("~ Level {} ~", self.level_index),
+			format_args!("~ Level {} ~", self.level_number),
 			format_args!("\x1b[color=#ff0]{}", self.level_name),
 			format_args!("\x1b[color=#0f0]Paused!"),
 		]);
