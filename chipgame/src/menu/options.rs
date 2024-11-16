@@ -41,6 +41,9 @@ impl OptionsMenu {
 			};
 			events.push(evt);
 		}
+		if input.b.is_pressed() {
+			events.push(MenuEvent::CloseMenu);
+		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
@@ -48,8 +51,8 @@ impl OptionsMenu {
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = cvmath::Rect::vec(resx.screen_size);
 
-		let ss = resx.screen_size;
-		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Rect::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -57,33 +60,19 @@ impl OptionsMenu {
 			..Default::default()
 		});
 
-		// let mut pos = Vec2::ZERO;
-		let mut scribe = shade::d2::Scribe {
-			font_size: 32.0,
-			line_height: 40.0,
-			..Default::default()
-		};
+		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
 
-		for (i, item) in Self::ITEMS.iter().enumerate() {
-			let color = if i == self.selected as usize { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) };
-			scribe.color = color;
+		let items: [&dyn fmt::Display; 4] = [
+			&fmtools::fmt!("Background music: "{get_flag(self.bg_music)}),
+			&fmtools::fmt!("Sound effects: "{get_flag(self.sound_fx)}),
+			&fmtools::fmt!("Developer mode: "{get_flag(self.dev_mode)}),
+			&"Back",
+		];
 
-			let state = match i {
-				0 => Some(self.bg_music),
-				1 => Some(self.sound_fx),
-				2 => Some(self.dev_mode),
-				_ => None,
-			};
-
-			let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 * 0.5 - 100.0 + i as i32 as f32 * scribe.line_height));
-			if let Some(state) = state {
-				let color = if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
-				buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &[format_args!("{}{}", item, color)]);
-			}
-			else {
-				buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, item);
-			}
-		}
+		draw::DrawMenuItems {
+			items_text: &items,
+			selected_index: self.selected as usize,
+		}.draw(&mut buf, &rect, resx);
 
 		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 	}

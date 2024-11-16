@@ -1,6 +1,19 @@
 {
 	"name": "CCLP1",
 	"title": "Chip's Challenge Level Pack 1",
+	"about": [
+		"CCLP1 staff",
+		"",
+		"John Lewis (Staff Coordinator)",
+		"Dave Varberg (Speaker for the Staff)",
+		"The Architect (Content Creator)",
+		"James Anderson (Webmaster)",
+		"Tom Patten (Voting Coordinator)",
+		"Rock Généreux (MS Ruleset Playtester)",
+		"Ben Hornlitz (MS Ruleset Playtester)",
+		"Tyler Sontag (Lynx Ruleset Playtester)",
+		"Paul Gilbert (Lynx Ruleset Playtester)"
+	],
 	"splash": "splash.png",
 	"levels": [
 		"lv/level1.json",

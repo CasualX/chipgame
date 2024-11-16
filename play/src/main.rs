@@ -122,8 +122,6 @@ fn main() {
 
 	let context = unsafe { window_context.make_current().unwrap() };
 
-	context.window().set_cursor_visible(false);
-
 	shade::gl::capi::load_with(|s| context.get_proc_address(s) as *const _);
 
 	// Create the graphics context
@@ -262,10 +260,10 @@ fn main() {
 				&chipgame::play::PlayEvent::Quit => quit = true,
 				&chipgame::play::PlayEvent::PlayLevel => {
 					if let Some(fx) = &state.fx {
-						context.window().set_title(&format!("ChipGame - {}", fx.gs.field.name));
+						context.window().set_title(&format!("{} - Level {} - {}", state.level_pack.name, fx.level_number, fx.gs.field.name));
 					}
 					else {
-						context.window().set_title("ChipGame");
+						context.window().set_title(&state.level_pack.title);
 					}
 				}
 			}

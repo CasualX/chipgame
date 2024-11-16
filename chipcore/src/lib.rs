@@ -45,6 +45,12 @@ pub enum TrapState {
 	Open,
 }
 
+pub enum RngSeed {
+	LevelHash,
+	System,
+	Manual(u64),
+}
+
 const SOLID_WALL: u8 = 0xf;
 const THIN_WALL_N: u8 = 0x1;
 const THIN_WALL_E: u8 = 0x2;

@@ -3,18 +3,18 @@ use std::path;
 
 use super::*;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum PlayEvent {
-	PlaySound { sound: core::SoundFx },
-	PlayMusic { music: Option<data::MusicId> },
-	Quit,
-	PlayLevel,
-}
+mod event;
+mod savedata;
+
+pub use self::event::*;
+pub use self::savedata::*;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct LevelPackDto {
 	pub name: String,
 	pub title: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub about: Option<Vec<String>>,
 	pub levels: Vec<String>,
 }
 
@@ -30,120 +30,13 @@ pub struct LevelData {
 pub struct LevelPack {
 	pub name: String,
 	pub title: String,
+	pub about: Option<String>,
 	pub lv_data: Vec<String>,
 	pub lv_info: Vec<LevelData>,
 }
 impl LevelPack {
 	pub fn get_level_number(&self, name: &str) -> Option<i32> {
 		self.lv_info.iter().position(|s| s.name == name).map(|i| i as i32 + 1)
-	}
-}
-
-pub struct PlayData {
-	pub bg_music: bool,
-	pub sound_fx: bool,
-	pub dev_mode: bool,
-	pub current_level: i32,
-	pub unlocked_levels: Vec<i32>,
-}
-impl Default for PlayData {
-	fn default() -> Self {
-		Self {
-			bg_music: true,
-			sound_fx: true,
-			dev_mode: false,
-			current_level: 0,
-			unlocked_levels: Vec::new(),
-		}
-	}
-}
-impl PlayData {
-	pub fn unlock_level(&mut self, level_number: i32) {
-		if let Err(index) = self.unlocked_levels.binary_search(&level_number) {
-			self.unlocked_levels.insert(index, level_number);
-		}
-	}
-	pub fn is_level_unlocked(&self, level_number: i32) -> bool {
-		self.unlocked_levels.binary_search(&level_number).is_ok()
-	}
-	pub fn load(&mut self, level_pack: &LevelPack) {
-		let file_name = format!("save/{}.json", level_pack.name);
-
-		let save_data = if let Ok(content) = std::fs::read_to_string(&file_name) {
-			serde_json::from_str::<save::SaveDto>(&content).unwrap_or_default()
-		}
-		else {
-			return;
-		};
-
-		self.current_level = 0;
-		if let Some(current_level) = save_data.current_level {
-			if let Some(level_number) = level_pack.get_level_number(&current_level) {
-				self.current_level = level_number;
-			}
-		}
-
-		self.bg_music = save_data.options.background_music;
-		self.sound_fx = save_data.options.sound_effects;
-		self.dev_mode = save_data.options.developer_mode;
-
-		self.unlocked_levels.clear();
-		let unlocked_levels = save_data.unlocked_levels.iter().filter_map(|level_name| level_pack.get_level_number(level_name));
-		self.unlocked_levels.extend(unlocked_levels);
-		if self.unlocked_levels.is_empty() {
-			self.unlocked_levels.push(1);
-		}
-		self.unlocked_levels.sort();
-	}
-	pub fn save(&mut self, level_pack: &LevelPack, replay: Option<(i32, save::RecordDto)>) {
-		let file_name = format!("save/{}.json", level_pack.name);
-
-		let mut save_data = if let Ok(content) = std::fs::read_to_string(&file_name) {
-			serde_json::from_str::<save::SaveDto>(&content).unwrap_or_default()
-		}
-		else {
-			save::SaveDto::default()
-		};
-
-		let level_name = level_pack.lv_info.get((self.current_level - 1) as usize).map(|s| s.name.clone());
-		if let Some(level_name) = &level_name {
-			if let Some((level_number, replay)) = replay {
-
-				if let Some(entry) = save_data.records_time.get(level_name) {
-					if replay.ticks < entry.ticks {
-						save_data.records_time.insert(level_name.clone(), replay.clone());
-					}
-				}
-				else {
-					save_data.records_time.insert(level_name.clone(), replay.clone());
-				}
-
-				if let Some(entry) = save_data.records_steps.get(level_name) {
-					if replay.steps < entry.steps || (replay.steps == entry.steps && replay.ticks < entry.ticks) {
-						save_data.records_steps.insert(level_name.clone(), replay.clone());
-					}
-				}
-				else {
-					save_data.records_steps.insert(level_name.clone(), replay.clone());
-				}
-			}
-		}
-		save_data.current_level = level_name;
-
-
-		save_data.options.background_music = self.bg_music;
-		save_data.options.sound_effects = self.sound_fx;
-		save_data.options.developer_mode = self.dev_mode;
-
-		save_data.unlocked_levels.clear();
-		let unlocked_levels = self.unlocked_levels.iter().filter_map(|&level_number| level_pack.lv_info.get((level_number - 1) as usize).map(|s| s.name.clone()));
-		save_data.unlocked_levels.extend(unlocked_levels);
-
-		let content = serde_json::to_string_pretty(&save_data).unwrap();
-		match std::fs::write(&file_name, content) {
-			Ok(_) => {}
-			Err(e) => eprintln!("Error saving file: {}", e),
-		}
 	}
 }
 
@@ -154,7 +47,7 @@ pub struct PlayState {
 	pub events: Vec<PlayEvent>,
 	pub input: core::Input,
 	pub level_pack: LevelPack,
-	pub data: PlayData,
+	pub save_data: SaveData,
 }
 
 impl PlayState {
@@ -172,15 +65,16 @@ impl PlayState {
 		self.level_pack = LevelPack {
 			name: pack.name,
 			title: pack.title,
+			about: pack.about.map(|lines| lines.join("\n")),
 			lv_data,
 			lv_info,
 		};
-		self.data.load(&self.level_pack);
-		self.data.save(&self.level_pack, None);
+		self.save_data.load(&self.level_pack);
+		self.save_data.save(&self.level_pack, None);
 	}
 
 	pub fn launch(&mut self) {
-		self.menu.open_main(self.data.current_level > 0);
+		self.menu.open_main(self.save_data.current_level > 0, &self.level_pack.title);
 	}
 
 	pub fn think(&mut self, input: &core::Input) {
@@ -214,7 +108,8 @@ impl PlayState {
 		let attempts = if let Some(fx) = &self.fx { if fx.level_number == level_number { fx.gs.ps.attempts } else { 0 } } else { 0 };
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
-		self.data.current_level = level_number;
+		self.save_data.current_level = level_number;
+		self.save_data.save(&self.level_pack, None);
 
 		fx.init();
 		fx.gs.ps.attempts = attempts;
@@ -227,7 +122,7 @@ impl PlayState {
 	pub fn sync(&mut self) {
 		let events = mem::replace(&mut self.menu.events, Vec::new());
 		for evt in events {
-			println!("MenuEvent: {:?}", evt);
+			eprintln!("MenuEvent: {:?}", evt);
 			match evt {
 				menu::MenuEvent::NewGame => {
 					self.play_level(1);
@@ -235,7 +130,7 @@ impl PlayState {
 				menu::MenuEvent::MainMenu => {
 					self.fx = None;
 					self.events.push(PlayEvent::PlayLevel);
-					self.menu.open_main(self.data.current_level > 0);
+					self.menu.open_main(self.save_data.current_level > 0, &self.level_pack.title);
 				}
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu {
@@ -243,8 +138,26 @@ impl PlayState {
 						offset: 0,
 						items: Vec::new(),
 					};
-					menu.load_items(&self.level_pack);
+					menu.load_items(&self.level_pack, &self.save_data);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));
+				}
+				menu::MenuEvent::UnlockLevel => {
+					let menu = menu::UnlockLevelMenu {
+						selected: 0,
+						password: [None; 4],
+					};
+					self.menu.stack.push(menu::Menu::UnlockLevel(menu));
+				}
+				menu::MenuEvent::EnterPassword { code } => {
+					for (index, lv_info) in self.level_pack.lv_info.iter().enumerate() {
+						if let Some(lv_pass) = &lv_info.password {
+							if lv_pass.as_bytes() == code.as_slice() {
+								let level_number = index as i32 + 1;
+								self.save_data.unlock_level(level_number);
+								self.save_data.current_level = level_number;
+							}
+						}
+					}
 				}
 				menu::MenuEvent::PlayLevel { level_number } => {
 					self.play_level(level_number);
@@ -258,7 +171,7 @@ impl PlayState {
 					self.play_level(level_number);
 				}
 				menu::MenuEvent::Continue => {
-					let level_number = i32::max(1, self.data.current_level);
+					let level_number = i32::max(1, self.save_data.current_level);
 					self.play_level(level_number);
 				}
 				menu::MenuEvent::Resume => {
@@ -267,6 +180,24 @@ impl PlayState {
 						fx.unpause();
 					}
 				}
+				menu::MenuEvent::SaveReplay => {
+					if let Some(fx) = &self.fx {
+						let record = get_record_data_from_fx(fx);
+						let record = serde_json::to_string_pretty(&record).unwrap();
+						if let Err(err) = std::fs::write(format!("replay/{}.level{}.attempt{}.json", self.level_pack.name, fx.level_number, fx.gs.ps.attempts), record) {
+							eprintln!("Error saving replay: {}", err);
+						}
+					}
+				}
+				menu::MenuEvent::About => {
+					if let Some(about) = &self.level_pack.about {
+						let menu = menu::AboutMenu {
+							text: about.clone(),
+						};
+						self.menu.stack.push(menu::Menu::About(menu));
+					}
+				}
+				menu::MenuEvent::HighScores => {}
 				menu::MenuEvent::Exit => {
 					self.menu.close_all();
 					self.fx = None;
@@ -275,9 +206,9 @@ impl PlayState {
 				menu::MenuEvent::Options => {
 					let menu = menu::OptionsMenu {
 						selected: 0,
-						bg_music: self.data.bg_music,
-						sound_fx: self.data.sound_fx,
-						dev_mode: self.data.dev_mode,
+						bg_music: self.save_data.bg_music,
+						sound_fx: self.save_data.sound_fx,
+						dev_mode: self.save_data.dev_mode,
 					};
 					self.menu.stack.push(menu::Menu::Options(menu));
 				}
@@ -296,42 +227,46 @@ impl PlayState {
 					}
 				}
 				menu::MenuEvent::BgMusicOn => {
-					self.data.bg_music = true;
+					self.save_data.bg_music = true;
 					self.events.push(PlayEvent::PlayMusic { music: Some(data::MusicId::Canyon) });
 				}
 				menu::MenuEvent::BgMusicOff => {
-					self.data.bg_music = false;
+					self.save_data.bg_music = false;
 					self.events.push(PlayEvent::PlayMusic { music: None });
 				}
 				menu::MenuEvent::SoundFxOn => {
-					self.data.sound_fx = true;
+					self.save_data.sound_fx = true;
 				}
 				menu::MenuEvent::SoundFxOff => {
-					self.data.sound_fx = false;
+					self.save_data.sound_fx = false;
 				}
 				menu::MenuEvent::DevModeOn => {
-					self.data.dev_mode = true;
+					self.save_data.dev_mode = true;
 				}
 				menu::MenuEvent::DevModeOff => {
-					self.data.dev_mode = false;
+					self.save_data.dev_mode = false;
 				}
 				menu::MenuEvent::CursorMove => {}
 				menu::MenuEvent::CloseMenu => {
 					self.menu.close_menu();
 				}
-				_ => unimplemented!("{:?}", evt),
 			}
 		}
 
 		if let Some(fx) = &mut self.fx {
 			let events = mem::replace(&mut fx.events, Vec::new());
 			for evt in events {
-				println!("FxEvent: {:?}", evt);
+				eprintln!("FxEvent: {:?}", evt);
 				match evt {
 					fx::FxEvent::PlaySound { sound } => {
-						self.events.push(PlayEvent::PlaySound { sound });
+						if self.save_data.sound_fx {
+							self.events.push(PlayEvent::PlaySound { sound });
+						}
 					}
-					fx::FxEvent::PlayMusic { music } => {
+					fx::FxEvent::PlayMusic { mut music } => {
+						if !self.save_data.bg_music {
+							music = None;
+						}
 						self.events.push(PlayEvent::PlayMusic { music });
 					}
 					fx::FxEvent::Pause => {
@@ -350,10 +285,11 @@ impl PlayState {
 						self.menu.close_all();
 					}
 					fx::FxEvent::GameWin => {
-						self.data.unlock_level(fx.level_number);
-						self.data.unlock_level(fx.level_number + 1);
-						self.data.current_level = fx.level_number + 1;
-						self.data.save(&self.level_pack, Some((fx.level_number, get_record_data_from_fx(fx))));
+						self.save_data.unlock_level(fx.level_number);
+						self.save_data.unlock_level(fx.level_number + 1);
+						self.save_data.current_level = fx.level_number + 1;
+						self.save_data.save(&self.level_pack, Some((fx.level_number, &get_record_data_from_fx(fx))));
+
 						let menu = menu::GameWinMenu {
 							selected: 0,
 							level_number: fx.level_number,
@@ -405,18 +341,27 @@ impl PlayState {
 
 }
 
+fn encode_bytes(bytes: &[u8]) -> String {
+	// Compress the bytes
+	let mut compressed = Vec::new();
+	compressed.reserve(bytes.len());
+	let mut compress = flate2::Compress::new(flate2::Compression::best(), true);
+	compress.compress_vec(bytes, &mut compressed, flate2::FlushCompress::Finish).unwrap();
+
+	// Base64 encode to string
+	simple_base64::encode_engine(compressed.as_slice(), &simple_base64::engine::general_purpose::STANDARD_NO_PAD)
+}
+
 fn get_record_data_from_fx(fx: &fx::FxState) -> save::RecordDto {
-	let mut replay = String::new();
-	for input in &fx.gs.inputs {
-		use std::fmt::Write;
-		let _ = write!(replay, "{:02x}", input);
-	}
+	let replay = encode_bytes(&fx.gs.inputs);
 
 	save::RecordDto {
 		date: None,
 		ticks: fx.gs.time,
+		realtime: fx.gs_realtime,
 		steps: fx.gs.ps.steps,
 		bonks: fx.gs.ps.bonks,
+		seed: format!("{:016x}", fx.gs.field.seed),
 		replay,
 	}
 }

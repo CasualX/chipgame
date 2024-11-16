@@ -17,3 +17,7 @@ serde_json = "1.0"
 clap = { version = "3.2", features = ["cargo"] }
 
 cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
+fmtools = "0.1"
+
+flate2 = "1.0"
+simple-base64 = "0.23"

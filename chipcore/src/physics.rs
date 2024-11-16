@@ -429,7 +429,8 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 
 	#[inline]
 	fn press_once(ent: &mut Entity) -> bool {
-		let state = ent.flags & EF_BUTTON_DOWN == 0;
+		// Checking for EF_NEW_POS prevents entities from pressing buttons when spawned...
+		let state = ent.flags & EF_BUTTON_DOWN == 0 && ent.flags & EF_NEW_POS != 0;
 		ent.flags |= EF_BUTTON_DOWN;
 		state
 	}

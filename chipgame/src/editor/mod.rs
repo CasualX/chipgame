@@ -130,20 +130,11 @@ impl EditorState {
 		}).collect();
 		entities.sort_unstable_by_key(|ent| (ent.kind as i32, ent.pos.y, ent.pos.x));
 
-		// Generate a new seed if zero, otherwise keep the existing seed
-		let seed = if self.game.gs.field.seed == 0 {
-			urandom::new().next_u32() as u64
-		}
-		else {
-			self.game.gs.field.seed
-		};
-
 		let dto = core::FieldDto {
 			name: self.game.gs.field.name.clone(),
 			author: self.game.gs.field.author.clone(),
 			hint: self.game.gs.field.hint.clone(),
 			password: self.game.gs.field.password.clone(),
-			seed,
 			time_limit: self.game.gs.field.time_limit,
 			required_chips: self.game.gs.field.required_chips,
 			map: core::MapDto {

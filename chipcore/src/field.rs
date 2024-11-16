@@ -19,7 +19,6 @@ pub struct FieldDto {
 	pub hint: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub password: Option<String>,
-	pub seed: u64,
 	pub required_chips: i32,
 	pub time_limit: i32,
 	pub map: MapDto,

@@ -379,11 +379,13 @@ pub fn toggle_walls(ctx: &mut FxState) {
 }
 
 pub fn game_win(ctx: &mut FxState) {
+	ctx.gs_realtime = ctx.time;
 	ctx.next_level_load = ctx.time + 2.0;
 	ctx.game_win = true;
 }
 
 pub fn game_over(ctx: &mut FxState) {
+	ctx.gs_realtime = ctx.time;
 	ctx.next_level_load = ctx.time + 2.0;
 	ctx.game_win = false;
 }

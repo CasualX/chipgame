@@ -6,6 +6,7 @@ pub struct FxState {
 	pub time: f32,
 	pub dt: f32,
 	pub gs: core::GameState,
+	pub gs_realtime: f32,
 	pub camera: Camera,
 	pub objects: ObjectMap,
 	pub level_number: i32,
@@ -29,7 +30,7 @@ impl FxState {
 	}
 	pub fn parse_level(&mut self, level_number: i32, json: &str) {
 		self.objects.clear();
-		self.gs.parse(json);
+		self.gs.parse(json, core::RngSeed::System);
 		self.sync();
 		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
 
@@ -101,7 +102,7 @@ impl FxState {
 	}
 	pub fn sync(&mut self) {
 		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
-			println!("GameEvent: {:?}", ev);
+			eprintln!("GameEvent: {:?}", ev);
 			match ev {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
 				&core::GameEvent::EntityRemoved { entity, kind } => entity_removed(self, entity, kind),

@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Default)]
 pub struct MainMenu {
+	pub title: String,
 	pub selected: u8,
 }
 
@@ -40,8 +41,8 @@ impl MainMenu {
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = cvmath::Rect::vec(resx.screen_size);
 
-		let ss = resx.screen_size;
-		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Rect::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -49,22 +50,25 @@ impl MainMenu {
 			..Default::default()
 		});
 
-		let size = resx.screen_size.y as f32 * FONT_SIZE;
+		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 
-		// let mut pos = Vec2::ZERO;
-		let mut scribe = shade::d2::Scribe {
-			font_size: size,
-			line_height: size * (5.0 / 4.0),
-			..Default::default()
-		};
+		{
+			let size = resx.screen_size.y as f32 * FONT_SIZE;
 
-		for (i, item) in Self::ITEMS.iter().enumerate() {
-			let color = if i == self.selected as usize { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) };
-			scribe.color = color;
+			let scribe = shade::d2::Scribe {
+				font_size: size,
+				line_height: size * (5.0 / 4.0),
+				color: cvmath::Vec4(255, 255, 255, 255),
+				..Default::default()
+			};
 
-			let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 * 0.5 - 100.0 + i as i32 as f32 * scribe.line_height));
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, item);
+			buf.text_box(&resx.font, &scribe, &top, shade::d2::BoxAlign::MiddleCenter, &self.title);
 		}
+
+		draw::DrawMenuItems {
+			items_text: &wrap_items(&Self::ITEMS),
+			selected_index: self.selected as usize,
+		}.draw(&mut buf, &bottom, resx);
 
 		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 	}

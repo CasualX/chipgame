@@ -11,3 +11,6 @@ cvmath.workspace = true
 shade = { git = "https://github.com/CasualX/shade", no-default-features = true }
 serde = { version = "1.0", features=["derive"] }
 serde_json = "1.0"
+flate2.workspace = true
+simple-base64.workspace = true
+fmtools.workspace = true

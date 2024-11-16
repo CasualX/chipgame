@@ -3,7 +3,7 @@ use super::*;
 const LEVELS_PER_PAGE: i32 = 14;
 
 fn clip_offset(offset: i32, len: i32) -> i32 {
-	i32::min(len - LEVELS_PER_PAGE, i32::max(0, offset))
+	i32::max(0, i32::min(len - LEVELS_PER_PAGE, offset))
 }
 
 #[derive(Default)]
@@ -14,11 +14,12 @@ pub struct LevelSelectMenu {
 }
 
 impl LevelSelectMenu {
-	pub fn load_items(&mut self, lp: &crate::play::LevelPack) {
+	pub fn load_items(&mut self, lp: &crate::play::LevelPack, sd: &crate::play::SaveData) {
 		self.items.clear();
 		self.items.push("Unlock level".to_string());
-		for (index, ld) in lp.lv_info.iter().enumerate() {
-			self.items.push(format!("Level {}: {}", index + 1, ld.name));
+		for &level_number in &sd.unlocked_levels {
+			let Some(lv_info) = lp.lv_info.get((level_number - 1) as usize) else { continue };
+			self.items.push(format!("Level {}: {}", level_number, lv_info.name));
 		}
 	}
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
@@ -47,6 +48,9 @@ impl LevelSelectMenu {
 			};
 			events.push(evt);
 		}
+		if input.b.is_pressed() {
+			events.push(MenuEvent::CloseMenu);
+		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
@@ -54,8 +58,8 @@ impl LevelSelectMenu {
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = cvmath::Rect::vec(resx.screen_size);
 
-		let ss = resx.screen_size;
-		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Rect::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,

@@ -29,7 +29,7 @@ pub struct GameState {
 }
 
 impl GameState {
-	pub fn parse(&mut self, json: &str) {
+	pub fn parse(&mut self, json: &str, rng_seed: RngSeed) {
 		self.time = 0;
 		self.ts = TimeState::Waiting;
 		self.ps.clear();
@@ -40,7 +40,16 @@ impl GameState {
 		self.field.author = ld.author;
 		self.field.hint = ld.hint;
 		self.field.password = ld.password;
-		self.rand.rng = urandom::rng::Xoshiro256::from_seed(ld.seed);
+		self.field.seed = match rng_seed {
+			RngSeed::LevelHash => obfstr::hash(json) as u64,
+			RngSeed::Manual(seed) => seed,
+			RngSeed::System => {
+				let mut seed = [0u8; 8];
+				urandom::rng::getentropy(&mut seed);
+				u64::from_le_bytes(seed)
+			},
+		};
+		self.rand.rng = urandom::rng::Xoshiro256::new();
 		self.field.time_limit = ld.time_limit;
 		self.field.required_chips = ld.required_chips;
 		self.field.width = ld.map.width;
@@ -99,7 +108,7 @@ impl GameState {
 		}
 
 		let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
-		println!("Found {} chips", chips);
+		eprintln!("Found {} chips", chips);
 	}
 }
 

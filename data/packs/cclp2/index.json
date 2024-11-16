@@ -1,6 +1,28 @@
 {
 	"name": "CCLP2",
 	"title": "Chip's Challenge Level Pack 2",
+	"about": [
+		"Chip McCallahan is now a proud member of Melinda the",
+		"Mental Marvel's exclusive computer club, the Bit Busters.",
+		"It wasn't easy getting there - he had to make his way through the 149 levels of",
+		"Melinda's clubhouse, dodging pink balls, unlocking doors, and picking up chips.",
+		"Some parts were frustrating, but most of the levels were a lot of fun to solve.",
+		"",
+		"After he finally completed all the levels, he went back and found lots of crafty",
+		"shortcuts and tricks to finish the levels even faster than he had done before.",
+		"His total score was now almost as high as Melinda's!",
+		"But eventually, while Chip still enjoyed the original levels,",
+		"he wanted a new and different challenge.",
+		"",
+		"Chip was having lunch one day, when suddenly, Melinda walked into the room.",
+		"\"Melinda,\" Chip asked, \"Do you have another clubhouse that I can explore?\"",
+		"",
+		"\"Actually, some of the Bit Busters have been building their own levels.",
+		"Their clubhouse is finished now, and I think you might like to try it.\"",
+		"",
+		"\"Really?  I'll... I'll do it!\"  Chip was overjoyed.",
+		"But little did he know the challenge that awaited him... "
+	],
 	"levels": [
 		"lv/level1.json",
 		"lv/level2.json",

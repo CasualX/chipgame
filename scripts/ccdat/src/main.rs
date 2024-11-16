@@ -76,7 +76,6 @@ fn read_level(data: &[u8]) {
 		author: md.author,
 		hint: md.hint,
 		password: Some(md.password),
-		seed: 0,
 		time_limit,
 		required_chips: chips,
 		map,
