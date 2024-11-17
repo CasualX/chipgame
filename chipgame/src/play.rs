@@ -1,5 +1,6 @@
 use std::mem;
 use std::path;
+use std::fs;
 
 use super::*;
 
@@ -15,6 +16,8 @@ pub struct LevelPackDto {
 	pub title: String,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub about: Option<Vec<String>>,
+	#[serde(default)]
+	pub unlock_all_levels: bool,
 	pub levels: Vec<String>,
 }
 
@@ -31,6 +34,7 @@ pub struct LevelPack {
 	pub name: String,
 	pub title: String,
 	pub about: Option<String>,
+	pub unlock_all_levels: bool,
 	pub lv_data: Vec<String>,
 	pub lv_info: Vec<LevelData>,
 }
@@ -46,35 +50,101 @@ pub struct PlayState {
 	pub menu: menu::MenuState,
 	pub events: Vec<PlayEvent>,
 	pub input: core::Input,
-	pub level_pack: LevelPack,
+	pub lp_index: usize,
+	pub level_packs: Vec<LevelPack>,
 	pub save_data: SaveData,
 }
 
-impl PlayState {
-	pub fn load_pack(&mut self, path: &path::Path) {
-		let json = std::fs::read_to_string(path.join("index.json")).unwrap();
-		let pack: LevelPackDto = serde_json::from_str(&json).unwrap();
-		let mut lv_info = Vec::new();
-		let mut lv_data = Vec::new();
-		for level in &pack.levels {
-			let s = std::fs::read_to_string(path.join(level)).expect(level);
-			let ld: LevelData = serde_json::from_str(&s).unwrap();
-			lv_info.push(ld);
-			lv_data.push(s);
+fn load_level_packs(packs: &mut Vec<LevelPack>) {
+	let dir = match fs::read_dir("data/packs") {
+		Ok(dir) => dir,
+		Err(err) => {
+			eprintln!("Error reading data/packs directory: {}", err);
+			return;
 		}
-		self.level_pack = LevelPack {
-			name: pack.name,
-			title: pack.title,
-			about: pack.about.map(|lines| lines.join("\n")),
-			lv_data,
-			lv_info,
+	};
+	for entry in dir {
+		match entry {
+			Ok(entry) => {
+				let path = entry.path();
+				if path.is_dir() {
+					load_level_pack(&path, packs);
+				}
+			}
+			Err(err) => {
+				eprintln!("Error reading pack: {}", err);
+			}
+		}
+	}
+	packs.sort_by_key(|lp| lp.name.clone());
+}
+
+fn load_level_pack(path: &path::Path, packs: &mut Vec<LevelPack>) {
+	let index_path = path.join("index.json");
+	let json = match fs::read_to_string(&index_path) {
+		Ok(json) => json,
+		Err(err) => {
+			eprintln!("Error reading {}: {}", index_path.display(), err);
+			return;
+		}
+	};
+
+	let pack: LevelPackDto = match serde_json::from_str(&json) {
+		Ok(pack) => pack,
+		Err(err) => {
+			eprintln!("Error parsing {}: {}", index_path.display(), err);
+			return;
+		}
+	};
+
+	let mut lv_info = Vec::new();
+	let mut lv_data = Vec::new();
+	for level in &pack.levels {
+		let level_path = path.join(level);
+		let s = match fs::read_to_string(&level_path) {
+			Ok(s) => s,
+			Err(err) => {
+				eprintln!("Error reading {}: {}", level_path.display(), err);
+				continue;
+			}
 		};
-		self.save_data.load(&self.level_pack);
-		self.save_data.save(&self.level_pack, None);
+
+		let ld: LevelData = match serde_json::from_str(&s) {
+			Ok(ld) => ld,
+			Err(err) => {
+				eprintln!("Error parsing {}: {}", level_path.display(), err);
+				continue;
+			}
+		};
+
+		lv_info.push(ld);
+		lv_data.push(s);
+	}
+
+	packs.push(LevelPack {
+		name: pack.name,
+		title: pack.title,
+		about: pack.about.map(|lines| lines.join("\n")),
+		unlock_all_levels: pack.unlock_all_levels,
+		lv_data,
+		lv_info,
+	});
+}
+
+impl PlayState {
+	pub fn load_packs(&mut self) {
+		load_level_packs(&mut self.level_packs);
 	}
 
 	pub fn launch(&mut self) {
-		self.menu.open_main(self.save_data.current_level > 0, &self.level_pack.title);
+		if self.level_packs.is_empty() {
+			return;
+		}
+		self.menu.stack.push(menu::Menu::PackSelect(menu::LevelPackSelectMenu {
+			selected: 0,
+			items: self.level_packs.iter().map(|lp| lp.title.clone()).collect(),
+		}));
+		// self.menu.open_main(self.save_data.current_level > 0, &self.level_packs[self.lp_index].title);
 	}
 
 	pub fn think(&mut self, input: &core::Input) {
@@ -103,13 +173,13 @@ impl PlayState {
 
 	pub fn play_level(&mut self, level_number: i32) {
 		// If loading a level fails just... do nothing
-		let Some(lv_data) = self.level_pack.lv_data.get((level_number - 1) as usize) else { return };
+		let Some(lv_data) = self.level_packs[self.lp_index].lv_data.get((level_number - 1) as usize) else { return };
 
 		let attempts = if let Some(fx) = &self.fx { if fx.level_number == level_number { fx.gs.ps.attempts } else { 0 } } else { 0 };
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
 		self.save_data.current_level = level_number;
-		self.save_data.save(&self.level_pack, None);
+		self.save_data.save(&self.level_packs[self.lp_index], None);
 
 		fx.init();
 		fx.gs.ps.attempts = attempts;
@@ -124,13 +194,19 @@ impl PlayState {
 		for evt in events {
 			eprintln!("MenuEvent: {:?}", evt);
 			match evt {
+				menu::MenuEvent::LevelPackSelect { index } => {
+					self.lp_index = index;
+					self.save_data.load(&self.level_packs[self.lp_index]);
+					self.save_data.save(&self.level_packs[self.lp_index], None);
+					self.menu.open_main(self.save_data.current_level > 0, &self.level_packs[self.lp_index].title);
+				}
 				menu::MenuEvent::NewGame => {
 					self.play_level(1);
 				}
 				menu::MenuEvent::MainMenu => {
 					self.fx = None;
 					self.events.push(PlayEvent::PlayLevel);
-					self.menu.open_main(self.save_data.current_level > 0, &self.level_pack.title);
+					self.menu.open_main(self.save_data.current_level > 0, &self.level_packs[self.lp_index].title);
 				}
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu {
@@ -138,7 +214,7 @@ impl PlayState {
 						offset: 0,
 						items: Vec::new(),
 					};
-					menu.load_items(&self.level_pack, &self.save_data);
+					menu.load_items(&self.level_packs[self.lp_index], &self.save_data);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));
 				}
 				menu::MenuEvent::UnlockLevel => {
@@ -149,7 +225,7 @@ impl PlayState {
 					self.menu.stack.push(menu::Menu::UnlockLevel(menu));
 				}
 				menu::MenuEvent::EnterPassword { code } => {
-					for (index, lv_info) in self.level_pack.lv_info.iter().enumerate() {
+					for (index, lv_info) in self.level_packs[self.lp_index].lv_info.iter().enumerate() {
 						if let Some(lv_pass) = &lv_info.password {
 							if lv_pass.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
@@ -184,13 +260,13 @@ impl PlayState {
 					if let Some(fx) = &self.fx {
 						let record = get_record_data_from_fx(fx);
 						let record = serde_json::to_string_pretty(&record).unwrap();
-						if let Err(err) = std::fs::write(format!("replay/{}.level{}.attempt{}.json", self.level_pack.name, fx.level_number, fx.gs.ps.attempts), record) {
+						if let Err(err) = std::fs::write(format!("replay/{}.level{}.attempt{}.json", self.level_packs[self.lp_index].name, fx.level_number, fx.gs.ps.attempts), record) {
 							eprintln!("Error saving replay: {}", err);
 						}
 					}
 				}
 				menu::MenuEvent::About => {
-					if let Some(about) = &self.level_pack.about {
+					if let Some(about) = &self.level_packs[self.lp_index].about {
 						let menu = menu::AboutMenu {
 							text: about.clone(),
 						};
@@ -288,7 +364,7 @@ impl PlayState {
 						self.save_data.unlock_level(fx.level_number);
 						self.save_data.unlock_level(fx.level_number + 1);
 						self.save_data.current_level = fx.level_number + 1;
-						self.save_data.save(&self.level_pack, Some((fx.level_number, &get_record_data_from_fx(fx))));
+						self.save_data.save(&self.level_packs[self.lp_index], Some((fx.level_number, &get_record_data_from_fx(fx))));
 
 						let menu = menu::GameWinMenu {
 							selected: 0,

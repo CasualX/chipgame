@@ -105,8 +105,13 @@ impl SaveData {
 		self.dev_mode = save_data.options.developer_mode;
 
 		self.unlocked_levels.clear();
-		let unlocked_levels = save_data.unlocked_levels.iter().filter_map(|level_name| level_pack.get_level_number(level_name));
-		self.unlocked_levels.extend(unlocked_levels);
+		if level_pack.unlock_all_levels {
+			self.unlocked_levels.extend(1..level_pack.lv_info.len() as i32 + 1);
+		}
+		else {
+			let unlocked_levels = save_data.unlocked_levels.iter().filter_map(|level_name| level_pack.get_level_number(level_name));
+			self.unlocked_levels.extend(unlocked_levels);
+		}
 		if self.unlocked_levels.is_empty() {
 			self.unlocked_levels.push(1);
 		}

@@ -5,6 +5,7 @@ pub enum MenuEvent {
 	CloseMenu,
 
 	// Main Events
+	LevelPackSelect { index: usize },
 	NewGame,
 	Continue,
 	LevelSelect,

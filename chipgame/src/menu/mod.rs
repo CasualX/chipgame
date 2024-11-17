@@ -5,6 +5,7 @@ use crate::fx::Resources;
 
 mod draw;
 mod event;
+mod packselect;
 mod main;
 mod gamewin;
 mod gameover;
@@ -17,6 +18,7 @@ mod u;
 mod v;
 
 pub use self::event::*;
+pub use self::packselect::*;
 pub use self::main::*;
 pub use self::gamewin::*;
 pub use self::gameover::*;
@@ -62,6 +64,7 @@ pub struct Input {
 }
 
 pub enum Menu {
+	PackSelect(packselect::LevelPackSelectMenu),
 	Main(MainMenu),
 	GameWin(GameWinMenu),
 	GameOver(GameOverMenu),
@@ -74,6 +77,7 @@ pub enum Menu {
 impl Menu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		match self {
+			Menu::PackSelect(menu) => menu.think(input, events),
 			Menu::Main(menu) => menu.think(input, events),
 			Menu::GameWin(menu) => menu.think(input, events),
 			Menu::GameOver(menu) => menu.think(input, events),
@@ -86,6 +90,7 @@ impl Menu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		match self {
+			Menu::PackSelect(menu) => menu.draw(g, resx),
 			Menu::Main(menu) => menu.draw(g, resx),
 			Menu::GameWin(menu) => menu.draw(g, resx),
 			Menu::GameOver(menu) => menu.draw(g, resx),

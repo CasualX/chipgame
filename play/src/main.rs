@@ -63,19 +63,19 @@ impl AudioPlayer {
 }
 
 fn main() {
-	let app = clap::command!("play")
-		.arg(clap::arg!(--"level-pack" -p [level_pack] "Level pack to play"))
-		.arg(clap::arg!(-n [n] "Level number to play"))
-		.arg(clap::arg!(--dev "Enable developer mode"));
-	let matches = app.get_matches();
-	let level_pack = matches.value_of("level-pack").expect("Level pack not specified");
-	let level_pack = std::path::Path::new(level_pack);
-	let level = if let Some(n) = matches.value_of("n") {
-		Some(n.parse::<i32>().expect("Invalid level number"))
-	}
-	else {
-		None
-	};
+	// let app = clap::command!("play")
+	// 	.arg(clap::arg!(--"level-pack" -p [level_pack] "Level pack to play"))
+	// 	.arg(clap::arg!(-n [n] "Level number to play"))
+	// 	.arg(clap::arg!(--dev "Enable developer mode"));
+	// let matches = app.get_matches();
+	// let level_pack = matches.value_of("level-pack").expect("Level pack not specified");
+	// let level_pack = std::path::Path::new(level_pack);
+	// let level = if let Some(n) = matches.value_of("n") {
+	// 	Some(n.parse::<i32>().expect("Invalid level number"))
+	// }
+	// else {
+	// 	None
+	// };
 	// let is_dev = matches.is_present("dev");
 
 	let xinput = xinput::XInput::new();
@@ -189,12 +189,13 @@ fn main() {
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
-	state.load_pack(&level_pack);
+	// state.load_pack(&level_pack);
+	state.load_packs();
 	state.launch();
 
-	if let Some(level) = level {
-		state.play_level(level);
-	}
+	// if let Some(level) = level {
+	// 	state.play_level(level);
+	// }
 
 	let mut input = chipgame::core::Input::default();
 
@@ -260,10 +261,13 @@ fn main() {
 				&chipgame::play::PlayEvent::Quit => quit = true,
 				&chipgame::play::PlayEvent::PlayLevel => {
 					if let Some(fx) = &state.fx {
-						context.window().set_title(&format!("{} - Level {} - {}", state.level_pack.name, fx.level_number, fx.gs.field.name));
+						context.window().set_title(&format!("{} - Level {} - {}", state.level_packs[state.lp_index].name, fx.level_number, fx.gs.field.name));
+					}
+					else if let Some(level_pack) = state.level_packs.get(state.lp_index) {
+						context.window().set_title(&level_pack.title);
 					}
 					else {
-						context.window().set_title(&state.level_pack.title);
+						context.window().set_title("Play ChipGame");
 					}
 				}
 			}

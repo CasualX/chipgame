@@ -1,6 +1,7 @@
 {
 	"name": "DEV",
 	"title": "Development Pack",
+	"unlock_all_levels": true,
 	"levels": [
 		"template.json",
 		"items.json",
