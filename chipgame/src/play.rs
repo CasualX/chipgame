@@ -56,10 +56,10 @@ pub struct PlayState {
 }
 
 fn load_level_packs(packs: &mut Vec<LevelPack>) {
-	let dir = match fs::read_dir("data/packs") {
+	let dir = match fs::read_dir("levelsets") {
 		Ok(dir) => dir,
 		Err(err) => {
-			eprintln!("Error reading data/packs directory: {}", err);
+			eprintln!("Error reading levelsets directory: {}", err);
 			return;
 		}
 	};
@@ -260,7 +260,7 @@ impl PlayState {
 					if let Some(fx) = &self.fx {
 						let record = get_record_data_from_fx(fx);
 						let record = serde_json::to_string_pretty(&record).unwrap();
-						if let Err(err) = std::fs::write(format!("replay/{}.level{}.attempt{}.json", self.level_packs[self.lp_index].name, fx.level_number, fx.gs.ps.attempts), record) {
+						if let Err(err) = std::fs::write(format!("save/replay/{}.level{}.attempt{}.json", self.level_packs[self.lp_index].name, fx.level_number, fx.gs.ps.attempts), record) {
 							eprintln!("Error saving replay: {}", err);
 						}
 					}
@@ -364,7 +364,7 @@ impl PlayState {
 						self.save_data.unlock_level(fx.level_number);
 						self.save_data.unlock_level(fx.level_number + 1);
 						self.save_data.current_level = fx.level_number + 1;
-						self.save_data.save(&self.level_packs[self.lp_index], Some((fx.level_number, &get_record_data_from_fx(fx))));
+						self.save_data.save(&self.level_packs[self.lp_index], Some((fx.level_number - 1, &get_record_data_from_fx(fx))));
 
 						let menu = menu::GameWinMenu {
 							selected: 0,
@@ -417,6 +417,35 @@ impl PlayState {
 
 }
 
+fn compress_bytes(bytes: &[u8]) -> Vec<u8> {
+	// Compress the bytes
+	let mut compressed = Vec::new();
+	compressed.reserve(bytes.len());
+	let mut compress = flate2::Compress::new(flate2::Compression::best(), true);
+	compress.compress_vec(bytes, &mut compressed, flate2::FlushCompress::Finish).unwrap();
+	return compressed;
+}
+fn decompress_bytes(bytes: &[u8]) -> Vec<u8> {
+	// Decompress the bytes
+	let mut decompressed = Vec::new();
+	let mut decompress = flate2::Decompress::new(true);
+	decompressed.reserve(bytes.len());
+	loop {
+		match decompress.decompress_vec(bytes, &mut decompressed, flate2::FlushDecompress::Finish) {
+			Ok(flate2::Status::Ok) => {}
+			Ok(flate2::Status::BufError) => {
+				decompressed.reserve(decompressed.len() * 2);
+			}
+			Ok(flate2::Status::StreamEnd) => break,
+			Err(e) => {
+				eprintln!("Error decompressing: {}", e);
+				break;
+			}
+		}
+	}
+	return decompressed;
+}
+
 fn encode_bytes(bytes: &[u8]) -> String {
 	// Compress the bytes
 	let mut compressed = Vec::new();
@@ -428,10 +457,10 @@ fn encode_bytes(bytes: &[u8]) -> String {
 	simple_base64::encode_engine(compressed.as_slice(), &simple_base64::engine::general_purpose::STANDARD_NO_PAD)
 }
 
-fn get_record_data_from_fx(fx: &fx::FxState) -> save::RecordDto {
+fn get_record_data_from_fx(fx: &fx::FxState) -> savedto::RecordDto {
 	let replay = encode_bytes(&fx.gs.inputs);
 
-	save::RecordDto {
+	savedto::RecordDto {
 		date: None,
 		ticks: fx.gs.time,
 		realtime: fx.gs_realtime,

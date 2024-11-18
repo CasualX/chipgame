@@ -2,9 +2,9 @@
 resolver = "2"
 members = [
 	"./chipcore",
+	"./chipedit",
 	"./chipgame",
-	"./editor",
-	"./play",
+	"./chipplay",
 	"./scripts/ccdat",
 	"./scripts/fixer",
 	"./scripts/levelstats",

@@ -31,35 +31,35 @@ impl SaveData {
 		self.unlocked_levels.binary_search(&level_number).is_ok()
 	}
 
-	pub fn save(&mut self, level_pack: &LevelPack, replay: Option<(i32, &save::RecordDto)>) {
+	pub fn save(&mut self, level_pack: &LevelPack, replay: Option<(i32, &savedto::RecordDto)>) {
 		let file_name = format!("save/{}.json", level_pack.name);
 
 		let mut save_data = if let Ok(content) = std::fs::read_to_string(&file_name) {
-			serde_json::from_str::<save::SaveDto>(&content).unwrap_or_default()
+			serde_json::from_str::<savedto::SaveDto>(&content).unwrap_or_default()
 		}
 		else {
-			save::SaveDto::default()
+			savedto::SaveDto::default()
 		};
 
 		if let Some((level_number, replay)) = replay {
 			if let Some(level_name) = level_pack.lv_info.get(level_number as usize).map(|s| &s.name) {
 
-				if let Some(entry) = save_data.records_time.get(level_name) {
+				if let Some(entry) = save_data.records.mintime.get(level_name) {
 					if replay.ticks < entry.ticks {
-						save_data.records_time.insert(level_name.clone(), replay.clone());
+						save_data.records.mintime.insert(level_name.clone(), replay.clone());
 					}
 				}
 				else {
-					save_data.records_time.insert(level_name.clone(), replay.clone());
+					save_data.records.mintime.insert(level_name.clone(), replay.clone());
 				}
 
-				if let Some(entry) = save_data.records_steps.get(level_name) {
+				if let Some(entry) = save_data.records.minsteps.get(level_name) {
 					if replay.steps < entry.steps || (replay.steps == entry.steps && replay.ticks < entry.ticks) {
-						save_data.records_steps.insert(level_name.clone(), replay.clone());
+						save_data.records.minsteps.insert(level_name.clone(), replay.clone());
 					}
 				}
 				else {
-					save_data.records_steps.insert(level_name.clone(), replay.clone());
+					save_data.records.minsteps.insert(level_name.clone(), replay.clone());
 				}
 			}
 		}
@@ -77,6 +77,7 @@ impl SaveData {
 		save_data.unlocked_levels.extend(unlocked_levels);
 
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
+		// let content = encode_bytes(content.as_bytes());
 		match std::fs::write(&file_name, content) {
 			Ok(_) => {}
 			Err(e) => eprintln!("Error saving file: {}", e),
@@ -87,7 +88,7 @@ impl SaveData {
 		let file_name = format!("save/{}.json", level_pack.name);
 
 		let save_data = if let Ok(content) = std::fs::read_to_string(&file_name) {
-			serde_json::from_str::<save::SaveDto>(&content).unwrap_or_default()
+			serde_json::from_str::<savedto::SaveDto>(&content).unwrap_or_default()
 		}
 		else {
 			return;

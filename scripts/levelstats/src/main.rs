@@ -4,7 +4,7 @@ struct LevelStats {
 	n_blocks: usize,
 }
 
-const LEVEL_PACK: &str = "data/packs/cclp1";
+const LEVEL_PACK: &str = "levelsets/cclp1";
 
 fn main() {
 	let mut stats = vec![];

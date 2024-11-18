@@ -71,9 +71,7 @@ Bonks:    ##
 # Game Over
 
 Level 1: Lesson 1
-
-    Ooops!
-Look out for creatures!
+Ooops! Look out for creatures!
 
 Attempt: ##
 

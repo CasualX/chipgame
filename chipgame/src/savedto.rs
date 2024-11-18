@@ -6,10 +6,18 @@ pub struct SaveDto {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub current_level: Option<String>,
 	pub unlocked_levels: Vec<String>,
-	pub records_time: HashMap<String, RecordDto>,
-	pub records_steps: HashMap<String, RecordDto>,
+	#[serde(default)]
+	pub records: RecordsDto,
 	pub options: OptionsDto,
+}
 
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
+pub struct RecordsDto {
+	#[serde(default)]
+	pub mintime: HashMap<String, RecordDto>,
+	#[serde(default)]
+	pub minsteps: HashMap<String, RecordDto>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -26,9 +34,19 @@ pub struct RecordDto {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct OptionsDto {
 	pub background_music: bool,
 	pub sound_effects: bool,
 	pub developer_mode: bool,
+}
+
+impl Default for OptionsDto {
+	fn default() -> Self {
+		Self {
+			background_music: true,
+			sound_effects: true,
+			developer_mode: false,
+		}
+	}
 }
