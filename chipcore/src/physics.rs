@@ -294,6 +294,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_time = s.time;
 	ent.pos = new_pos;
 	ent.flags |= EF_NEW_POS;
+	ent.flags &= !EF_BUTTON_DOWN;
 
 	// Retain momentum when entity lands on a Trap
 	if !matches!(s.field.get_terrain(new_pos), Terrain::BearTrap) {

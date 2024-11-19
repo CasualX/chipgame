@@ -10,16 +10,16 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 pub struct LevelSelectMenu {
 	pub selected: i32,
 	pub offset: i32,
-	pub items: Vec<String>,
+	pub items: Vec<(i32, String)>,
 }
 
 impl LevelSelectMenu {
 	pub fn load_items(&mut self, lp: &crate::play::LevelPack, sd: &crate::play::SaveData) {
 		self.items.clear();
-		self.items.push("Unlock level".to_string());
+		self.items.push((0, "Unlock level".to_string()));
 		for &level_number in &sd.unlocked_levels {
 			let Some(lv_info) = lp.lv_info.get((level_number - 1) as usize) else { continue };
-			self.items.push(format!("Level {}: {}", level_number, lv_info.name));
+			self.items.push((level_number, format!("Level {}: {}", level_number, lv_info.name)));
 		}
 	}
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
@@ -44,7 +44,7 @@ impl LevelSelectMenu {
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::UnlockLevel,
-				index => MenuEvent::PlayLevel { level_number: index },
+				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].0 },
 			};
 			events.push(evt);
 		}
@@ -99,7 +99,7 @@ impl LevelSelectMenu {
 			}
 
 			let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.25, y));
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, item);
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, &item.1);
 
 			y += scribe.line_height;
 		}
