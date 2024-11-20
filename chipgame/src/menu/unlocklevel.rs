@@ -2,20 +2,84 @@ use super::*;
 
 #[derive(Default)]
 pub struct UnlockLevelMenu {
-	pub selected: i32,
+	pub selected: i8,
 	pub password: [Option<char>; 4],
 }
 
 const LETTERS: &[&[char]; 3] = &[
 	['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].as_slice(),
-	['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].as_slice(),
-	['Z', 'X', 'C', 'V', 'B', 'N', 'M'].as_slice(),
+	  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].as_slice(),
+	       ['Z', 'X', 'C', 'V', 'B', 'N', 'M'].as_slice(),
 ];
+
+fn get_row_index(selected: i8) -> usize {
+	if selected < LETTERS[0].len() as i8 { 0 }
+	else if selected < (LETTERS[0].len() + LETTERS[1].len()) as i8 { 1 }
+	else { 2 }
+}
 
 impl UnlockLevelMenu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		if input.up.is_pressed() {
+			match get_row_index(self.selected) {
+				0 => (),
+				1 => self.selected -= 10,
+				2 => self.selected -= 8,
+				_ => unreachable!(),
+			}
+		}
+
+		if input.down.is_pressed() {
+			match get_row_index(self.selected) {
+				0 => self.selected += 10,
+				1 => self.selected += 8,
+				2 => (),
+				_ => unreachable!(),
+			}
+		}
+
+		if input.left.is_pressed() {
+			if self.selected > 0 {
+				self.selected -= 1;
+			}
+			else {
+				self.selected = 25;
+			}
+		}
+
+		if input.right.is_pressed() {
+			if self.selected < 25 {
+				self.selected += 1;
+			}
+			else {
+				self.selected = 0;
+			}
+		}
+
+		if input.a.is_pressed() {
+			if let Some(slot) = self.password.iter().position(|&x| x.is_none()) {
+				self.password[slot] = match get_row_index(self.selected) {
+					0 => Some(LETTERS[0][self.selected as usize]),
+					1 => Some(LETTERS[1][self.selected as usize - LETTERS[0].len()]),
+					2 => Some(LETTERS[2][self.selected as usize - LETTERS[0].len() - LETTERS[1].len()]),
+					_ => unreachable!(),
+				}
+			}
+		}
+
 		if input.b.is_pressed() {
-			events.push(MenuEvent::CloseMenu);
+			if let Some(slot) = self.password.iter().rposition(|&x| x.is_some()) {
+				self.password[slot] = None;
+			}
+			else {
+				events.push(MenuEvent::CloseMenu);
+			}
+		}
+
+		if input.start.is_pressed() {
+			if let [Some(_1), Some(_2), Some(_3), Some(_4)] = self.password {
+				events.push(MenuEvent::EnterPassword { code: [_1 as u8, _2 as u8, _3 as u8, _4 as u8] });
+			}
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
@@ -56,14 +120,16 @@ impl UnlockLevelMenu {
 			for (j, &chr) in line.iter().enumerate() {
 				let xstart = (resx.screen_size.x as f32 - width) * 0.5;
 
+				let chr_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
+
 				let rect = cvmath::Rect::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
 				let scribe = shade::d2::Scribe {
 					font_size: size,
 					line_height: size * (5.0 / 4.0),
-					color: cvmath::Vec4(255, 255, 255, 255),
+					color: if chr_index == self.selected { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) },
 					..Default::default()
 				};
-				buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &format!("{}", chr));
+				buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &[format_args!("{}", chr)]);
 			}
 		}
 

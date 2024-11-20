@@ -225,14 +225,19 @@ impl PlayState {
 					self.menu.stack.push(menu::Menu::UnlockLevel(menu));
 				}
 				menu::MenuEvent::EnterPassword { code } => {
+					let mut success = false;
 					for (index, lv_info) in self.level_packs[self.lp_index].lv_info.iter().enumerate() {
 						if let Some(lv_pass) = &lv_info.password {
 							if lv_pass.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
 								self.save_data.unlock_level(level_number);
 								self.save_data.current_level = level_number;
+								success = true;
 							}
 						}
+					}
+					if success {
+						self.menu.open_main(true, &self.level_packs[self.lp_index].title);
 					}
 				}
 				menu::MenuEvent::PlayLevel { level_number } => {

@@ -22,24 +22,28 @@ impl LevelSelectMenu {
 			self.items.push((level_number, format!("Level {}: {}", level_number, lv_info.name)));
 		}
 	}
+
+	fn jump(&mut self, jump: i32, events: &mut Vec<MenuEvent>) {
+		let selected = i32::max(0, i32::min(self.items.len() as i32 - 1, self.selected + jump));
+		if self.selected != selected {
+			events.push(MenuEvent::CursorMove);
+			self.selected = selected;
+			self.offset = clip_offset(selected - 1, self.items.len() as i32);
+		}
+	}
+
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
-			if self.selected > 0 {
-				events.push(MenuEvent::CursorMove);
-				self.selected = self.selected - 1;
-			}
-			if self.selected < self.offset + 1 {
-				self.offset = clip_offset(self.selected - 1, self.items.len() as i32);
-			}
+			self.jump(-1, events);
+		}
+		if input.left.is_pressed() {
+			self.jump(-10, events);
 		}
 		if input.down.is_pressed() {
-			if self.selected < self.items.len() as i32 - 1 {
-				events.push(MenuEvent::CursorMove);
-				self.selected = self.selected + 1;
-			}
-			if self.selected >= self.offset + (LEVELS_PER_PAGE - 1) {
-				self.offset = clip_offset(self.selected - (LEVELS_PER_PAGE - 1) + 1, self.items.len() as i32);//i32::min(self.items.len() as i32 - LEVELS_PER_PAGE, i32::max(0, self.selected - (LEVELS_PER_PAGE - 1) + 1));
-			}
+			self.jump(1, events);
+		}
+		if input.right.is_pressed() {
+			self.jump(10, events);
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
