@@ -91,6 +91,13 @@ impl SaveData {
 			serde_json::from_str::<savedto::SaveDto>(&content).unwrap_or_default()
 		}
 		else {
+			self.unlocked_levels.clear();
+			if level_pack.unlock_all_levels {
+				self.unlocked_levels.extend(1..level_pack.lv_info.len() as i32 + 1);
+			}
+			else if self.unlocked_levels.is_empty() {
+				self.unlocked_levels.push(1);
+			}
 			return;
 		};
 

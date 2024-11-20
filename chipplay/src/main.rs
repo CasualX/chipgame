@@ -199,7 +199,7 @@ fn main() {
 	// 	state.play_level(level);
 	// }
 
-	let mut input = chipgame::core::Input::default();
+	let mut kbd_input = chipgame::core::Input::default();
 
 	// Main loop
 	let mut quit = false;
@@ -224,14 +224,14 @@ fn main() {
 				}
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::KeyboardInput { input: keyboard_input, .. }, .. } => {
 					match keyboard_input.virtual_keycode {
-						Some(winit::event::VirtualKeyCode::Left) => input.left = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Right) => input.right = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Up) => input.up = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Down) => input.down = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::A) => input.a = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::B) => input.b = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Return) => input.start = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Space) => input.select = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Left) => kbd_input.left = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Right) => kbd_input.right = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Up) => kbd_input.up = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Down) => kbd_input.down = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::A | winit::event::VirtualKeyCode::Space) => kbd_input.a = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::B | winit::event::VirtualKeyCode::Back) => kbd_input.b = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Return) => kbd_input.start = is_pressed(keyboard_input.state),
+						Some(winit::event::VirtualKeyCode::Escape) => kbd_input.select = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) {
 							if let Some(fx) = &mut state.fx {
 								fx.music_enabled = !fx.music_enabled;
@@ -247,9 +247,11 @@ fn main() {
 			}
 		});
 
-		xinput.get_state(&mut input);
+		let mut x_input = chipgame::core::Input::default();
+		xinput.get_state(&mut x_input);
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
+		let input = kbd_input | x_input;
 		state.think(&input);
 
 		g.begin().unwrap();

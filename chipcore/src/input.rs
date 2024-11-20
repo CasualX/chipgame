@@ -1,3 +1,4 @@
+use std::ops;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Button { Up, Down, Left, Right, A, B, Start, Select }
@@ -47,6 +48,23 @@ impl Input {
 			bits |= INPUT_SELECT;
 		}
 		buf.push(bits);
+	}
+}
+
+impl ops::BitOr<Input> for Input {
+	type Output = Input;
+
+	fn bitor(self, rhs: Input) -> Input {
+		Input {
+			up: self.up | rhs.up,
+			left: self.left | rhs.left,
+			down: self.down | rhs.down,
+			right: self.right | rhs.right,
+			a: self.a | rhs.a,
+			b: self.b | rhs.b,
+			start: self.start | rhs.start,
+			select: self.select | rhs.select,
+		}
 	}
 }
 

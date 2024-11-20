@@ -28,7 +28,12 @@ impl LevelSelectMenu {
 		if self.selected != selected {
 			events.push(MenuEvent::CursorMove);
 			self.selected = selected;
-			self.offset = clip_offset(selected - 1, self.items.len() as i32);
+			if self.selected <= self.offset {
+				self.offset = clip_offset(selected - 1, self.items.len() as i32);
+			}
+			else if self.selected >= self.offset + LEVELS_PER_PAGE - 1 {
+				self.offset = clip_offset(selected - LEVELS_PER_PAGE + 2, self.items.len() as i32);
+			}
 		}
 	}
 
