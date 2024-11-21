@@ -21,12 +21,9 @@ pub enum MenuEvent {
 	PauseMenu,
 
 	// Options Events
-	BgMusicOn,
-	BgMusicOff,
-	SoundFxOn,
-	SoundFxOff,
-	DevModeOn,
-	DevModeOff,
+	SetBackgroundMusic { value: bool },
+	SetSoundEffects { value: bool },
+	SetDeveloperMode { value: bool },
 
 	// Level select Events
 	UnlockLevel,

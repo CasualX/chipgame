@@ -20,21 +20,21 @@ Just the core game logic, to simulate the game without rendering or audio.
 
 Game data files.
 
-### Desktop application: [./play](./play)
+### Desktop application: [./chipplay](./chipplay)
 
 Uses winit, glutin for windowing, shade for OpenGL rendering, soloud for audio.
 
-### Level editor: [./editor](./editor)
-
-### CCDAT: [./ccdat](./ccdat)
-
-Chip's Challenge level extractor.
+### Level editor: [./chipedit](./chipedit)
 
 References
 ----------
 
 * https://wiki.bitbusters.club/Main_Page
 * https://tilde.town/~magical/chip/
+
+Makurust to render markdown files:
+
+* https://github.com/fromgodd/makurust
 
 License
 -------

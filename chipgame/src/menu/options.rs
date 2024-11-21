@@ -27,11 +27,11 @@ impl OptionsMenu {
 			let evt = match self.selected {
 				0 => {
 					self.bg_music = !self.bg_music;
-					if self.bg_music { MenuEvent::BgMusicOn } else { MenuEvent::BgMusicOff }
+					MenuEvent::SetBackgroundMusic { value: self.bg_music }
 				}
 				1 => {
 					self.sound_fx = !self.sound_fx;
-					if self.sound_fx { MenuEvent::SoundFxOn } else { MenuEvent::SoundFxOff }
+					MenuEvent::SetSoundEffects { value: self.sound_fx }
 				}
 				// 2 => {
 				// 	self.dev_mode = !self.dev_mode;

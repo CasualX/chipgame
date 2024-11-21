@@ -232,11 +232,7 @@ fn main() {
 						Some(winit::event::VirtualKeyCode::B | winit::event::VirtualKeyCode::Back) => kbd_input.b = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::Return) => kbd_input.start = is_pressed(keyboard_input.state),
 						Some(winit::event::VirtualKeyCode::Escape) => kbd_input.select = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) {
-							if let Some(fx) = &mut state.fx {
-								fx.music_enabled = !fx.music_enabled;
-							}
-						},
+						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) { state.toggle_music(); },
 						_ => (),
 					}
 				}

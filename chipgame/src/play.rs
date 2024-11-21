@@ -187,6 +187,29 @@ impl PlayState {
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::PlayLevel);
+		self.play_music();
+	}
+
+	pub fn toggle_music(&mut self) {
+		self.save_data.bg_music = !self.save_data.bg_music;
+		self.save_data.save(&self.level_packs[self.lp_index], None);
+		self.play_music();
+	}
+
+	fn play_music(&mut self) {
+		let music = if !self.save_data.bg_music {
+			None
+		}
+		else if let Some(fx) = &self.fx {
+			match fx.level_number % 2 {
+				0 => Some(data::MusicId::Chip1),
+				_ => Some(data::MusicId::Chip2),
+			}
+		}
+		else {
+			Some(data::MusicId::Canyon)
+		};
+		self.events.push(PlayEvent::PlayMusic { music });
 	}
 
 	pub fn sync(&mut self) {
@@ -199,6 +222,7 @@ impl PlayState {
 					self.save_data.load(&self.level_packs[self.lp_index]);
 					self.save_data.save(&self.level_packs[self.lp_index], None);
 					self.menu.open_main(self.save_data.current_level > 0, &self.level_packs[self.lp_index].title);
+					self.play_music();
 				}
 				menu::MenuEvent::NewGame => {
 					self.play_level(1);
@@ -207,6 +231,7 @@ impl PlayState {
 					self.fx = None;
 					self.events.push(PlayEvent::PlayLevel);
 					self.menu.open_main(self.save_data.current_level > 0, &self.level_packs[self.lp_index].title);
+					self.play_music();
 				}
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu {
@@ -307,25 +332,24 @@ impl PlayState {
 						self.menu.stack.push(menu::Menu::Pause(menu));
 					}
 				}
-				menu::MenuEvent::BgMusicOn => {
-					self.save_data.bg_music = true;
-					self.events.push(PlayEvent::PlayMusic { music: Some(data::MusicId::Canyon) });
+				menu::MenuEvent::SetBackgroundMusic { value } => {
+					if self.save_data.bg_music != value {
+						self.save_data.bg_music = value;
+						self.save_data.save(&self.level_packs[self.lp_index], None);
+						self.play_music();
+					}
 				}
-				menu::MenuEvent::BgMusicOff => {
-					self.save_data.bg_music = false;
-					self.events.push(PlayEvent::PlayMusic { music: None });
+				menu::MenuEvent::SetSoundEffects { value } => {
+					if self.save_data.sound_fx != value {
+						self.save_data.sound_fx = value;
+						self.save_data.save(&self.level_packs[self.lp_index], None);
+					}
 				}
-				menu::MenuEvent::SoundFxOn => {
-					self.save_data.sound_fx = true;
-				}
-				menu::MenuEvent::SoundFxOff => {
-					self.save_data.sound_fx = false;
-				}
-				menu::MenuEvent::DevModeOn => {
-					self.save_data.dev_mode = true;
-				}
-				menu::MenuEvent::DevModeOff => {
-					self.save_data.dev_mode = false;
+				menu::MenuEvent::SetDeveloperMode { value } => {
+					if self.save_data.dev_mode != value {
+						self.save_data.dev_mode = value;
+						self.save_data.save(&self.level_packs[self.lp_index], None);
+					}
 				}
 				menu::MenuEvent::CursorMove => {}
 				menu::MenuEvent::CloseMenu => {
