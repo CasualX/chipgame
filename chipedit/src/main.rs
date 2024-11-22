@@ -20,6 +20,13 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 }
 
 fn main() {
+	// Change the working directory to the executable's directory
+	if let Ok(exe_path) = std::env::current_exe() {
+		if let Some(exe_dir) = exe_path.parent() {
+			let _ = std::env::set_current_dir(exe_dir);
+		}
+	}
+
 	let app = clap::command!("play")
 		.arg(clap::arg!(<level> "Level file to play"));
 	let matches = app.get_matches();
