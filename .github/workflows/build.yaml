@@ -1,0 +1,30 @@
+name: Build Binaries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  win32:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Sources
+      uses: actions/checkout@v4
+
+    - name: Install Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+
+    - name: Build Binaries
+      run: |
+        cargo build --release --bin chipedit
+        cargo build --release --bin chipplay
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        path: |
+          target/release/*.exe
+          target/release/*.pdb
