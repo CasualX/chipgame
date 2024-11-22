@@ -6,10 +6,10 @@ pub struct UnlockLevelMenu {
 	pub password: [Option<char>; 4],
 }
 
-const LETTERS: &[&[char]; 3] = &[
-	['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].as_slice(),
-	  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].as_slice(),
-	       ['Z', 'X', 'C', 'V', 'B', 'N', 'M'].as_slice(),
+const LETTERS: &[&[u8]] = &[
+	[b'Q', b'W', b'E', b'R', b'T', b'Y', b'U', b'I', b'O', b'P'].as_slice(),
+	   [b'A', b'S', b'D', b'F', b'G', b'H', b'J', b'K', b'L'].as_slice(),
+	         [b'Z', b'X', b'C', b'V', b'B', b'N', b'M'].as_slice(),
 ];
 
 fn get_row_index(selected: i8) -> usize {
@@ -59,9 +59,9 @@ impl UnlockLevelMenu {
 		if input.a.is_pressed() {
 			if let Some(slot) = self.password.iter().position(|&x| x.is_none()) {
 				self.password[slot] = match get_row_index(self.selected) {
-					0 => Some(LETTERS[0][self.selected as usize]),
-					1 => Some(LETTERS[1][self.selected as usize - LETTERS[0].len()]),
-					2 => Some(LETTERS[2][self.selected as usize - LETTERS[0].len() - LETTERS[1].len()]),
+					0 => Some(LETTERS[0][self.selected as usize] as char),
+					1 => Some(LETTERS[1][self.selected as usize - LETTERS[0].len()] as char),
+					2 => Some(LETTERS[2][self.selected as usize - LETTERS[0].len() - LETTERS[1].len()] as char),
 					_ => unreachable!(),
 				}
 			}
@@ -109,8 +109,8 @@ impl UnlockLevelMenu {
 
 		let rect = cvmath::Rect::c(0.0, size + size, resx.screen_size.x as f32, size + size);
 
-		buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
-			format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
+		buf.text_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
+			&format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
 		]);
 
 		let height = LETTERS.len() as f32 * size * 1.5;
@@ -119,17 +119,16 @@ impl UnlockLevelMenu {
 			let width = line.len() as f32 * size * 1.5;
 			for (j, &chr) in line.iter().enumerate() {
 				let xstart = (resx.screen_size.x as f32 - width) * 0.5;
-
-				let chr_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
-
+				let current_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
 				let rect = cvmath::Rect::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
 				let scribe = shade::d2::Scribe {
 					font_size: size,
 					line_height: size * (5.0 / 4.0),
-					color: if chr_index == self.selected { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) },
+					color: if current_index == self.selected { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) },
 					..Default::default()
 				};
-				buf.text_fmt_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &[format_args!("{}", chr)]);
+				let chr = chr as char;
+				buf.text_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &[&chr]);
 			}
 		}
 

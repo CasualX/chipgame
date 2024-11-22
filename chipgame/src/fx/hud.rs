@@ -175,14 +175,14 @@ impl FxState {
 			};
 			let level_index = format!("~ Level {} ~", self.level_number);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &level_index);
-			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 - size * 1.2), &level_index);
+			tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 - size * 1.2), &level_index);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);
 			scribe.color = Vec4(255, 255, 0, 255);
-			tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
+			tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
 			if let Some(password) = &self.gs.field.password {
 				let password = format!("Password: {}", password);
 				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
-				tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
+				tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
 			}
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}

@@ -18,16 +18,16 @@ impl<'a> DrawPlayTitle<'a> {
 		};
 
 		if let Some(subtitle) = self.subtitle {
-			buf.text_fmt_lines(&resx.font, &scribe, rect, shade::d2::BoxAlign::MiddleCenter, &[
-				format_args!("~ Level {} ~", self.level_number),
-				format_args!("\x1b[color=#ff0]{}", self.level_name),
-				format_args!("{}", subtitle),
+			buf.text_lines(&resx.font, &scribe, rect, shade::d2::BoxAlign::MiddleCenter, &[
+				&format_args!("~ Level {} ~", self.level_number),
+				&format_args!("\x1b[color=#ff0]{}", self.level_name),
+				subtitle,
 			]);
 		}
 		else {
-			buf.text_fmt_lines(&resx.font, &scribe, rect, shade::d2::BoxAlign::MiddleCenter, &[
-				format_args!("~ Level {} ~", self.level_number),
-				format_args!("\x1b[color=#ff0]{}", self.level_name),
+			buf.text_lines(&resx.font, &scribe, rect, shade::d2::BoxAlign::MiddleCenter, &[
+				&format_args!("~ Level {} ~", self.level_number),
+				&format_args!("\x1b[color=#ff0]{}", self.level_name),
 			]);
 		}
 	}
