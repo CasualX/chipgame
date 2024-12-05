@@ -22,12 +22,12 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 
 struct AudioPlayer {
 	sl: soloud::Soloud,
-	sfx: HashMap<chipgame::core::SoundFx, soloud::Wav>,
+	sfx: HashMap<chipcore::SoundFx, soloud::Wav>,
 	music: HashMap<chipgame::data::MusicId, soloud::Wav>,
 	cur_music: Option<(chipgame::data::MusicId, soloud::Handle)>,
 }
 impl AudioPlayer {
-	fn load_wav(&mut self, fx: chipgame::core::SoundFx, path: &str) {
+	fn load_wav(&mut self, fx: chipcore::SoundFx, path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
 		wav.load(path).expect("Failed to load sound");
@@ -43,7 +43,7 @@ impl AudioPlayer {
 	}
 }
 impl AudioPlayer {
-	fn play(&mut self, sound: chipgame::core::SoundFx) {
+	fn play(&mut self, sound: chipcore::SoundFx) {
 		if let Some(wav) = self.sfx.get(&sound) {
 			self.sl.play(wav);
 		}
@@ -89,26 +89,26 @@ fn main() {
 		music: HashMap::new(),
 		cur_music: None,
 	};
-	ap.load_wav(chipgame::core::SoundFx::GameOver, "data/sfx/death.wav");
-	ap.load_wav(chipgame::core::SoundFx::GameWin, "data/sfx/tada.wav");
-	ap.load_wav(chipgame::core::SoundFx::Derezz, "data/sfx/derezz.wav");
-	ap.load_wav(chipgame::core::SoundFx::ICCollected, "data/sfx/chack.wav");
-	ap.load_wav(chipgame::core::SoundFx::KeyCollected, "data/sfx/click.wav");
-	ap.load_wav(chipgame::core::SoundFx::BootCollected, "data/sfx/click.wav");
-	ap.load_wav(chipgame::core::SoundFx::LockOpened, "data/sfx/door.wav");
-	ap.load_wav(chipgame::core::SoundFx::SocketOpened, "data/sfx2/socket unlock.wav");
-	ap.load_wav(chipgame::core::SoundFx::CantMove, "data/sfx/oof.wav");
-	ap.load_wav(chipgame::core::SoundFx::BlockMoving, "data/sfx/whisk.wav");
-	ap.load_wav(chipgame::core::SoundFx::TrapEntered, "data/sfx/traphit.wav");
-	ap.load_wav(chipgame::core::SoundFx::BombExplosion, "data/sfx/bomb.wav");
-	ap.load_wav(chipgame::core::SoundFx::ButtonPressed, "data/sfx/tick.wav");
-	ap.load_wav(chipgame::core::SoundFx::Teleporting, "data/sfx/teleport.wav");
-	ap.load_wav(chipgame::core::SoundFx::WallPopup, "data/sfx/popup.wav");
-	ap.load_wav(chipgame::core::SoundFx::WaterSplash, "data/sfx/splash.wav");
-	ap.load_wav(chipgame::core::SoundFx::BootsStolen, "data/sfx/thief.wav");
-	ap.load_wav(chipgame::core::SoundFx::TileEmptied, "data/sfx/whisk.wav");
-	ap.load_wav(chipgame::core::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
-	ap.load_wav(chipgame::core::SoundFx::FireWalking, "data/sfx/crackle.wav");
+	ap.load_wav(chipcore::SoundFx::GameOver, "data/sfx/death.wav");
+	ap.load_wav(chipcore::SoundFx::GameWin, "data/sfx/tada.wav");
+	ap.load_wav(chipcore::SoundFx::Derezz, "data/sfx/derezz.wav");
+	ap.load_wav(chipcore::SoundFx::ICCollected, "data/sfx/chack.wav");
+	ap.load_wav(chipcore::SoundFx::KeyCollected, "data/sfx/click.wav");
+	ap.load_wav(chipcore::SoundFx::BootCollected, "data/sfx/click.wav");
+	ap.load_wav(chipcore::SoundFx::LockOpened, "data/sfx/door.wav");
+	ap.load_wav(chipcore::SoundFx::SocketOpened, "data/sfx2/socket unlock.wav");
+	ap.load_wav(chipcore::SoundFx::CantMove, "data/sfx/oof.wav");
+	ap.load_wav(chipcore::SoundFx::BlockMoving, "data/sfx/whisk.wav");
+	ap.load_wav(chipcore::SoundFx::TrapEntered, "data/sfx/traphit.wav");
+	ap.load_wav(chipcore::SoundFx::BombExplosion, "data/sfx/bomb.wav");
+	ap.load_wav(chipcore::SoundFx::ButtonPressed, "data/sfx/tick.wav");
+	ap.load_wav(chipcore::SoundFx::Teleporting, "data/sfx/teleport.wav");
+	ap.load_wav(chipcore::SoundFx::WallPopup, "data/sfx/popup.wav");
+	ap.load_wav(chipcore::SoundFx::WaterSplash, "data/sfx/splash.wav");
+	ap.load_wav(chipcore::SoundFx::BootsStolen, "data/sfx/thief.wav");
+	ap.load_wav(chipcore::SoundFx::TileEmptied, "data/sfx/whisk.wav");
+	ap.load_wav(chipcore::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
+	ap.load_wav(chipcore::SoundFx::FireWalking, "data/sfx/crackle.wav");
 	ap.load_music(chipgame::data::MusicId::Chip1, "data/music/2Chip1.ogg");
 	ap.load_music(chipgame::data::MusicId::Chip2, "data/music/2Chip2.ogg");
 	ap.load_music(chipgame::data::MusicId::Canyon, "data/music/2Canyon.ogg");
@@ -191,15 +191,10 @@ fn main() {
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
-	// state.load_pack(&level_pack);
-	state.load_packs();
+	state.lvsets.load();
 	state.launch();
 
-	// if let Some(level) = level {
-	// 	state.play_level(level);
-	// }
-
-	let mut kbd_input = chipgame::core::Input::default();
+	let mut kbd_input = chipcore::Input::default();
 
 	// Main loop
 	let mut quit = false;
@@ -223,17 +218,28 @@ fn main() {
 					quit = true;
 				}
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::KeyboardInput { input: keyboard_input, .. }, .. } => {
-					match keyboard_input.virtual_keycode {
-						Some(winit::event::VirtualKeyCode::Left) => kbd_input.left = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Right) => kbd_input.right = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Up) => kbd_input.up = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Down) => kbd_input.down = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::A | winit::event::VirtualKeyCode::Space) => kbd_input.a = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::B | winit::event::VirtualKeyCode::Back) => kbd_input.b = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Return) => kbd_input.start = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::Escape) => kbd_input.select = is_pressed(keyboard_input.state),
-						Some(winit::event::VirtualKeyCode::M) => if is_pressed(keyboard_input.state) { state.toggle_music(); },
-						_ => (),
+					let left = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Left)) || keyboard_input.scancode == 0x1e;
+					let right = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Right)) || keyboard_input.scancode == 0x20;
+					let up = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Up)) || keyboard_input.scancode == 0x11;
+					let down = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Down)) || keyboard_input.scancode == 0x1f;
+
+					let a = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Space));
+					let b = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Back));
+
+					let start = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Return));
+					let select = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Escape));
+
+					if left { kbd_input.left = is_pressed(keyboard_input.state); }
+					if right { kbd_input.right = is_pressed(keyboard_input.state); }
+					if up { kbd_input.up = is_pressed(keyboard_input.state); }
+					if down { kbd_input.down = is_pressed(keyboard_input.state); }
+					if a { kbd_input.a = is_pressed(keyboard_input.state); }
+					if b { kbd_input.b = is_pressed(keyboard_input.state); }
+					if start { kbd_input.start = is_pressed(keyboard_input.state); }
+					if select { kbd_input.select = is_pressed(keyboard_input.state); }
+
+					if matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::M)) && is_pressed(keyboard_input.state) {
+						state.toggle_music();
 					}
 				}
 				winit::event::Event::MainEventsCleared => {
@@ -243,7 +249,7 @@ fn main() {
 			}
 		});
 
-		let mut x_input = chipgame::core::Input::default();
+		let mut x_input = chipcore::Input::default();
 		xinput.get_state(&mut x_input);
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
@@ -261,9 +267,9 @@ fn main() {
 				&chipgame::play::PlayEvent::Quit => quit = true,
 				&chipgame::play::PlayEvent::PlayLevel => {
 					if let Some(fx) = &state.fx {
-						context.window().set_title(&format!("{} - Level {} - {}", state.level_packs[state.lp_index].name, fx.level_number, fx.gs.field.name));
+						context.window().set_title(&format!("{} - Level {} - {}", state.lvsets.current().name, fx.level_number, fx.gs.field.name));
 					}
-					else if let Some(level_pack) = state.level_packs.get(state.lp_index) {
+					else if let Some(level_pack) = state.lvsets.collection.get(state.lvsets.selected) {
 						context.window().set_title(&level_pack.title);
 					}
 					else {

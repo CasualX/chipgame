@@ -8,15 +8,15 @@ Levelsets
 
 When the game is started, the player is presented with a menu to select a levelset to play.
 
-* [Chip's Challenge](https://wiki.bitbusters.club/Chip%27s_Challenge)
-* [Chip's Challenge Level Pack 1](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_1)
+* [Chip's Challenge](https://wiki.bitbusters.club/Chip%27s_Challenge): Play the original levels from the game for the feeling of nostalgia.
+* [Chip's Challenge Level Pack 1](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_1): Play this first if you're a newcomer to the game.
 
 Additional levelsets can be installed in the `levelsets` directory.
 
 Keyboard Controls
 -----------------
 
-* Arrow keys: Move Chip
+* Arrow keys, WASD: Move Chip
 * Space: Select menu item
 * Backspace: Close the current menu
 * Enter: Open the Pause menu

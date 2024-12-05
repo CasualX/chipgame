@@ -1,7 +1,4 @@
 
-// pub mod core;
-pub use chipcore as core;
-
 pub mod editor;
 pub mod fx;
 pub mod menu;

@@ -1,0 +1,11 @@
+[package]
+name = "spritec"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap.workspace = true
+dataview = "1.0"
+cvmath.workspace = true
+serde_json.workspace = true
+ini_core.workspace = true

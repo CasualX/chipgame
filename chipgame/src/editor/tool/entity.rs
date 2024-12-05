@@ -21,7 +21,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 			// Otherwise create a new entity
 			else {
 				if let Some(args) = s.selected_args {
-					s.selected_ent = s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
+					s.selected_ent = s.game.gs.entity_create(&EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
 				}
 				s.game.sync();
 			}
@@ -32,7 +32,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 		if let Some(ent) = s.game.gs.ents.get(s.selected_ent) {
 			if ent.pos != cursor_pos {
 				if let Some(args) = s.game.gs.entity_remove(s.selected_ent) {
-					s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
+					s.game.gs.entity_create(&EntityArgs { kind: args.kind, pos: cursor_pos, face_dir: args.face_dir });
 					s.game.sync();
 				}
 			}
@@ -43,7 +43,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 pub fn think(_s: &mut EditorState) {
 	// if s.input.left_click {
 	// 	if let Some(args) = s.selected_args {
-	// 		s.selected_ent = s.game.gs.entity_create(&core::EntityArgs { kind: args.kind, pos: s.cursor_pos, face_dir: args.face_dir });
+	// 		s.selected_ent = s.game.gs.entity_create(&EntityArgs { kind: args.kind, pos: s.cursor_pos, face_dir: args.face_dir });
 	// 		s.game.sync(None);
 	// 	}
 	// }
@@ -65,7 +65,7 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 				let kind = ent.kind;
 				let pos = ent.pos;
 				if let Some(args) = s.game.gs.entity_remove(s.selected_ent) {
-					let new_args = core::EntityArgs { kind, pos, face_dir: next_face_dir(args.face_dir) };
+					let new_args = EntityArgs { kind, pos, face_dir: next_face_dir(args.face_dir) };
 					s.selected_args = Some(new_args);
 					s.selected_ent = s.game.gs.entity_create(&new_args);
 					println!("Rotated: {:?} at {}", kind, pos);
@@ -78,9 +78,9 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 
 pub fn delete(s: &mut EditorState, pressed: bool) {
 	if pressed {
-		if s.selected_ent == core::EntityHandle::INVALID {
+		if s.selected_ent == EntityHandle::INVALID {
 			let cursor_pos = s.cursor_pos;
-			s.selected_ent = s.game.gs.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None }).unwrap_or(core::EntityHandle::INVALID);
+			s.selected_ent = s.game.gs.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None }).unwrap_or(EntityHandle::INVALID);
 		}
 		if let Some(ent) = s.game.gs.ents.get(s.selected_ent) {
 			let kind = ent.kind;
@@ -89,6 +89,6 @@ pub fn delete(s: &mut EditorState, pressed: bool) {
 			s.game.sync();
 			println!("Deleted: {:?} at {}", kind, pos);
 		}
-		s.selected_ent = core::EntityHandle::INVALID;
+		s.selected_ent = EntityHandle::INVALID;
 	}
 }

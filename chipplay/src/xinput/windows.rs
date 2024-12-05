@@ -9,13 +9,13 @@ impl XInput {
 		XInput { handle }
 	}
 
-	pub fn get_state(&self, input: &mut chipgame::core::Input) {
+	pub fn get_state(&self, input: &mut chipcore::Input) {
 		for user_index in 0..4 {
 			self.get_state_(user_index, input);
 		}
 	}
 
-	fn get_state_(&self, user_index: u32, input: &mut chipgame::core::Input) {
+	fn get_state_(&self, user_index: u32, input: &mut chipcore::Input) {
 		if let Ok(state) = self.handle.get_state(user_index) {
 			input.up |= state.arrow_up();
 			input.down |= state.arrow_down();

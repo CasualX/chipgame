@@ -6,6 +6,6 @@ impl XInput {
 		XInput {}
 	}
 
-	pub fn get_state(&self, _input: &mut chipgame::core::Input) {
+	pub fn get_state(&self, _input: &mut chipcore::Input) {
 	}
 }

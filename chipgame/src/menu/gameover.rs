@@ -3,7 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct GameOverMenu {
 	pub selected: u8,
-	pub activity: crate::core::PlayerActivity,
+	pub activity: chipcore::PlayerActivity,
 	pub level_number: i32,
 	pub level_name: String,
 	pub attempts: i32,
@@ -53,7 +53,7 @@ impl GameOverMenu {
 		let [top, middle, bottom] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Fr(1.0); 3]);
 
 		let reason = {
-			use crate::core::PlayerActivity as PA;
+			use chipcore::PlayerActivity as PA;
 			match self.activity {
 				PA::Drowned => "Ooops! Chip can't swim without flippers!",
 				PA::Burned => "Ooops! Don't step in the fire without fire boots!",

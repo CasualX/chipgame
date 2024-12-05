@@ -80,7 +80,7 @@ pub fn entity_teleport(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 }
 
-pub fn entity_drown(ctx: &mut FxState, ehandle: core::EntityHandle) {
+pub fn entity_drown(_ctx: &mut FxState, _ehandle: core::EntityHandle) {
 	// let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	// let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 }
@@ -264,7 +264,7 @@ fn sprite_for_ent(ent: &core::Entity, pl: &core::PlayerState) -> data::SpriteId 
 	}
 }
 
-pub fn item_pickup(ctx: &mut FxState, ehandle: core::EntityHandle, item: core::ItemPickup) {
+pub fn item_pickup(ctx: &mut FxState, ehandle: core::EntityHandle, _item: core::ItemPickup) {
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 

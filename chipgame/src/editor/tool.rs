@@ -4,12 +4,12 @@ pub mod terrain;
 pub mod entity;
 pub mod connection;
 
-fn next_face_dir(face_dir: Option<core::Compass>) -> Option<core::Compass> {
+fn next_face_dir(face_dir: Option<Compass>) -> Option<Compass> {
 	match face_dir {
-		Some(core::Compass::Up) => Some(core::Compass::Right),
-		Some(core::Compass::Right) => Some(core::Compass::Down),
-		Some(core::Compass::Down) => Some(core::Compass::Left),
-		Some(core::Compass::Left) => None,
-		None => Some(core::Compass::Up),
+		Some(Compass::Up) => Some(Compass::Right),
+		Some(Compass::Right) => Some(Compass::Down),
+		Some(Compass::Down) => Some(Compass::Left),
+		Some(Compass::Left) => None,
+		None => Some(Compass::Up),
 	}
 }

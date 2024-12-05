@@ -9,7 +9,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 		}
 	}
 	else {
-		let new_conn = core::Conn { src: s.conn_src, dest: s.cursor_pos };
+		let new_conn = Conn { src: s.conn_src, dest: s.cursor_pos };
 
 		if new_conn.src != new_conn.dest {
 			if let Some(index) = s.game.gs.field.conns.iter().position(|conn| conn == &new_conn) {

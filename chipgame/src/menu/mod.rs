@@ -123,8 +123,10 @@ impl MenuState {
 	pub fn close_all(&mut self) {
 		self.stack.clear();
 	}
-	pub fn close_menu(&mut self) {
-		let _ = self.stack.pop();
+	pub fn close_menu(&mut self, can_close_last_menu: bool) {
+		if can_close_last_menu || self.stack.len() > 1 {
+			let _ = self.stack.pop();
+		}
 	}
 	pub fn open_main(&mut self, start_from_continue: bool, title: &str) {
 		self.stack.clear();

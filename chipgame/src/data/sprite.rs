@@ -1,4 +1,4 @@
-use cvmath::Vec2;
+use super::*;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Hash)]
@@ -210,4 +210,124 @@ impl SpriteId {
 	pub fn uv(self, tex_size: Vec2<i32>) -> Vec2<f32> {
 		self.index().map(|c| c as f32 * 34.0 + 1.0) / tex_size.map(|c| c as f32)
 	}
+}
+
+pub fn create_spritesheet() -> SpriteSheet<SpriteId> {
+	let ids = [
+	SpriteId::Blank,
+	SpriteId::Floor,
+	SpriteId::Wall,
+	SpriteId::Chip,
+	SpriteId::Socket,
+	SpriteId::Exit1,
+	SpriteId::Exit2,
+	SpriteId::Exit3,
+	SpriteId::Hint,
+	SpriteId::Water,
+	SpriteId::DirtBlock,
+	SpriteId::Dirt,
+	SpriteId::Gravel,
+	SpriteId::Fire,
+	SpriteId::Ice,
+	SpriteId::IceCornerNW,
+	SpriteId::IceCornerNE,
+	SpriteId::IceCornerSW,
+	SpriteId::IceCornerSE,
+	SpriteId::ForceUp,
+	SpriteId::ForceLeft,
+	SpriteId::ForceDown,
+	SpriteId::ForceRight,
+	SpriteId::ForceRandom,
+	SpriteId::CloneMachine,
+	SpriteId::CloneBlockN,
+	SpriteId::CloneBlockW,
+	SpriteId::CloneBlockS,
+	SpriteId::CloneBlockE,
+	SpriteId::ThinWallN,
+	SpriteId::ThinWallW,
+	SpriteId::ThinWallS,
+	SpriteId::ThinWallE,
+	SpriteId::ThinWallSE,
+	SpriteId::Flippers,
+	SpriteId::FireBoots,
+	SpriteId::IceSkates,
+	SpriteId::SuctionBoots,
+	SpriteId::PlayerCheer,
+	SpriteId::PlayerWalkNeutral,
+	SpriteId::PlayerWalkUp,
+	SpriteId::PlayerWalkLeft,
+	SpriteId::PlayerWalkDown,
+	SpriteId::PlayerWalkRight,
+	SpriteId::PlayerSwimNeutral,
+	SpriteId::PlayerSwimUp,
+	SpriteId::PlayerSwimLeft,
+	SpriteId::PlayerSwimDown,
+	SpriteId::PlayerSwimRight,
+	SpriteId::PlayerBurned,
+	SpriteId::PlayerDead,
+	SpriteId::WaterSplash,
+	SpriteId::BlueKey,
+	SpriteId::RedKey,
+	SpriteId::GreenKey,
+	SpriteId::YellowKey,
+	SpriteId::BlueLock,
+	SpriteId::RedLock,
+	SpriteId::GreenLock,
+	SpriteId::YellowLock,
+	SpriteId::HiddenWall,
+	SpriteId::InvisWall,
+	SpriteId::BlueWall,
+	SpriteId::BlueWallFake,
+	SpriteId::GreenSwitch,
+	SpriteId::RedSwitch,
+	SpriteId::BrownSwitch,
+	SpriteId::BlueSwitch,
+	SpriteId::OnOffWall,
+	SpriteId::OnOffFloor,
+	SpriteId::Bomb,
+	SpriteId::Thief,
+	SpriteId::Teleport,
+	SpriteId::BearTrap,
+	SpriteId::RecessedWall,
+	SpriteId::BugUp,
+	SpriteId::BugLeft,
+	SpriteId::BugDown,
+	SpriteId::BugRight,
+	SpriteId::TankUp,
+	SpriteId::TankLeft,
+	SpriteId::TankDown,
+	SpriteId::TankRight,
+	SpriteId::PinkBall,
+	SpriteId::FireBall,
+	SpriteId::GliderUp,
+	SpriteId::GliderLeft,
+	SpriteId::GliderDown,
+	SpriteId::GliderRight,
+	SpriteId::WalkerUpDown,
+	SpriteId::WalkerLeftRight,
+	SpriteId::TeethUp,
+	SpriteId::TeethLeft,
+	SpriteId::TeethDown,
+	SpriteId::TeethRight,
+	SpriteId::Blob,
+	SpriteId::ParameciumUpDown,
+	SpriteId::ParameciumLeftRight,
+	];
+
+	let mut sprites = HashMap::new();
+	let mut frames = Vec::new();
+	for &id in &ids {
+		sprites.insert(id, SpriteEntry {
+			index: frames.len() as u16,
+			len: 1,
+			duration: 0.0,
+		});
+		let index = id.index();
+		frames.push(SpriteFrame {
+			rect: [index.x * 34 + 1, index.y * 34 + 1, 32, 32],
+			origin: Vec2(0, 0),
+			duration: 0.0,
+		});
+	}
+	SpriteSheet { width: 224, height: 512, sprites, frames }
 }

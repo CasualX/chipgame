@@ -8,16 +8,19 @@ members = [
 	"./scripts/ccdat",
 	"./scripts/fixer",
 	"./scripts/levelstats",
+	"./scripts/spritec",
 ]
 
 [workspace.dependencies]
 serde = { version = "1.0", features=["derive"] }
 serde_json = "1.0"
 
+ini_core = "0.2"
+
 clap = { version = "3.2", features = ["cargo"] }
 
-cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
+cvmath = { version = "0.0.1", features=["serde", "dataview"] }
 fmtools = "0.1"
 
 flate2 = "1.0"
-simple-base64 = "0.23"
+basenc = "0.2"

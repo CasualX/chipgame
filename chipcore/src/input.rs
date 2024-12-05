@@ -49,6 +49,19 @@ impl Input {
 		}
 		buf.push(bits);
 	}
+
+	pub fn decode(byte: u8) -> Input {
+		Input {
+			up: byte & INPUT_UP != 0,
+			left: byte & INPUT_LEFT != 0,
+			down: byte & INPUT_DOWN != 0,
+			right: byte & INPUT_RIGHT != 0,
+			a: byte & INPUT_A != 0,
+			b: byte & INPUT_B != 0,
+			start: byte & INPUT_START != 0,
+			select: byte & INPUT_SELECT != 0,
+		}
+	}
 }
 
 impl ops::BitOr<Input> for Input {

@@ -1,8 +1,9 @@
 use std::collections::HashMap;
-use crate::fx;
-use crate::core;
-use crate::data;
 use cvmath::*;
+use chipcore::{Compass, Conn, EntityArgs, EntityHandle, EntityKind, FieldDto, MapDto, Terrain};
+
+use crate::fx;
+use crate::data;
 
 mod tool;
 mod tiles;
@@ -19,57 +20,57 @@ impl Default for Tool {
 	}
 }
 
-static TERRAIN_SAMPLES: [[core::Terrain; 2]; 24] = [
-	[core::Terrain::Blank, core::Terrain::Floor],
-	[core::Terrain::Dirt, core::Terrain::Gravel],
-	[core::Terrain::Wall, core::Terrain::CloneMachine],
-	[core::Terrain::HiddenWall, core::Terrain::InvisibleWall],
-	[core::Terrain::RealBlueWall, core::Terrain::FakeBlueWall],
-	[core::Terrain::BlueLock, core::Terrain::RedLock],
-	[core::Terrain::GreenLock, core::Terrain::YellowLock],
-	[core::Terrain::Exit, core::Terrain::Hint],
-	[core::Terrain::Water, core::Terrain::Fire],
-	[core::Terrain::WaterHazard, core::Terrain::DirtBlock],
-	[core::Terrain::ThinWallE, core::Terrain::ThinWallS],
-	[core::Terrain::ThinWallN, core::Terrain::ThinWallW],
-	[core::Terrain::ThinWallSE, core::Terrain::Ice],
-	[core::Terrain::IceNW, core::Terrain::IceNE],
-	[core::Terrain::IceSW, core::Terrain::IceSE],
-	[core::Terrain::ToggleFloor, core::Terrain::ToggleWall],
-	[core::Terrain::GreenButton, core::Terrain::RedButton],
-	[core::Terrain::BrownButton, core::Terrain::BlueButton],
-	[core::Terrain::BearTrap, core::Terrain::RecessedWall],
-	[core::Terrain::Teleport, core::Terrain::ForceRandom],
-	[core::Terrain::ForceE, core::Terrain::ForceS],
-	[core::Terrain::ForceN, core::Terrain::ForceW],
-	[core::Terrain::CloneBlockE, core::Terrain::CloneBlockS],
-	[core::Terrain::CloneBlockN, core::Terrain::CloneBlockW],
+static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
+	[Terrain::Blank, Terrain::Floor],
+	[Terrain::Dirt, Terrain::Gravel],
+	[Terrain::Wall, Terrain::CloneMachine],
+	[Terrain::HiddenWall, Terrain::InvisibleWall],
+	[Terrain::RealBlueWall, Terrain::FakeBlueWall],
+	[Terrain::BlueLock, Terrain::RedLock],
+	[Terrain::GreenLock, Terrain::YellowLock],
+	[Terrain::Exit, Terrain::Hint],
+	[Terrain::Water, Terrain::Fire],
+	[Terrain::WaterHazard, Terrain::DirtBlock],
+	[Terrain::ThinWallE, Terrain::ThinWallS],
+	[Terrain::ThinWallN, Terrain::ThinWallW],
+	[Terrain::ThinWallSE, Terrain::Ice],
+	[Terrain::IceNW, Terrain::IceNE],
+	[Terrain::IceSW, Terrain::IceSE],
+	[Terrain::ToggleFloor, Terrain::ToggleWall],
+	[Terrain::GreenButton, Terrain::RedButton],
+	[Terrain::BrownButton, Terrain::BlueButton],
+	[Terrain::BearTrap, Terrain::RecessedWall],
+	[Terrain::Teleport, Terrain::ForceRandom],
+	[Terrain::ForceE, Terrain::ForceS],
+	[Terrain::ForceN, Terrain::ForceW],
+	[Terrain::CloneBlockE, Terrain::CloneBlockS],
+	[Terrain::CloneBlockN, Terrain::CloneBlockW],
 ];
 
-static ENTITY_SAMPLES: [(core::EntityKind, data::SpriteId); 23] = [
-	(core::EntityKind::Player, data::SpriteId::PlayerWalkNeutral),
-	(core::EntityKind::Chip, data::SpriteId::Chip),
-	(core::EntityKind::Socket, data::SpriteId::Socket),
-	(core::EntityKind::Block, data::SpriteId::DirtBlock),
-	(core::EntityKind::Flippers, data::SpriteId::Flippers),
-	(core::EntityKind::FireBoots, data::SpriteId::FireBoots),
-	(core::EntityKind::IceSkates, data::SpriteId::IceSkates),
-	(core::EntityKind::SuctionBoots, data::SpriteId::SuctionBoots),
-	(core::EntityKind::BlueKey, data::SpriteId::BlueKey),
-	(core::EntityKind::RedKey, data::SpriteId::RedKey),
-	(core::EntityKind::GreenKey, data::SpriteId::GreenKey),
-	(core::EntityKind::YellowKey, data::SpriteId::YellowKey),
-	(core::EntityKind::Thief, data::SpriteId::Thief),
-	(core::EntityKind::Bomb, data::SpriteId::Bomb),
-	(core::EntityKind::Bug, data::SpriteId::BugUp),
-	(core::EntityKind::FireBall, data::SpriteId::FireBall),
-	(core::EntityKind::PinkBall, data::SpriteId::PinkBall),
-	(core::EntityKind::Tank, data::SpriteId::TankUp),
-	(core::EntityKind::Glider, data::SpriteId::GliderUp),
-	(core::EntityKind::Teeth, data::SpriteId::TeethUp),
-	(core::EntityKind::Walker, data::SpriteId::WalkerUpDown),
-	(core::EntityKind::Blob, data::SpriteId::Blob),
-	(core::EntityKind::Paramecium, data::SpriteId::ParameciumUpDown),
+static ENTITY_SAMPLES: [(EntityKind, data::SpriteId); 23] = [
+	(EntityKind::Player, data::SpriteId::PlayerWalkNeutral),
+	(EntityKind::Chip, data::SpriteId::Chip),
+	(EntityKind::Socket, data::SpriteId::Socket),
+	(EntityKind::Block, data::SpriteId::DirtBlock),
+	(EntityKind::Flippers, data::SpriteId::Flippers),
+	(EntityKind::FireBoots, data::SpriteId::FireBoots),
+	(EntityKind::IceSkates, data::SpriteId::IceSkates),
+	(EntityKind::SuctionBoots, data::SpriteId::SuctionBoots),
+	(EntityKind::BlueKey, data::SpriteId::BlueKey),
+	(EntityKind::RedKey, data::SpriteId::RedKey),
+	(EntityKind::GreenKey, data::SpriteId::GreenKey),
+	(EntityKind::YellowKey, data::SpriteId::YellowKey),
+	(EntityKind::Thief, data::SpriteId::Thief),
+	(EntityKind::Bomb, data::SpriteId::Bomb),
+	(EntityKind::Bug, data::SpriteId::BugUp),
+	(EntityKind::FireBall, data::SpriteId::FireBall),
+	(EntityKind::PinkBall, data::SpriteId::PinkBall),
+	(EntityKind::Tank, data::SpriteId::TankUp),
+	(EntityKind::Glider, data::SpriteId::GliderUp),
+	(EntityKind::Teeth, data::SpriteId::TeethUp),
+	(EntityKind::Walker, data::SpriteId::WalkerUpDown),
+	(EntityKind::Blob, data::SpriteId::Blob),
+	(EntityKind::Paramecium, data::SpriteId::ParameciumUpDown),
 ];
 
 #[derive(Default)]
@@ -91,9 +92,9 @@ pub struct EditorState {
 	pub cursor_pos: Vec2<i32>,
 	pub mouse_pos: Vec3<f32>,
 
-	pub selected_terrain: core::Terrain,
-	pub selected_ent: core::EntityHandle,
-	pub selected_args: Option<core::EntityArgs>,
+	pub selected_terrain: Terrain,
+	pub selected_ent: EntityHandle,
+	pub selected_args: Option<EntityArgs>,
 	pub conn_src: Vec2<i32>,
 
 	pub tool_pos: Option<Vec2<i32>>,
@@ -111,8 +112,8 @@ impl EditorState {
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();
 		let mut legend = Vec::new();
-		legend_map.insert(core::Terrain::Blank, 0); legend.push(core::Terrain::Blank);
-		legend_map.insert(core::Terrain::Floor, 1); legend.push(core::Terrain::Floor);
+		legend_map.insert(Terrain::Blank, 0); legend.push(Terrain::Blank);
+		legend_map.insert(Terrain::Floor, 1); legend.push(Terrain::Floor);
 		let mut idx = 2;
 		for &terrain in self.game.gs.field.terrain.iter() {
 			if !legend_map.contains_key(&terrain) {
@@ -123,21 +124,21 @@ impl EditorState {
 		}
 		let data = self.game.gs.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
 
-		let mut entities: Vec<_> = self.game.gs.ents.iter().map(|ent| core::EntityArgs {
+		let mut entities: Vec<_> = self.game.gs.ents.iter().map(|ent| EntityArgs {
 			kind: ent.kind,
 			pos: ent.pos,
 			face_dir: ent.face_dir,
 		}).collect();
 		entities.sort_unstable_by_key(|ent| (ent.kind as i32, ent.pos.y, ent.pos.x));
 
-		let dto = core::FieldDto {
+		let dto = FieldDto {
 			name: self.game.gs.field.name.clone(),
 			author: self.game.gs.field.author.clone(),
 			hint: self.game.gs.field.hint.clone(),
 			password: self.game.gs.field.password.clone(),
 			time_limit: self.game.gs.field.time_limit,
 			required_chips: self.game.gs.field.required_chips,
-			map: core::MapDto {
+			map: MapDto {
 				width: self.game.gs.field.width,
 				height: self.game.gs.field.height,
 				data,
@@ -292,14 +293,14 @@ impl EditorState {
 	pub fn tool_terrain(&mut self, pressed: bool) {
 		if pressed {
 			self.tool = Tool::Terrain;
-			self.selected_terrain = core::Terrain::Floor;
+			self.selected_terrain = Terrain::Floor;
 			self.tool_pos = None;
 		}
 	}
 	pub fn tool_entity(&mut self, pressed: bool) {
 		if pressed {
 			self.tool = Tool::Entity;
-			self.selected_ent = core::EntityHandle::INVALID;
+			self.selected_ent = EntityHandle::INVALID;
 			self.selected_args = None;
 			self.tool_pos = None;
 		}
@@ -396,8 +397,8 @@ impl EditorState {
 			if cursor_pos.y == -2 && cursor_pos.x >= 0 && cursor_pos.x < ENTITY_SAMPLES.len() as i32 {
 				let (kind, _) = ENTITY_SAMPLES[cursor_pos.x as usize];
 				s.tool = Tool::Entity;
-				s.selected_ent = core::EntityHandle::INVALID;
-				s.selected_args = Some(core::EntityArgs { kind, pos: cursor_pos, face_dir: None });
+				s.selected_ent = EntityHandle::INVALID;
+				s.selected_args = Some(EntityArgs { kind, pos: cursor_pos, face_dir: None });
 			}
 		}
 		else {

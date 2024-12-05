@@ -6,8 +6,7 @@ Presentation layer
 use std::mem;
 use std::collections::HashMap;
 use cvmath::*;
-
-use crate::core;
+use chipcore as core;
 
 mod camera;
 mod event;

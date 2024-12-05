@@ -14,7 +14,7 @@ pub struct LevelSelectMenu {
 }
 
 impl LevelSelectMenu {
-	pub fn load_items(&mut self, lp: &crate::play::LevelPack, sd: &crate::play::SaveData) {
+	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
 		self.items.clear();
 		self.items.push((0, "Unlock level".to_string()));
 		for &level_number in &sd.unlocked_levels {
