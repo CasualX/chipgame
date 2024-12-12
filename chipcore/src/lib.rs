@@ -19,6 +19,7 @@ mod physics;
 mod playerstate;
 mod quadtree;
 mod random;
+mod replay;
 mod soundfx;
 mod terrain;
 
@@ -36,6 +37,7 @@ pub use self::physics::*;
 pub use self::playerstate::*;
 pub use self::quadtree::*;
 pub use self::random::*;
+pub use self::replay::*;
 pub use self::soundfx::*;
 pub use self::terrain::*;
 

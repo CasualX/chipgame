@@ -31,7 +31,7 @@ impl SaveData {
 		self.unlocked_levels.binary_search(&level_number).is_ok()
 	}
 
-	pub fn save(&mut self, level_pack: &LevelSet, replay: Option<(i32, &savedto::RecordDto)>) {
+	pub fn save(&mut self, level_pack: &LevelSet, replay: Option<(i32, &chipcore::ReplayDto)>) {
 		let file_name = format!("save/{}.json", level_pack.name);
 
 		let mut save_data = if let Ok(content) = std::fs::read_to_string(&file_name) {

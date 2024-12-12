@@ -49,7 +49,7 @@ impl GameState {
 				u64::from_le_bytes(seed)
 			},
 		};
-		self.rand.rng = urandom::rng::Xoshiro256::new();
+		self.rand.rng = urandom::rng::Xoshiro256::from_seed(self.field.seed);
 		self.field.time_limit = ld.time_limit;
 		self.field.required_chips = ld.required_chips;
 		self.field.width = ld.map.width;
@@ -107,8 +107,8 @@ impl GameState {
 			}
 		}
 
-		let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
-		eprintln!("Found {} chips", chips);
+		// let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
+		// eprintln!("Found {} chips", chips);
 	}
 }
 
@@ -256,6 +256,18 @@ impl GameState {
 					s.events.push(GameEvent::EntityHidden { entity: ent.handle, hidden });
 				}
 			}
+		}
+	}
+
+	pub fn save_replay(&self, realtime: f32) -> ReplayDto {
+		ReplayDto {
+			date: None,
+			ticks: self.time,
+			realtime,
+			steps: self.ps.steps,
+			bonks: self.ps.bonks,
+			seed: format!("{:016x}", self.field.seed),
+			replay: encode_bytes(&self.inputs),
 		}
 	}
 }

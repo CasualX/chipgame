@@ -15,22 +15,9 @@ pub struct SaveDto {
 #[derive(Clone, Debug, Default)]
 pub struct RecordsDto {
 	#[serde(default)]
-	pub mintime: HashMap<String, RecordDto>,
+	pub mintime: HashMap<String, chipcore::ReplayDto>,
 	#[serde(default)]
-	pub minsteps: HashMap<String, RecordDto>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, Debug, Default)]
-pub struct RecordDto {
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub date: Option<String>,
-	pub ticks: i32,
-	pub realtime: f32,
-	pub steps: i32,
-	pub bonks: i32,
-	pub seed: String,
-	pub replay: String,
+	pub minsteps: HashMap<String, chipcore::ReplayDto>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]

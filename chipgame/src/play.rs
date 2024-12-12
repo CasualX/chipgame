@@ -174,8 +174,8 @@ impl PlayState {
 				}
 				menu::MenuEvent::SaveReplay => {
 					if let Some(fx) = &self.fx {
-						let record = get_record_data_from_fx(fx);
-						let record = serde_json::to_string_pretty(&record).unwrap();
+						let replay = fx.gs.save_replay(fx.gs_realtime);
+						let record = serde_json::to_string_pretty(&replay).unwrap();
 						if let Err(err) = std::fs::write(format!("save/replay/{}.level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
 							eprintln!("Error saving replay: {}", err);
 						}
@@ -279,7 +279,8 @@ impl PlayState {
 						self.save_data.unlock_level(fx.level_number);
 						self.save_data.unlock_level(fx.level_number + 1);
 						self.save_data.current_level = fx.level_number + 1;
-						self.save_data.save(&self.lvsets.current(), Some((fx.level_number - 1, &get_record_data_from_fx(fx))));
+						let replay = fx.gs.save_replay(fx.gs_realtime);
+						self.save_data.save(&self.lvsets.current(), Some((fx.level_number - 1, &replay)));
 
 						let menu = menu::GameWinMenu {
 							selected: 0,
@@ -330,53 +331,4 @@ impl PlayState {
 		self.menu.draw(g, resx);
 	}
 
-}
-
-fn encode_bytes(bytes: &[u8]) -> String {
-	// Compress the bytes
-	let mut compressed = Vec::new();
-	compressed.reserve(bytes.len());
-	let mut compress = flate2::Compress::new(flate2::Compression::best(), true);
-	compress.compress_vec(bytes, &mut compressed, flate2::FlushCompress::Finish).unwrap();
-
-	// Base64 encode to string
-	basenc::Base64Std.encode(compressed.as_slice(), basenc::NoPad)
-}
-pub fn decode_bytes(string: &str) -> Vec<u8> {
-	// Base64 decode to bytes
-	let compressed = basenc::Base64Std.decode(string, basenc::NoPad).unwrap();
-
-	// Decompress the bytes
-	let mut decompressed = Vec::new();
-	let mut decompress = flate2::Decompress::new(true);
-	decompressed.reserve(100000);
-	loop {
-		match decompress.decompress_vec(compressed.as_slice(), &mut decompressed, flate2::FlushDecompress::Finish) {
-			Ok(flate2::Status::Ok) => {}
-			Ok(flate2::Status::BufError) => {
-				println!("Decompressing buffer error");
-				decompressed.reserve(decompressed.len() * 2);
-			}
-			Ok(flate2::Status::StreamEnd) => break,
-			Err(e) => {
-				eprintln!("Error decompressing: {}", e);
-				break;
-			}
-		}
-	}
-	return decompressed;
-}
-
-fn get_record_data_from_fx(fx: &fx::FxState) -> savedto::RecordDto {
-	let replay = encode_bytes(&fx.gs.inputs);
-
-	savedto::RecordDto {
-		date: None,
-		ticks: fx.gs.time,
-		realtime: fx.gs_realtime,
-		steps: fx.gs.ps.steps,
-		bonks: fx.gs.ps.bonks,
-		seed: format!("{:016x}", fx.gs.field.seed),
-		replay,
-	}
 }
