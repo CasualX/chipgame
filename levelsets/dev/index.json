@@ -14,6 +14,8 @@
 		"convergence2.json",
 		"attack of the clones.json",
 		"blob clone rng test.json",
-		"test8.json"
+		"test8.json",
+		"monster push block.json",
+		"force block push.json"
 	]
 }

@@ -22,5 +22,7 @@ clap = { version = "3.2", features = ["cargo"] }
 cvmath = { version = "0.0.1", features=["serde", "dataview"] }
 fmtools = "0.1"
 
+urandom = { git = "https://github.com/CasualX/urandom", branch = "grandvizier" }
+
 flate2 = "1.0"
 basenc = "0.2"

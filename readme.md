@@ -4,17 +4,17 @@ Chip's Challenge Remake
 Organization
 ------------
 
-### Game: [./chipgame](./chipgame)
-
-Platform independent game implementation.
-
-Includes menus, game logic, rendering, audio, input handling, etc.
-
 ### Gameplay: [./chipcore](./chipcore)
 
 Platform independent core gameplay implementation.
 
 Just the core game logic, to simulate the game without rendering or audio.
+
+### Game: [./chipgame](./chipgame)
+
+Platform independent game implementation.
+
+Includes menus, game logic, rendering, audio, input handling, etc.
 
 ### Data: [./data](./data)
 

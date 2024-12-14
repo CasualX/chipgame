@@ -23,16 +23,18 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		return;
 	}
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::Water) {
-		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		ent.flags |= EF_REMOVE;
-		return;
-	}
-	if matches!(terrain, Terrain::Fire) {
-		s.events.push(GameEvent::EntityBurn { entity: ent.handle });
-		ent.flags |= EF_REMOVE;
-		return;
+	if ent.flags & EF_NEW_POS != 0 {
+		let terrain = s.field.get_terrain(ent.pos);
+		if matches!(terrain, Terrain::Water) {
+			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
+			ent.flags |= EF_REMOVE;
+			return;
+		}
+		if matches!(terrain, Terrain::Fire) {
+			s.events.fire(GameEvent::EntityBurn { entity: ent.handle });
+			ent.flags |= EF_REMOVE;
+			return;
+		}
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
@@ -48,7 +50,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 				// Choose a direction to turn
 				let step_dirs = [face_dir.turn_left(), face_dir.turn_right()];
-				let choice = s.rand.rng.coin_flip();
+				let choice = s.rand.coin_flip();
 
 				if try_move(s, ent, step_dirs[choice as usize]) { }
 				else if try_move(s, ent, step_dirs[(!choice) as usize]) { }

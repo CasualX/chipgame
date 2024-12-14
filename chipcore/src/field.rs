@@ -176,7 +176,7 @@ impl GameState {
 				let new_pos = ent.pos + d;
 				self.qt.update(ehandle, ent.pos, new_pos);
 				ent.pos = new_pos;
-				self.events.push(GameEvent::EntityStep { entity: ehandle });
+				self.events.fire(GameEvent::EntityStep { entity: ehandle });
 				self.ents.put(ent);
 			}
 		}

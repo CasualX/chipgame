@@ -62,7 +62,7 @@ impl GameState {
 			EntityKind::Blob => blob::create(s, data),
 			EntityKind::Paramecium => paramecium::create(s, data),
 		};
-		s.events.push(GameEvent::EntityCreated { entity: ehandle, kind: data.kind });
+		s.events.fire(GameEvent::EntityCreated { entity: ehandle, kind: data.kind });
 		return ehandle;
 	}
 
@@ -71,7 +71,7 @@ impl GameState {
 		let s = self;
 		let ent = s.ents.remove(ehandle)?;
 		s.qt.remove(ehandle, ent.pos);
-		s.events.push(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
+		s.events.fire(GameEvent::EntityRemoved { entity: ehandle, kind: ent.kind });
 		Some(ent.to_entity_args())
 	}
 }

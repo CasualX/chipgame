@@ -2,7 +2,7 @@
 Core chipgame gameplay code.
 */
 
-use std::cmp;
+use std::{cmp, ops};
 use cvmath::Vec2i;
 
 mod codes;

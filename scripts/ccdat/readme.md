@@ -7,12 +7,12 @@ Extract level data from .dat files and resave them in this project's format.
 
 ```bash
 # Select the .dat file, level pack location and level number
-CCDAT=tmp/CCLP3/data/CCLP3.dat
-LEVEL_PACK=levelsets/cclp3
+CCDAT=tmp/CCLP4/data/CCLP4.dat
+LEVEL_PACK=levelsets/cclp4
 N=1
 
 function ccextract() {
-	cargo run --bin ccdat -- -f $CCDAT -n $1 > $LEVEL_PACK/lv/level$1.json
+	cargo run --bin ccdat_extract -- -f $CCDAT -n $1 > $LEVEL_PACK/lv/level$1.json
 }
 function ccedit() {
 	cargo run --bin chipedit -- $LEVEL_PACK/lv/level$1.json

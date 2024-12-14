@@ -88,6 +88,20 @@ impl Object {
 			return;
 		}
 
+		if let Some(ent) = ctx.gs.ents.get(self.ehandle) {
+			let terrain = ctx.gs.field.get_terrain(ent.pos);
+			let elevated = matches!(terrain, core::Terrain::Wall | core::Terrain::RedLock | core::Terrain::BlueLock | core::Terrain::GreenLock | core::Terrain::YellowLock);
+
+			if elevated {
+				if !matches!(ent.kind, core::EntityKind::Block) {
+					self.pos.z = 20.0;
+				}
+			}
+			else {
+				self.pos.z = 0.0;
+			}
+		}
+
 		match &mut self.mover {
 			MoveType::Step(step) => {
 				let t = f32::min(1.0, (ctx.time - step.move_time) / step.move_spd);

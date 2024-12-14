@@ -352,6 +352,17 @@ pub fn draw_tile(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uni
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
 
+fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
+	for h in state.gs.qt.get(pos) {
+		if let Some(ent) = state.gs.ents.get(h) {
+			if matches!(ent.kind, core::EntityKind::Block) {
+				return true;
+			}
+		}
+	}
+	false
+}
+
 pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform>, state: &FxState, time: f32) {
 	let i = (time * 8.0) as i32;
 	let field = &state.gs.field;
@@ -374,7 +385,9 @@ pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform
 					_ => (),
 				}
 			}
-			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0), sprite, model, 1.0);
+			// Make Blocks appear on top of walls
+			let z = if matches!(model, data::ModelId::Wall) && is_block_on_pos(state, Vec2(x, y)) { -2.0 } else { 0.0 };
+			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0).with_z(z), sprite, model, 1.0);
 		}
 	}
 	// Render the object shadows

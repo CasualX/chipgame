@@ -22,7 +22,7 @@ pub struct GameState {
 	pub spawns: Vec<EntityArgs>,
 	pub qt: QuadTree,
 	pub rand: Random,
-	pub events: Vec<GameEvent>,
+	pub events: Events,
 	pub ts: TimeState,
 	pub input: Input,
 	pub inputs: Vec<u8>,
@@ -49,7 +49,7 @@ impl GameState {
 				u64::from_le_bytes(seed)
 			},
 		};
-		self.rand.rng = urandom::rng::Xoshiro256::from_seed(self.field.seed);
+		self.rand.reseed(self.field.seed);
 		self.field.time_limit = ld.time_limit;
 		self.field.required_chips = ld.required_chips;
 		self.field.width = ld.map.width;
@@ -127,7 +127,7 @@ impl GameState {
 		// Check if the player has run out of time
 		if self.field.time_limit > 0 && self.time >= self.field.time_limit * 60 {
 			ps_activity(self, PlayerActivity::OutOfTime);
-			self.events.push(GameEvent::GameOver { player: self.ps.ehandle });
+			self.events.fire(GameEvent::GameOver { player: self.ps.ehandle });
 			return;
 		}
 
@@ -218,7 +218,7 @@ impl GameState {
 
 	pub fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
 		if let Some(old) = self.field.set_terrain(pos, terrain) {
-			self.events.push(GameEvent::TerrainUpdated { pos, old, new: terrain });
+			self.events.fire(GameEvent::TerrainUpdated { pos, old, new: terrain });
 		}
 	}
 
@@ -253,7 +253,7 @@ impl GameState {
 				}
 				if (ent.flags & EF_HIDDEN != 0) != hidden {
 					ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
-					s.events.push(GameEvent::EntityHidden { entity: ent.handle, hidden });
+					s.events.fire(GameEvent::EntityHidden { entity: ent.handle, hidden });
 				}
 			}
 		}

@@ -114,8 +114,8 @@ fn try_unlock(s: &mut GameState, pos: Vec2i, key: KeyColor) -> bool {
 	if !matches!(key, KeyColor::Green) {
 		s.ps.keys[key as usize] -= 1;
 	}
-	s.events.push(GameEvent::LockOpened { pos, key });
-	s.events.push(GameEvent::SoundFx { sound: SoundFx::LockOpened });
+	s.events.fire(GameEvent::LockOpened { pos, key });
+	s.events.fire(GameEvent::SoundFx { sound: SoundFx::LockOpened });
 	return true;
 }
 
@@ -149,7 +149,9 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		};
 		// If on a solid wall, allow movement out
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
-			flick(s, &new_pos, step_dir);
+			if is_player {
+				flick(s, &new_pos, step_dir);
+			}
 			return false;
 		}
 
@@ -166,7 +168,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				}
 				Terrain::FakeBlueWall => {
 					s.set_terrain(new_pos, Terrain::Floor);
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
 					false
 				}
 				Terrain::HiddenWall => {
@@ -190,7 +192,9 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Right => THIN_WALL_W,
 		};
 		if to_terrain.solid_flags() & panel != 0 {
-			flick(s, &new_pos, step_dir);
+			if is_player {
+				flick(s, &new_pos, step_dir);
+			}
 			return false;
 		}
 
@@ -222,8 +226,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			EntityKind::Socket => {
 				if is_player && s.ps.chips >= s.field.required_chips {
 					ent.flags |= EF_REMOVE;
-					s.events.push(GameEvent::SocketFilled { pos: ent.pos });
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
+					s.events.fire(GameEvent::SocketFilled { pos: ent.pos });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
 					false
 				}
 				else {
@@ -234,8 +238,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				if is_player && try_move(s, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec());
-					s.events.push(GameEvent::BlockPush { entity: ent.handle });
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					false
 				}
 				else {
@@ -304,8 +308,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	if is_player {
 		s.ps.steps += 1;
 	}
-	s.events.push(GameEvent::EntityTurn { entity: ent.handle });
-	s.events.push(GameEvent::EntityStep { entity: ent.handle });
+	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
+	s.events.fire(GameEvent::EntityStep { entity: ent.handle });
 	return true;
 }
 
@@ -318,8 +322,8 @@ fn flick(s: &mut GameState, &new_pos: &Vec2i, step_dir: Compass) {
 			if try_move(s, &mut ent, step_dir) {
 				s.update_hidden_flag(ent.pos);
 				s.update_hidden_flag(ent.pos - step_dir.to_vec());
-				s.events.push(GameEvent::BlockPush { entity: ent.handle });
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
 		}
 
@@ -394,9 +398,9 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	}
 
 	// Teleport the entity
-	s.events.push(GameEvent::EntityTeleport { entity: ent.handle });
+	s.events.fire(GameEvent::EntityTeleport { entity: ent.handle });
 	if matches!(ent.kind, EntityKind::Player) {
-		s.events.push(GameEvent::SoundFx { sound: SoundFx::Teleporting });
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::Teleporting });
 	}
 	return true;
 }
@@ -409,10 +413,10 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	if matches!(terrain, Terrain::BearTrap) {
 		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
 		if trapped && ent.flags & EF_TRAPPED == 0 {
-			s.events.push(GameEvent::EntityTrapped { entity: ent.handle });
+			s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
 			// Avoid audio spam when the level is initially loaded
 			if s.time != 0 {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
 			}
 		}
 		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
@@ -421,9 +425,10 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	if matches!(ent.kind, EntityKind::Player) {
 		if let Some(step_dir) = ent.step_dir {
 			let from_pos = ent.pos - step_dir.to_vec();
-			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) {
+			// HACK: Avoid triggering the recessed wall on the first step
+			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) && s.ps.steps > 1 {
 				s.set_terrain(from_pos, Terrain::Wall);
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::WallPopup });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WallPopup });
 			}
 		}
 	}
@@ -451,7 +456,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					}
 				}
 				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
 			}
 		}
@@ -488,13 +493,13 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				s.spawns.push(args);
 
 				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
 			}
 		}
 		Terrain::BrownButton => {
 			if press_once(ent) && play_sound {
-				s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 			}
 		}
 		Terrain::BlueButton => {
@@ -503,7 +508,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					if matches!(other.kind, EntityKind::Tank) {
 						if let Some(face_dir) = other.face_dir {
 							other.face_dir = Some(face_dir.turn_around());
-							s.events.push(GameEvent::EntityTurn { entity: other.handle });
+							s.events.fire(GameEvent::EntityTurn { entity: other.handle });
 						}
 					}
 				}
@@ -512,11 +517,11 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 				if matches!(ent.kind, EntityKind::Tank) {
 					if let Some(face_dir) = ent.face_dir {
 						ent.face_dir = Some(face_dir.turn_around());
-						s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+						s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 					}
 				}
 				if play_sound {
-					s.events.push(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
 			}
 		}

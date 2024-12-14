@@ -23,16 +23,18 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		return;
 	}
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::Water) {
-		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		ent.flags |= EF_REMOVE;
-		return;
-	}
-	if matches!(terrain, Terrain::Fire) {
-		s.events.push(GameEvent::EntityBurn { entity: ent.handle });
-		ent.flags |= EF_REMOVE;
-		return;
+	if ent.flags & EF_NEW_POS != 0 {
+		let terrain = s.field.get_terrain(ent.pos);
+		if matches!(terrain, Terrain::Water) {
+			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
+			ent.flags |= EF_REMOVE;
+			return;
+		}
+		if matches!(terrain, Terrain::Fire) {
+			s.events.fire(GameEvent::EntityBurn { entity: ent.handle });
+			ent.flags |= EF_REMOVE;
+			return;
+		}
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
@@ -43,7 +45,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			// If no legal move, stay put and face in the first direction
 			else {
 				if ent.face_dir != Some(first_dir) {
-					s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+					s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 				}
 				ent.face_dir = Some(first_dir);
 			}

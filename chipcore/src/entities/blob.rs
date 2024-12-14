@@ -23,11 +23,13 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		return;
 	}
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::Water) {
-		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		ent.flags |= EF_REMOVE;
-		return;
+	if ent.flags & EF_NEW_POS != 0 {
+		let terrain = s.field.get_terrain(ent.pos);
+		if matches!(terrain, Terrain::Water) {
+			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
+			ent.flags |= EF_REMOVE;
+			return;
+		}
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {

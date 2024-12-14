@@ -37,6 +37,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		if other_ent.step_time >= s.time {
 			return;
 		}
+		// Only explode when an entity moved into the bomb
+		if other_ent.flags & EF_NEW_POS == 0 {
+			continue;
+		}
 		exploded = true;
 		if matches!(other_ent.kind, EntityKind::Player) {
 			continue;
@@ -46,8 +50,8 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if exploded {
 		ent.flags |= EF_REMOVE;
-		s.events.push(GameEvent::BombExplode { entity: ent.handle });
-		s.events.push(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
+		s.events.fire(GameEvent::BombExplode { entity: ent.handle });
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 	}
 }
 

@@ -51,3 +51,30 @@ pub enum GameEvent {
 	GameOver { player: EntityHandle },
 	SoundFx { sound: SoundFx },
 }
+
+#[derive(Default)]
+pub struct Events {
+	events: Vec<GameEvent>,
+}
+
+impl Events {
+	#[inline]
+	pub fn fire(&mut self, event: GameEvent) {
+		unsafe {
+			self._fire().write(event);
+		}
+	}
+
+	#[inline(never)]
+	unsafe fn _fire(&mut self) -> *mut GameEvent {
+		self.events.reserve(1);
+		let index = self.events.len();
+		self.events.set_len(index + 1);
+		self.events.get_unchecked_mut(index)
+	}
+
+	#[inline]
+	pub fn take(&mut self) -> Vec<GameEvent> {
+		std::mem::take(&mut self.events)
+	}
+}

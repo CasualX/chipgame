@@ -101,7 +101,7 @@ impl FxState {
 		self.sync();
 	}
 	pub fn sync(&mut self) {
-		for ev in &mem::replace(&mut self.gs.events, Vec::new()) {
+		for ev in &self.gs.events.take() {
 			eprintln!("GameEvent: {:?}", ev);
 			match ev {
 				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),

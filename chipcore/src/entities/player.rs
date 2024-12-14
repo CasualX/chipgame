@@ -42,11 +42,11 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	// Clear movement after a delay
 	if s.time >= ent.step_time + IDLE_TIME {
 		if ent.face_dir.is_some() {
-			s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 		}
 		ent.face_dir = None;
 	}
-	if s.time >= ent.step_time + ent.step_spd {
+	if s.time >= ent.step_time + ent.step_spd && ent.flags & EF_NEW_POS != 0 {
 		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
 			ps_activity(s, PlayerActivity::Burned);
 			return;
@@ -55,8 +55,8 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			ps_activity(s, PlayerActivity::Drowned);
 			return;
 		}
-		if ent.flags & EF_NEW_POS != 0 && matches!(terrain, Terrain::Exit) {
-			s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+		if matches!(terrain, Terrain::Exit) {
+			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 			ps_activity(s, PlayerActivity::Win);
 			return;
 		}
@@ -73,7 +73,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	// Turn dirt to floor after stepping on it
 	if matches!(terrain, Terrain::Dirt) {
 		s.set_terrain(ent.pos, Terrain::Floor);
-		s.events.push(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 	}
 
 	// Wait until movement is cleared before accepting new input
@@ -195,9 +195,9 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
 	s.ps.bonks += 1;
-	s.events.push(GameEvent::PlayerBump { player: ent.handle });
-	s.events.push(GameEvent::SoundFx { sound: SoundFx::CantMove });
-	s.events.push(GameEvent::EntityTurn { entity: ent.handle });
+	s.events.fire(GameEvent::PlayerBump { player: ent.handle });
+	s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
+	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 }
 
 const FLAGS: SolidFlags = SolidFlags {

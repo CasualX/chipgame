@@ -73,8 +73,8 @@ fn pickup_item(s: &mut GameState, ent: &mut Entity) {
 		_ => return,
 	};
 
-	s.events.push(GameEvent::ItemPickup { entity: ent.handle, item });
-	s.events.push(GameEvent::SoundFx { sound });
+	s.events.fire(GameEvent::ItemPickup { entity: ent.handle, item });
+	s.events.fire(GameEvent::SoundFx { sound });
 }
 
 const FLAGS: SolidFlags = SolidFlags {

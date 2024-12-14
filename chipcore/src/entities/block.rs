@@ -23,12 +23,14 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		return;
 	}
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::Water) {
-		s.set_terrain(ent.pos, Terrain::Dirt);
-		s.events.push(GameEvent::EntityDrown { entity: ent.handle });
-		s.events.push(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
-		ent.flags |= EF_REMOVE;
+	if ent.flags & EF_NEW_POS != 0 {
+		let terrain = s.field.get_terrain(ent.pos);
+		if matches!(terrain, Terrain::Water) {
+			s.set_terrain(ent.pos, Terrain::Dirt);
+			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
+			s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
+			ent.flags |= EF_REMOVE;
+		}
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
@@ -61,7 +63,7 @@ const FLAGS: SolidFlags = SolidFlags {
 	water: false,
 	exit: true,
 	blue_fake: true,
-	recessed_wall: false,
+	recessed_wall: true,
 	keys: false,
 	boots: true,
 	chips: true,

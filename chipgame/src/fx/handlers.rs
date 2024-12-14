@@ -109,7 +109,7 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = Object {
 		handle,
 		ehandle: core::EntityHandle::INVALID,
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
 		sprite: data::SpriteId::Fire,

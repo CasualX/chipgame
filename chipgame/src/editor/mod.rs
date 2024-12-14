@@ -281,10 +281,11 @@ impl EditorState {
 
 			let pen = shade::d2::Pen { template: ToVertex { color: [255, 0, 0, 255] } };
 			for ent in self.game.gs.ents.iter() {
+				let pos = ent.pos.map(|c| c as f32 * 32.0 + 16.0);
 				if let Some(face_dir) = ent.face_dir {
-					let pos = ent.pos.map(|c| c as f32 * 32.0 + 16.0);
 					cv.draw_arrow(&pen, pos, pos + face_dir.to_vec().map(|c| c as f32 * 20.0), 4.0);
 				}
+				cv.draw_line_rect(&pen, &Rect::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
