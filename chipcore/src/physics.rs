@@ -370,7 +370,7 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::ForceW => try_move(s, ent, Compass::Left),
 		Terrain::ForceS => try_move(s, ent, Compass::Down),
 		Terrain::ForceE => try_move(s, ent, Compass::Right),
-		Terrain::ForceRandom => { let dir = s.rand.compass(); try_move(s, ent, dir) },
+		Terrain::ForceRandom => { let dir = s.rand.next(); try_move(s, ent, dir) },
 		Terrain::Teleport => if let Some(step_dir) = step_dir { teleport(s, ent, step_dir) } else { false },
 		_ => return false,
 	};

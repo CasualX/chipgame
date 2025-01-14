@@ -211,7 +211,6 @@ impl FxState {
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
 				};
-				let hint = hint.replace(". ", ".\n");
 				tbuf.text_box(&resx.font, &scribe, &Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
 				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
 				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);

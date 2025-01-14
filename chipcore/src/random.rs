@@ -34,13 +34,4 @@ impl Random {
 	pub fn reseed(&mut self, seed: u64) {
 		self.rand = urandom::rng::Xoshiro256::from_seed(seed);
 	}
-
-	pub fn compass(&mut self) -> Compass {
-		match self.rand.next_u32() % 4 {
-			0 => Compass::Up,
-			1 => Compass::Left,
-			2 => Compass::Down,
-			_ => Compass::Right,
-		}
-	}
 }

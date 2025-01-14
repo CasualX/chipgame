@@ -147,7 +147,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				Terrain::ForceE => Some(Compass::Right),
 				Terrain::ForceN => Some(Compass::Up),
 				Terrain::ForceS => Some(Compass::Down),
-				Terrain::ForceRandom => Some(s.rand.compass()),
+				Terrain::ForceRandom => Some(s.rand.next()),
 				_ => None,
 			};
 			if let Some(force_dir) = force_dir {
