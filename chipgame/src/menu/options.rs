@@ -40,6 +40,7 @@ impl OptionsMenu {
 				_ => MenuEvent::CloseMenu,
 			};
 			events.push(evt);
+			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
 			events.push(MenuEvent::CloseMenu);

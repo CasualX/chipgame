@@ -146,6 +146,7 @@ impl EditorState {
 			},
 			entities,
 			connections: self.game.gs.field.conns.clone(),
+			replays: None,
 		};
 		serde_json::to_string(&dto).unwrap()
 	}
@@ -320,6 +321,16 @@ impl EditorState {
 		for conn in self.game.gs.field.conns.iter_mut() {
 			conn.src += offset;
 			conn.dest += offset;
+		}
+	}
+
+	pub fn expand_top(&mut self, pressed: bool) {
+		if pressed {
+			for _ in 0..self.game.gs.field.width as usize {
+				self.game.gs.field.terrain.insert(0, Terrain::Floor);
+			}
+			self.game.gs.field.height += 1;
+			self.offset_positions(Vec2::new(0, 1));
 		}
 	}
 

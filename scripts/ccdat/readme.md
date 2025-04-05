@@ -7,8 +7,8 @@ Extract level data from .dat files and resave them in this project's format.
 
 ```bash
 # Select the .dat file, level pack location and level number
-CCDAT=tmp/CCLP4/data/CCLP4.dat
-LEVEL_PACK=levelsets/cclp4
+CCDAT=tmp/CCLP5/data/CCLP5.dat
+LEVEL_PACK=levelsets/cclp5
 N=1
 
 function ccextract() {

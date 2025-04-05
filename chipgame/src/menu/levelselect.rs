@@ -56,6 +56,7 @@ impl LevelSelectMenu {
 				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].0 },
 			};
 			events.push(evt);
+			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
 			events.push(MenuEvent::CloseMenu);

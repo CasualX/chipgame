@@ -2,6 +2,7 @@
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MenuEvent {
 	CursorMove,
+	CursorSelect,
 	CloseMenu,
 
 	// Main Events

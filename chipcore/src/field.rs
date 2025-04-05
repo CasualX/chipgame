@@ -24,6 +24,8 @@ pub struct FieldDto {
 	pub map: MapDto,
 	pub entities: Vec<EntityArgs>,
 	pub connections: Vec<Conn>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub replays: Option<Vec<ReplayDto>>,
 }
 
 /// Connection between terrain tiles.
