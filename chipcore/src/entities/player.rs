@@ -62,6 +62,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 	}
 
+	// Turn dirt to floor after stepping on it
+	if ent.flags & EF_NEW_POS != 0 && matches!(terrain, Terrain::Dirt) {
+		s.set_terrain(ent.pos, Terrain::Floor);
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
+	}
+
 	let activity = match terrain {
 		Terrain::Water => PlayerActivity::Swimming,
 		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => if s.ps.ice_skates { PlayerActivity::Skating } else { PlayerActivity::Sliding },
@@ -69,12 +75,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		_ => PlayerActivity::Walking,
 	};
 	ps_activity(s, activity);
-
-	// Turn dirt to floor after stepping on it
-	if matches!(terrain, Terrain::Dirt) {
-		s.set_terrain(ent.pos, Terrain::Floor);
-		s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
-	}
 
 	// Wait until movement is cleared before accepting new input
 	if s.time >= ent.step_time + ent.step_spd {

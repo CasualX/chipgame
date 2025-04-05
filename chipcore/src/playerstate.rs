@@ -168,7 +168,8 @@ pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 			}
 			PlayerActivity::Bombed => {
 				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
+				// Already fired by the Bomb entity!
+				// s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 			}
 			PlayerActivity::OutOfTime => {
 				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });

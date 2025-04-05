@@ -32,4 +32,6 @@ pub enum SoundFx {
 	WaterWalking,
 	FireWalking,
 	WallPopup,
+	CursorMove,
+	CursorSelect,
 }

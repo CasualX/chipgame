@@ -37,6 +37,7 @@ impl PauseMenu {
 				_ => MenuEvent::MainMenu,
 			};
 			events.push(evt);
+			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
 			events.push(MenuEvent::CloseMenu);

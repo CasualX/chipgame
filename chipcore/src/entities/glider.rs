@@ -46,7 +46,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 const FLAGS: SolidFlags = SolidFlags {
 	gravel: true,
-	fire: false,
+	fire: true,
 	dirt: true,
 	water: false,
 	exit: true,

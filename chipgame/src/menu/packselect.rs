@@ -22,6 +22,7 @@ impl LevelPackSelectMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			events.push(MenuEvent::LevelPackSelect { index: self.selected });
+			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
 			events.push(MenuEvent::CloseMenu);

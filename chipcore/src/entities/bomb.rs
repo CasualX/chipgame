@@ -23,10 +23,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		return;
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Bombed);
-	}
-
 	let mut exploded = false;
 	for ehandle in s.qt.get(ent.pos) {
 		if ehandle == ent.handle {
@@ -42,10 +38,13 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			continue;
 		}
 		exploded = true;
+		// Remove non-player entities
 		if matches!(other_ent.kind, EntityKind::Player) {
-			continue;
+			ps_activity(s, PlayerActivity::Bombed);
 		}
-		other_ent.flags |= EF_REMOVE;
+		else {
+			other_ent.flags |= EF_REMOVE;
+		}
 	}
 
 	if exploded {

@@ -138,6 +138,40 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	let new_pos = ent.pos + step_dir.to_vec();
 	let from_terrain = s.field.get_terrain(ent.pos);
 
+	// Set the entity's step speed based on the terrain
+	if matches!(from_terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
+		if is_player {
+			if s.ps.suction_boots {
+				ent.step_spd = ent.base_spd;
+				ps_activity(s, PlayerActivity::Suction);
+			}
+			else {
+				ent.step_spd = cmp::max(1, ent.base_spd / 2);
+				ps_activity(s, PlayerActivity::Sliding);
+			}
+		}
+		else {
+			ent.step_spd = cmp::max(1, ent.base_spd / 2);
+		}
+	}
+	else if matches!(from_terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
+		if is_player {
+			if s.ps.ice_skates {
+				ent.step_spd = ent.base_spd;
+			}
+			else {
+				ent.step_spd = cmp::max(1, ent.base_spd / 2);
+				ps_activity(s, PlayerActivity::Skating);
+			}
+		}
+		else {
+			ent.step_spd = cmp::max(1, ent.base_spd / 2);
+		}
+	}
+	else {
+		ent.step_spd = ent.base_spd;
+	}
+
 	if !dev_wtw {
 		// Check for panels on the current terrain
 		let solidf = from_terrain.solid_flags();
@@ -271,25 +305,6 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			return false;
 		}
 	}
-
-	// Set the entity's step speed based on the terrain
-	let has_suction_boots = is_player && s.ps.suction_boots;
-	let has_ice_skates = is_player && s.ps.ice_skates;
-	ent.step_spd = match from_terrain {
-		Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom if !has_suction_boots => {
-			if is_player {
-				ps_activity(s, PlayerActivity::Sliding);
-			}
-			cmp::max(1, ent.base_spd / 2)
-		},
-		Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW if !has_ice_skates => {
-			if is_player {
-				ps_activity(s, PlayerActivity::Sliding);
-			}
-			cmp::max(1, ent.base_spd / 2)
-		},
-		_ => ent.base_spd,
-	};
 
 	s.qt.update(ent.handle, ent.pos, new_pos);
 

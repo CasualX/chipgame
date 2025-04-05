@@ -16,6 +16,7 @@
 		"blob clone rng test.json",
 		"test8.json",
 		"monster push block.json",
-		"force block push.json"
+		"force block push.json",
+		"bonk.json"
 	]
 }

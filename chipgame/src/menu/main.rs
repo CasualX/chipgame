@@ -33,6 +33,7 @@ impl MainMenu {
 				// _ => MenuEvent::None,
 			};
 			events.push(evt);
+			events.push(MenuEvent::CursorSelect);
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {

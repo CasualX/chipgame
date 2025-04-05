@@ -81,6 +81,7 @@ fn read_level(data: &[u8]) {
 		map,
 		entities: ents,
 		connections: conns,
+		replays: None,
 	};
 
 	let json = serde_json::to_string(&field).unwrap();

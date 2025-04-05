@@ -237,7 +237,12 @@ impl PlayState {
 						self.save_data.save(&self.lvsets.current(), None);
 					}
 				}
-				menu::MenuEvent::CursorMove => {}
+				menu::MenuEvent::CursorMove => {
+					self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::CursorMove });
+				}
+				menu::MenuEvent::CursorSelect => {
+					self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::CursorSelect });
+				}
 				menu::MenuEvent::CloseMenu => {
 					self.menu.close_menu(self.fx.is_some());
 				}

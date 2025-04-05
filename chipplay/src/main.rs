@@ -109,6 +109,8 @@ fn main() {
 	ap.load_wav(chipcore::SoundFx::TileEmptied, "data/sfx/whisk.wav");
 	ap.load_wav(chipcore::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
 	ap.load_wav(chipcore::SoundFx::FireWalking, "data/sfx/crackle.wav");
+	ap.load_wav(chipcore::SoundFx::CursorMove, "data/sfxui/click-buttons-ui-menu.mp3");
+	ap.load_wav(chipcore::SoundFx::CursorSelect, "data/sfx/bump.wav");
 	ap.load_music(chipgame::data::MusicId::Chip1, "data/music/2Chip1.ogg");
 	ap.load_music(chipgame::data::MusicId::Chip2, "data/music/2Chip2.ogg");
 	ap.load_music(chipgame::data::MusicId::Canyon, "data/music/2Canyon.ogg");
@@ -217,28 +219,28 @@ fn main() {
 				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => {
 					quit = true;
 				}
-				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::KeyboardInput { input: keyboard_input, .. }, .. } => {
-					let left = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Left)) || keyboard_input.scancode == 0x1e;
-					let right = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Right)) || keyboard_input.scancode == 0x20;
-					let up = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Up)) || keyboard_input.scancode == 0x11;
-					let down = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Down)) || keyboard_input.scancode == 0x1f;
+				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::KeyboardInput { input, .. }, .. } => {
+					let left = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Left)) || input.scancode == 0x1e;
+					let right = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Right)) || input.scancode == 0x20;
+					let up = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Up)) || input.scancode == 0x11;
+					let down = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Down)) || input.scancode == 0x1f;
 
-					let a = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Space));
-					let b = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Back));
+					let a = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Space));
+					let b = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Back));
 
-					let start = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Return));
-					let select = matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::Escape));
+					let start = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Return));
+					let select = matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::Escape));
 
-					if left { kbd_input.left = is_pressed(keyboard_input.state); }
-					if right { kbd_input.right = is_pressed(keyboard_input.state); }
-					if up { kbd_input.up = is_pressed(keyboard_input.state); }
-					if down { kbd_input.down = is_pressed(keyboard_input.state); }
-					if a { kbd_input.a = is_pressed(keyboard_input.state); }
-					if b { kbd_input.b = is_pressed(keyboard_input.state); }
-					if start { kbd_input.start = is_pressed(keyboard_input.state); }
-					if select { kbd_input.select = is_pressed(keyboard_input.state); }
+					if left { kbd_input.left = is_pressed(input.state); }
+					if right { kbd_input.right = is_pressed(input.state); }
+					if up { kbd_input.up = is_pressed(input.state); }
+					if down { kbd_input.down = is_pressed(input.state); }
+					if a { kbd_input.a = is_pressed(input.state); }
+					if b { kbd_input.b = is_pressed(input.state); }
+					if start { kbd_input.start = is_pressed(input.state); }
+					if select { kbd_input.select = is_pressed(input.state); }
 
-					if matches!(keyboard_input.virtual_keycode, Some(winit::event::VirtualKeyCode::M)) && is_pressed(keyboard_input.state) {
+					if matches!(input.virtual_keycode, Some(winit::event::VirtualKeyCode::M)) && is_pressed(input.state) {
 						state.toggle_music();
 					}
 				}
