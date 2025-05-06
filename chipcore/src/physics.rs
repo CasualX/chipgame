@@ -11,11 +11,13 @@ pub struct SolidFlags {
 	pub blue_fake: bool,
 	pub recessed_wall: bool,
 	pub keys: bool,
+	pub solid_key: bool,
 	pub boots: bool,
 	pub chips: bool,
 	pub creatures: bool,
 	pub player: bool,
 	pub thief: bool,
+	pub hint: bool,
 }
 
 /// Checks if the entity can move in the given step direction.
@@ -67,6 +69,7 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 		Terrain::Water if flags.water => return false,
 		Terrain::FakeBlueWall if flags.blue_fake => return false,
 		Terrain::RecessedWall if flags.recessed_wall => return false,
+		// Terrain::Hint if flags.hint => return false,
 		_ => (),
 	}
 
@@ -83,8 +86,8 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 			EntityKind::SuctionBoots => flags.boots,
 			EntityKind::BlueKey => flags.keys,
 			EntityKind::RedKey => flags.keys,
-			EntityKind::GreenKey => flags.keys,
-			EntityKind::YellowKey => flags.keys,
+			EntityKind::GreenKey => flags.solid_key,
+			EntityKind::YellowKey => flags.solid_key,
 			EntityKind::Thief => flags.thief,
 			EntityKind::Bomb => false,
 			EntityKind::Bug => flags.creatures,
@@ -247,6 +250,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Terrain::Water if flags.water => return false,
 			Terrain::FakeBlueWall if flags.blue_fake => return false,
 			Terrain::RecessedWall if flags.recessed_wall => return false,
+			// Terrain::Hint if flags.hint => return false,
 			_ => (),
 		}
 	}
@@ -286,8 +290,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			EntityKind::SuctionBoots => flags.boots,
 			EntityKind::BlueKey => flags.keys,
 			EntityKind::RedKey => flags.keys,
-			EntityKind::GreenKey => flags.keys,
-			EntityKind::YellowKey => flags.keys,
+			EntityKind::GreenKey => flags.solid_key,
+			EntityKind::YellowKey => flags.solid_key,
 			EntityKind::Thief => flags.thief,
 			EntityKind::Bomb => false,
 			EntityKind::Bug => flags.creatures,
@@ -303,6 +307,26 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		s.ents.put(ent);
 		if solid {
 			return false;
+		}
+	}
+
+	// Slap code
+	if is_player && s.ps.last_step_dir == Some(step_dir) {
+		if matches!(step_dir, Compass::Up | Compass::Down) {
+			if s.ps.inbuf.is_any_dir(Compass::Left) {
+				slap(s, ent.pos, Compass::Left);
+			}
+			if s.ps.inbuf.is_any_dir(Compass::Right) {
+				slap(s, ent.pos, Compass::Right);
+			}
+		}
+		if matches!(step_dir, Compass::Left | Compass::Right) {
+			if s.ps.inbuf.is_any_dir(Compass::Up) {
+				slap(s, ent.pos, Compass::Up);
+			}
+			if s.ps.inbuf.is_any_dir(Compass::Down) {
+				slap(s, ent.pos, Compass::Down);
+			}
 		}
 	}
 
@@ -337,6 +361,37 @@ fn flick(s: &mut GameState, &new_pos: &Vec2i, step_dir: Compass) {
 			if try_move(s, &mut ent, step_dir) {
 				s.update_hidden_flag(ent.pos);
 				s.update_hidden_flag(ent.pos - step_dir.to_vec());
+				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+			}
+		}
+
+		s.ents.put(ent);
+	}
+}
+
+fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
+	let pos = player_pos + slap_dir.to_vec();
+
+	// Slap the terrain
+	match s.field.get_terrain(pos) {
+		Terrain::RealBlueWall => {
+			s.set_terrain(pos, Terrain::Wall);
+		}
+		Terrain::HiddenWall => {
+			s.set_terrain(pos, Terrain::Wall);
+		}
+		_ => {}
+	}
+
+	// Slap blocks
+	for ehandle in s.qt.get(pos) {
+		let Some(mut ent) = s.ents.take(ehandle) else { continue };
+
+		if matches!(ent.kind, EntityKind::Block) {
+			if try_move(s, &mut ent, slap_dir) {
+				s.update_hidden_flag(ent.pos);
+				s.update_hidden_flag(ent.pos - slap_dir.to_vec());
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}

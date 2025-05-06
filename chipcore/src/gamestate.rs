@@ -127,7 +127,7 @@ impl GameState {
 		// Check if the player has run out of time
 		if self.field.time_limit > 0 && self.time >= self.field.time_limit * 60 {
 			ps_activity(self, PlayerActivity::OutOfTime);
-			self.events.fire(GameEvent::GameOver { player: self.ps.ehandle });
+			self.events.fire(GameEvent::GameOver { player: () });
 			return;
 		}
 

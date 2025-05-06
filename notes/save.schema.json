@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LevelSet State",
+  "description": "Schema for saving the state of the game's level progression and settings.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1,
+      "description": "Save file format version. Must be exactly 1 for this schema."
+    },
+    "current_level": {
+      "type": "string",
+      "description": "Name of the level to continue from."
+    },
+    "unlocked_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "List of unlocked level names."
+    },
+    "completed_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "List of completed level names."
+    },
+    "high_scores": {
+      "type": "object",
+      "properties": {
+        "ticks": {
+          "type": "object",
+          "description": "Mapping from level names to best completion time in ticks (lower is better).",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "steps": {
+          "type": "object",
+          "description": "Mapping from level names to fewest steps taken (lower is better).",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "attempts": {
+          "type": "object",
+          "description": "Mapping from level names to number of attempts.",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "required": ["ticks", "steps", "attempts"],
+      "additionalProperties": false
+    },
+    "settings": {
+      "type": "object",
+      "description": "Game settings.",
+      "properties": {
+        "background_music": { "type": "boolean" },
+        "sound_effects": { "type": "boolean" },
+        "developer_mode": { "type": "boolean" }
+      },
+      "required": ["background_music", "sound_effects", "developer_mode"],
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "version",
+    "current_level",
+    "unlocked_levels",
+    "completed_levels",
+    "high_scores",
+    "settings"
+  ],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "version": 1,
+      "current_level": "The Ancient Temple",
+      "unlocked_levels": [
+        "The Ancient Temple",
+        "The Lost City"
+      ],
+      "completed_levels": [
+        "The Ancient Temple"
+      ],
+      "high_scores": {
+        "ticks": {
+          "The Ancient Temple": 120,
+          "The Lost City": 150
+        },
+        "steps": {
+          "The Ancient Temple": 50,
+          "The Lost City": 60
+        },
+        "attempts": {
+          "The Ancient Temple": 3,
+          "The Lost City": 4
+        }
+      },
+      "settings": {
+        "background_music": false,
+        "sound_effects": true,
+        "developer_mode": false
+      }
+    }
+  ]
+}

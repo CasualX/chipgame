@@ -93,7 +93,8 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	obj.sprite = sprite_for_ent(ent, &ctx.gs.ps);
 }
 
-pub fn player_activity(ctx: &mut FxState, ehandle: core::EntityHandle) {
+pub fn player_activity(ctx: &mut FxState, _player: ()) {
+	let ehandle = ctx.gs.ps.ehandle;
 	entity_face_dir(ctx, ehandle);
 }
 

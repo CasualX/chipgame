@@ -63,11 +63,13 @@ const FLAGS: SolidFlags = SolidFlags {
 	blue_fake: false,
 	recessed_wall: false,
 	keys: false,
+	solid_key: true,
 	boots: true,
 	chips: true,
 	creatures: false,
 	player: false,
 	thief: false,
+	hint: false,
 };
 
 static FUNCS: EntityData = EntityData { think, flags: FLAGS };

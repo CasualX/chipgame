@@ -33,6 +33,13 @@ impl InputBuffer {
 		}
 	}
 
+	pub fn is_any_dir(&self, dir: Compass) -> bool {
+		(self.nmoves > 0 && self.moves[0].dir == dir)
+			|| (self.nmoves > 1 && self.moves[1].dir == dir)
+			|| (self.nmoves > 2 && self.moves[2].dir == dir)
+			|| (self.nmoves > 3 && self.moves[3].dir == dir)
+	}
+
 	fn add_dir(&mut self, dir: Compass) {
 		// Find the first seen move
 		let mut i = 0;

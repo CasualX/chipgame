@@ -68,6 +68,7 @@ impl PlayState {
 		self.save_data.save(&self.lvsets.current(), None);
 
 		fx.init();
+		// let attempts = self.save_data
 		fx.gs.ps.attempts = attempts;
 		fx.parse_level(level_number, lv_data);
 
@@ -142,7 +143,6 @@ impl PlayState {
 							if lv_pass.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
 								self.save_data.unlock_level(level_number);
-								self.save_data.current_level = level_number;
 								success = true;
 							}
 						}
@@ -176,7 +176,7 @@ impl PlayState {
 					if let Some(fx) = &self.fx {
 						let replay = fx.gs.save_replay(fx.gs_realtime);
 						let record = serde_json::to_string_pretty(&replay).unwrap();
-						if let Err(err) = std::fs::write(format!("save/replay/{}.level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
+						if let Err(err) = std::fs::write(format!("save/{}/replay/level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
 							eprintln!("Error saving replay: {}", err);
 						}
 					}
@@ -281,9 +281,7 @@ impl PlayState {
 						self.menu.close_all();
 					}
 					fx::FxEvent::GameWin => {
-						self.save_data.unlock_level(fx.level_number);
-						self.save_data.unlock_level(fx.level_number + 1);
-						self.save_data.current_level = fx.level_number + 1;
+						self.save_data.complete_level(fx.level_number);
 						let replay = fx.gs.save_replay(fx.gs_realtime);
 						self.save_data.save(&self.lvsets.current(), Some((fx.level_number - 1, &replay)));
 

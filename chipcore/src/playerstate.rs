@@ -1,5 +1,8 @@
 use super::*;
 
+/// Multiplayer player index.
+pub type PlayerIndex = ();
+
 /// Player activity.
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
 pub enum PlayerActivity {
@@ -52,6 +55,8 @@ pub struct PlayerState {
 	pub activity: PlayerActivity,
 	/// True if previous movement was involuntary.
 	pub forced_move: bool,
+	/// Last step direction for block slapping.
+	pub last_step_dir: Option<Compass>,
 	/// Total steps taken (for high score).
 	pub steps: i32,
 	/// Total bonks into walls.
@@ -151,7 +156,7 @@ fn ps_nextcs(s: &mut GameState, btn: Button) {
 pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 	if s.ps.activity != activity {
 		s.ps.activity = activity;
-		s.events.fire(GameEvent::PlayerActivity { player: s.ps.ehandle });
+		s.events.fire(GameEvent::PlayerActivity { player: () });
 
 		if activity.is_game_over() {
 			s.ts = TimeState::Paused;
@@ -159,32 +164,32 @@ pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 
 		match activity {
 			PlayerActivity::Drowned => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
 			}
 			PlayerActivity::Burned => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::FireWalking });
 			}
 			PlayerActivity::Bombed => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				// Already fired by the Bomb entity!
 				// s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 			}
 			PlayerActivity::OutOfTime => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
 			}
 			PlayerActivity::Collided => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
 			}
 			PlayerActivity::Eaten => {
-				s.events.fire(GameEvent::GameOver { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
 			}
 			PlayerActivity::Win => {
-				s.events.fire(GameEvent::GameWin { player: s.ps.ehandle });
+				s.events.fire(GameEvent::GameWin { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameWin });
 			}
 			_ => (),

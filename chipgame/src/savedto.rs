@@ -7,17 +7,21 @@ pub struct SaveDto {
 	pub current_level: Option<String>,
 	pub unlocked_levels: Vec<String>,
 	#[serde(default)]
-	pub records: RecordsDto,
+	pub completed_levels: Vec<String>,
+	#[serde(default)]
+	pub high_scores: HighScoresDto,
 	pub options: OptionsDto,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug, Default)]
-pub struct RecordsDto {
+pub struct HighScoresDto {
 	#[serde(default)]
-	pub mintime: HashMap<String, chipcore::ReplayDto>,
+	pub ticks: HashMap<String, i32>,
 	#[serde(default)]
-	pub minsteps: HashMap<String, chipcore::ReplayDto>,
+	pub steps: HashMap<String, i32>,
+	#[serde(default)]
+	pub attempts: HashMap<String, i32>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]

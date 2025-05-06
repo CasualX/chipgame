@@ -6,35 +6,52 @@ pub struct UnlockLevelMenu {
 	pub password: [Option<char>; 4],
 }
 
-const LETTERS: &[&[u8]] = &[
-	[b'Q', b'W', b'E', b'R', b'T', b'Y', b'U', b'I', b'O', b'P'].as_slice(),
-	   [b'A', b'S', b'D', b'F', b'G', b'H', b'J', b'K', b'L'].as_slice(),
-	         [b'Z', b'X', b'C', b'V', b'B', b'N', b'M'].as_slice(),
-];
-
-fn get_row_index(selected: i8) -> usize {
-	if selected < LETTERS[0].len() as i8 { 0 }
-	else if selected < (LETTERS[0].len() + LETTERS[1].len()) as i8 { 1 }
-	else { 2 }
+const fn lookup(letter: u8) -> usize {
+	let mut i = 0;
+	while i < LETTERS_MAP.len() {
+		if LETTERS_MAP[i] == letter {
+			return i;
+		}
+		i += 1;
+	}
+	unreachable!()
 }
+
+macro_rules! create_map {
+	($($src:ident => $dest:ident,)*) => {
+		{
+			let mut map = [-1; 26];
+			$(map[lookup(stringify!($src).as_bytes()[0])] = lookup(stringify!($dest).as_bytes()[0]) as i8;)*
+			map
+		}
+	}
+}
+
+// Maps querty positions to the letter down below
+const LETTERS_MAP: &[u8; 26] = b"QWERTYUIOPASDFGHJKLZXCVBNM";
+
+static PRESS_DOWN_MAP: [i8; 26] = create_map! {
+	Q=>A, W=>S, E=>D, R=>F, T=>G, Y=>H, U=>J, I=>K, O=>L, P=>L,
+	A=>Z, S=>Z, D=>X, F=>C, G=>V, H=>B, J=>N, K=>M, L=>M,
+};
+static PRESS_UP_MAP: [i8; 26] = create_map! {
+	A=>Q, S=>W, D=>E, F=>R, G=>T, H=>Y, J=>U, K=>I, L=>O,
+	Z=>S, X=>D, C=>F, V=>G, B=>H, N=>J, M=>K,
+};
 
 impl UnlockLevelMenu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
-			match get_row_index(self.selected) {
-				0 => (),
-				1 => self.selected -= 10,
-				2 => self.selected -= 8,
-				_ => unreachable!(),
+			let new_index = PRESS_UP_MAP[self.selected as usize];
+			if new_index >= 0 {
+				self.selected = new_index;
 			}
 		}
 
 		if input.down.is_pressed() {
-			match get_row_index(self.selected) {
-				0 => self.selected += 10,
-				1 => self.selected += 8,
-				2 => (),
-				_ => unreachable!(),
+			let new_index = PRESS_DOWN_MAP[self.selected as usize];
+			if new_index >= 0 {
+				self.selected = new_index;
 			}
 		}
 
@@ -58,12 +75,7 @@ impl UnlockLevelMenu {
 
 		if input.a.is_pressed() {
 			if let Some(slot) = self.password.iter().position(|&x| x.is_none()) {
-				self.password[slot] = match get_row_index(self.selected) {
-					0 => Some(LETTERS[0][self.selected as usize] as char),
-					1 => Some(LETTERS[1][self.selected as usize - LETTERS[0].len()] as char),
-					2 => Some(LETTERS[2][self.selected as usize - LETTERS[0].len() - LETTERS[1].len()] as char),
-					_ => unreachable!(),
-				}
+				self.password[slot] = Some(LETTERS_MAP[self.selected as usize] as char);
 			}
 		}
 
@@ -113,8 +125,9 @@ impl UnlockLevelMenu {
 			&format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
 		]);
 
-		let height = LETTERS.len() as f32 * size * 1.5;
-		for (i, &line) in LETTERS.iter().enumerate() {
+		let letters = &[&LETTERS_MAP[0..10], &LETTERS_MAP[10..19], &LETTERS_MAP[19..26]];
+		let height = letters.len() as f32 * size * 1.5;
+		for (i, &line) in letters.iter().enumerate() {
 			let y = (resx.screen_size.y as f32 - height) * 0.5 + i as f32 * size * 1.5;
 			let width = line.len() as f32 * size * 1.5;
 			for (j, &chr) in line.iter().enumerate() {
