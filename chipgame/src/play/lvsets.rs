@@ -33,6 +33,9 @@ impl LevelSet {
 	pub fn get_level_number(&self, name: &str) -> Option<i32> {
 		self.lv_info.iter().position(|s| s.name == name).map(|i| i as i32 + 1)
 	}
+	pub fn get_level_index(&self, name: &str) -> Option<usize> {
+		self.lv_info.iter().position(|s| s.name == name)
+	}
 }
 
 #[derive(Default)]

@@ -187,6 +187,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				}
 			}
 		}
+		s.ps.last_step_dir = ent.step_dir;
 	}
 }
 
@@ -195,7 +196,7 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
 	s.ps.bonks += 1;
-	s.events.fire(GameEvent::PlayerBump { player: ent.handle });
+	s.events.fire(GameEvent::PlayerBump { player: () });
 	s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 }
@@ -209,11 +210,13 @@ const FLAGS: SolidFlags = SolidFlags {
 	blue_fake: false,
 	recessed_wall: false,
 	keys: false,
+	solid_key: false,
 	boots: false,
 	chips: false,
 	creatures: false,
 	player: false,
 	thief: false,
+	hint: false,
 };
 
 static FUNCS: EntityData = EntityData { think, flags: FLAGS };

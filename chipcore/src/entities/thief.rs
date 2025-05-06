@@ -25,7 +25,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			s.ps.fire_boots = false;
 			s.ps.ice_skates = false;
 			s.ps.suction_boots = false;
-			s.events.fire(GameEvent::ItemsThief { player: s.ps.ehandle });
+			s.events.fire(GameEvent::ItemsThief { player: () });
 			s.events.fire(GameEvent::SoundFx { sound: SoundFx::BootsStolen });
 		}
 	}
@@ -40,11 +40,13 @@ const FLAGS: SolidFlags = SolidFlags {
 	blue_fake: true,
 	recessed_wall: true,
 	keys: true,
+	solid_key: true,
 	boots: true,
 	chips: true,
 	creatures: true,
 	player: false,
 	thief: true,
+	hint: false,
 };
 
 static FUNCS: EntityData = EntityData { think, flags: FLAGS };

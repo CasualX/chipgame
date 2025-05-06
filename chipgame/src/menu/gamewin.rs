@@ -9,6 +9,8 @@ pub struct GameWinMenu {
 	pub time: i32,
 	pub steps: i32,
 	pub bonks: i32,
+	pub time_high_score: bool,
+	pub steps_high_score: bool,
 }
 
 impl GameWinMenu {

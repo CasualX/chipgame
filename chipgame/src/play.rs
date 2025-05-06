@@ -61,15 +61,15 @@ impl PlayState {
 		// If loading a level fails just... do nothing
 		let Some(lv_data) = self.lvsets.current().lv_data.get((level_number - 1) as usize) else { return };
 
-		let attempts = if let Some(fx) = &self.fx { if fx.level_number == level_number { fx.gs.ps.attempts } else { 0 } } else { 0 };
+		let attempts = self.save_data.update_level_attempts((level_number - 1) as usize);
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
 		self.save_data.current_level = level_number;
-		self.save_data.save(&self.lvsets.current(), None);
+		self.save_data.save(&self.lvsets.current());
 
 		fx.init();
-		fx.gs.ps.attempts = attempts;
 		fx.parse_level(level_number, lv_data);
+		fx.gs.ps.attempts = attempts;
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::PlayLevel);
@@ -78,7 +78,7 @@ impl PlayState {
 
 	pub fn toggle_music(&mut self) {
 		self.save_data.bg_music = !self.save_data.bg_music;
-		self.save_data.save(&self.lvsets.current(), None);
+		self.save_data.save(&self.lvsets.current());
 		self.play_music();
 	}
 
@@ -106,7 +106,7 @@ impl PlayState {
 				menu::MenuEvent::LevelPackSelect { index } => {
 					self.lvsets.selected = index;
 					self.save_data.load(&self.lvsets.current());
-					self.save_data.save(&self.lvsets.current(), None);
+					self.save_data.save(&self.lvsets.current());
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
 					self.play_music();
 				}
@@ -142,7 +142,6 @@ impl PlayState {
 							if lv_pass.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
 								self.save_data.unlock_level(level_number);
-								self.save_data.current_level = level_number;
 								success = true;
 							}
 						}
@@ -176,7 +175,7 @@ impl PlayState {
 					if let Some(fx) = &self.fx {
 						let replay = fx.gs.save_replay(fx.gs_realtime);
 						let record = serde_json::to_string_pretty(&replay).unwrap();
-						if let Err(err) = std::fs::write(format!("save/replay/{}.level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
+						if let Err(err) = std::fs::write(format!("save/{}/replay/level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
 							eprintln!("Error saving replay: {}", err);
 						}
 					}
@@ -221,20 +220,20 @@ impl PlayState {
 				menu::MenuEvent::SetBackgroundMusic { value } => {
 					if self.save_data.bg_music != value {
 						self.save_data.bg_music = value;
-						self.save_data.save(&self.lvsets.current(), None);
+						self.save_data.save(&self.lvsets.current());
 						self.play_music();
 					}
 				}
 				menu::MenuEvent::SetSoundEffects { value } => {
 					if self.save_data.sound_fx != value {
 						self.save_data.sound_fx = value;
-						self.save_data.save(&self.lvsets.current(), None);
+						self.save_data.save(&self.lvsets.current());
 					}
 				}
 				menu::MenuEvent::SetDeveloperMode { value } => {
 					if self.save_data.dev_mode != value {
 						self.save_data.dev_mode = value;
-						self.save_data.save(&self.lvsets.current(), None);
+						self.save_data.save(&self.lvsets.current());
 					}
 				}
 				menu::MenuEvent::CursorMove => {
@@ -281,11 +280,13 @@ impl PlayState {
 						self.menu.close_all();
 					}
 					fx::FxEvent::GameWin => {
-						self.save_data.unlock_level(fx.level_number);
-						self.save_data.unlock_level(fx.level_number + 1);
-						self.save_data.current_level = fx.level_number + 1;
-						let replay = fx.gs.save_replay(fx.gs_realtime);
-						self.save_data.save(&self.lvsets.current(), Some((fx.level_number - 1, &replay)));
+						let scores = savedata::Scores {
+							ticks: fx.gs.time,
+							steps: fx.gs.ps.steps,
+							// attempts: fx.gs.ps.attempts,
+						};
+						self.save_data.complete_level(fx.level_number, scores);
+						self.save_data.save(&self.lvsets.current());
 
 						let menu = menu::GameWinMenu {
 							selected: 0,
@@ -295,6 +296,8 @@ impl PlayState {
 							time: fx.gs.time,
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
+							time_high_score: false,
+							steps_high_score: false,
 						};
 						self.menu.stack.push(menu::Menu::GameWin(menu));
 					}
