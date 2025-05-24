@@ -13,7 +13,7 @@ clap.workspace = true
 
 urandom.workspace = true
 cvmath.workspace = true
-shade = { git = "https://github.com/CasualX/shade" }
+shade.workspace = true
 
 glutin = "0.26"
 winit = "0.24"

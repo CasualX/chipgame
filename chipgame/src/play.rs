@@ -23,13 +23,39 @@ pub struct PlayState {
 }
 
 impl PlayState {
-	pub fn launch(&mut self) {
+	pub fn launch(&mut self, g: &mut shade::Graphics) {
 		if self.lvsets.collection.is_empty() {
 			return;
+		}
+		let mut splash = Vec::new();
+		for set in &self.lvsets.collection {
+			let Some(path) = &set.splash
+			else {
+				splash.push(None);
+				continue
+			};
+			let props = shade::image::TextureProps {
+				filter_min: shade::TextureFilter::Linear,
+				filter_mag: shade::TextureFilter::Linear,
+				wrap_u: shade::TextureWrap::ClampEdge,
+				wrap_v: shade::TextureWrap::ClampEdge,
+			};
+			match shade::image::AnimatedImage::load(g, None, path, &props) {
+				Ok(texs) => {
+					eprintln!("Loaded splash image: {}", path.display());
+					splash.push(Some(texs));
+				}
+				Err(err) => {
+					eprintln!("Error loading splash image: {:?}", err);
+					splash.push(None);
+				}
+			}
 		}
 		self.menu.stack.push(menu::Menu::PackSelect(menu::LevelPackSelectMenu {
 			selected: self.lvsets.selected,
 			items: self.lvsets.collection.iter().map(|lp| lp.title.clone()).collect(),
+			splash,
+			ntime: 0,
 		}));
 	}
 

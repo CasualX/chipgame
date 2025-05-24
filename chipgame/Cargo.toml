@@ -8,7 +8,7 @@ chipcore = { path = "../chipcore" }
 dataview = "1.0"
 urandom.workspace = true
 cvmath.workspace = true
-shade = { git = "https://github.com/CasualX/shade", no-default-features = true }
+shade.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 flate2.workspace = true

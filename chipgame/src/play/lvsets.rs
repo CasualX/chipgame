@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use super::*;
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -6,6 +8,8 @@ pub struct LevelSetDto {
 	pub title: String,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub about: Option<Vec<String>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub splash: Option<String>,
 	#[serde(default)]
 	pub unlock_all_levels: bool,
 	pub levels: Vec<String>,
@@ -25,6 +29,7 @@ pub struct LevelSet {
 	pub name: String,
 	pub title: String,
 	pub about: Option<String>,
+	pub splash: Option<PathBuf>,
 	pub unlock_all_levels: bool,
 	pub lv_data: Vec<String>,
 	pub lv_info: Vec<LevelData>,
@@ -118,10 +123,13 @@ fn load_levelset(path: &path::Path, packs: &mut Vec<LevelSet>) {
 		lv_data.push(s);
 	}
 
+	let splash = pack.splash.map(|s| path.join(s));
+
 	packs.push(LevelSet {
 		name: pack.name,
 		title: pack.title,
 		about: pack.about.map(|lines| lines.join("\n")),
+		splash,
 		unlock_all_levels: pack.unlock_all_levels,
 		lv_data,
 		lv_info,

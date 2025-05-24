@@ -132,15 +132,15 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = shade::png::load(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::png::TextureProps {
+	let tileset = shade::image::png::load(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
 		wrap_v: shade::TextureWrap::ClampEdge,
-	}, Some(&mut shade::png::gutter(32, 32, 4))).unwrap();
+	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset).unwrap();
 
-	let texdigits = shade::png::load(&mut g, Some("digits"), "data/digits.png", &shade::png::TextureProps {
+	let texdigits = shade::image::png::load(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -172,7 +172,7 @@ fn main() {
 			panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
 		}
 
-		let texture = shade::png::load(&mut g, Some("font"), "data/font.png", &shade::png::TextureProps {
+		let texture = shade::image::png::load(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,
@@ -194,7 +194,7 @@ fn main() {
 	};
 	let mut state = chipgame::play::PlayState::default();
 	state.lvsets.load();
-	state.launch();
+	state.launch(&mut g);
 
 	let mut kbd_input = chipcore::Input::default();
 

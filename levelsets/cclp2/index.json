@@ -23,6 +23,7 @@
 		"\"Really?  I'll... I'll do it!\"  Chip was overjoyed.",
 		"But little did he know the challenge that awaited him... "
 	],
+	"splash": "splash.png",
 	"levels": [
 		"lv/level1.json",
 		"lv/level2.json",

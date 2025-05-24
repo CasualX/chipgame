@@ -1,7 +1,7 @@
 {
 	"name": "CCLP4",
 	"title": "Chip's Challenge Level Pack 4",
-	"splash": "splash.gif",
+	"splash": "logo.png",
 	"levels": [
 		"lv/level1.json",
 		"lv/level2.json",

@@ -12,7 +12,7 @@ serde_json.workspace = true
 
 clap.workspace = true
 
-shade = { git = "https://github.com/CasualX/shade", features = ["msdfgen"] }
+shade.workspace = true
 glutin = "0.26"
 winit = "0.24"
 

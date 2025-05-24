@@ -339,6 +339,7 @@ pub fn hidden_wall_bumped(ctx: &mut FxState, pos: Vec2<i32>) {
 }
 
 pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
+	// The raising animation won't be visible because a wall tile is drawn on top of it...
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
