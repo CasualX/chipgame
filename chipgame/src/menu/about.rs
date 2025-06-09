@@ -15,10 +15,10 @@ impl AboutMenu {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.shader = resx.font.shader;
 		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.viewport = cvmath::Rect::vec(resx.screen_size);
+		buf.viewport = Bounds2::vec(resx.screen_size);
 
-		let rect = Rect::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -31,7 +31,7 @@ impl AboutMenu {
 		let scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
-			color: cvmath::Vec4(255, 255, 255, 255),
+			color: Vec4(255, 255, 255, 255),
 			..Default::default()
 		};
 

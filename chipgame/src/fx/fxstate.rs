@@ -160,9 +160,9 @@ impl FxState {
 		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
 		cv.shader = resx.shader;
 		cv.depth_test = Some(shade::DepthTest::Less);
-		cv.viewport = cvmath::Rect::vec(size);
+		cv.viewport = Bounds2::vec(size);
 		// cv.cull_mode = Some(shade::CullMode::CW);
-		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
+		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: resx.tileset });
 		render::field(&mut cv, self, time);
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 

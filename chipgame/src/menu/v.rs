@@ -9,23 +9,23 @@ pub struct UiVertex {
 }
 
 unsafe impl shade::TVertex for UiVertex {
-	const VERTEX_LAYOUT: &'static shade::VertexLayout = &shade::VertexLayout {
+	const LAYOUT: &'static shade::VertexLayout = &shade::VertexLayout {
 		size: mem::size_of::<UiVertex>() as u16,
 		alignment: mem::align_of::<UiVertex>() as u16,
 		attributes: &[
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 2,
+				name: "a_pos",
+				format: shade::VertexAttributeFormat::F32v2,
 				offset: dataview::offset_of!(UiVertex.pos) as u16,
 			},
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 2,
+				name: "a_texcoord",
+				format: shade::VertexAttributeFormat::F32v2,
 				offset: dataview::offset_of!(UiVertex.uv) as u16,
 			},
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::U8Norm,
-				len: 4,
+				name: "a_color",
+				format: shade::VertexAttributeFormat::U8Normv4,
 				offset: dataview::offset_of!(UiVertex.color) as u16,
 			},
 		],

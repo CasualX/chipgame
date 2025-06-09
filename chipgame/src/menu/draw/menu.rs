@@ -6,7 +6,7 @@ pub struct DrawMenuItems<'a> {
 }
 
 impl<'a> DrawMenuItems<'a> {
-	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &cvmath::Rect<f32>, resx: &Resources) {
+	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Bounds2<f32>, resx: &Resources) {
 		let size = resx.screen_size.y as f32 * FONT_SIZE;
 
 		let mut scribe = shade::d2::Scribe {
@@ -19,14 +19,14 @@ impl<'a> DrawMenuItems<'a> {
 
 		for (i, line) in self.items_text.iter().enumerate() {
 			scribe.color = if i == self.selected_index {
-				cvmath::Vec4(255, 255, 255, 255)
+				Vec4(255, 255, 255, 255)
 			}
 			else {
-				cvmath::Vec4(128, 128, 128, 255)
+				Vec4(128, 128, 128, 255)
 			};
 
 			let next_y = y + scribe.line_height;
-			let rect = cvmath::Rect::c(rect.mins.x, rect.mins.y + y, rect.maxs.x, rect.mins.y + next_y);
+			let rect = Bounds2::c(rect.mins.x, rect.mins.y + y, rect.maxs.x, rect.mins.y + next_y);
 			y = next_y;
 			buf.text_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, std::slice::from_ref(line));
 		}

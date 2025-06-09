@@ -7,13 +7,13 @@ pub struct DrawPlayTitle<'a> {
 }
 
 impl<'a> DrawPlayTitle<'a> {
-	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Rect<f32>, resx: &Resources) {
+	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Bounds2<f32>, resx: &Resources) {
 		let size = resx.screen_size.y as f32 * FONT_SIZE;
 
 		let scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
-			color: cvmath::Vec4(255, 255, 255, 255),
+			color: Vec4(255, 255, 255, 255),
 			..Default::default()
 		};
 

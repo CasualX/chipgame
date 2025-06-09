@@ -99,10 +99,10 @@ impl UnlockLevelMenu {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.shader = resx.font.shader;
 		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.viewport = cvmath::Rect::vec(resx.screen_size);
+		buf.viewport = Bounds2::vec(resx.screen_size);
 
-		let rect = Rect::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -115,11 +115,11 @@ impl UnlockLevelMenu {
 		let scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
-			color: cvmath::Vec4(255, 255, 255, 255),
+			color: Vec4(255, 255, 255, 255),
 			..Default::default()
 		};
 
-		let rect = cvmath::Rect::c(0.0, size + size, resx.screen_size.x as f32, size + size);
+		let rect = Bounds2::c(0.0, size + size, resx.screen_size.x as f32, size + size);
 
 		buf.text_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, &[
 			&format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
@@ -133,11 +133,11 @@ impl UnlockLevelMenu {
 			for (j, &chr) in line.iter().enumerate() {
 				let xstart = (resx.screen_size.x as f32 - width) * 0.5;
 				let current_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
-				let rect = cvmath::Rect::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
+				let rect = Bounds2::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
 				let scribe = shade::d2::Scribe {
 					font_size: size,
 					line_height: size * (5.0 / 4.0),
-					color: if current_index == self.selected { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) },
+					color: if current_index == self.selected { Vec4(255, 255, 255, 255) } else { Vec4(128, 128, 128, 255) },
 					..Default::default()
 				};
 				let chr = chr as char;

@@ -40,7 +40,7 @@ impl LevelPackSelectMenu {
 			cv.blend_mode = shade::BlendMode::Alpha;
 			cv.viewport = Bounds::vec(ss);
 
-			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 			let time = self.ntime as f32 / 60.0;
 			let texture = splash.get_frame(time);
@@ -58,7 +58,7 @@ impl LevelPackSelectMenu {
 				top_left: UiVertex { pos: Vec2f(0.0, ss.y as f32), uv: Vec2f(0.0, 0.0), color },
 				top_right: UiVertex { pos: Vec2f(ss.x as f32, ss.y as f32), uv: Vec2f(1.0, 0.0), color },
 			};
-			let rc = cvmath::Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32);
+			let rc = Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32);
 			let height = splash.height as f32 * (ss.x as f32 / splash.width as f32);
 			let [_, rc, _] = draw::flexv(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(height), layout::Unit::Fr(1.0)]);
 			// let [_, rc, _] = draw::flexh(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(splash.width as f32), layout::Unit::Fr(1.0)]);
@@ -71,10 +71,10 @@ impl LevelPackSelectMenu {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.shader = resx.font.shader;
 		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.viewport = cvmath::Rect::vec(resx.screen_size);
+		buf.viewport = Bounds2::vec(resx.screen_size);
 
-		let rect = Rect::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -90,7 +90,7 @@ impl LevelPackSelectMenu {
 			let scribe = shade::d2::Scribe {
 				font_size: size,
 				line_height: size * (5.0 / 4.0),
-				color: cvmath::Vec4(255, 255, 255, 255),
+				color: Vec4(255, 255, 255, 255),
 				..Default::default()
 			};
 

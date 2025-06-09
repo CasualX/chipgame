@@ -12,7 +12,7 @@ pub struct UiUniform {
 impl Default for UiUniform {
 	fn default() -> Self {
 		UiUniform {
-			transform: cvmath::Transform2f::IDENTITY,
+			transform: Transform2f::IDENTITY,
 			texture: shade::Texture2D::INVALID,
 			color: [1.0, 1.0, 1.0, 1.0],
 			gamma: 2.2,
@@ -21,13 +21,13 @@ impl Default for UiUniform {
 }
 
 unsafe impl shade::TUniform for UiUniform {
-	const UNIFORM_LAYOUT: &'static shade::UniformLayout = &shade::UniformLayout {
+	const LAYOUT: &'static shade::UniformLayout = &shade::UniformLayout {
 		size: mem::size_of::<UiUniform>() as u16,
 		alignment: mem::align_of::<UiUniform>() as u16,
 		attributes: &[
 			shade::UniformAttribute {
 				name: "u_transform",
-				ty: shade::UniformType::Mat3x2 { order: shade::UniformMatOrder::RowMajor },
+				ty: shade::UniformType::Mat3x2 { order: shade::MatrixLayout::RowMajor },
 				offset: dataview::offset_of!(UiUniform.transform) as u16,
 				len: 1,
 			},

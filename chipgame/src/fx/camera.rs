@@ -31,14 +31,14 @@ impl FxState {
 		};
 
 		self.camera.target_fast = self.camera.target_fast.exp_decay(ent_pos, 25.0, 1.0 / 60.0);
-		self.camera.target = self.camera.target.exp_decay(ent_pos, 15.0, 1.0 / 60.0).with_x(self.camera.target_fast.x);
+		self.camera.target = self.camera.target.exp_decay(ent_pos, 15.0, 1.0 / 60.0).set_x(self.camera.target_fast.x);
 
-		self.camera.proj_mat = cvmath::Mat4::perspective_fov(cvmath::Deg(45.0), size.x as f32, size.y as f32, 0.1, 2000.0, (cvmath::RH, cvmath::NO));
+		self.camera.proj_mat = Mat4::perspective_fov(Deg(45.0), size.x as f32, size.y as f32, 0.1, 2000.0, (RH, NO));
 		self.camera.view_mat = {
 			let eye = self.camera.target + self.camera.eye_offset;
 			let target = self.camera.target_fast;
-			let up = cvmath::Vec3(0.0, -1.0, 0.0);
-			cvmath::Mat4::look_at(eye, target, up, cvmath::RH)
+			let up = Vec3(0.0, -1.0, 0.0);
+			Mat4::look_at(eye, target, up, RH)
 		};
 
 		self.camera.view_proj_mat = self.camera.proj_mat * self.camera.view_mat;

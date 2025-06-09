@@ -138,7 +138,7 @@ impl MenuState {
 	}
 }
 
-fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
+fn foo(from: Bounds2<f32>, to: Bounds2<f32>) -> Transform2<f32> {
 	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
 	let sy = (to.maxs.y - to.mins.y) / (from.maxs.y - from.mins.y);
 	Transform2 {
@@ -152,12 +152,12 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 
 	cv.blend_mode = shade::BlendMode::Alpha;
 	cv.shader = resx.colorshader;
-	cv.viewport = cvmath::Rect::vec(resx.screen_size);
+	cv.viewport = Bounds2::vec(resx.screen_size);
 
 	let paint = shade::d2::Paint {
 		template: UiVertex { pos: Vec2::ZERO, uv: Vec2::ZERO, color: [0, 0, 0, alpha] },
 	};
-	cv.fill_rect(&paint, &cvmath::Rect::c(-1.0, 1.0, 1.0, -1.0));
+	cv.fill_rect(&paint, &Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 	cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 }
