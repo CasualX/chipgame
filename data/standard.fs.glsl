@@ -2,18 +2,18 @@
 
 out vec4 FragColor;
 
-in vec4 VertexColor;
-in vec2 TexCoord;
+in vec4 v_color;
+in vec2 v_texcoord;
 
 uniform sampler2D tex;
-uniform vec2 texSize;
 
 void main() {
-	vec4 color = texture(tex, TexCoord / texSize);
+	ivec2 texSize = textureSize(tex, 0);
+	vec4 color = texture(tex, v_texcoord / texSize);
 	if (color.a < 0.2) {
 		discard;
 	}
 
-	color *= VertexColor;
+	color *= v_color;
 	FragColor = color;
 }

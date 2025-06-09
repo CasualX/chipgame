@@ -19,7 +19,7 @@ ini_core = "0.2"
 
 clap = { version = "3.2", features = ["cargo"] }
 
-cvmath = { version = "0.0.1", features=["serde", "dataview"] }
+cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
 fmtools = "0.1"
 
 urandom = "0.2"

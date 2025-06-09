@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use cvmath::{Vec2, Rect};
+use cvmath::Vec2;
 
 mod model;
 mod music;

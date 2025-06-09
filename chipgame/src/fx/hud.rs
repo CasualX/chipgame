@@ -2,7 +2,7 @@ use super::*;
 
 use crate::menu::{UiUniform, UiVertex};
 
-fn foo(from: Rect<f32>, to: Rect<f32>) -> Transform2<f32> {
+fn foo(from: Bounds2<f32>, to: Bounds2<f32>) -> Transform2<f32> {
 	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
 	let sy = (to.maxs.y - to.mins.y) / (from.maxs.y - from.mins.y);
 	Transform2 {
@@ -27,7 +27,7 @@ impl FxState {
 		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.viewport = Bounds::vec(ss);
 
-		let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		cv.push_uniform(UiUniform {
 			transform,
@@ -43,7 +43,7 @@ impl FxState {
 		// 	},
 		// };
 		let a = ss.y as f32 * 0.075;
-		// cv.fill_rect(&paint, &Rect::c(0.0, 0.0, ss.x as f32, a + a));
+		// cv.fill_rect(&paint, &Bounds2::c(0.0, 0.0, ss.x as f32, a + a));
 
 		cv.push_uniform_f(|u| {
 			UiUniform {
@@ -98,10 +98,10 @@ impl FxState {
 		{
 			let mut tbuf = shade::d2::TextBuffer::new();
 			tbuf.shader = resx.font.shader;
-			tbuf.viewport = cvmath::Rect::vec(ss);
+			tbuf.viewport = Bounds2::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 			tbuf.push_uniform(shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
@@ -126,7 +126,7 @@ impl FxState {
 						3 => Vec4(255, 255, 0, 255),
 						_ => Vec4(255, 255, 255, 255),
 					};
-					tbuf.text_box(&resx.font, &scribe, &Rect::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::BoxAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
+					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::BoxAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
 				}
 			}
 
@@ -138,13 +138,13 @@ impl FxState {
 
 			// scribe.color = Vec4::unpack8(chips_color);
 			// let chips_display = format!("Chips: {:0>3}", chips_remaining);
-			// tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, &chips_display);
-			tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, "CHIPS");
+			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, &chips_display);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, "CHIPS");
 
 			// scribe.color = Vec4::unpack8(time_color);
 			// let time_display = if time_remaining > 0 { format!("Time:  {:0>3}", time_remaining) } else { String::from("Time:  -") };
-			// tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, &time_display);
-			tbuf.text_box(&resx.font, &scribe, &Rect::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, "TIME");
+			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, &time_display);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, "TIME");
 
 			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
@@ -154,10 +154,10 @@ impl FxState {
 			darken = true;
 			let mut tbuf = shade::d2::TextBuffer::new();
 			tbuf.shader = resx.font.shader;
-			tbuf.viewport = cvmath::Rect::vec(ss);
+			tbuf.viewport = Bounds2::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-			let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 			tbuf.push_uniform(shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
@@ -192,10 +192,10 @@ impl FxState {
 
 				let mut tbuf = shade::d2::TextBuffer::new();
 				tbuf.shader = resx.font.shader;
-				tbuf.viewport = cvmath::Rect::vec(ss);
+				tbuf.viewport = Bounds2::vec(ss);
 				tbuf.blend_mode = shade::BlendMode::Alpha;
 
-				let transform = foo(Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), Rect::c(-1.0, 1.0, 1.0, -1.0));
+				let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 				tbuf.push_uniform(shade::d2::TextUniform {
 					transform,
 					texture: resx.font.texture,
@@ -211,7 +211,7 @@ impl FxState {
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
 				};
-				tbuf.text_box(&resx.font, &scribe, &Rect::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
+				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
 				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
 				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
 				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
@@ -233,7 +233,7 @@ fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, sprite: d
 	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 0.0) / tex_size, color: [255, 255, 255, 255] };
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let stamp = shade::d2::Stamp { bottom_left, top_left, top_right, bottom_right };
-	cv.stamp_rect(&stamp, &Rect(pos, pos + Vec2(size, size)));
+	cv.stamp_rect(&stamp, &Bounds2(pos, pos + Vec2(size, size)));
 }
 
 fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
@@ -284,5 +284,5 @@ fn draw_digit(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, digit: Opt
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u2, v2), color };
 	let stamp = shade::d2::Stamp { bottom_left, top_left, top_right, bottom_right };
 
-	cv.stamp_rect(&stamp, &Rect(pos, pos + Vec2(17.0, 25.0)));
+	cv.stamp_rect(&stamp, &Bounds2(pos, pos + Vec2(17.0, 25.0)));
 }

@@ -132,7 +132,7 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = shade::image::png::load(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::image::TextureProps {
+	let tileset = shade::image::png::load_file(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -140,7 +140,7 @@ fn main() {
 	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset).unwrap();
 
-	let texdigits = shade::image::png::load(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
+	let texdigits = shade::image::png::load_file(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -148,18 +148,9 @@ fn main() {
 	}, None).unwrap();
 
 	// Create the shader
-	let shader = g.shader_create(None).unwrap();
-	if let Err(_) = g.shader_compile(shader, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")) {
-		panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
-	}
-	let colorshader = g.shader_create(None).unwrap();
-	if let Err(_) = g.shader_compile(colorshader, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl")) {
-		panic!("Failed to compile shader: {}", g.shader_compile_log(colorshader).unwrap());
-	}
-	let uishader = g.shader_create(None).unwrap();
-	if let Err(_) = g.shader_compile(uishader, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")) {
-		panic!("Failed to compile shader: {}", g.shader_compile_log(uishader).unwrap());
-	}
+	let shader = g.shader_create(None, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")).unwrap();
+	let colorshader = g.shader_create(None, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl")).unwrap();
+	let uishader = g.shader_create(None, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")).unwrap();
 
 	let mut past_now = time::Instant::now();
 
@@ -167,12 +158,9 @@ fn main() {
 		let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
 		let font = Some(font);
 
-		let shader = g.shader_create(None).unwrap();
-		if let Err(_) = g.shader_compile(shader, include_str!("../../data/font.vs.glsl"), include_str!("../../data/font.fs.glsl")) {
-			panic!("Failed to compile shader: {}", g.shader_compile_log(shader).unwrap());
-		}
+		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS).unwrap();
 
-		let texture = shade::image::png::load(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
+		let texture = shade::image::png::load_file(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,

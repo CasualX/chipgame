@@ -7,20 +7,20 @@ pub struct DrawScoreCard {
 	pub bonks: i32,
 }
 impl DrawScoreCard {
-	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Rect<f32>, resx: &Resources) {
+	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Bounds2<f32>, resx: &Resources) {
 		let size = resx.screen_size.y as f32 * FONT_SIZE;
 
 		let mut scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
-			color: cvmath::Vec4(255, 255, 255, 255),
+			color: Vec4(255, 255, 255, 255),
 			..Default::default()
 		};
 
-		scribe.color = cvmath::Vec4(255, 255, 255, 255);
+		scribe.color = Vec4(255, 255, 255, 255);
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, "Attempts:\nTime:\nSteps:\nBonks:");
 
-		scribe.color = cvmath::Vec4(0, 255, 128, 255);
+		scribe.color = Vec4(0, 255, 128, 255);
 		let frames = self.time % 60;
 		let seconds = (self.time / 60) % 60;
 		let minutes = self.time / 3600;

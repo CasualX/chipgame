@@ -50,10 +50,10 @@ impl OptionsMenu {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.shader = resx.font.shader;
 		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.viewport = cvmath::Rect::vec(resx.screen_size);
+		buf.viewport = Bounds2::vec(resx.screen_size);
 
-		let rect = Rect::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,

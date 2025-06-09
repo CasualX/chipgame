@@ -12,7 +12,7 @@ pub struct UiUniform {
 impl Default for UiUniform {
 	fn default() -> Self {
 		UiUniform {
-			transform: cvmath::Transform2f::IDENTITY,
+			transform: Transform2f::IDENTITY,
 			texture: shade::Texture2D::INVALID,
 			color: [1.0, 1.0, 1.0, 1.0],
 			gamma: 2.2,
@@ -20,35 +20,11 @@ impl Default for UiUniform {
 	}
 }
 
-unsafe impl shade::TUniform for UiUniform {
-	const UNIFORM_LAYOUT: &'static shade::UniformLayout = &shade::UniformLayout {
-		size: mem::size_of::<UiUniform>() as u16,
-		alignment: mem::align_of::<UiUniform>() as u16,
-		attributes: &[
-			shade::UniformAttribute {
-				name: "u_transform",
-				ty: shade::UniformType::Mat3x2 { order: shade::UniformMatOrder::RowMajor },
-				offset: dataview::offset_of!(UiUniform.transform) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "u_texture",
-				ty: shade::UniformType::Sampler2D(0),
-				offset: dataview::offset_of!(UiUniform.texture) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "u_color",
-				ty: shade::UniformType::F4,
-				offset: dataview::offset_of!(UiUniform.color) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "u_gamma",
-				ty: shade::UniformType::F1,
-				offset: dataview::offset_of!(UiUniform.gamma) as u16,
-				len: 1,
-			},
-		],
-	};
+impl shade::UniformVisitor for UiUniform {
+	fn visit(&self, set: &mut dyn shade::UniformSetter) {
+		set.value("u_transform", &self.transform);
+		set.value("u_texture", &self.texture);
+		set.value("u_color", &self.color);
+		set.value("u_gamma", &self.gamma);
+	}
 }

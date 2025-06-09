@@ -11,23 +11,23 @@ pub struct Vertex {
 }
 
 unsafe impl shade::TVertex for Vertex {
-	const VERTEX_LAYOUT: &'static shade::VertexLayout = &shade::VertexLayout {
+	const LAYOUT: &'static shade::VertexLayout = &shade::VertexLayout {
 		size: std::mem::size_of::<Vertex>() as u16,
 		alignment: std::mem::align_of::<Vertex>() as u16,
 		attributes: &[
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 3,
+				name: "a_pos",
+				format: shade::VertexAttributeFormat::F32v3,
 				offset: dataview::offset_of!(Vertex.pos) as u16,
 			},
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::F32,
-				len: 2,
+				name: "a_texcoord",
+				format: shade::VertexAttributeFormat::F32v2,
 				offset: dataview::offset_of!(Vertex.uv) as u16,
 			},
 			shade::VertexAttribute {
-				format: shade::VertexAttributeFormat::U8Norm,
-				len: 4,
+				name: "a_color",
+				format: shade::VertexAttributeFormat::U8Normv4,
 				offset: dataview::offset_of!(Vertex.color) as u16,
 			},
 		],
@@ -39,46 +39,24 @@ unsafe impl shade::TVertex for Vertex {
 #[derive(Copy, Clone, dataview::Pod)]
 #[repr(C)]
 pub struct Uniform {
-	pub transform: cvmath::Mat4<f32>,
+	pub transform: Mat4<f32>,
 	pub texture: shade::Texture2D,
-	pub texture_size: [f32; 2],
 }
 
 impl Default for Uniform {
 	fn default() -> Self {
 		Uniform {
-			transform: cvmath::Mat4::IDENTITY,
+			transform: Mat4::IDENTITY,
 			texture: shade::Texture2D::INVALID,
-			texture_size: [1.0, 1.0],
 		}
 	}
 }
 
-unsafe impl shade::TUniform for Uniform {
-	const UNIFORM_LAYOUT: &'static shade::UniformLayout = &shade::UniformLayout {
-		size: std::mem::size_of::<Uniform>() as u16,
-		alignment: std::mem::align_of::<Uniform>() as u16,
-		attributes: &[
-			shade::UniformAttribute {
-				name: "transform",
-				ty: shade::UniformType::Mat4x4 { order: shade::UniformMatOrder::RowMajor },
-				offset: dataview::offset_of!(Uniform.transform) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "tex",
-				ty: shade::UniformType::Sampler2D(0),
-				offset: dataview::offset_of!(Uniform.texture) as u16,
-				len: 1,
-			},
-			shade::UniformAttribute {
-				name: "texSize",
-				ty: shade::UniformType::F2,
-				offset: dataview::offset_of!(Uniform.texture_size) as u16,
-				len: 1,
-			},
-		],
-	};
+impl shade::UniformVisitor for Uniform {
+	fn visit(&self, set: &mut dyn shade::UniformSetter) {
+		set.value("transform", &self.transform);
+		set.value("tex", &self.texture);
+	}
 }
 
 const T_S: f32 = 32.0; // TILE SIZE
@@ -387,7 +365,7 @@ pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform
 			}
 			// Make Blocks appear on top of walls
 			let z = if matches!(model, data::ModelId::Wall) && is_block_on_pos(state, Vec2(x, y)) { -2.0 } else { 0.0 };
-			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0).with_z(z), sprite, model, 1.0);
+			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0).set_z(z), sprite, model, 1.0);
 		}
 	}
 	// Render the object shadows

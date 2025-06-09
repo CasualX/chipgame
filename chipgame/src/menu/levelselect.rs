@@ -66,10 +66,10 @@ impl LevelSelectMenu {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.shader = resx.font.shader;
 		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.viewport = cvmath::Rect::vec(resx.screen_size);
+		buf.viewport = Bounds2::vec(resx.screen_size);
 
-		let rect = Rect::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Rect::c(-1.0, 1.0, 1.0, -1.0));
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
 		buf.push_uniform(shade::d2::TextUniform {
 			transform,
@@ -82,11 +82,11 @@ impl LevelSelectMenu {
 		let scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
-			color: cvmath::Vec4(255, 255, 255, 255),
+			color: Vec4(255, 255, 255, 255),
 			..Default::default()
 		};
 
-		let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 1.5));
+		let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 1.5));
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Go to level");
 
 		// let mut pos = Vec2::ZERO;
@@ -99,7 +99,7 @@ impl LevelSelectMenu {
 		let mut y = size * 5.0;
 		for i in self.offset..i32::min(self.offset + LEVELS_PER_PAGE, self.items.len() as i32) {
 			let item = &self.items[i as usize];
-			let color = if i == self.selected { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) };
+			let color = if i == self.selected { Vec4(255, 255, 255, 255) } else { Vec4(128, 128, 128, 255) };
 			scribe.color = color;
 			if self.offset != 0 && i == self.offset {
 				scribe.color.w = 84;
@@ -108,16 +108,16 @@ impl LevelSelectMenu {
 				scribe.color.w = 84;
 			}
 
-			let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.25, y));
+			let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.25, y));
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, &item.1);
 
 			y += scribe.line_height;
 		}
 		// for (i, item) in self.items.iter().enumerate().filter(|&(i, _)| i >= self.offset as usize).take(7) {
-		// 	let color = if i == self.selected as usize { cvmath::Vec4(255, 255, 255, 255) } else { cvmath::Vec4(128, 128, 128, 255) };
+		// 	let color = if i == self.selected as usize { Vec4(255, 255, 255, 255) } else { Vec4(128, 128, 128, 255) };
 		// 	scribe.color = color;
 
-		// 	let rect = cvmath::Rect::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 * 0.5 - 100.0 + i as i32 as f32 * scribe.line_height));
+		// 	let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 * 0.5 - 100.0 + i as i32 as f32 * scribe.line_height));
 		// 	buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, item);
 		// }
 

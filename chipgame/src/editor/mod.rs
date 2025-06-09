@@ -154,14 +154,9 @@ impl EditorState {
 		self.screen_size = Vec2::new(width, height);
 	}
 	pub fn mouse_move(&mut self, mouse_x: i32, mouse_y: i32) {
-		let ndc_x = (mouse_x as f32 / self.screen_size.x as f32 - 0.5) * 2.0;
-		let ndc_y = (mouse_y as f32 / self.screen_size.y as f32 - 0.5) * -2.0;
+		let cam = self.game.camera.setup(self.screen_size);
+		let ray = cam.viewport_to_ray(Vec2(mouse_x, mouse_y));
 
-		let x = ndc_x / self.game.camera.proj_mat.a11;
-		let y = ndc_y / self.game.camera.proj_mat.a22;
-		let dir = (self.game.camera.view_mat.inverse() * Vec4::new(x, y, -1.0, 1.0)).xyz().normalize();
-
-		let ray = Ray::new(self.game.camera.target + self.game.camera.eye_offset, dir);
 		let plane = Plane::new(Vec3::Z, 0.0);
 		let mut hits = [TraceHit::default(); 2];
 		if ray.trace(&plane, &mut hits) > 0 {
@@ -189,7 +184,7 @@ impl EditorState {
 		// Clear the screen
 		g.clear(&shade::ClearArgs {
 			surface: shade::Surface::BACK_BUFFER,
-			color: Some(cvmath::Vec4(0.2, 0.2, 0.5, 1.0)),
+			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
 			depth: Some(1.0),
 			..Default::default()
 		}).unwrap();
@@ -223,12 +218,14 @@ impl EditorState {
 
 		self.game.draw(g, resx);
 
+		let cam = self.game.camera.setup(self.screen_size);
+
 		let p = self.mouse_pos; {
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = resx.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
+			cv.viewport = Bounds2::vec(self.screen_size);
+			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -262,8 +259,8 @@ impl EditorState {
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.shader = resx.shader;
 			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.viewport = cvmath::Rect::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: self.game.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
+			cv.viewport = Bounds2::vec(self.screen_size);
+			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
 
 			struct ToVertex {
 				color: [u8; 4],
@@ -286,7 +283,7 @@ impl EditorState {
 				if let Some(face_dir) = ent.face_dir {
 					cv.draw_arrow(&pen, pos, pos + face_dir.to_vec().map(|c| c as f32 * 20.0), 4.0);
 				}
-				cv.draw_line_rect(&pen, &Rect::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
+				cv.draw_line_rect(&pen, &Bounds2::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}

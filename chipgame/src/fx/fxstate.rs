@@ -20,6 +20,7 @@ pub struct FxState {
 	pub darken_time: f32,
 	pub tiles: &'static [TileGfx],
 	pub events: Vec<FxEvent>,
+	pub axes: Option<shade::d3::axes::AxesModel>,
 }
 
 impl FxState {
@@ -147,7 +148,6 @@ impl FxState {
 		let time = self.ntime as f32 / 60.0;
 		self.time = time;
 		self.dt = 1.0 / 60.0;
-		let size = resx.screen_size;
 
 		for handle in self.objects.map.keys().cloned().collect::<Vec<_>>() {
 			let Some(mut obj) = self.objects.remove(handle) else { continue };
@@ -155,16 +155,30 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.set_game_camera(resx);
+		self.set_game_camera();
+
+		let viewport = Bounds2::vec(resx.screen_size);
+		let cam = self.camera.setup(viewport.size());
 
 		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
 		cv.shader = resx.shader;
 		cv.depth_test = Some(shade::DepthTest::Less);
-		cv.viewport = cvmath::Rect::vec(size);
-		// cv.cull_mode = Some(shade::CullMode::CW);
-		cv.push_uniform(render::Uniform { transform: self.camera.view_proj_mat, texture: resx.tileset, texture_size: resx.tileset_size.map(|c| c as f32).into() });
+		cv.viewport = viewport;
+		cv.cull_mode = Some(shade::CullMode::CW);
+		cv.push_uniform(render::Uniform { transform: cam.view_proj, texture: resx.tileset });
 		render::field(&mut cv, self, time);
 		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+
+		if self.axes.is_none() {
+			let shader = g.shader_create(None, shade::gl::shaders::AXES_VS, shade::gl::shaders::AXES_FS).unwrap();
+			self.axes = Some(shade::d3::axes::AxesModel::create(g, shader));
+		}
+		if let Some(axes) = &self.axes {
+			axes.draw(g, &cam, &shade::d3::axes::AxesInstance {
+				local: Transform3f::scale(Vec3::dup(50.0)),
+				depth_test: None,
+			});
+		}
 
 		if self.hud_enabled {
 			self.render_ui(g, resx);
