@@ -21,7 +21,7 @@ impl Camera {
 			let eye = self.target + self.eye_offset;
 			let target = self.target_fast;
 			let up = Vec3(0.0, -1.0, 0.0);
-			Mat4::look_at(eye, target, up, Hand::LH)
+			Transform3f::look_at(eye, target, up, Hand::LH)
 		};
 		let view_proj = projection * view;
 		shade::d3::CameraSetup {

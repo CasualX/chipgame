@@ -1,11 +1,10 @@
 use super::*;
 
-#[derive(Copy, Clone, Debug, dataview::Pod)]
-#[repr(C)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct UiUniform {
 	pub transform: Transform2f,
 	pub texture: shade::Texture2D,
-	pub color: [f32; 4],
+	pub color: Vec4f,
 	pub gamma: f32,
 }
 
@@ -14,7 +13,7 @@ impl Default for UiUniform {
 		UiUniform {
 			transform: Transform2f::IDENTITY,
 			texture: shade::Texture2D::INVALID,
-			color: [1.0, 1.0, 1.0, 1.0],
+			color: Vec4f(1.0, 1.0, 1.0, 1.0),
 			gamma: 2.2,
 		}
 	}
