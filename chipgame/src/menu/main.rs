@@ -38,18 +38,13 @@ impl MainMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.shader = resx.font.shader;
-		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
 
 		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		buf.push_uniform(shade::d2::TextUniform {
-			transform,
-			texture: resx.font.texture,
-			..Default::default()
-		});
+		buf.uniform.transform = Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
 
 		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 
@@ -63,7 +58,7 @@ impl MainMenu {
 				..Default::default()
 			};
 
-			buf.text_box(&resx.font, &scribe, &top, shade::d2::BoxAlign::MiddleCenter, &self.title);
+			buf.text_box(&resx.font, &scribe, &top, shade::d2::TextAlign::MiddleCenter, &self.title);
 		}
 
 		draw::DrawMenuItems {
@@ -71,6 +66,6 @@ impl MainMenu {
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &bottom, resx);
 
-		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		buf.draw(g, shade::Surface::BACK_BUFFER);
 	}
 }

@@ -33,26 +33,23 @@ impl LevelPackSelectMenu {
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		self.ntime += 1;
 
+		let mut pool = shade::d2::DrawPool::new();
+
 		if let Some(Some(splash)) = self.splash.get(self.selected) {
 			let ss = resx.screen_size;
-			let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
-			cv.shader = resx.uishader;
-			cv.blend_mode = shade::BlendMode::Alpha;
+			let cv = pool.get::<UiVertex, UiUniform>();
 			cv.viewport = Bounds::vec(ss);
+			cv.blend_mode = shade::BlendMode::Alpha;
+			cv.shader = resx.uishader;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			cv.uniform.transform = Transform2f::ortho(rect);
 
 			let time = self.ntime as f32 / 60.0;
-			let texture = splash.get_frame(time);
-
-			cv.push_uniform(UiUniform {
-				transform,
-				texture,
-				..Default::default()
-			});
+			cv.uniform.texture = splash.get_frame(time);
 
 			let color = [128, 128, 128, 255];
-			let stamp = shade::d2::Stamp {
+			let sprite = shade::d2::Sprite {
 				bottom_left: UiVertex { pos: Vec2f(0.0, 0.0), uv: Vec2f(0.0, 1.0), color },
 				bottom_right: UiVertex { pos: Vec2f(ss.x as f32, 0.0), uv: Vec2f(1.0, 1.0), color },
 				top_left: UiVertex { pos: Vec2f(0.0, ss.y as f32), uv: Vec2f(0.0, 0.0), color },
@@ -62,25 +59,18 @@ impl LevelPackSelectMenu {
 			let height = splash.height as f32 * (ss.x as f32 / splash.width as f32);
 			let [_, rc, _] = draw::flexv(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(height), layout::Unit::Fr(1.0)]);
 			// let [_, rc, _] = draw::flexh(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(splash.width as f32), layout::Unit::Fr(1.0)]);
-			cv.stamp_rect(&stamp, &rc);
-
-			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+			cv.sprite_rect(&sprite, &rc);
 		}
 
 
-		let mut buf = shade::d2::TextBuffer::new();
-		buf.shader = resx.font.shader;
-		buf.blend_mode = shade::BlendMode::Alpha;
+		let buf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
 
 		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		buf.push_uniform(shade::d2::TextUniform {
-			transform,
-			texture: resx.font.texture,
-			..Default::default()
-		});
+		buf.uniform.transform = Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
 
 		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 
@@ -94,7 +84,7 @@ impl LevelPackSelectMenu {
 				..Default::default()
 			};
 
-			buf.text_box(&resx.font, &scribe, &top, shade::d2::BoxAlign::MiddleCenter, "Choose a Level Pack");
+			buf.text_box(&resx.font, &scribe, &top, shade::d2::TextAlign::MiddleCenter, "Choose a Level Pack");
 		}
 
 		let items = self.items.iter().map(|s| s as &dyn fmt::Display).collect::<Vec<_>>();
@@ -102,8 +92,8 @@ impl LevelPackSelectMenu {
 		draw::DrawMenuItems {
 			items_text: &items,
 			selected_index: self.selected,
-		}.draw(&mut buf, &bottom, resx);
+		}.draw(buf, &bottom, resx);
 
-		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		pool.draw(g, shade::Surface::BACK_BUFFER);
 	}
 }

@@ -18,17 +18,17 @@ impl DrawScoreCard {
 		};
 
 		scribe.color = Vec4(255, 255, 255, 255);
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, "Attempts:\nTime:\nSteps:\nBonks:");
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, "Attempts:\nTime:\nSteps:\nBonks:");
 
 		scribe.color = Vec4(0, 255, 128, 255);
 		let frames = self.time % 60;
 		let seconds = (self.time / 60) % 60;
 		let minutes = self.time / 3600;
 		if minutes > 0 {
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleRight, &format!("{}\n{}:{:02}.{:02}\n{}\n{}", self.attempts, minutes, seconds, frames, self.steps, self.bonks));
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, &format!("{}\n{}:{:02}.{:02}\n{}\n{}", self.attempts, minutes, seconds, frames, self.steps, self.bonks));
 		}
 		else {
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleRight, &format!("{}\n{}.{:02}\n{}\n{}", self.attempts, seconds, frames, self.steps, self.bonks));
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, &format!("{}\n{}.{:02}\n{}\n{}", self.attempts, seconds, frames, self.steps, self.bonks));
 		}
 	}
 }

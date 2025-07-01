@@ -64,18 +64,13 @@ impl LevelSelectMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.shader = resx.font.shader;
-		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
 
 		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		buf.push_uniform(shade::d2::TextUniform {
-			transform,
-			texture: resx.font.texture,
-			..Default::default()
-		});
+		buf.uniform.transform = Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
 
 		let size = resx.screen_size.y as f32 * FONT_SIZE;
 
@@ -87,7 +82,7 @@ impl LevelSelectMenu {
 		};
 
 		let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.5, size * 1.5));
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::TopCenter, "Go to level");
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, "Go to level");
 
 		// let mut pos = Vec2::ZERO;
 		let mut scribe = shade::d2::Scribe {
@@ -109,7 +104,7 @@ impl LevelSelectMenu {
 			}
 
 			let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.25, y));
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, &item.1);
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.1);
 
 			y += scribe.line_height;
 		}
@@ -118,9 +113,9 @@ impl LevelSelectMenu {
 		// 	scribe.color = color;
 
 		// 	let rect = Bounds2::point(Vec2(resx.screen_size.x as f32 * 0.5, resx.screen_size.y as f32 * 0.5 - 100.0 + i as i32 as f32 * scribe.line_height));
-		// 	buf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleLeft, item);
+		// 	buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, item);
 		// }
 
-		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		buf.draw(g, shade::Surface::BACK_BUFFER);
 	}
 }

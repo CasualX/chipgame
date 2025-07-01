@@ -187,7 +187,7 @@ impl EditorState {
 			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
 			depth: Some(1.0),
 			..Default::default()
-		}).unwrap();
+		});
 
 		if self.input.key_left {
 			self.game.camera.target.x -= 5.0;
@@ -221,11 +221,12 @@ impl EditorState {
 		let cam = self.game.camera.setup(self.screen_size);
 
 		let p = self.mouse_pos; {
-			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = resx.shader;
-			cv.depth_test = Some(shade::DepthTest::Less);
+			let mut cv = shade::d2::DrawBuilder::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.shader = resx.shader;
+			cv.uniform.transform = cam.view_proj;
+			cv.uniform.texture = resx.tileset;
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -251,16 +252,17 @@ impl EditorState {
 				surface: shade::Surface::BACK_BUFFER,
 				depth: Some(1.0),
 				..Default::default()
-			}).unwrap();
-			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+			});
+			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 
 		{
-			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = resx.shader;
-			cv.depth_test = Some(shade::DepthTest::Less);
+			let mut cv = shade::d2::DrawBuilder::<fx::render::Vertex, fx::render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.shader = resx.shader;
+			cv.uniform.transform = cam.view_proj;
+			cv.uniform.texture = resx.tileset;
 
 			struct ToVertex {
 				color: [u8; 4],
@@ -285,7 +287,7 @@ impl EditorState {
 				}
 				cv.draw_line_rect(&pen, &Bounds2::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
 			}
-			cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 	}
 

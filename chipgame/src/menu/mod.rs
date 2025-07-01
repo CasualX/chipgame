@@ -138,17 +138,8 @@ impl MenuState {
 	}
 }
 
-fn foo(from: Bounds2<f32>, to: Bounds2<f32>) -> Transform2<f32> {
-	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
-	let sy = (to.maxs.y - to.mins.y) / (from.maxs.y - from.mins.y);
-	Transform2 {
-		a11: sx, a12: 0.0, a13: to.mins.x - from.mins.x * sx,
-		a21: 0.0, a22: sy, a23: to.mins.y - from.mins.y * sy,
-	}
-}
-
 pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
-	let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
+	let mut cv = shade::d2::DrawBuilder::<UiVertex, UiUniform>::new();
 
 	cv.blend_mode = shade::BlendMode::Alpha;
 	cv.shader = resx.colorshader;
@@ -159,7 +150,7 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 	};
 	cv.fill_rect(&paint, &Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
-	cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+	cv.draw(g, shade::Surface::BACK_BUFFER);
 }
 
 fn wrap_items<'a, const N: usize>(items: &'a [&'a str; N]) -> [&'a (dyn fmt::Display + 'a); N] {

@@ -36,8 +36,7 @@ unsafe impl shade::TVertex for Vertex {
 
 // Uniform definition
 
-#[derive(Copy, Clone, dataview::Pod)]
-#[repr(C)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Uniform {
 	pub transform: Mat4<f32>,
 	pub texture: shade::Texture2D,
@@ -124,7 +123,7 @@ impl ModelData {
 
 const TILE_SIZE: f32 = 32.0;
 
-fn draw_floor(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, z1: f32, z2: f32, alpha: f32) {
+fn draw_floor(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, z1: f32, z2: f32, alpha: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -161,7 +160,7 @@ fn draw_floor(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>
 	});
 }
 
-fn draw_shadow(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, skew: f32, a: f32) {
+fn draw_shadow(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, skew: f32, a: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
@@ -197,7 +196,7 @@ fn draw_shadow(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32
 	});
 }
 
-fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, w: f32, sprite: data::SpriteId, alpha: f32) {
+fn draw_wall(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, w: f32, sprite: data::SpriteId, alpha: f32) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
@@ -265,7 +264,7 @@ fn draw_wall(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>,
 	});
 }
 
-fn draw_portal(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId) {
+fn draw_portal(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId) {
 	let gfx = sprite.index();
 
 	let mut p = cv.begin(shade::PrimType::Triangles, 5, 4);
@@ -310,7 +309,7 @@ fn draw_portal(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32
 	});
 }
 
-pub fn draw(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, model: data::ModelId, alpha: f32) {
+pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, model: data::ModelId, alpha: f32) {
 	match model {
 		data::ModelId::Empty => (),
 		data::ModelId::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha),
@@ -325,7 +324,7 @@ pub fn draw(cv: &mut shade::d2::CommandBuffer<Vertex, Uniform>, pos: Vec3<f32>, 
 	}
 }
 
-pub fn draw_tile(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform>, terrain: core::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
+pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, terrain: core::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
 	let tile = tiles[terrain as usize];
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
@@ -341,7 +340,7 @@ fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
 	false
 }
 
-pub fn field(cv: &mut shade::d2::CommandBuffer::<render::Vertex, render::Uniform>, state: &FxState, time: f32) {
+pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, state: &FxState, time: f32) {
 	let i = (time * 8.0) as i32;
 	let field = &state.gs.field;
 	// let resx = &state.resources;

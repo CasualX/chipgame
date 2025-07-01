@@ -48,7 +48,7 @@ fn main() {
 		wrap_u: shade::TextureWrap::ClampEdge,
 		wrap_v: shade::TextureWrap::ClampEdge,
 	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
-	let tex_info = g.texture2d_get_info(tileset).unwrap();
+	let tex_info = g.texture2d_get_info(tileset);
 
 	let texdigits = shade::image::png::load_file(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
@@ -58,9 +58,9 @@ fn main() {
 	}, None).unwrap();
 
 	// Create the shader
-	let shader = g.shader_create(None, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl")).unwrap();
-	let colorshader = g.shader_create(None, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl")).unwrap();
-	let uishader = g.shader_create(None, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl")).unwrap();
+	let shader = g.shader_create(None, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl"));
+	let colorshader = g.shader_create(None, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl"));
+	let uishader = g.shader_create(None, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl"));
 
 	let mut past_now = time::Instant::now();
 
@@ -68,7 +68,7 @@ fn main() {
 		let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
 		let font = Some(font);
 
-		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS).unwrap();
+		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
 		let texture = shade::image::png::load_file(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
@@ -170,9 +170,9 @@ fn main() {
 
 		resx.screen_size = [size.width as i32, size.height as i32].into();
 
-		g.begin().unwrap();
+		g.begin();
 		editor.draw(&mut g, &resx);
-		g.end().unwrap();
+		g.end();
 
 		// Swap the buffers and wait for the next frame
 		context.swap_buffers().unwrap();

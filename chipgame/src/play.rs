@@ -353,7 +353,7 @@ impl PlayState {
 			color: Some(cvmath::Vec4(0.2, 0.2, 0.5, 1.0)),
 			depth: Some(1.0),
 			..Default::default()
-		}).unwrap();
+		});
 
 		if let Some(fx) = &mut self.fx {
 			fx.hud_enabled = self.menu.stack.is_empty();

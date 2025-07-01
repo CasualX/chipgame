@@ -48,18 +48,13 @@ impl OptionsMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.shader = resx.font.shader;
-		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
 
 		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		buf.push_uniform(shade::d2::TextUniform {
-			transform,
-			texture: resx.font.texture,
-			..Default::default()
-		});
+		buf.uniform.transform = Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
 
 		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
 
@@ -74,6 +69,6 @@ impl OptionsMenu {
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &rect, resx);
 
-		buf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		buf.draw(g, shade::Surface::BACK_BUFFER);
 	}
 }

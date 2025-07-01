@@ -155,22 +155,23 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.set_game_camera();
+		self.set_game_camera(time);
 
 		let viewport = Bounds2::vec(resx.screen_size);
 		let cam = self.camera.setup(viewport.size());
 
-		let mut cv = shade::d2::CommandBuffer::<render::Vertex, render::Uniform>::new();
-		cv.shader = resx.shader;
-		cv.depth_test = Some(shade::DepthTest::Less);
+		let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
 		cv.viewport = viewport;
+		cv.depth_test = Some(shade::DepthTest::Less);
 		cv.cull_mode = Some(shade::CullMode::CW);
-		cv.push_uniform(render::Uniform { transform: cam.view_proj, texture: resx.tileset });
+		cv.shader = resx.shader;
+		cv.uniform.transform = cam.view_proj;
+		cv.uniform.texture = resx.tileset;
 		render::field(&mut cv, self, time);
-		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		cv.draw(g, shade::Surface::BACK_BUFFER);
 
 		if self.axes.is_none() {
-			let shader = g.shader_create(None, shade::gl::shaders::AXES_VS, shade::gl::shaders::AXES_FS).unwrap();
+			let shader = g.shader_create(None, shade::gl::shaders::COLOR3D_VS, shade::gl::shaders::COLOR3D_FS);
 			self.axes = Some(shade::d3::axes::AxesModel::create(g, shader));
 		}
 		if let Some(axes) = &self.axes {

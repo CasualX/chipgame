@@ -2,15 +2,6 @@ use super::*;
 
 use crate::menu::{UiUniform, UiVertex};
 
-fn foo(from: Bounds2<f32>, to: Bounds2<f32>) -> Transform2<f32> {
-	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
-	let sy = (to.maxs.y - to.mins.y) / (from.maxs.y - from.mins.y);
-	Transform2 {
-		a11: sx, a12: 0.0, a13: to.mins.x - from.mins.x * sx,
-		a21: 0.0, a22: sy, a23: to.mins.y - from.mins.y * sy,
-	}
-}
-
 impl FxState {
 	pub fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let ss = resx.screen_size;
@@ -22,18 +13,15 @@ impl FxState {
 			crate::menu::darken(g, resx, alpha);
 		}
 
-		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
-		cv.shader = resx.uishader;
-		cv.blend_mode = shade::BlendMode::Alpha;
+		let mut pool = shade::d2::DrawPool::new();
+
+		let cv = pool.get::<UiVertex, UiUniform>();
 		cv.viewport = Bounds::vec(ss);
+		cv.blend_mode = shade::BlendMode::Alpha;
+		cv.shader = resx.uishader;
 
-		let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		cv.push_uniform(UiUniform {
-			transform,
-			texture: resx.texdigits,
-			..Default::default()
-		});
+		cv.uniform.transform = Transform2f::ortho(cv.viewport.cast());
+		cv.uniform.texture = resx.texdigits;
 
 		// let paint = shade::d2::Paint {
 		// 	template: UiVertex {
@@ -45,70 +33,57 @@ impl FxState {
 		let a = ss.y as f32 * 0.075;
 		// cv.fill_rect(&paint, &Bounds2::c(0.0, 0.0, ss.x as f32, a + a));
 
-		cv.push_uniform_f(|u| {
-			UiUniform {
-				texture: resx.tileset,
-				..*u
-			}
-		});
+		cv.uniform.texture = resx.tileset;
 
 		let ref gs = self.gs;
 
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(&mut cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(&mut cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(&mut cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(&mut cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
 		}
 
 		if gs.ps.flippers {
-			draw_sprite(&mut cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(a * 0.0, a), a);
+			draw_sprite(cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(a * 0.0, a), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(&mut cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
+			draw_sprite(cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(&mut cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
+			draw_sprite(cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(&mut cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
+			draw_sprite(cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
 		}
 
-		cv.push_uniform_f(|u| {
-			UiUniform {
-				texture: resx.texdigits,
-				..*u
-			}
-		});
+		cv.uniform.texture = resx.texdigits;
 		let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
 		let chips_color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(&mut cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
+		draw_digits(cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
 		let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
 		let time_color = if time_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(&mut cv, time_remaining, Vec2(ss.x as f32 - a * 1.4, a * 1.2).round(), time_color);
-
-		cv.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+		draw_digits(cv, time_remaining, Vec2(ss.x as f32 - a * 1.4, a * 1.2).round(), time_color);
 
 		{
-			let mut tbuf = shade::d2::TextBuffer::new();
+			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
-			tbuf.viewport = Bounds2::vec(ss);
-			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-			tbuf.push_uniform(shade::d2::TextUniform {
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			let transform = Transform2f::ortho(rect);
+			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
-			});
+			};
 			let size = ss.y as f32 * 0.025;
 			let mut scribe = shade::d2::Scribe {
 				font_size: size,
@@ -126,7 +101,7 @@ impl FxState {
 						3 => Vec4(255, 255, 0, 255),
 						_ => Vec4(255, 255, 255, 255),
 					};
-					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::BoxAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
+					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::TextAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
 				}
 			}
 
@@ -138,33 +113,30 @@ impl FxState {
 
 			// scribe.color = Vec4::unpack8(chips_color);
 			// let chips_display = format!("Chips: {:0>3}", chips_remaining);
-			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, &chips_display);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::BoxAlign::BottomLeft, "CHIPS");
+			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::TextAlign::BottomLeft, &chips_display);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::TextAlign::BottomLeft, "CHIPS");
 
 			// scribe.color = Vec4::unpack8(time_color);
 			// let time_display = if time_remaining > 0 { format!("Time:  {:0>3}", time_remaining) } else { String::from("Time:  -") };
-			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, &time_display);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::BoxAlign::TopLeft, "TIME");
-
-			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
+			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::TextAlign::TopLeft, &time_display);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::TextAlign::TopLeft, "TIME");
 		}
 
 		let mut darken = false;
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
 			darken = true;
-			let mut tbuf = shade::d2::TextBuffer::new();
+			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
-			tbuf.viewport = Bounds2::vec(ss);
-			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-			tbuf.push_uniform(shade::d2::TextUniform {
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			let transform = Transform2f::ortho(rect);
+			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
-			});
+			};
 			let size = ss.y as f32 * 0.05;
 			let mut scribe = shade::d2::Scribe {
 				font_size: size,
@@ -184,25 +156,23 @@ impl FxState {
 				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
 				tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
 			}
-			tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 		}
 		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
 			if let Some(hint) = &self.gs.field.hint {
 				darken = true;
 
-				let mut tbuf = shade::d2::TextBuffer::new();
+				let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 				tbuf.shader = resx.font.shader;
-				tbuf.viewport = Bounds2::vec(ss);
-				tbuf.blend_mode = shade::BlendMode::Alpha;
 
-				let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-				tbuf.push_uniform(shade::d2::TextUniform {
+				let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+				let transform = Transform2f::ortho(rect);
+				tbuf.uniform = shade::d2::TextUniform {
 					transform,
 					texture: resx.font.texture,
 					outline_width_absolute: 0.8,
 					unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 					..Default::default()
-				});
+				};
 				let size = ss.y as f32 * 0.05;
 				let scribe = shade::d2::Scribe {
 					font_size: size,
@@ -211,10 +181,9 @@ impl FxState {
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
 				};
-				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
+				tbuf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, &hint);
 				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
 				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
-				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
 			}
 		}
 
@@ -222,21 +191,23 @@ impl FxState {
 			self.darken = darken;
 			self.darken_time = self.time;
 		}
+
+		pool.draw(g, shade::Surface::BACK_BUFFER);
 	}
 }
 
-fn draw_sprite(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, sprite: data::SpriteId, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
+fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, sprite: data::SpriteId, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
 	let uv = sprite.uv(tex_size);
 	let tex_size = tex_size.map(|c| c as f32);
 	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };
 	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(0.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 0.0) / tex_size, color: [255, 255, 255, 255] };
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
-	let stamp = shade::d2::Stamp { bottom_left, top_left, top_right, bottom_right };
-	cv.stamp_rect(&stamp, &Bounds2(pos, pos + Vec2(size, size)));
+	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
+	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(size, size)));
 }
 
-fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
+fn draw_digits(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
 	if n < 0 {
 		draw_digit(cv, None, pos + (0.0, 0.0), color);
 		draw_digit(cv, None, pos + (17.0, 0.0), color);
@@ -257,7 +228,7 @@ fn draw_digits(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, n: i32, p
 	}
 }
 
-fn draw_digit(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, digit: Option<char>, pos: Vec2<f32>, color: u32) {
+fn draw_digit(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, digit: Option<char>, pos: Vec2<f32>, color: u32) {
 	let index = match digit {
 		Some('0') => 1,
 		Some('1') => 2,
@@ -282,7 +253,6 @@ fn draw_digit(cv: &mut shade::d2::CommandBuffer<UiVertex, UiUniform>, digit: Opt
 	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u1, v2), color };
 	let top_right = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u2, v1), color };
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u2, v2), color };
-	let stamp = shade::d2::Stamp { bottom_left, top_left, top_right, bottom_right };
-
-	cv.stamp_rect(&stamp, &Bounds2(pos, pos + Vec2(17.0, 25.0)));
+	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
+	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(17.0, 25.0)));
 }

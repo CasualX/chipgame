@@ -28,7 +28,7 @@ impl<'a> DrawMenuItems<'a> {
 			let next_y = y + scribe.line_height;
 			let rect = Bounds2::c(rect.mins.x, rect.mins.y + y, rect.maxs.x, rect.mins.y + next_y);
 			y = next_y;
-			buf.text_lines(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, std::slice::from_ref(line));
+			buf.text_lines(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, std::slice::from_ref(line));
 		}
 	}
 }
