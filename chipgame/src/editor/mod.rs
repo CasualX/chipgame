@@ -222,10 +222,11 @@ impl EditorState {
 
 		let p = self.mouse_pos; {
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = resx.shader;
-			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.shader = resx.shader;
+			cv.uniform.transform = cam.view_proj;
+			cv.uniform.texture = resx.tileset;
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -257,10 +258,11 @@ impl EditorState {
 
 		{
 			let mut cv = shade::d2::CommandBuffer::<fx::render::Vertex, fx::render::Uniform>::new();
-			cv.shader = resx.shader;
-			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.push_uniform(fx::render::Uniform { transform: cam.view_proj, texture: resx.tileset });
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.shader = resx.shader;
+			cv.uniform.transform = cam.view_proj;
+			cv.uniform.texture = resx.tileset;
 
 			struct ToVertex {
 				color: [u8; 4],

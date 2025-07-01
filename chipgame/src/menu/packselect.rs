@@ -36,20 +36,15 @@ impl LevelPackSelectMenu {
 		if let Some(Some(splash)) = self.splash.get(self.selected) {
 			let ss = resx.screen_size;
 			let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
-			cv.shader = resx.uishader;
-			cv.blend_mode = shade::BlendMode::Alpha;
 			cv.viewport = Bounds::vec(ss);
+			cv.blend_mode = shade::BlendMode::Alpha;
+			cv.shader = resx.uishader;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			cv.uniform.transform = Transform2f::ortho(rect);
 
 			let time = self.ntime as f32 / 60.0;
-			let texture = splash.get_frame(time);
-
-			cv.push_uniform(UiUniform {
-				transform,
-				texture,
-				..Default::default()
-			});
+			cv.uniform.texture = splash.get_frame(time);
 
 			let color = [128, 128, 128, 255];
 			let stamp = shade::d2::Stamp {
@@ -69,18 +64,13 @@ impl LevelPackSelectMenu {
 
 
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.shader = resx.font.shader;
-		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
 
 		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-		let transform = foo(rect, Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		buf.push_uniform(shade::d2::TextUniform {
-			transform,
-			texture: resx.font.texture,
-			..Default::default()
-		});
+		buf.uniform.transform = Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
 
 		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 

@@ -36,8 +36,7 @@ unsafe impl shade::TVertex for Vertex {
 
 // Uniform definition
 
-#[derive(Copy, Clone, dataview::Pod)]
-#[repr(C)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Uniform {
 	pub transform: Mat4<f32>,
 	pub texture: shade::Texture2D,

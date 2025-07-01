@@ -2,15 +2,6 @@ use super::*;
 
 use crate::menu::{UiUniform, UiVertex};
 
-fn foo(from: Bounds2<f32>, to: Bounds2<f32>) -> Transform2<f32> {
-	let sx = (to.maxs.x - to.mins.x) / (from.maxs.x - from.mins.x);
-	let sy = (to.maxs.y - to.mins.y) / (from.maxs.y - from.mins.y);
-	Transform2 {
-		a11: sx, a12: 0.0, a13: to.mins.x - from.mins.x * sx,
-		a21: 0.0, a22: sy, a23: to.mins.y - from.mins.y * sy,
-	}
-}
-
 impl FxState {
 	pub fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let ss = resx.screen_size;
@@ -23,17 +14,13 @@ impl FxState {
 		}
 
 		let mut cv = shade::d2::CommandBuffer::<UiVertex, UiUniform>::new();
-		cv.shader = resx.uishader;
-		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.viewport = Bounds::vec(ss);
+		cv.blend_mode = shade::BlendMode::Alpha;
+		cv.shader = resx.uishader;
 
-		let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-
-		cv.push_uniform(UiUniform {
-			transform,
-			texture: resx.texdigits,
-			..Default::default()
-		});
+		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		cv.uniform.transform = Transform2f::ortho(rect);
+		cv.uniform.texture = resx.texdigits;
 
 		// let paint = shade::d2::Paint {
 		// 	template: UiVertex {
@@ -45,12 +32,7 @@ impl FxState {
 		let a = ss.y as f32 * 0.075;
 		// cv.fill_rect(&paint, &Bounds2::c(0.0, 0.0, ss.x as f32, a + a));
 
-		cv.push_uniform_f(|u| {
-			UiUniform {
-				texture: resx.tileset,
-				..*u
-			}
-		});
+		cv.uniform.texture = resx.tileset;
 
 		let ref gs = self.gs;
 
@@ -80,12 +62,7 @@ impl FxState {
 			draw_sprite(&mut cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
 		}
 
-		cv.push_uniform_f(|u| {
-			UiUniform {
-				texture: resx.texdigits,
-				..*u
-			}
-		});
+		cv.uniform.texture = resx.texdigits;
 		let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
 		let chips_color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
 		draw_digits(&mut cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
@@ -97,18 +74,19 @@ impl FxState {
 
 		{
 			let mut tbuf = shade::d2::TextBuffer::new();
-			tbuf.shader = resx.font.shader;
 			tbuf.viewport = Bounds2::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
+			tbuf.shader = resx.font.shader;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-			tbuf.push_uniform(shade::d2::TextUniform {
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			let transform = Transform2f::ortho(rect);
+			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
-			});
+			};
 			let size = ss.y as f32 * 0.025;
 			let mut scribe = shade::d2::Scribe {
 				font_size: size,
@@ -157,14 +135,15 @@ impl FxState {
 			tbuf.viewport = Bounds2::vec(ss);
 			tbuf.blend_mode = shade::BlendMode::Alpha;
 
-			let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-			tbuf.push_uniform(shade::d2::TextUniform {
+			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			let transform = Transform2f::ortho(rect);
+			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
 				outline_width_absolute: 0.8,
 				unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 				..Default::default()
-			});
+			};
 			let size = ss.y as f32 * 0.05;
 			let mut scribe = shade::d2::Scribe {
 				font_size: size,
@@ -195,14 +174,15 @@ impl FxState {
 				tbuf.viewport = Bounds2::vec(ss);
 				tbuf.blend_mode = shade::BlendMode::Alpha;
 
-				let transform = foo(Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), Bounds2::c(-1.0, 1.0, 1.0, -1.0));
-				tbuf.push_uniform(shade::d2::TextUniform {
+				let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+				let transform = Transform2f::ortho(rect);
+				tbuf.uniform = shade::d2::TextUniform {
 					transform,
 					texture: resx.font.texture,
 					outline_width_absolute: 0.8,
 					unit_range: Vec2::dup(4.0f32) / Vec2(232.0f32, 232.0f32),
 					..Default::default()
-				});
+				};
 				let size = ss.y as f32 * 0.05;
 				let scribe = shade::d2::Scribe {
 					font_size: size,
@@ -211,7 +191,7 @@ impl FxState {
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
 				};
-				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32), shade::d2::BoxAlign::MiddleCenter, &hint);
+				tbuf.text_box(&resx.font, &scribe, &rect, shade::d2::BoxAlign::MiddleCenter, &hint);
 				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
 				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
 				tbuf.draw(g, shade::Surface::BACK_BUFFER).unwrap();
