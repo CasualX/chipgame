@@ -13,15 +13,15 @@ impl AboutMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
-		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let rect = resx.viewport.cast();
 		buf.uniform.transform = Transform2f::ortho(rect);
 		buf.uniform.texture = resx.font.texture;
 
-		let size = resx.screen_size.y as f32 * FONT_SIZE * 0.75;
+		let size = rect.height() * FONT_SIZE * 0.75;
 
 		let scribe = shade::d2::Scribe {
 			font_size: size,

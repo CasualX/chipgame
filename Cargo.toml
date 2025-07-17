@@ -6,6 +6,7 @@ members = [
 	"./chipgame",
 	"./chipplay",
 	"./scripts/ccdat",
+	"./scripts/colorkey",
 	"./scripts/fixer",
 	"./scripts/levelstats",
 	"./scripts/spritec",

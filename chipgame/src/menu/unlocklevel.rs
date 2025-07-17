@@ -96,15 +96,15 @@ impl UnlockLevelMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
-		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let rect = resx.viewport.cast();
 		buf.uniform.transform = Transform2f::ortho(rect);
 		buf.uniform.texture = resx.font.texture;
 
-		let size = resx.screen_size.y as f32 * FONT_SIZE;
+		let size = resx.viewport.height() as f32 * FONT_SIZE;
 
 		let scribe = shade::d2::Scribe {
 			font_size: size,
@@ -113,7 +113,7 @@ impl UnlockLevelMenu {
 			..Default::default()
 		};
 
-		let rect = Bounds2::c(0.0, size + size, resx.screen_size.x as f32, size + size);
+		let rect = Bounds2::c(0.0, size + size, resx.viewport.width() as f32, size + size);
 
 		buf.text_lines(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, &[
 			&format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
@@ -122,10 +122,10 @@ impl UnlockLevelMenu {
 		let letters = &[&LETTERS_MAP[0..10], &LETTERS_MAP[10..19], &LETTERS_MAP[19..26]];
 		let height = letters.len() as f32 * size * 1.5;
 		for (i, &line) in letters.iter().enumerate() {
-			let y = (resx.screen_size.y as f32 - height) * 0.5 + i as f32 * size * 1.5;
+			let y = (resx.viewport.height() as f32 - height) * 0.5 + i as f32 * size * 1.5;
 			let width = line.len() as f32 * size * 1.5;
 			for (j, &chr) in line.iter().enumerate() {
-				let xstart = (resx.screen_size.x as f32 - width) * 0.5;
+				let xstart = (resx.viewport.width() as f32 - width) * 0.5;
 				let current_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
 				let rect = Bounds2::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
 				let scribe = shade::d2::Scribe {

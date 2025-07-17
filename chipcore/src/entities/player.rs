@@ -53,10 +53,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
 			ps_activity(s, PlayerActivity::Drowned);
+			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			return;
 		}
 		if matches!(terrain, Terrain::Exit) {
 			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
+			s.events.fire(GameEvent::Fireworks { pos: ent.pos });
 			ps_activity(s, PlayerActivity::Win);
 			return;
 		}

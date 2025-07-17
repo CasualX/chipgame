@@ -340,7 +340,7 @@ fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
 	false
 }
 
-pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, state: &FxState, time: f32) {
+pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, state: &FxState, time: f32, shadow: f32) {
 	let i = (time * 8.0) as i32;
 	let field = &state.gs.field;
 	// let resx = &state.resources;
@@ -374,10 +374,10 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 			continue;
 		}
 		if matches!(obj.model, data::ModelId::Sprite | data::ModelId::FlatSprite) {
-			draw_shadow(cv, obj.pos, obj.sprite, 10.0, obj.alpha);
+			draw_shadow(cv, obj.pos, obj.sprite, 10.0, obj.alpha * shadow);
 		}
 		if matches!(obj.model, data::ModelId::ReallyFlatSprite) {
-			draw_shadow(cv, obj.pos, obj.sprite, 2.0, obj.alpha);
+			draw_shadow(cv, obj.pos, obj.sprite, 2.0, obj.alpha * shadow);
 		}
 	}
 	// Render the objects
@@ -387,4 +387,27 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		}
 		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha);
 	}
+}
+
+pub fn draw_effect(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, efx: &Effect, time: f32) {
+	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
+	let t = f32::clamp(time - efx.start, 0.0, 1.0);
+	// 12 frames of animation
+	let aindex = f32::floor(t * 13.0).min(12.0);
+	let d_size = 96.0;
+	let u = aindex * d_size;
+	let v = match efx.ty {
+		EffectType::Splash => d_size * 0.0,
+		EffectType::Sparkles => d_size * 1.0,
+		EffectType::Fireworks => d_size * 2.0,
+	};
+	p.add_indices_quad();
+	let s = 32.0;
+	let color = [255; 4];
+	p.add_vertices(&[
+		Vertex { pos: efx.pos + Vec3f(-s, s, 1.0), uv: Vec2f(u, v), color },
+		Vertex { pos: efx.pos + Vec3f(-s, -s, 1.0), uv: Vec2f(u, v + 96.0), color },
+		Vertex { pos: efx.pos + Vec3f(s, -s, 1.0), uv: Vec2f(u + 96.0, v + 96.0), color },
+		Vertex { pos: efx.pos + Vec3f(s, s, 1.0), uv: Vec2f(u + 96.0, v), color },
+	]);
 }

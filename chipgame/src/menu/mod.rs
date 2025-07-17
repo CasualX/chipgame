@@ -143,7 +143,7 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 
 	cv.blend_mode = shade::BlendMode::Alpha;
 	cv.shader = resx.colorshader;
-	cv.viewport = Bounds2::vec(resx.screen_size);
+	cv.viewport = resx.viewport;
 
 	let paint = shade::d2::Paint {
 		template: UiVertex { pos: Vec2::ZERO, uv: Vec2::ZERO, color: [0, 0, 0, alpha] },

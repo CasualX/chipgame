@@ -50,6 +50,13 @@ fn main() {
 	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset);
 
+	let effects = shade::image::png::load_file(&mut g, Some("effects"), "data/effects.png", &shade::image::TextureProps {
+		filter_min: shade::TextureFilter::Linear,
+		filter_mag: shade::TextureFilter::Linear,
+		wrap_u: shade::TextureWrap::ClampEdge,
+		wrap_v: shade::TextureWrap::ClampEdge,
+	}, None).unwrap();
+
 	let texdigits = shade::image::png::load_file(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
@@ -80,11 +87,13 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
+	let viewport = cvmath::Bounds(cvmath::Vec2::ZERO, cvmath::Vec2(size.width as i32, size.height as i32));
 	let mut resx = chipgame::fx::Resources {
+		effects,
 		tileset,
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
-		screen_size: [size.width as i32, size.height as i32].into(),
+		viewport,
 		colorshader,
 		uishader,
 		texdigits,
@@ -168,7 +177,7 @@ fn main() {
 			}
 		});
 
-		resx.screen_size = [size.width as i32, size.height as i32].into();
+		resx.viewport.maxs = [size.width as i32, size.height as i32].into();
 
 		g.begin();
 		editor.draw(&mut g, &resx);

@@ -29,6 +29,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			s.set_terrain(ent.pos, Terrain::Dirt);
 			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
 			s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
+			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			ent.flags |= EF_REMOVE;
 		}
 	}

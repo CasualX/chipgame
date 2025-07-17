@@ -49,10 +49,10 @@ impl Camera {
 
 impl FxState {
 	pub fn set_game_camera(&mut self, time: f32) {
-		self.camera.blend = f32::clamp((time - 8.0) * 0.25, 0.0, 1.0);
+		self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
 
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
-			self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0 * self.camera.blend.max(0.001), 200.0);
+			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend.max(0.001) * 1.75).min(1.0), 200.0);
 			obj.lerp_pos + (16.0, 32.0 * 1.5, 0.0)
 		}
 		else {

@@ -4,8 +4,6 @@ use crate::menu::{UiUniform, UiVertex};
 
 impl FxState {
 	pub fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
-		let ss = resx.screen_size;
-
 		let darken_time = f32::min(1.0, (self.time - self.darken_time) / 0.2);
 		let alpha = if self.darken { darken_time } else { 1.0 - darken_time };
 		if alpha > 0.0 {
@@ -16,7 +14,7 @@ impl FxState {
 		let mut pool = shade::d2::DrawPool::new();
 
 		let cv = pool.get::<UiVertex, UiUniform>();
-		cv.viewport = Bounds::vec(ss);
+		cv.viewport = resx.viewport;
 		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.shader = resx.uishader;
 
@@ -30,6 +28,7 @@ impl FxState {
 		// 		color: [255, 255, 255, 255],
 		// 	},
 		// };
+		let ss = resx.viewport.size();
 		let a = ss.y as f32 * 0.075;
 		// cv.fill_rect(&paint, &Bounds2::c(0.0, 0.0, ss.x as f32, a + a));
 
@@ -75,8 +74,7 @@ impl FxState {
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
 
-			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-			let transform = Transform2f::ortho(rect);
+			let transform = Transform2f::ortho(resx.viewport.cast());
 			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
@@ -128,8 +126,7 @@ impl FxState {
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
 
-			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
-			let transform = Transform2f::ortho(rect);
+			let transform = Transform2f::ortho(resx.viewport.cast());
 			tbuf.uniform = shade::d2::TextUniform {
 				transform,
 				texture: resx.font.texture,
@@ -164,7 +161,7 @@ impl FxState {
 				let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 				tbuf.shader = resx.font.shader;
 
-				let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+				let rect = resx.viewport.cast();
 				let transform = Transform2f::ortho(rect);
 				tbuf.uniform = shade::d2::TextUniform {
 					transform,

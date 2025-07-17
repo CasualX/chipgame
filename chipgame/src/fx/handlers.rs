@@ -391,3 +391,11 @@ pub fn game_over(ctx: &mut FxState) {
 	ctx.next_level_load = ctx.time + 2.0;
 	ctx.game_win = false;
 }
+
+pub fn effect(ctx: &mut FxState, pos: Vec2i, ty: EffectType) {
+	ctx.effects.push(Effect {
+		ty,
+		pos: Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 10.0),
+		start: ctx.time,
+	});
+}

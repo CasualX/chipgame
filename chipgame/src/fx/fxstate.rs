@@ -1,5 +1,17 @@
 use super::*;
 
+pub enum EffectType {
+	Splash,
+	Sparkles,
+	Fireworks,
+}
+
+pub struct Effect {
+	pub ty: EffectType,
+	pub pos: Vec3f,
+	pub start: f32,
+}
+
 #[derive(Default)]
 pub struct FxState {
 	pub ntime: i32,
@@ -9,6 +21,7 @@ pub struct FxState {
 	pub gs_realtime: f32,
 	pub camera: Camera,
 	pub objects: ObjectMap,
+	pub effects: Vec<Effect>,
 	pub level_number: i32,
 	pub next_level_load: f32,
 	pub game_win: bool,
@@ -134,6 +147,9 @@ impl FxState {
 				&core::GameEvent::GameWin { .. } => game_win(self),
 				&core::GameEvent::GameOver { .. } => game_over(self),
 				&core::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
+				&core::GameEvent::BombExplode { pos } => effect(self, pos, EffectType::Sparkles),
+				&core::GameEvent::WaterSplash { pos } => effect(self, pos, EffectType::Splash),
+				&core::GameEvent::Fireworks { pos } => effect(self, pos, EffectType::Fireworks),
 				_ => {}
 			}
 		}
@@ -155,27 +171,47 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.set_game_camera(time);
+		self.set_game_camera(self.gs.time as f32 / 60.0);
 
-		let viewport = Bounds2::vec(resx.screen_size);
-		let cam = self.camera.setup(viewport.size());
+		let camera = self.camera.setup(resx.viewport.size());
 
-		let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
-		cv.viewport = viewport;
-		cv.depth_test = Some(shade::DepthTest::Less);
-		cv.cull_mode = Some(shade::CullMode::CW);
-		cv.shader = resx.shader;
-		cv.uniform.transform = cam.view_proj;
-		cv.uniform.texture = resx.tileset;
-		render::field(&mut cv, self, time);
-		cv.draw(g, shade::Surface::BACK_BUFFER);
+		{
+			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			cv.viewport = resx.viewport;
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.cull_mode = Some(shade::CullMode::CW);
+			cv.shader = resx.shader;
+			cv.uniform.transform = camera.view_proj;
+			cv.uniform.texture = resx.tileset;
+			render::field(&mut cv, self, time, self.camera.blend);
+			cv.draw(g, shade::Surface::BACK_BUFFER);
+		}
+
+		// Render the effects
+		{
+			let mut cv = shade::d2::DrawBuilder::<Vertex, Uniform>::new();
+			cv.viewport = resx.viewport;
+			cv.blend_mode = shade::BlendMode::Solid;
+			cv.depth_test = Some(shade::DepthTest::Always);
+			// cv.cull_mode = Some(shade::CullMode::CW);
+
+			cv.shader = resx.shader;
+			cv.uniform.transform = camera.view_proj;
+			cv.uniform.texture = resx.effects;
+
+			for efx in &self.effects {
+				render::draw_effect(&mut cv, efx, time);
+			}
+			cv.draw(g, shade::Surface::BACK_BUFFER);
+		}
+		self.effects.retain(|efx| time < efx.start + 1.0);
 
 		if self.axes.is_none() {
 			let shader = g.shader_create(None, shade::gl::shaders::COLOR3D_VS, shade::gl::shaders::COLOR3D_FS);
 			self.axes = Some(shade::d3::axes::AxesModel::create(g, shader));
 		}
 		if let Some(axes) = &self.axes {
-			axes.draw(g, &cam, &shade::d3::axes::AxesInstance {
+			axes.draw(g, &camera, &shade::d3::axes::AxesInstance {
 				local: Transform3f::scale(Vec3::dup(50.0)),
 				depth_test: None,
 			});

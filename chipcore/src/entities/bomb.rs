@@ -49,7 +49,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	if exploded {
 		ent.flags |= EF_REMOVE;
-		s.events.fire(GameEvent::BombExplode { entity: ent.handle });
+		s.events.fire(GameEvent::BombExplode { pos: ent.pos });
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
 	}
 }

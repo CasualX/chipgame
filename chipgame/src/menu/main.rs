@@ -38,18 +38,18 @@ impl MainMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
-		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let rect = resx.viewport.cast();
 		buf.uniform.transform = Transform2f::ortho(rect);
 		buf.uniform.texture = resx.font.texture;
 
 		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 
 		{
-			let size = resx.screen_size.y as f32 * FONT_SIZE;
+			let size = resx.viewport.height() as f32 * FONT_SIZE;
 
 			let scribe = shade::d2::Scribe {
 				font_size: size,

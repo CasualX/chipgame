@@ -36,18 +36,18 @@ impl LevelPackSelectMenu {
 		let mut pool = shade::d2::DrawPool::new();
 
 		if let Some(Some(splash)) = self.splash.get(self.selected) {
-			let ss = resx.screen_size;
 			let cv = pool.get::<UiVertex, UiUniform>();
-			cv.viewport = Bounds::vec(ss);
+			cv.viewport = resx.viewport;
 			cv.blend_mode = shade::BlendMode::Alpha;
 			cv.shader = resx.uishader;
 
-			let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+			let rect = resx.viewport.cast();
 			cv.uniform.transform = Transform2f::ortho(rect);
 
 			let time = self.ntime as f32 / 60.0;
 			cv.uniform.texture = splash.get_frame(time);
 
+			let ss = resx.viewport.size();
 			let color = [128, 128, 128, 255];
 			let sprite = shade::d2::Sprite {
 				bottom_left: UiVertex { pos: Vec2f(0.0, 0.0), uv: Vec2f(0.0, 1.0), color },
@@ -64,18 +64,18 @@ impl LevelPackSelectMenu {
 
 
 		let buf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
-		buf.viewport = Bounds2::vec(resx.screen_size);
+		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
-		let rect = Bounds2::vec(resx.screen_size.cast::<f32>());
+		let rect = resx.viewport.cast();
 		buf.uniform.transform = Transform2f::ortho(rect);
 		buf.uniform.texture = resx.font.texture;
 
 		let [top, bottom, _] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(3.0), layout::Unit::Fr(1.0)]);
 
 		{
-			let size = resx.screen_size.y as f32 * FONT_SIZE;
+			let size = resx.viewport.height() as f32 * FONT_SIZE;
 
 			let scribe = shade::d2::Scribe {
 				font_size: size,

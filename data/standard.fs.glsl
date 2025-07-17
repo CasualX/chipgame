@@ -8,8 +8,7 @@ in vec2 v_texcoord;
 uniform sampler2D tex;
 
 void main() {
-	ivec2 texSize = textureSize(tex, 0);
-	vec4 color = texture(tex, v_texcoord / texSize);
+	vec4 color = texture(tex, v_texcoord);
 	if (color.a < 0.2) {
 		discard;
 	}
