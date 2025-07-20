@@ -4,6 +4,7 @@ pub enum MenuEvent {
 	CursorMove,
 	CursorSelect,
 	CloseMenu,
+	LevelPreview { level_number: i32 },
 
 	// Main Events
 	LevelPackSelect { index: usize },

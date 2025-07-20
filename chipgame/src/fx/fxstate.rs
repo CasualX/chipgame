@@ -66,6 +66,7 @@ impl FxState {
 		self.next_level_load = 0.0;
 		self.darken = true;
 		self.darken_time = -1.0;
+		self.init_camera();
 	}
 	pub fn pause(&mut self) {
 		// if matches!(self.gs.ts, core::TimeState::Running) {

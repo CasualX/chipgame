@@ -145,11 +145,31 @@ impl PlayState {
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
 					self.play_music();
 				}
+				menu::MenuEvent::LevelPreview { level_number } => {
+					for menu in &mut self.menu.stack {
+						match menu {
+							menu::Menu::LevelSelect(menu) => {
+								if let Some(lv_data) = self.lvsets.current().lv_data.get((level_number - 1) as usize) {
+									let mut fx = Box::new(crate::fx::FxState::default());
+									fx.init();
+									fx.parse_level(level_number, lv_data);
+									fx.hud_enabled = false;
+									menu.level = Some(fx);
+								}
+								else {
+									menu.level = None;
+								}
+							}
+							_ => {}
+						}
+					}
+				}
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu {
 						selected: 0,
 						offset: 0,
 						items: Vec::new(),
+						level: None,
 					};
 					menu.load_items(&self.lvsets.current(), &self.save_data);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));

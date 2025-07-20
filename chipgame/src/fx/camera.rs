@@ -27,10 +27,9 @@ impl Camera {
 		let near = 10.0;
 		let far = 2000.0;
 		// let projection = Mat4::perspective(fov_y, aspect_ratio, near, far, (Hand::LH, Clip::NO));
-		// let half_height = 200.0;
-		// let projection = Mat4::ortho(-half_height * aspect_ratio, half_height * aspect_ratio, -half_height, half_height, near, far, (Hand::LH, Clip::NO));
 		let projection = Mat4::blend_ortho_perspective(self.blend, position.distance(self.target_fast), fov_y, aspect_ratio, near, far, (Hand::LH, Clip::NO));
 		let view_proj = projection * view;
+		let inv_view_proj = view_proj.inverse();
 		shade::d3::CameraSetup {
 			surface: shade::Surface::BACK_BUFFER,
 			viewport: Bounds2::vec(size),
@@ -41,13 +40,27 @@ impl Camera {
 			far,
 			projection,
 			view_proj,
-			inv_view_proj: view_proj.inverse(),
+			inv_view_proj,
 			clip: Clip::NO,
 		}
 	}
 }
 
 impl FxState {
+	pub fn init_camera(&mut self) {
+		self.camera.blend = 0.0;
+		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
+			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend.max(0.001) * 1.75).min(1.0), 200.0);
+			obj.lerp_pos + (16.0, 32.0 * 1.5, 0.0)
+		}
+		else {
+			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0, 400.0);
+			self.camera.target
+		};
+		self.camera.target_fast = ent_pos;
+		self.camera.target = ent_pos;
+	}
+
 	pub fn set_game_camera(&mut self, time: f32) {
 		self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
 
