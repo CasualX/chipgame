@@ -12,6 +12,7 @@ pub struct Camera {
 	pub eye_offset: Vec3<f32>,
 
 	pub blend: f32,
+	pub perspective: bool,
 }
 
 impl Camera {
@@ -27,7 +28,8 @@ impl Camera {
 		let near = 10.0;
 		let far = 2000.0;
 		// let projection = Mat4::perspective(fov_y, aspect_ratio, near, far, (Hand::LH, Clip::NO));
-		let projection = Mat4::blend_ortho_perspective(self.blend, position.distance(self.target_fast), fov_y, aspect_ratio, near, far, (Hand::LH, Clip::NO));
+		let focus_depth = position.distance(self.target_fast);
+		let projection = Mat4::blend_ortho_perspective(self.blend, focus_depth, fov_y, aspect_ratio, near, far, (Hand::LH, Clip::NO));
 		let view_proj = projection * view;
 		let inv_view_proj = view_proj.inverse();
 		shade::d3::CameraSetup {
@@ -62,7 +64,12 @@ impl FxState {
 	}
 
 	pub fn set_game_camera(&mut self, time: f32) {
-		self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
+		if self.camera.perspective {
+			self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
+		}
+		else {
+			self.camera.blend = 0.0;
+		}
 
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
 			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend.max(0.001) * 1.75).min(1.0), 200.0);

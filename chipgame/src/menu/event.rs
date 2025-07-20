@@ -26,6 +26,7 @@ pub enum MenuEvent {
 	SetBackgroundMusic { value: bool },
 	SetSoundEffects { value: bool },
 	SetDeveloperMode { value: bool },
+	SetPerspective { value: bool },
 
 	// Level select Events
 	UnlockLevel,

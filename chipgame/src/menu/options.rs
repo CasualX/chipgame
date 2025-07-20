@@ -6,10 +6,11 @@ pub struct OptionsMenu {
 	pub bg_music: bool,
 	pub sound_fx: bool,
 	pub dev_mode: bool,
+	pub perspective: bool,
 }
 
 impl OptionsMenu {
-	const ITEMS: [&'static str; 3] = ["Background music: ", "Sound effects: ", "Back"];
+	const ITEMS: [&'static str; 4] = ["Background music: ", "Sound effects: ", "Perspective: ", "Back"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -33,10 +34,10 @@ impl OptionsMenu {
 					self.sound_fx = !self.sound_fx;
 					MenuEvent::SetSoundEffects { value: self.sound_fx }
 				}
-				// 2 => {
-				// 	self.dev_mode = !self.dev_mode;
-				// 	if self.dev_mode { MenuEvent::DevModeOn } else { MenuEvent::DevModeOff }
-				// }
+				2 => {
+					self.perspective = !self.perspective;
+					MenuEvent::SetPerspective { value: self.perspective }
+				}
 				_ => MenuEvent::CloseMenu,
 			};
 			events.push(evt);
@@ -58,9 +59,10 @@ impl OptionsMenu {
 
 		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
 
-		let items: [&dyn fmt::Display; 3] = [
+		let items: [&dyn fmt::Display; 4] = [
 			&fmtools::fmt!("Background music: "{get_flag(self.bg_music)}),
 			&fmtools::fmt!("Sound effects: "{get_flag(self.sound_fx)}),
+			&fmtools::fmt!("Perspective: "{get_flag(self.perspective)}),
 			&"Back",
 		];
 

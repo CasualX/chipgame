@@ -190,10 +190,10 @@ impl EditorState {
 		});
 
 		if self.input.key_left {
-			self.game.camera.target.x -= 5.0;
+			self.game.camera.target.x -= 10.0;
 		}
 		if self.input.key_right {
-			self.game.camera.target.x += 5.0;
+			self.game.camera.target.x += 10.0;
 		}
 		if self.input.key_up {
 			self.game.camera.target.y -= 5.0;

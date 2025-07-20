@@ -23,6 +23,7 @@ pub struct SaveData {
 	pub bg_music: bool,
 	pub sound_fx: bool,
 	pub dev_mode: bool,
+	pub perspective: bool,
 }
 
 impl Default for SaveData {
@@ -39,6 +40,7 @@ impl Default for SaveData {
 			bg_music: true,
 			sound_fx: true,
 			dev_mode: false,
+			perspective: true,
 		}
 	}
 }
@@ -110,6 +112,7 @@ impl SaveData {
 				background_music: self.bg_music,
 				sound_effects: self.sound_fx,
 				developer_mode: self.dev_mode,
+				perspective: self.perspective,
 			},
 		};
 
@@ -158,6 +161,7 @@ impl SaveData {
 		self.bg_music = save_data.options.background_music;
 		self.sound_fx = save_data.options.sound_effects;
 		self.dev_mode = save_data.options.developer_mode;
+		self.perspective = save_data.options.perspective;
 
 		self.unlocked_levels.clear();
 		if level_pack.unlock_all_levels {
@@ -228,12 +232,18 @@ pub struct HighScoresDto {
 	pub attempts: HashMap<String, i32>,
 }
 
+fn default_true() -> bool {
+	true
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug)]
 pub struct OptionsDto {
 	pub background_music: bool,
 	pub sound_effects: bool,
 	pub developer_mode: bool,
+	#[serde(default = "default_true")]
+	pub perspective: bool,
 }
 
 impl Default for OptionsDto {
@@ -242,6 +252,7 @@ impl Default for OptionsDto {
 			background_music: true,
 			sound_effects: true,
 			developer_mode: false,
+			perspective: true,
 		}
 	}
 }

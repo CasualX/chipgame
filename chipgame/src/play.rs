@@ -96,6 +96,7 @@ impl PlayState {
 		fx.init();
 		fx.parse_level(level_number, lv_data);
 		fx.gs.ps.attempts = attempts;
+		fx.camera.perspective = self.save_data.perspective;
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::PlayLevel);
@@ -246,6 +247,7 @@ impl PlayState {
 						bg_music: self.save_data.bg_music,
 						sound_fx: self.save_data.sound_fx,
 						dev_mode: self.save_data.dev_mode,
+						perspective: self.save_data.perspective,
 					};
 					self.menu.stack.push(menu::Menu::Options(menu));
 				}
@@ -280,6 +282,15 @@ impl PlayState {
 					if self.save_data.dev_mode != value {
 						self.save_data.dev_mode = value;
 						self.save_data.save(&self.lvsets.current());
+					}
+				}
+				menu::MenuEvent::SetPerspective { value } => {
+					if self.save_data.perspective != value {
+						self.save_data.perspective = value;
+						self.save_data.save(&self.lvsets.current());
+						if let Some(fx) = &mut self.fx {
+							fx.camera.perspective = value;
+						}
 					}
 				}
 				menu::MenuEvent::CursorMove => {
