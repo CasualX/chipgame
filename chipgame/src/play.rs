@@ -155,10 +155,10 @@ impl PlayState {
 									fx.init();
 									fx.parse_level(level_number, lv_data);
 									fx.hud_enabled = false;
-									menu.level = Some(fx);
+									menu.preview = Some(fx);
 								}
 								else {
-									menu.level = None;
+									menu.preview = None;
 								}
 							}
 							_ => {}
@@ -166,12 +166,7 @@ impl PlayState {
 					}
 				}
 				menu::MenuEvent::LevelSelect => {
-					let mut menu = menu::LevelSelectMenu {
-						selected: 0,
-						offset: 0,
-						items: Vec::new(),
-						level: None,
-					};
+					let mut menu = menu::LevelSelectMenu::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));
 				}

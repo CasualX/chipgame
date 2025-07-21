@@ -10,8 +10,9 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 pub struct LevelSelectMenu {
 	pub selected: i32,
 	pub offset: i32,
+	pub offsetf: f32,
 	pub items: Vec<(i32, String)>,
-	pub level: Option<Box<crate::fx::FxState>>,
+	pub preview: Option<Box<crate::fx::FxState>>,
 }
 
 impl LevelSelectMenu {
@@ -20,8 +21,13 @@ impl LevelSelectMenu {
 		self.items.push((0, "Unlock level".to_string()));
 		for &level_number in &sd.unlocked_levels {
 			let Some(lv_info) = lp.lv_info.get((level_number - 1) as usize) else { continue };
+			if sd.current_level == level_number {
+				self.selected = self.items.len() as i32;
+			}
 			self.items.push((level_number, format!("Level {}: {}", level_number, lv_info.name)));
 		}
+		self.offset = clip_offset(self.selected - LEVELS_PER_PAGE / 2 + 1, self.items.len() as i32);
+		self.offsetf = self.offset as f32;
 	}
 
 	fn jump(&mut self, jump: i32, events: &mut Vec<MenuEvent>) {
@@ -69,7 +75,7 @@ impl LevelSelectMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		// Draw the level preview when available
-		if let Some(fx) = &mut self.level {
+		if let Some(fx) = &mut self.preview {
 			fx.draw(g, resx);
 			darken(g, resx, 168);
 		}
@@ -101,21 +107,38 @@ impl LevelSelectMenu {
 			..Default::default()
 		};
 
-		let mut y = size * 5.0;
-		for i in self.offset..i32::min(self.offset + LEVELS_PER_PAGE, self.items.len() as i32) {
-			let item = &self.items[i as usize];
-			let color = if i == self.selected { Vec4(255, 255, 255, 255) } else { Vec4(128, 128, 128, 255) };
-			scribe.color = color;
-			scribe.outline.w = 255;
-			if self.offset != 0 && i == self.offset {
-				scribe.color.w = 84;
-				scribe.outline.w = 84;
+		self.offsetf = Vec2(self.offsetf, 0.0).exp_decay(Vec2(self.offset as f32, 0.0), 15.0, 1.0 / 60.0).x;
+
+		let mut y = size * 5.0 - self.offsetf * scribe.line_height;
+		let top_transparent = size * 5.0 - scribe.line_height * 1.5;
+		let top_opaque = size * 5.0;
+		let bottom_opaque = top_opaque + (LEVELS_PER_PAGE - 1) as f32 * scribe.line_height;
+		let bottom_transparent = bottom_opaque + scribe.line_height * 1.5;
+
+		for i in 0..self.items.len() as i32 {
+			if y < top_transparent {
+				y += scribe.line_height;
+				continue;
 			}
-			if self.offset != self.items.len() as i32 - LEVELS_PER_PAGE && i == self.offset + LEVELS_PER_PAGE - 1 {
-				scribe.color.w = 84;
-				scribe.outline.w = 84;
+			else if y > bottom_transparent {
+				break;
 			}
 
+			let alpha = if y < top_opaque {
+				(y - top_transparent) / (top_opaque - top_transparent)
+			}
+			else if y > bottom_opaque {
+				(bottom_transparent - y) / (bottom_transparent - bottom_opaque)
+			}
+			else {
+				1.0
+			};
+			let alpha = (f32::clamp(alpha, 0.0, 1.0) * 255.0) as u8;
+			let color = if i == self.selected { 255 } else { 128 };
+			scribe.color = Vec4(color, color, color, alpha);
+			scribe.outline.w = alpha;
+
+			let item = &self.items[i as usize];
 			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.25, y));
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.1);
 
