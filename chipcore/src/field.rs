@@ -74,6 +74,9 @@ impl Field {
 		let index = (y * self.width + x) as usize;
 		let ptr = self.terrain.get_mut(index)?;
 		let old = *ptr;
+		if old == terrain {
+			return None;
+		}
 		*ptr = terrain;
 		Some(old)
 	}

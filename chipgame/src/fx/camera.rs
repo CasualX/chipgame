@@ -52,8 +52,8 @@ impl FxState {
 	pub fn init_camera(&mut self) {
 		self.camera.blend = 0.0;
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
-			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend.max(0.001) * 1.75).min(1.0), 200.0);
-			obj.lerp_pos + (16.0, 32.0 * 1.5, 0.0)
+			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend * 1.75).min(1.0), 200.0);
+			obj.lerp_pos + Vec3(16.0, 16.0 + 32.0 * self.camera.blend, 0.0)
 		}
 		else {
 			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0, 400.0);
@@ -73,7 +73,7 @@ impl FxState {
 
 		let ent_pos = if let Some(obj) = self.camera.object_h.and_then(|h| self.objects.get(h)) {
 			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0 * (self.camera.blend.max(0.001) * 1.75).min(1.0), 200.0);
-			obj.lerp_pos + (16.0, 32.0 * 1.5, 0.0)
+			obj.lerp_pos + Vec3(16.0, 16.0 + 32.0 * self.camera.blend, 0.0)
 		}
 		else {
 			self.camera.eye_offset = Vec3::new(0.0, 1.0 * 32.0, 400.0);

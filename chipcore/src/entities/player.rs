@@ -53,7 +53,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
 			ps_activity(s, PlayerActivity::Drowned);
-			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
+			// s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			return;
 		}
 		if matches!(terrain, Terrain::Exit) {
@@ -71,7 +71,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 
 	let activity = match terrain {
-		Terrain::Water => PlayerActivity::Swimming,
+		Terrain::Water => {
+			if !matches!(s.ps.activity, PlayerActivity::Swimming) {
+				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
+			}
+			PlayerActivity::Swimming
+		},
 		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => if s.ps.ice_skates { PlayerActivity::Skating } else { PlayerActivity::Sliding },
 		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => if s.ps.suction_boots { PlayerActivity::Suction } else { PlayerActivity::Sliding },
 		_ => PlayerActivity::Walking,

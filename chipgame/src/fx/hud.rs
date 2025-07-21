@@ -206,9 +206,9 @@ fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, sprite: dat
 
 fn draw_digits(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
 	if n < 0 {
-		draw_digit(cv, None, pos + (0.0, 0.0), color);
-		draw_digit(cv, None, pos + (17.0, 0.0), color);
-		draw_digit(cv, None, pos + (34.0, 0.0), color);
+		draw_digit(cv, None, pos + Vec2(0.0, 0.0), color);
+		draw_digit(cv, None, pos + Vec2(17.0, 0.0), color);
+		draw_digit(cv, None, pos + Vec2(34.0, 0.0), color);
 	}
 	else {
 		let d1 = n % 10;
@@ -219,9 +219,9 @@ fn draw_digits(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, n: i32, pos
 		let d2 = if d2 > 0 || d3.is_some() { Some((d2 as u8 + b'0') as char) } else { None };
 		let d1 = Some((d1 as u8 + b'0') as char);
 
-		draw_digit(cv, d3, pos + (0.0, 0.0), color);
-		draw_digit(cv, d2, pos + (17.0, 0.0), color);
-		draw_digit(cv, d1, pos + (34.0, 0.0), color);
+		draw_digit(cv, d3, pos + Vec2(0.0, 0.0), color);
+		draw_digit(cv, d2, pos + Vec2(17.0, 0.0), color);
+		draw_digit(cv, d1, pos + Vec2(34.0, 0.0), color);
 	}
 }
 
