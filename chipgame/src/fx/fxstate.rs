@@ -45,7 +45,6 @@ impl FxState {
 	pub fn parse_level(&mut self, level_number: i32, json: &str) {
 		self.objects.clear();
 		self.gs.parse(json, core::RngSeed::System);
-		self.sync();
 
 		for y in 0..self.gs.field.height {
 			for x in 0..self.gs.field.width {
@@ -59,6 +58,8 @@ impl FxState {
 				}
 			}
 		}
+
+		self.sync();
 
 		self.hud_enabled = true;
 		self.level_number = level_number;
@@ -128,6 +129,7 @@ impl FxState {
 				&core::GameEvent::PlayerActivity { player } => player_activity(self, player),
 				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
 				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
+				&core::GameEvent::FireHidden { pos, hidden } => fire_hidden(self, pos, hidden),
 				&core::GameEvent::TerrainUpdated { pos, old, new } => {
 					let mut tw = false;
 					match (old, new) {
@@ -183,7 +185,7 @@ impl FxState {
 			cv.shader = resx.shader;
 			cv.uniform.transform = camera.view_proj;
 			cv.uniform.texture = resx.tileset;
-			render::field(&mut cv, self, time, self.camera.blend);
+			render::field(&mut cv, self, time, 1.0);
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 

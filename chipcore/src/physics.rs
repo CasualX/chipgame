@@ -274,8 +274,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 			EntityKind::Block => {
 				if is_player && try_move(s, &mut ent, step_dir) {
-					s.update_hidden_flag(ent.pos);
-					s.update_hidden_flag(ent.pos - step_dir.to_vec());
+					s.update_hidden_flag(ent.pos, true);
+					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					false
@@ -359,8 +359,8 @@ fn flick(s: &mut GameState, &new_pos: &Vec2i, step_dir: Compass) {
 
 		if matches!(ent.kind, EntityKind::Block) {
 			if try_move(s, &mut ent, step_dir) {
-				s.update_hidden_flag(ent.pos);
-				s.update_hidden_flag(ent.pos - step_dir.to_vec());
+				s.update_hidden_flag(ent.pos, true);
+				s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
@@ -390,8 +390,8 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 
 		if matches!(ent.kind, EntityKind::Block) {
 			if try_move(s, &mut ent, slap_dir) {
-				s.update_hidden_flag(ent.pos);
-				s.update_hidden_flag(ent.pos - slap_dir.to_vec());
+				s.update_hidden_flag(ent.pos, true);
+				s.update_hidden_flag(ent.pos - slap_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}

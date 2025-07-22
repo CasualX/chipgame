@@ -86,8 +86,11 @@ impl GameState {
 		}
 
 		for ehandle in self.ents.handles() {
-			if let Some(ent) = self.ents.get(ehandle) {
-				self.update_hidden_flag(ent.pos);
+			if let Some(ent) = self.ents.take(ehandle) {
+				if matches!(ent.kind, EntityKind::Block) {
+					self.update_hidden_flag(ent.pos, true);
+				}
+				self.ents.put(ent);
 			}
 		}
 
@@ -228,27 +231,12 @@ impl GameState {
 		matches!(terrain, Terrain::Hint)
 	}
 
-	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i) {
+	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i, hidden: bool) {
 		let s = self;
-
-		// Hide all template entities on clone machines
-		let hide_all = matches!(s.field.get_terrain(pos), Terrain::CloneMachine);
-
-		let mut hidden = hide_all;
-		if !hidden {
-			for ehandle in s.qt.get(pos) {
-				if let Some(ent) = s.ents.get(ehandle) {
-					if matches!(ent.kind, EntityKind::Block) {
-						hidden = true;
-						break;
-					}
-				}
-			}
-		}
 
 		for ehandle in s.qt.get(pos) {
 			if let Some(ent) = s.ents.get_mut(ehandle) {
-				if !hide_all && matches!(ent.kind, EntityKind::Block) {
+				if matches!(ent.kind, EntityKind::Block | EntityKind::Bomb) {
 					continue;
 				}
 				if (ent.flags & EF_HIDDEN != 0) != hidden {
@@ -256,6 +244,11 @@ impl GameState {
 					s.events.fire(GameEvent::EntityHidden { entity: ent.handle, hidden });
 				}
 			}
+		}
+
+		let terrain = s.field.get_terrain(pos);
+		if matches!(terrain, Terrain::Fire) {
+			s.events.fire(GameEvent::FireHidden { pos, hidden });
 		}
 	}
 

@@ -105,6 +105,13 @@ pub fn entity_hidden(ctx: &mut FxState, ehandle: core::EntityHandle, hidden: boo
 	obj.vis = !hidden;
 }
 
+pub fn fire_hidden(ctx: &mut FxState, pos: Vec2i, hidden: bool) {
+	let Some(obj) = ctx.objects.map.values_mut().find(|obj| {
+		obj.sprite == data::SpriteId::Fire && (obj.pos.xy() + Vec2(0.0, 2.0)).map(|c| (c / 32.0).round() as i32) == pos
+	}) else { return };
+	obj.vis = !hidden;
+}
+
 pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {

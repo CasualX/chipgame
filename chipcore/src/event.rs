@@ -42,6 +42,7 @@ pub enum GameEvent {
 	PlayerBump { player: PlayerIndex },
 	BlockPush { entity: EntityHandle },
 	ItemPickup { entity: EntityHandle, item: ItemPickup },
+	FireHidden { pos: Vec2i, hidden: bool },
 	BombExplode { pos: Vec2i },
 	WaterSplash { pos: Vec2i },
 	Fireworks { pos: Vec2i },

@@ -150,16 +150,7 @@ impl PlayState {
 					for menu in &mut self.menu.stack {
 						match menu {
 							menu::Menu::LevelSelect(menu) => {
-								if let Some(lv_data) = self.lvsets.current().lv_data.get((level_number - 1) as usize) {
-									let mut fx = Box::new(crate::fx::FxState::default());
-									fx.init();
-									fx.parse_level(level_number, lv_data);
-									fx.hud_enabled = false;
-									menu.preview = Some(fx);
-								}
-								else {
-									menu.preview = None;
-								}
+								load_preview(&mut menu.preview, self.lvsets.current(), level_number);
 							}
 							_ => {}
 						}
@@ -168,6 +159,7 @@ impl PlayState {
 				menu::MenuEvent::LevelSelect => {
 					let mut menu = menu::LevelSelectMenu::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);
+					load_preview(&mut menu.preview, self.lvsets.current(), self.save_data.current_level);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));
 				}
 				menu::MenuEvent::UnlockLevel => {
@@ -390,5 +382,18 @@ impl PlayState {
 		}
 		self.menu.draw(g, resx);
 	}
-
 }
+
+fn load_preview(field: &mut Option<Box<fx::FxState>>, lvset: &LevelSet, level_number: i32) {
+	if let Some(lv_data) = lvset.lv_data.get((level_number - 1) as usize) {
+		let mut fx = Box::new(crate::fx::FxState::default());
+		fx.init();
+		fx.parse_level(level_number, lv_data);
+		fx.hud_enabled = false;
+		*field = Some(fx);
+	}
+	else {
+		*field = None;
+	}
+}
+
