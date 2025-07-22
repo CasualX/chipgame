@@ -190,10 +190,10 @@ impl EditorState {
 		});
 
 		if self.input.key_left {
-			self.game.camera.target.x -= 10.0;
+			self.game.camera.target.x -= 5.0;
 		}
 		if self.input.key_right {
-			self.game.camera.target.x += 10.0;
+			self.game.camera.target.x += 5.0;
 		}
 		if self.input.key_up {
 			self.game.camera.target.y -= 5.0;
@@ -213,8 +213,8 @@ impl EditorState {
 			}
 		}
 
-		self.game.camera.eye_offset = Vec3::<f32>(0.0, 8.0 * 32.0, 400.0) * 2.0;
-		self.game.camera.object_h = None;
+		self.game.camera.offset = Vec3f(0.0, 8.0 * 32.0, 400.0);
+		self.game.camera.object = None;
 
 		self.game.draw(g, resx);
 

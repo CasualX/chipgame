@@ -46,7 +46,6 @@ impl FxState {
 		self.objects.clear();
 		self.gs.parse(json, core::RngSeed::System);
 		self.sync();
-		self.camera.eye_offset = Vec3::new(0.0, 2.0 * 32.0, 400.0);
 
 		for y in 0..self.gs.field.height {
 			for x in 0..self.gs.field.width {
@@ -172,7 +171,7 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.set_game_camera(self.gs.time as f32 / 60.0);
+		self.update_camera(self.gs.time as f32 / 60.0);
 
 		let camera = self.camera.setup(resx.viewport.size());
 

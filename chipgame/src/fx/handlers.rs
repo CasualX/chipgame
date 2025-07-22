@@ -19,8 +19,8 @@ pub fn entity_created(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core
 		unalive_after_anim: false,
 	};
 	if matches!(kind, core::EntityKind::Player) {
-		ctx.camera.object_h = Some(handle);
-		ctx.camera.target = obj.pos;
+		ctx.camera.object = Some(handle);
+		ctx.camera.target_slow = obj.pos;
 		ctx.camera.target_fast = obj.pos;
 	}
 	ctx.objects.insert(obj);
