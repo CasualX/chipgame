@@ -1,6 +1,4 @@
-use std::mem;
-use std::path;
-use std::fs;
+use std::{mem, path, fs};
 
 use super::*;
 
@@ -209,9 +207,8 @@ impl PlayState {
 					if let Some(fx) = &self.fx {
 						let replay = fx.gs.save_replay(fx.gs_realtime);
 						let record = serde_json::to_string_pretty(&replay).unwrap();
-						if let Err(err) = std::fs::write(format!("save/{}/replay/level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts), record) {
-							eprintln!("Error saving replay: {}", err);
-						}
+						let path = format!("save/{}/replay/level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts);
+						write_save(path::Path::new(&path), &record);
 					}
 				}
 				menu::MenuEvent::About => {
@@ -381,6 +378,13 @@ impl PlayState {
 			menu::darken(g, resx, 168);
 		}
 		self.menu.draw(g, resx);
+	}
+}
+
+fn write_save(path: &path::Path, record: &str) {
+	let _ = fs::create_dir(path.parent().unwrap_or(path));
+	if let Err(err) = fs::write(path, record) {
+		eprintln!("Error saving replay: {}", err);
 	}
 }
 

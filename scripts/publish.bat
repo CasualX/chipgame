@@ -14,13 +14,13 @@ copy target\release\chipedit.exe target\publish
 
 rem Copy the assets to the publish dir
 xcopy data target\publish\data /E /Y /I /Q
-xcopy levelsets\cc1 target\publish\levelsets\cc1 /E /Y /I /Q
+rem xcopy levelsets\cc1 target\publish\levelsets\cc1 /E /Y /I /Q
 xcopy levelsets\cclp1 target\publish\levelsets\cclp1 /E /Y /I /Q
+xcopy levelsets\cclp3 target\publish\levelsets\cclp3 /E /Y /I /Q
+xcopy levelsets\cclp4 target\publish\levelsets\cclp4 /E /Y /I /Q
+xcopy levelsets\cclp5 target\publish\levelsets\cclp5 /E /Y /I /Q
 makurust levelsets\readme.md
 move levelsets\readme.html target\publish\levelsets\readme.html
 
 makurust chipgame.md
 move chipgame.html target\publish\readme.html
-
-rem Create folders for the save and replay files
-mkdir target\publish\save\replay

@@ -8,8 +8,12 @@ Levelsets
 
 When the game is started, the player is presented with a menu to select a levelset to play.
 
-* [Chip's Challenge](https://wiki.bitbusters.club/Chip%27s_Challenge): Play the original levels from the game for the feeling of nostalgia.
-* [Chip's Challenge Level Pack 1](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_1): Play this first if you're a newcomer to the game.
+Start by playing Chip's Challenge Level Pack 1, it is designed specifically for beginners to learn and experience the basics of the game before moving on to more challenging levelsets.
+
+* [Chip's Challenge Level Pack 1](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_1)
+* [Chip's Challenge Level Pack 3](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_3)
+* [Chip's Challenge Level Pack 4](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_4)
+* [Chip's Challenge Level Pack 5](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_5)
 
 Additional levelsets can be installed in the `levelsets` directory.
 

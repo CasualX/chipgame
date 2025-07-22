@@ -143,9 +143,9 @@ impl SaveData {
 			}
 			self.completed_levels.clear();
 			self.high_scores.ticks.clear();
-			self.high_scores.ticks.resize(level_pack.lv_info.len(), i32::MAX);
+			self.high_scores.ticks.resize(level_pack.lv_info.len(), -1);
 			self.high_scores.steps.clear();
-			self.high_scores.steps.resize(level_pack.lv_info.len(), i32::MAX);
+			self.high_scores.steps.resize(level_pack.lv_info.len(), -1);
 			self.high_scores.attempts.clear();
 			self.high_scores.attempts.resize(level_pack.lv_info.len(), 0);
 			return;
