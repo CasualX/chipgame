@@ -24,6 +24,7 @@ pub struct SaveData {
 	pub sound_fx: bool,
 	pub dev_mode: bool,
 	pub perspective: bool,
+	pub auto_save_replay: bool,
 }
 
 impl Default for SaveData {
@@ -41,6 +42,7 @@ impl Default for SaveData {
 			sound_fx: true,
 			dev_mode: false,
 			perspective: true,
+			auto_save_replay: false,
 		}
 	}
 }
@@ -92,6 +94,18 @@ impl SaveData {
 		*attempts_entry
 	}
 
+	pub fn is_time_high_score(&self, level_number: i32, time: i32) -> bool {
+		let level_index = (level_number - 1) as usize;
+		let Some(ticks_entry) = self.high_scores.ticks.get(level_index) else { return false };
+		return *ticks_entry < 0 || *ticks_entry > time;
+	}
+
+	pub fn is_steps_high_score(&self, level_number: i32, steps: i32) -> bool {
+		let level_index = (level_number - 1) as usize;
+		let Some(steps_entry) = self.high_scores.steps.get(level_index) else { return false };
+		return *steps_entry < 0 || *steps_entry > steps;
+	}
+
 	pub fn save(&mut self, level_pack: &LevelSet) {
 		let file_name = get_levelset_state_filename(level_pack);
 
@@ -113,6 +127,7 @@ impl SaveData {
 				sound_effects: self.sound_fx,
 				developer_mode: self.dev_mode,
 				perspective: self.perspective,
+				auto_save_replay: self.auto_save_replay,
 			},
 		};
 
@@ -162,6 +177,7 @@ impl SaveData {
 		self.sound_fx = save_data.options.sound_effects;
 		self.dev_mode = save_data.options.developer_mode;
 		self.perspective = save_data.options.perspective;
+		self.auto_save_replay = save_data.options.auto_save_replay;
 
 		self.unlocked_levels.clear();
 		if level_pack.unlock_all_levels {
@@ -244,6 +260,8 @@ pub struct OptionsDto {
 	pub developer_mode: bool,
 	#[serde(default = "default_true")]
 	pub perspective: bool,
+	#[serde(default)]
+	pub auto_save_replay: bool,
 }
 
 impl Default for OptionsDto {
@@ -253,6 +271,7 @@ impl Default for OptionsDto {
 			sound_effects: true,
 			developer_mode: false,
 			perspective: true,
+			auto_save_replay: false,
 		}
 	}
 }

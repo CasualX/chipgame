@@ -205,10 +205,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::SaveReplay => {
 					if let Some(fx) = &self.fx {
-						let replay = fx.gs.save_replay(fx.gs_realtime);
-						let record = serde_json::to_string_pretty(&replay).unwrap();
-						let path = format!("save/{}/replay/level{}.attempt{}.json", self.lvsets.current().name, fx.level_number, fx.gs.ps.attempts);
-						write_save(path::Path::new(&path), &record);
+						save_replay(self.lvsets.current(), fx);
 					}
 				}
 				menu::MenuEvent::About => {
@@ -326,8 +323,16 @@ impl PlayState {
 							steps: fx.gs.ps.steps,
 							// attempts: fx.gs.ps.attempts,
 						};
+						let time_high_score = self.save_data.is_time_high_score(fx.level_number, scores.ticks);
+						let steps_high_score = self.save_data.is_steps_high_score(fx.level_number, scores.steps);
+						if time_high_score || steps_high_score {
+							self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::GameWin });
+						}
 						self.save_data.complete_level(fx.level_number, scores);
 						self.save_data.save(&self.lvsets.current());
+						if self.save_data.auto_save_replay {
+							save_replay(self.lvsets.current(), fx);
+						}
 
 						let menu = menu::GameWinMenu {
 							selected: 0,
@@ -337,8 +342,9 @@ impl PlayState {
 							time: fx.gs.time,
 							steps: fx.gs.ps.steps,
 							bonks: fx.gs.ps.bonks,
-							time_high_score: false,
-							steps_high_score: false,
+							time_high_score,
+							steps_high_score,
+							..Default::default()
 						};
 						self.menu.stack.push(menu::Menu::GameWin(menu));
 					}
@@ -361,7 +367,7 @@ impl PlayState {
 		}
 	}
 
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
 		// Clear the screen
 		g.clear(&shade::ClearArgs {
 			surface: shade::Surface::BACK_BUFFER,
@@ -377,11 +383,18 @@ impl PlayState {
 		if self.fx.is_some() && !self.menu.stack.is_empty() {
 			menu::darken(g, resx, 168);
 		}
-		self.menu.draw(g, resx);
+		self.menu.draw(g, resx, time);
 	}
 }
 
-fn write_save(path: &path::Path, record: &str) {
+fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
+	let replay = fx.gs.save_replay(fx.gs_realtime);
+	let record = serde_json::to_string_pretty(&replay).unwrap();
+	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.gs.ps.attempts);
+	write_replay(path::Path::new(&path), &record);
+}
+
+fn write_replay(path: &path::Path, record: &str) {
 	let _ = fs::create_dir(path.parent().unwrap_or(path));
 	if let Err(err) = fs::write(path, record) {
 		eprintln!("Error saving replay: {}", err);

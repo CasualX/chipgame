@@ -88,11 +88,11 @@ impl Menu {
 			Menu::About(menu) => menu.think(input, events),
 		}
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
 		match self {
 			Menu::PackSelect(menu) => menu.draw(g, resx),
 			Menu::Main(menu) => menu.draw(g, resx),
-			Menu::GameWin(menu) => menu.draw(g, resx),
+			Menu::GameWin(menu) => menu.draw(g, resx, time),
 			Menu::GameOver(menu) => menu.draw(g, resx),
 			Menu::Pause(menu) => menu.draw(g, resx),
 			Menu::Options(menu) => menu.draw(g, resx),
@@ -115,9 +115,9 @@ impl MenuState {
 			menu.think(input, &mut self.events);
 		}
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
 		if let Some(menu) = self.stack.last_mut() {
-			menu.draw(g, resx);
+			menu.draw(g, resx, time);
 		}
 	}
 	pub fn close_all(&mut self) {

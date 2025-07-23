@@ -1,6 +1,57 @@
 use super::*;
 
 #[derive(Default)]
+pub struct Fireworks {
+	time_start: f64,
+	pos: Vec2f,
+}
+impl Fireworks {
+	fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64, rc: Bounds2f) {
+		let mut rng = urandom::new();
+
+		if self.time_start == 0.0 {
+			self.time_start = time - rng.range(0.0..1.0);
+		}
+
+		if time >= self.time_start + 1.0 {
+			self.time_start = time;
+			self.pos.x = rng.range(rc.left()..rc.right()).round();
+			self.pos.y = rng.range(rc.top()..rc.bottom()).round();
+		}
+
+		let atime = time - self.time_start;
+		if atime < 1.0 {
+			// 12 frames of animation
+			let t = f64::clamp(atime, 0.0, 1.0) as f32;
+			let aindex = f32::floor(t * 13.0).min(12.0);
+
+			let d_size = 96.0;
+			let u = aindex * d_size;
+			let v = d_size * 2.0;
+			let texsize = Vec2f(1152.0, 288.0);
+
+			let mut buf = shade::d2::DrawBuilder::<UiVertex, UiUniform>::new();
+			buf.blend_mode = shade::BlendMode::Alpha;
+			buf.viewport = resx.viewport;
+			buf.shader = resx.uishader;
+			buf.uniform.transform = Transform2f::ortho(resx.viewport.cast());
+			buf.uniform.texture = resx.effects;
+			let rc = Bounds2f::point(self.pos, Vec2f(d_size, d_size) * 0.5);
+			let color = [255; 4];
+			let sprite = shade::d2::Sprite {
+				bottom_left: UiVertex { pos: Vec2f::ZERO, uv: Vec2f(u, v + d_size) / texsize, color },
+				top_left: UiVertex { pos: Vec2f::ZERO, uv: Vec2f(u, v) / texsize, color },
+				top_right: UiVertex { pos: Vec2f::ZERO, uv: Vec2f(u + d_size, v) / texsize, color },
+				bottom_right: UiVertex { pos: Vec2f::ZERO, uv: Vec2f(u + d_size, v + d_size) / texsize, color },
+			};
+			buf.sprite_rect(&sprite, &rc);
+			buf.draw(g, shade::Surface::BACK_BUFFER);
+		}
+
+	}
+}
+
+#[derive(Default)]
 pub struct GameWinMenu {
 	pub selected: u8,
 	pub level_number: i32,
@@ -11,6 +62,8 @@ pub struct GameWinMenu {
 	pub bonks: i32,
 	pub time_high_score: bool,
 	pub steps_high_score: bool,
+	pub time_fireworks: Fireworks,
+	pub steps_fireworks: Fireworks,
 }
 
 impl GameWinMenu {
@@ -39,7 +92,7 @@ impl GameWinMenu {
 			events.push(MenuEvent::CursorSelect);
 		}
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
@@ -72,5 +125,17 @@ impl GameWinMenu {
 		}.draw(&mut buf, &bottom, resx);
 
 		buf.draw(g, shade::Surface::BACK_BUFFER);
+
+		let size = resx.viewport.height() as f32 * FONT_SIZE;
+		if self.time_high_score {
+			let mins = Vec2f(middle.right() - size * 3.0, middle.center().y - size);
+			let maxs = Vec2f(middle.right(), middle.center().y);
+			self.time_fireworks.draw(g, resx, time, Bounds2f(mins, maxs));
+		}
+		if self.steps_high_score {
+			let mins = Vec2f(middle.right() - size, middle.center().y);
+			let maxs = Vec2f(middle.right(), middle.center().y + size);
+			self.steps_fireworks.draw(g, resx, time, Bounds2f(mins, maxs));
+		}
 	}
 }

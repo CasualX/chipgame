@@ -98,7 +98,7 @@ impl LevelSelectMenu {
 			..Default::default()
 		};
 
-		let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.5, size * 1.5));
+		let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.5, size * 1.5), Vec2::ZERO);
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, "Go to level");
 
 		let mut scribe = shade::d2::Scribe {
@@ -139,7 +139,7 @@ impl LevelSelectMenu {
 			scribe.outline.w = alpha;
 
 			let item = &self.items[i as usize];
-			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.25, y));
+			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.25, y), Vec2::ZERO);
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.1);
 
 			y += scribe.line_height;

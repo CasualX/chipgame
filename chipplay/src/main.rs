@@ -198,6 +198,8 @@ fn main() {
 
 	let mut kbd_input = chipcore::Input::default();
 
+	let time_base = time::Instant::now();
+
 	// Main loop
 	let mut quit = false;
 	while !quit {
@@ -259,7 +261,8 @@ fn main() {
 		state.think(&input);
 
 		g.begin();
-		state.draw(&mut g, &resx);
+		let time = time_base.elapsed().as_secs_f64();
+		state.draw(&mut g, &resx, time);
 		g.end();
 
 		for evt in &mem::replace(&mut state.events, Vec::new()) {
