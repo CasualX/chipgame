@@ -87,7 +87,7 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	let viewport = cvmath::Bounds(cvmath::Vec2::ZERO, cvmath::Vec2(size.width as i32, size.height as i32));
+	let viewport = cvmath::Bounds2(cvmath::Vec2::ZERO, cvmath::Vec2(size.width as i32, size.height as i32));
 	let mut resx = chipgame::fx::Resources {
 		effects,
 		tileset,

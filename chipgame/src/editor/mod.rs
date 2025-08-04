@@ -157,10 +157,9 @@ impl EditorState {
 		let cam = self.game.camera.setup(self.screen_size);
 		let ray = cam.viewport_to_ray(Vec2(mouse_x, mouse_y));
 
-		let plane = Plane::new(Vec3::Z, 0.0);
-		let mut hits = [TraceHit::default(); 2];
-		if ray.trace(&plane, &mut hits) > 0 {
-			self.mouse_pos = ray.at(hits[0].distance);
+		let plane = Plane3::new(Vec3::Z, 0.0);
+		if let Some(hit) = ray.trace(&plane) {
+			self.mouse_pos = ray.at(hit.distance);
 			self.cursor_pos = self.mouse_pos.xy().map(|c| (c / 32.0).floor() as i32);
 		}
 		else {

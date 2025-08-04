@@ -177,7 +177,7 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	let viewport = shade::cvmath::Bounds(
+	let viewport = shade::cvmath::Bounds2(
 		shade::cvmath::Vec2::ZERO,
 		shade::cvmath::Vec2(size.width as i32, size.height as i32),
 	);
