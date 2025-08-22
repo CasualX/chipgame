@@ -20,7 +20,7 @@ ini_core = "0.2"
 
 clap = { version = "3.2", features = ["cargo"] }
 
-cvmath = { git = "https://github.com/CasualX/cvmath", features=["serde", "dataview"] }
+cvmath = { version = "0.0.5", features=["serde", "dataview"] }
 fmtools = "0.1"
 
 urandom = "0.2"
@@ -28,4 +28,4 @@ urandom = "0.2"
 flate2 = "1.0"
 basenc = "0.2"
 
-shade = { git = "https://github.com/CasualX/shade", features = ["gl", "msdfgen", "png", "gif"] }
+shade = { version = "0.0.3", features = ["gl", "msdfgen", "png", "gif"] }
