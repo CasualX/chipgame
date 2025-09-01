@@ -137,7 +137,7 @@ impl SaveData {
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
 		match std::fs::write(&file_name, content) {
 			Ok(_) => {}
-			Err(e) => eprintln!("Error saving file: {}", e),
+			Err(e) => eprintln!("Error saving {}: {}", file_name, e),
 		}
 	}
 

@@ -70,7 +70,20 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 			Ok(entry) => {
 				let path = entry.path();
 				if path.is_dir() {
-					load_levelset(&path, packs);
+					let fs = FileSystem::StdFs(path.clone());
+					load_levelset_pak(&fs, packs);
+				}
+				// Check for .paks files and if a folder by that name does not exist
+				if path.is_file() && path.extension().map_or(false, |ext| ext == "paks") && !path.with_extension("").exists() {
+					match paks::FileReader::open(&path, &paks::Key::default()) {
+						Ok(paks) => {
+							let fs = FileSystem::Paks(paks);
+							load_levelset_pak(&fs, packs);
+						},
+						Err(err) => {
+							eprintln!("Error reading {}: {}", path.display(), err);
+						}
+					};
 				}
 			}
 			Err(err) => {
@@ -81,32 +94,31 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 	packs.sort_by(|a, b| a.name.cmp(&b.name));
 }
 
-fn load_levelset(path: &path::Path, packs: &mut Vec<LevelSet>) {
-	let index_path = path.join("index.json");
-	let json = match fs::read_to_string(&index_path) {
-		Ok(json) => json,
-		Err(err) => {
-			eprintln!("Error reading {}: {}", index_path.display(), err);
-			return;
-		}
-	};
-
-	let pack: LevelSetDto = match serde_json::from_str(&json) {
-		Ok(pack) => pack,
-		Err(err) => {
-			eprintln!("Error parsing {}: {}", index_path.display(), err);
-			return;
+fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
+	let index: LevelSetDto = {
+		let index = match fs.read("index.json") {
+			Ok(data) => data,
+			Err(err) => {
+				eprintln!("Error reading index.json: {}", err);
+				return;
+			}
+		};
+		match serde_json::from_slice(&index) {
+			Ok(pack) => pack,
+			Err(err) => {
+				eprintln!("Error parsing index.json: {}", err);
+				return;
+			}
 		}
 	};
 
 	let mut lv_info = Vec::new();
 	let mut lv_data = Vec::new();
-	for level in &pack.levels {
-		let level_path = path.join(level);
-		let s = match fs::read_to_string(&level_path) {
-			Ok(s) => s,
+	for level_path in &index.levels {
+		let s = match fs.read_to_string(level_path) {
+			Ok(data) => data,
 			Err(err) => {
-				eprintln!("Error reading {}: {}", level_path.display(), err);
+				eprintln!("Error reading {level_path}: {}", err);
 				continue;
 			}
 		};
@@ -114,7 +126,7 @@ fn load_levelset(path: &path::Path, packs: &mut Vec<LevelSet>) {
 		let ld: LevelData = match serde_json::from_str(&s) {
 			Ok(ld) => ld,
 			Err(err) => {
-				eprintln!("Error parsing {}: {}", level_path.display(), err);
+				eprintln!("Error parsing {level_path}: {}", err);
 				continue;
 			}
 		};
@@ -123,14 +135,17 @@ fn load_levelset(path: &path::Path, packs: &mut Vec<LevelSet>) {
 		lv_data.push(s);
 	}
 
-	let splash = pack.splash.map(|s| path.join(s));
+	let splash = index.splash.map(|s| match fs {
+		FileSystem::StdFs(path) => path.join(s),
+		FileSystem::Paks(_) => PathBuf::from(s),// This is wrong, load the splash image here... Or pass the FS through everywhere
+	});
 
 	packs.push(LevelSet {
-		name: pack.name,
-		title: pack.title,
-		about: pack.about.map(|lines| lines.join("\n")),
+		name: index.name,
+		title: index.title,
+		about: index.about.map(|lines| lines.join("\n")),
 		splash,
-		unlock_all_levels: pack.unlock_all_levels,
+		unlock_all_levels: index.unlock_all_levels,
 		lv_data,
 		lv_info,
 	});

@@ -3,6 +3,7 @@
 use std::{fs, thread, time};
 
 use chipgame::editor;
+use chipgame::FileSystem;
 
 #[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
@@ -19,7 +20,26 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 		.with_inner_size(size)
 }
 
+fn load_png(
+	g: &mut shade::Graphics,
+	name: Option<&str>,
+	fs: &FileSystem,
+	path: &str,
+	props: &shade::image::TextureProps,
+	transform: Option<&mut dyn FnMut(&mut Vec<u8>, &mut shade::image::ImageSize)>,
+) -> Result<shade::Texture2D, shade::image::png::LoadError> {
+	let data = fs.read(path).expect("Failed to read PNG file");
+	shade::image::png::load(g, name, &mut &data[..], props, transform)
+}
+
 fn main() {
+	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &paks::Key::default()) {
+		FileSystem::Paks(paks)
+	}
+	else {
+		FileSystem::StdFs(std::path::PathBuf::from("data"))
+	};
+
 	let app = clap::command!("play")
 		.arg(clap::arg!(<level> "Level file to play"));
 	let matches = app.get_matches();
@@ -42,7 +62,7 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = shade::image::png::load_file(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::image::TextureProps {
+	let tileset = load_png(&mut g, Some("scene tiles"), &fs, "Color_Tileset.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -50,14 +70,14 @@ fn main() {
 	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset);
 
-	let effects = shade::image::png::load_file(&mut g, Some("effects"), "data/effects.png", &shade::image::TextureProps {
+	let effects = load_png(&mut g, Some("effects"), &fs, "effects.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
 		wrap_v: shade::TextureWrap::ClampEdge,
 	}, None).unwrap();
 
-	let texdigits = shade::image::png::load_file(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
+	let texdigits = load_png(&mut g, Some("digits"), &fs, "digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -65,19 +85,31 @@ fn main() {
 	}, None).unwrap();
 
 	// Create the shader
-	let shader = g.shader_create(None, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl"));
-	let colorshader = g.shader_create(None, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl"));
-	let uishader = g.shader_create(None, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl"));
+	let shader = {
+		let vs = fs.read_to_string("standard.vs.glsl").unwrap();
+		let fs = fs.read_to_string("standard.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
+	let colorshader = {
+		let vs = fs.read_to_string("color.vs.glsl").unwrap();
+		let fs = fs.read_to_string("color.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
+	let uishader = {
+		let vs = fs.read_to_string("ui.vs.glsl").unwrap();
+		let fs = fs.read_to_string("ui.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
 
 	let mut past_now = time::Instant::now();
 
 	let font = {
-		let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
+		let font: shade::msdfgen::Font = serde_json::from_str(fs.read_to_string("font.json").unwrap().as_str()).unwrap();
 		let font = Some(font);
 
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
-		let texture = shade::image::png::load_file(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
+		let texture = shade::image::png::load_file(&mut g, Some("font"), "font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,

@@ -14,3 +14,4 @@ serde_json.workspace = true
 flate2.workspace = true
 basenc.workspace = true
 fmtools.workspace = true
+paks.workspace = true

@@ -1,4 +1,5 @@
-# bin/bash
+#!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Clean the publish directory
 rm -rf target/publish
@@ -12,16 +13,19 @@ cargo build --release --bin chipedit
 cp target/release/chipplay target/publish
 cp target/release/chipedit target/publish
 
-# Copy the assets to the publish dir
-cp -r data target/publish
+# Package the assets
+"$SCRIPT_DIR/createpak.sh" target/publish/data.paks 0 "" data/
 
-# Copy the levelsets to the publish dir
+# Package the levelsets
 mkdir -p target/publish/levelsets
-# cp -r levelsets/cc1 target/publish/levelsets/cc1
-cp -r levelsets/cclp1 target/publish/levelsets/cclp1
-cp -r levelsets/cclp3 target/publish/levelsets/cclp3
-cp -r levelsets/cclp4 target/publish/levelsets/cclp4
-cp -r levelsets/cclp5 target/publish/levelsets/cclp5
+"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp1.paks 0 "" levelsets/cclp1/
+"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp3.paks 0 "" levelsets/cclp3/
+"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp4.paks 0 "" levelsets/cclp4/
+"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp5.paks 0 "" levelsets/cclp5/
+
+# Create the save dir
+mkdir -p target/publish/save
+
 makurust levelsets/readme.md
 mv levelsets/readme.html target/publish/levelsets
 

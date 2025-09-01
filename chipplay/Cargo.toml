@@ -18,5 +18,7 @@ winit = "0.24"
 
 soloud = "1.0"
 
+paks.workspace = true
+
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.3"

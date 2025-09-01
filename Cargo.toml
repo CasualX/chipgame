@@ -29,3 +29,5 @@ flate2 = "1.0"
 basenc = "0.2"
 
 shade = { version = "0.0.3", features = ["gl", "msdfgen", "png", "gif"] }
+
+paks = { git = "https://github.com/CasualX/paks" }

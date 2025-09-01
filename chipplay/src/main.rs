@@ -1,9 +1,11 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
-use std::{fs, mem, thread, time};
+use std::{mem, thread, time};
 use std::collections::HashMap;
 
 mod xinput;
+
+use chipgame::FileSystem;
 
 #[cfg(windows)]
 fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowBuilder {
@@ -27,16 +29,18 @@ struct AudioPlayer {
 	cur_music: Option<(chipgame::data::MusicId, soloud::Handle)>,
 }
 impl AudioPlayer {
-	fn load_wav(&mut self, fx: chipcore::SoundFx, path: &str) {
+	fn load_wav(&mut self, fx: chipcore::SoundFx, fs: &FileSystem, path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
-		wav.load(path).expect("Failed to load sound");
+		let data = fs.read(path).expect("Failed to read sound file");
+		wav.load_mem(&data).expect("Failed to load sound");
 		self.sfx.insert(fx, wav);
 	}
-	fn load_music(&mut self, music: chipgame::data::MusicId, path: &str) {
+	fn load_music(&mut self, music: chipgame::data::MusicId, fs: &FileSystem,path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
-		wav.load(path).expect("Failed to load sound");
+		let data = fs.read(path).expect("Failed to read music file");
+		wav.load_mem(&data).expect("Failed to load music");
 		wav.set_looping(true);
 		wav.set_volume(0.5);
 		self.music.insert(music, wav);
@@ -64,6 +68,18 @@ impl AudioPlayer {
 	}
 }
 
+fn load_png(
+	g: &mut shade::Graphics,
+	name: Option<&str>,
+	fs: &FileSystem,
+	path: &str,
+	props: &shade::image::TextureProps,
+	transform: Option<&mut dyn FnMut(&mut Vec<u8>, &mut shade::image::ImageSize)>,
+) -> Result<shade::Texture2D, shade::image::png::LoadError> {
+	let data = fs.read(path).expect("Failed to read PNG file");
+	shade::image::png::load(g, name, &mut &data[..], props, transform)
+}
+
 fn main() {
 	// let app = clap::command!("play")
 	// 	.arg(clap::arg!(--"level-pack" -p [level_pack] "Level pack to play"))
@@ -80,6 +96,13 @@ fn main() {
 	// };
 	// let is_dev = matches.is_present("dev");
 
+	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &paks::Key::default()) {
+		FileSystem::Paks(paks)
+	}
+	else {
+		FileSystem::StdFs(std::path::PathBuf::from("data"))
+	};
+
 	let xinput = xinput::XInput::new();
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
@@ -89,31 +112,31 @@ fn main() {
 		music: HashMap::new(),
 		cur_music: None,
 	};
-	ap.load_wav(chipcore::SoundFx::GameOver, "data/sfx/death.wav");
-	ap.load_wav(chipcore::SoundFx::GameWin, "data/sfx/tada.wav");
-	ap.load_wav(chipcore::SoundFx::Derezz, "data/sfx/derezz.wav");
-	ap.load_wav(chipcore::SoundFx::ICCollected, "data/sfx/chack.wav");
-	ap.load_wav(chipcore::SoundFx::KeyCollected, "data/sfx/click.wav");
-	ap.load_wav(chipcore::SoundFx::BootCollected, "data/sfx/click.wav");
-	ap.load_wav(chipcore::SoundFx::LockOpened, "data/sfx/door.wav");
-	ap.load_wav(chipcore::SoundFx::SocketOpened, "data/sfx2/socket unlock.wav");
-	ap.load_wav(chipcore::SoundFx::CantMove, "data/sfx/oof.wav");
-	ap.load_wav(chipcore::SoundFx::BlockMoving, "data/sfx/whisk.wav");
-	ap.load_wav(chipcore::SoundFx::TrapEntered, "data/sfx/traphit.wav");
-	ap.load_wav(chipcore::SoundFx::BombExplosion, "data/sfx/bomb.wav");
-	ap.load_wav(chipcore::SoundFx::ButtonPressed, "data/sfx/tick.wav");
-	ap.load_wav(chipcore::SoundFx::Teleporting, "data/sfx/teleport.wav");
-	ap.load_wav(chipcore::SoundFx::WallPopup, "data/sfx/popup.wav");
-	ap.load_wav(chipcore::SoundFx::WaterSplash, "data/sfx/splash.wav");
-	ap.load_wav(chipcore::SoundFx::BootsStolen, "data/sfx/thief.wav");
-	ap.load_wav(chipcore::SoundFx::TileEmptied, "data/sfx/whisk.wav");
-	ap.load_wav(chipcore::SoundFx::BlueWallCleared, "data/sfx2/bump.wav");
-	ap.load_wav(chipcore::SoundFx::FireWalking, "data/sfx/crackle.wav");
-	ap.load_wav(chipcore::SoundFx::CursorMove, "data/sfxui/click-buttons-ui-menu.mp3");
-	ap.load_wav(chipcore::SoundFx::CursorSelect, "data/sfx/bump.wav");
-	ap.load_music(chipgame::data::MusicId::Chip1, "data/music/2Chip1.ogg");
-	ap.load_music(chipgame::data::MusicId::Chip2, "data/music/2Chip2.ogg");
-	ap.load_music(chipgame::data::MusicId::Canyon, "data/music/2Canyon.ogg");
+	ap.load_wav(chipcore::SoundFx::GameOver, &fs, "sfx/death.wav");
+	ap.load_wav(chipcore::SoundFx::GameWin, &fs, "sfx/tada.wav");
+	ap.load_wav(chipcore::SoundFx::Derezz, &fs, "sfx/derezz.wav");
+	ap.load_wav(chipcore::SoundFx::ICCollected, &fs, "sfx/chack.wav");
+	ap.load_wav(chipcore::SoundFx::KeyCollected, &fs, "sfx/click.wav");
+	ap.load_wav(chipcore::SoundFx::BootCollected, &fs, "sfx/click.wav");
+	ap.load_wav(chipcore::SoundFx::LockOpened, &fs, "sfx/door.wav");
+	ap.load_wav(chipcore::SoundFx::SocketOpened, &fs, "sfx2/socket unlock.wav");
+	ap.load_wav(chipcore::SoundFx::CantMove, &fs, "sfx/oof.wav");
+	ap.load_wav(chipcore::SoundFx::BlockMoving, &fs, "sfx/whisk.wav");
+	ap.load_wav(chipcore::SoundFx::TrapEntered, &fs, "sfx/traphit.wav");
+	ap.load_wav(chipcore::SoundFx::BombExplosion, &fs, "sfx/bomb.wav");
+	ap.load_wav(chipcore::SoundFx::ButtonPressed, &fs, "sfx/tick.wav");
+	ap.load_wav(chipcore::SoundFx::Teleporting, &fs, "sfx/teleport.wav");
+	ap.load_wav(chipcore::SoundFx::WallPopup, &fs, "sfx/popup.wav");
+	ap.load_wav(chipcore::SoundFx::WaterSplash, &fs, "sfx/splash.wav");
+	ap.load_wav(chipcore::SoundFx::BootsStolen, &fs, "sfx/thief.wav");
+	ap.load_wav(chipcore::SoundFx::TileEmptied, &fs, "sfx/whisk.wav");
+	ap.load_wav(chipcore::SoundFx::BlueWallCleared, &fs, "sfx2/bump.wav");
+	ap.load_wav(chipcore::SoundFx::FireWalking, &fs, "sfx/crackle.wav");
+	ap.load_wav(chipcore::SoundFx::CursorMove, &fs, "sfxui/click-buttons-ui-menu.mp3");
+	ap.load_wav(chipcore::SoundFx::CursorSelect, &fs, "sfx/bump.wav");
+	ap.load_music(chipgame::data::MusicId::Chip1, &fs, "music/2Chip1.ogg");
+	ap.load_music(chipgame::data::MusicId::Chip2, &fs, "music/2Chip2.ogg");
+	ap.load_music(chipgame::data::MusicId::Canyon, &fs, "music/2Canyon.ogg");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -132,7 +155,7 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = shade::image::png::load_file(&mut g, Some("scene tiles"), "data/Color_Tileset.png", &shade::image::TextureProps {
+	let tileset = load_png(&mut g, Some("scene tiles"), &fs, "Color_Tileset.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -140,14 +163,14 @@ fn main() {
 	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
 	let tex_info = g.texture2d_get_info(tileset);
 
-	let effects = shade::image::png::load_file(&mut g, Some("effects"), "data/effects.png", &shade::image::TextureProps {
+	let effects = load_png(&mut g, Some("effects"), &fs, "effects.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
 		wrap_v: shade::TextureWrap::ClampEdge,
 	}, None).unwrap();
 
-	let texdigits = shade::image::png::load_file(&mut g, Some("digits"), "data/digits.png", &shade::image::TextureProps {
+	let texdigits = load_png(&mut g, Some("digits"), &fs, "digits.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -155,19 +178,31 @@ fn main() {
 	}, None).unwrap();
 
 	// Create the shader
-	let shader = g.shader_create(None, include_str!("../../data/standard.vs.glsl"), include_str!("../../data/standard.fs.glsl"));
-	let colorshader = g.shader_create(None, include_str!("../../data/color.vs.glsl"), include_str!("../../data/color.fs.glsl"));
-	let uishader = g.shader_create(None, include_str!("../../data/ui.vs.glsl"), include_str!("../../data/ui.fs.glsl"));
+	let shader = {
+		let vs = fs.read_to_string("standard.vs.glsl").unwrap();
+		let fs = fs.read_to_string("standard.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
+	let colorshader = {
+		let vs = fs.read_to_string("color.vs.glsl").unwrap();
+		let fs = fs.read_to_string("color.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
+	let uishader = {
+		let vs = fs.read_to_string("ui.vs.glsl").unwrap();
+		let fs = fs.read_to_string("ui.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs)
+	};
 
 	let mut past_now = time::Instant::now();
 
 	let font = {
-		let font: shade::msdfgen::Font = serde_json::from_str(fs::read_to_string("data/font.json").unwrap().as_str()).unwrap();
+		let font: shade::msdfgen::Font = serde_json::from_str(fs.read_to_string("font.json").unwrap().as_str()).unwrap();
 		let font = Some(font);
 
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
-		let texture = shade::image::png::load_file(&mut g, Some("font"), "data/font.png", &shade::image::TextureProps {
+		let texture = load_png(&mut g, Some("font"), &fs, "font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,

@@ -17,3 +17,5 @@ shade.workspace = true
 
 glutin = "0.26"
 winit = "0.24"
+
+paks.workspace = true
