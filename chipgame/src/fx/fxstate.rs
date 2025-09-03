@@ -173,7 +173,7 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.update_camera(self.gs.time as f32 / 60.0);
+		self.update_camera();
 
 		let camera = self.camera.setup(resx.viewport.size());
 

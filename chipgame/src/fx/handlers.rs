@@ -71,13 +71,18 @@ pub fn entity_step(ctx: &mut FxState, ehandle: core::EntityHandle) {
 }
 
 pub fn entity_teleport(ctx: &mut FxState, ehandle: core::EntityHandle) {
+	// Step out of the teleport
+	entity_step(ctx, ehandle);
+
 	let Some(&obj_handle) = ctx.objects.lookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	obj.pos = ent.pos.map(|c| c as f32 * 32.0).vec3(0.0);
-	obj.lerp_pos = obj.pos;
-	obj.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
+	// When teleporting the player snap the camera
+	if ent.handle == ctx.gs.ps.ehandle {
+		obj.lerp_pos = obj.pos;
+		ctx.teleport_camera();
+	}
 }
 
 pub fn entity_drown(_ctx: &mut FxState, _ehandle: core::EntityHandle) {

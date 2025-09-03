@@ -62,7 +62,8 @@ impl FxState {
 		self.camera.target_fast = self.camera.target;
 	}
 
-	pub fn update_camera(&mut self, time: f32) {
+	pub fn update_camera(&mut self) {
+		let time = self.gs.time as f32 / 60.0;
 		if self.camera.perspective {
 			self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
 		}
@@ -76,5 +77,21 @@ impl FxState {
 
 		self.camera.target_fast = self.camera.target_fast.exp_decay(self.camera.target, 25.0, 1.0 / 60.0);
 		self.camera.target_slow = self.camera.target_slow.exp_decay(self.camera.target, 15.0, 1.0 / 60.0).set_x(self.camera.target_fast.x);
+	}
+	pub fn teleport_camera(&mut self) {
+		let time = self.gs.time as f32 / 60.0;
+		if self.camera.perspective {
+			self.camera.blend = f32::clamp((time - 0.0) * 0.5, 0.0, 1.0);
+		}
+		else {
+			self.camera.blend = 0.0;
+		}
+
+		if let Some(obj) = self.camera.object.and_then(|h| self.objects.get(h)) {
+			self.camera.target = obj.lerp_pos + Vec3(16.0, 16.0 + 32.0 * self.camera.blend, 0.0)
+		}
+
+		self.camera.target_fast = self.camera.target;
+		self.camera.target_slow = self.camera.target;
 	}
 }
