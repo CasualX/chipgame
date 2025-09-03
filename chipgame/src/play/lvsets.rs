@@ -15,13 +15,9 @@ pub struct LevelSetDto {
 	pub levels: Vec<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
 pub struct LevelData {
-	pub name: String,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub hint: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub password: Option<String>,
+	pub content: String,
+	pub field: chipcore::FieldDto,
 }
 
 #[derive(Default)]
@@ -31,15 +27,14 @@ pub struct LevelSet {
 	pub about: Option<String>,
 	pub splash: Option<PathBuf>,
 	pub unlock_all_levels: bool,
-	pub lv_data: Vec<String>,
-	pub lv_info: Vec<LevelData>,
+	pub levels: Vec<LevelData>,
 }
 impl LevelSet {
 	pub fn get_level_number(&self, name: &str) -> Option<i32> {
-		self.lv_info.iter().position(|s| s.name == name).map(|i| i as i32 + 1)
+		self.levels.iter().position(|lv| lv.field.name == name).map(|i| i as i32 + 1)
 	}
 	pub fn get_level_index(&self, name: &str) -> Option<usize> {
-		self.lv_info.iter().position(|s| s.name == name)
+		self.levels.iter().position(|lv| lv.field.name == name)
 	}
 }
 
@@ -112,8 +107,7 @@ fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 		}
 	};
 
-	let mut lv_info = Vec::new();
-	let mut lv_data = Vec::new();
+	let mut levels = Vec::new();
 	for level_path in &index.levels {
 		let s = match fs.read_to_string(level_path) {
 			Ok(data) => data,
@@ -123,17 +117,17 @@ fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 			}
 		};
 
-		let ld: LevelData = match serde_json::from_str(&s) {
-			Ok(ld) => ld,
+		let field: chipcore::FieldDto = match serde_json::from_str(&s) {
+			Ok(field) => field,
 			Err(err) => {
-				eprintln!("Error parsing {level_path}: {}", err);
+				eprintln!("Error parsing field data in {level_path}: {}", err);
 				continue;
 			}
 		};
 
-		lv_info.push(ld);
-		lv_data.push(s);
+		levels.push(LevelData { content: s, field });
 	}
+
 
 	let splash = index.splash.map(|s| match fs {
 		FileSystem::StdFs(path) => path.join(s),
@@ -146,7 +140,6 @@ fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 		about: index.about.map(|lines| lines.join("\n")),
 		splash,
 		unlock_all_levels: index.unlock_all_levels,
-		lv_data,
-		lv_info,
+		levels,
 	});
 }

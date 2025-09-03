@@ -41,7 +41,6 @@ impl GameState {
 		self.field.hint = ld.hint;
 		self.field.password = ld.password;
 		self.field.seed = match rng_seed {
-			RngSeed::LevelHash => obfstr::hash(json) as u64,
 			RngSeed::Manual(seed) => seed,
 			RngSeed::System => {
 				let mut seed = [0u8; 8];

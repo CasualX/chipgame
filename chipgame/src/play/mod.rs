@@ -83,16 +83,16 @@ impl PlayState {
 
 	pub fn play_level(&mut self, level_number: i32) {
 		// If loading a level fails just... do nothing
-		let Some(lv_data) = self.lvsets.current().lv_data.get((level_number - 1) as usize) else { return };
+		let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
 
-		let attempts = self.save_data.update_level_attempts((level_number - 1) as usize);
+		let attempts = self.save_data.update_level_attempts(level_number);
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
 		self.save_data.current_level = level_number;
 		self.save_data.save(&self.lvsets.current());
 
 		fx.init();
-		fx.parse_level(level_number, lv_data);
+		fx.parse_level(level_number, &lv.content);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.perspective = self.save_data.perspective;
 
@@ -169,8 +169,8 @@ impl PlayState {
 				}
 				menu::MenuEvent::EnterPassword { code } => {
 					let mut success = false;
-					for (index, lv_info) in self.lvsets.current().lv_info.iter().enumerate() {
-						if let Some(lv_pass) = &lv_info.password {
+					for (index, lv) in self.lvsets.current().levels.iter().enumerate() {
+						if let Some(lv_pass) = &lv.field.password {
 							if lv_pass.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
 								self.save_data.unlock_level(level_number);
@@ -402,10 +402,10 @@ fn write_replay(path: &path::Path, record: &str) {
 }
 
 fn load_preview(field: &mut Option<Box<fx::FxState>>, lvset: &LevelSet, level_number: i32) {
-	if let Some(lv_data) = lvset.lv_data.get((level_number - 1) as usize) {
+	if let Some(lv) = lvset.levels.get((level_number - 1) as usize) {
 		let mut fx = Box::new(crate::fx::FxState::default());
 		fx.init();
-		fx.parse_level(level_number, lv_data);
+		fx.parse_level(level_number, &lv.content);
 		fx.hud_enabled = false;
 		*field = Some(fx);
 	}

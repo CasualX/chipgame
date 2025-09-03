@@ -48,7 +48,6 @@ pub enum TrapState {
 }
 
 pub enum RngSeed {
-	LevelHash,
 	System,
 	Manual(u64),
 }
