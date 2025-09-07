@@ -94,7 +94,7 @@ impl PlayState {
 		fx.init();
 		fx.parse_level(level_number, &lv.content);
 		fx.gs.ps.attempts = attempts;
-		fx.camera.perspective = self.save_data.perspective;
+		fx.camera.set_perspective(self.save_data.perspective);
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::PlayLevel);
@@ -270,7 +270,7 @@ impl PlayState {
 						self.save_data.perspective = value;
 						self.save_data.save(&self.lvsets.current());
 						if let Some(fx) = &mut self.fx {
-							fx.camera.perspective = value;
+							fx.camera.set_perspective(value);
 						}
 					}
 				}
@@ -378,6 +378,7 @@ impl PlayState {
 
 		if let Some(fx) = &mut self.fx {
 			fx.hud_enabled = self.menu.stack.is_empty();
+			fx.follow_player();
 			fx.draw(g, resx);
 		}
 		if self.fx.is_some() && !self.menu.stack.is_empty() {

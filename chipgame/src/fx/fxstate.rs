@@ -19,7 +19,7 @@ pub struct FxState {
 	pub dt: f32,
 	pub gs: core::GameState,
 	pub gs_realtime: f32,
-	pub camera: Camera,
+	pub camera: PlayCamera,
 	pub objects: ObjectMap,
 	pub effects: Vec<Effect>,
 	pub level_number: i32,
@@ -59,6 +59,7 @@ impl FxState {
 			}
 		}
 
+		self.camera = PlayCamera::default(); // Reset the camera, adjusted when a player entity is created
 		self.sync();
 
 		self.hud_enabled = true;
@@ -66,7 +67,6 @@ impl FxState {
 		self.next_level_load = 0.0;
 		self.darken = true;
 		self.darken_time = -1.0;
-		self.init_camera();
 	}
 	pub fn pause(&mut self) {
 		// if matches!(self.gs.ts, core::TimeState::Running) {
@@ -161,6 +161,11 @@ impl FxState {
 			self.events.push(if self.game_win { FxEvent::GameWin } else { FxEvent::GameOver });
 		}
 	}
+	pub fn follow_player(&mut self) {
+		if let Some(obj) = self.objects.lookup.get(&self.gs.ps.ehandle).and_then(|h| self.objects.get(*h)) {
+			self.camera.set_target(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
+		}
+	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		self.ntime += 1;
 		let time = self.ntime as f32 / 60.0;
@@ -173,7 +178,9 @@ impl FxState {
 			self.objects.insert(obj);
 		}
 
-		self.update_camera();
+		if self.gs.time != 0 {
+			self.camera.animate();
+		}
 
 		let camera = self.camera.setup(resx.viewport.size());
 

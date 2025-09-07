@@ -109,7 +109,7 @@ fn main() {
 
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
-		let texture = shade::image::png::load_file(&mut g, Some("font"), "font.png", &shade::image::TextureProps {
+		let texture = load_png(&mut g, Some("font"), &fs, "font.png", &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,

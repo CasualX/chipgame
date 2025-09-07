@@ -3,11 +3,12 @@ use super::*;
 pub fn entity_created(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core::EntityKind) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 	let handle = ctx.objects.alloc();
+	let pos = Vec3::new(ent.pos.x as f32 * 32.0, ent.pos.y as f32 * 32.0, 0.0);
 	let obj = Object {
 		handle,
 		ehandle: ent.handle,
-		pos: Vec3::new(ent.pos.x as f32 * 32.0, ent.pos.y as f32 * 32.0, 0.0),
-		lerp_pos: Vec3::new(ent.pos.x as f32 * 32.0, ent.pos.y as f32 * 32.0, 0.0),
+		pos,
+		lerp_pos: pos,
 		mover: MoveType::Vel(MoveVel { vel: Vec3::ZERO }),
 		sprite: sprite_for_ent(ent, &ctx.gs.ps),
 		model: model_for_ent(ent),
@@ -18,13 +19,12 @@ pub fn entity_created(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core
 		live: true,
 		unalive_after_anim: false,
 	};
-	if matches!(kind, core::EntityKind::Player) {
-		ctx.camera.object = Some(handle);
-		ctx.camera.target_slow = obj.pos;
-		ctx.camera.target_fast = obj.pos;
-	}
 	ctx.objects.insert(obj);
 	ctx.objects.lookup.insert(ent.handle, handle);
+
+	if matches!(kind, core::EntityKind::Player) {
+		ctx.camera.teleport(pos + Vec3(16.0, 16.0, 0.0));
+	}
 }
 
 pub fn entity_removed(ctx: &mut FxState, ehandle: core::EntityHandle, kind: core::EntityKind) {
@@ -81,7 +81,7 @@ pub fn entity_teleport(ctx: &mut FxState, ehandle: core::EntityHandle) {
 	// When teleporting the player snap the camera
 	if ent.handle == ctx.gs.ps.ehandle {
 		obj.lerp_pos = obj.pos;
-		ctx.teleport_camera();
+		ctx.camera.teleport(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
 	}
 }
 

@@ -108,6 +108,8 @@ impl EditorState {
 	pub fn load_level(&mut self, json: &str) {
 		self.game.parse_level(0, json);
 		self.game.hud_enabled = false;
+		self.game.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
+		self.game.camera.set_perspective(false);
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();
@@ -201,6 +203,8 @@ impl EditorState {
 			self.game.camera.target.y += 5.0;
 		}
 
+		self.game.camera.animate();
+
 		if let Some(tool_pos) = self.tool_pos {
 			if tool_pos != self.cursor_pos {
 				self.tool_pos = Some(self.cursor_pos);
@@ -211,9 +215,6 @@ impl EditorState {
 				}
 			}
 		}
-
-		self.game.camera.offset = Vec3f(0.0, 8.0 * 32.0, 400.0);
-		self.game.camera.object = None;
 
 		self.game.draw(g, resx);
 
