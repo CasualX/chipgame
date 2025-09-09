@@ -328,9 +328,6 @@ fn main() {
 		past_now = now;
 		thread::sleep(sleep_dur);
 	}
-
-	// App crashes when dropping soloud...
-	std::mem::forget(ap.sl);
 }
 
 fn is_pressed(state: winit::event::ElementState) -> bool {
