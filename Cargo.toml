@@ -5,6 +5,7 @@ members = [
 	"./chipedit",
 	"./chipgame",
 	"./chipplay",
+	"./chipty",
 	"./scripts/ccdat",
 	"./scripts/colorkey",
 	"./scripts/fixer",

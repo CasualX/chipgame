@@ -1,7 +1,6 @@
 use super::*;
 
 /// Pickup items.
-#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum ItemPickup {
 	Chip,
@@ -16,7 +15,6 @@ pub enum ItemPickup {
 }
 
 /// Key colors.
-#[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum KeyColor {

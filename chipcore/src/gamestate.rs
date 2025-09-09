@@ -35,7 +35,7 @@ impl GameState {
 		self.ps = PlayerState::default();
 		self.input = Input::default();
 
-		let ld: FieldDto = serde_json::from_str(json).unwrap();
+		let ld: LevelDto = serde_json::from_str(json).unwrap();
 		self.field.name = ld.name;
 		self.field.author = ld.author;
 		self.field.hint = ld.hint;
@@ -251,15 +251,15 @@ impl GameState {
 		}
 	}
 
-	pub fn save_replay(&self, realtime: f32) -> ReplayDto {
-		ReplayDto {
+	pub fn save_replay(&self, realtime: f32) -> chipty::ReplayDto {
+		chipty::ReplayDto {
 			date: None,
 			ticks: self.time,
 			realtime,
 			steps: self.ps.steps,
 			bonks: self.ps.bonks,
 			seed: format!("{:016x}", self.field.seed),
-			replay: encode_bytes(&self.inputs),
+			replay: chipty::encode_bytes(&self.inputs),
 		}
 	}
 }

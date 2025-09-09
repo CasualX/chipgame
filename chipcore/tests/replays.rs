@@ -1,13 +1,13 @@
 use std::{env, fs};
 use std::path::Path;
 
-fn test_replay(level: &str, replay: &chipcore::ReplayDto, activity: chipcore::PlayerActivity) {
+fn test_replay(level: &str, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity) {
 	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
 
 	let mut game = chipcore::GameState::default();
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
-	let inputs = chipcore::decode_bytes(&replay.replay);
+	let inputs = chipty::decode_bytes(&replay.replay);
 	for &byte in &inputs {
 		let input = chipcore::Input::decode(byte);
 		game.tick(&input);
@@ -24,10 +24,10 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 	for level_number in 1..150 {
 		let level_path = levels_dir.join(format!("level{level_number}.json"));
 		let level_content = fs::read_to_string(&level_path).unwrap();
-		let level: chipcore::FieldDto = serde_json::from_str(&level_content).unwrap();
+		let level: chipcore::LevelDto = serde_json::from_str(&level_content).unwrap();
 		let replay_path = replays_dir.join(level_path.file_name().unwrap());
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
-			let replay: chipcore::ReplayDto = serde_json::from_str(&replay_content).unwrap();
+			let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
 			eprintln!("Playing: level{} {:?}: \x1b[32m{}\x1b[m", level_number, level.password.unwrap(), level.name);
 			test_replay(&level_content, &replay, chipcore::PlayerActivity::Win);
 		}

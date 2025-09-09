@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chipty = { path = "../chipty" }
 urandom.workspace = true
 cvmath.workspace = true
 serde.workspace = true

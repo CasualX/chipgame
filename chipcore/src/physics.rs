@@ -28,7 +28,7 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 
 	if let Some(step_dir) = step_dir {
 		// Check for panels on the current terrain
-		let solidf = terrain.solid_flags();
+		let solidf = terrain_solid_flags(terrain);
 		let panel = match step_dir {
 			Compass::Up => THIN_WALL_N,
 			Compass::Left => THIN_WALL_W,
@@ -50,13 +50,13 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 			Compass::Down => THIN_WALL_N,
 			Compass::Right => THIN_WALL_W,
 		};
-		if terrain.solid_flags() & panel != 0 {
+		if terrain_solid_flags(terrain) & panel != 0 {
 			return false;
 		}
 	}
 
 	// Check if the terrain is solid
-	if terrain.solid_flags() == SOLID_WALL {
+	if terrain_solid_flags(terrain) == SOLID_WALL {
 		return false;
 	}
 
@@ -177,7 +177,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 	if !dev_wtw {
 		// Check for panels on the current terrain
-		let solidf = from_terrain.solid_flags();
+		let solidf = terrain_solid_flags(from_terrain);
 		let panel = match step_dir {
 			Compass::Up => THIN_WALL_N,
 			Compass::Left => THIN_WALL_W,
@@ -228,7 +228,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Down => THIN_WALL_N,
 			Compass::Right => THIN_WALL_W,
 		};
-		if to_terrain.solid_flags() & panel != 0 {
+		if terrain_solid_flags(to_terrain) & panel != 0 {
 			if is_player {
 				flick(s, &new_pos, step_dir);
 			}
@@ -236,7 +236,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		}
 
 		// Check if the terrain is solid
-		if to_terrain.solid_flags() == SOLID_WALL {
+		if terrain_solid_flags(to_terrain) == SOLID_WALL {
 			return false;
 		}
 
@@ -598,5 +598,66 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		_ => {
 			ent.flags &= !EF_BUTTON_DOWN;
 		}
+	}
+}
+
+const SOLID_WALL: u8 = 0xf;
+const THIN_WALL_N: u8 = 0x1;
+const THIN_WALL_E: u8 = 0x2;
+const THIN_WALL_S: u8 = 0x4;
+const THIN_WALL_W: u8 = 0x8;
+
+fn terrain_solid_flags(terrain: Terrain) -> u8 {
+	match terrain {
+		Terrain::Blank => SOLID_WALL,
+		Terrain::Floor => 0,
+		Terrain::Wall => SOLID_WALL,
+		Terrain::Socket => SOLID_WALL,
+		Terrain::BlueLock => SOLID_WALL,
+		Terrain::RedLock => SOLID_WALL,
+		Terrain::GreenLock => SOLID_WALL,
+		Terrain::YellowLock => SOLID_WALL,
+		Terrain::Hint => 0,
+		Terrain::Exit => 0,
+		Terrain::FakeExit => 0,
+		Terrain::Water => 0,
+		Terrain::WaterHazard => SOLID_WALL,
+		Terrain::Fire => 0,
+		Terrain::Dirt => 0,
+		Terrain::DirtBlock => SOLID_WALL,
+		Terrain::Gravel => 0,
+		Terrain::Ice => 0,
+		Terrain::IceNW => THIN_WALL_N | THIN_WALL_W,
+		Terrain::IceNE => THIN_WALL_N | THIN_WALL_E,
+		Terrain::IceSW => THIN_WALL_S | THIN_WALL_W,
+		Terrain::IceSE => THIN_WALL_S | THIN_WALL_E,
+		Terrain::ForceN => 0,
+		Terrain::ForceW => 0,
+		Terrain::ForceS => 0,
+		Terrain::ForceE => 0,
+		Terrain::ForceRandom => 0,
+		Terrain::CloneMachine => SOLID_WALL,
+		Terrain::CloneBlockN => SOLID_WALL,
+		Terrain::CloneBlockW => SOLID_WALL,
+		Terrain::CloneBlockS => SOLID_WALL,
+		Terrain::CloneBlockE => SOLID_WALL,
+		Terrain::ToggleFloor => 0,
+		Terrain::ToggleWall => SOLID_WALL,
+		Terrain::ThinWallN => THIN_WALL_N,
+		Terrain::ThinWallW => THIN_WALL_W,
+		Terrain::ThinWallS => THIN_WALL_S,
+		Terrain::ThinWallE => THIN_WALL_E,
+		Terrain::ThinWallSE => THIN_WALL_S | THIN_WALL_E,
+		Terrain::HiddenWall => SOLID_WALL,
+		Terrain::InvisibleWall => SOLID_WALL,
+		Terrain::RealBlueWall => SOLID_WALL,
+		Terrain::FakeBlueWall => 0,
+		Terrain::GreenButton => 0,
+		Terrain::RedButton => 0,
+		Terrain::BrownButton => 0,
+		Terrain::BlueButton => 0,
+		Terrain::Teleport => 0,
+		Terrain::BearTrap => 0,
+		Terrain::RecessedWall => 0,
 	}
 }

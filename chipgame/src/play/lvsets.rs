@@ -2,22 +2,11 @@ use std::path::PathBuf;
 
 use super::*;
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct LevelSetDto {
-	pub name: String,
-	pub title: String,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub about: Option<Vec<String>>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub splash: Option<String>,
-	#[serde(default)]
-	pub unlock_all_levels: bool,
-	pub levels: Vec<String>,
-}
+pub use chipty::LevelSetIndirectDto as LevelSetDto;
 
 pub struct LevelData {
 	pub content: String,
-	pub field: chipcore::FieldDto,
+	pub field: chipcore::LevelDto,
 }
 
 #[derive(Default)]
@@ -117,7 +106,7 @@ fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 			}
 		};
 
-		let field: chipcore::FieldDto = match serde_json::from_str(&s) {
+		let field: chipcore::LevelDto = match serde_json::from_str(&s) {
 			Ok(field) => field,
 			Err(err) => {
 				eprintln!("Error parsing field data in {level_path}: {}", err);

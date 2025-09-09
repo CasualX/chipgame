@@ -6,7 +6,6 @@ use std::{cmp, ops};
 use cvmath::Vec2i;
 
 mod codes;
-mod compass;
 mod entities;
 mod entity;
 mod entitymap;
@@ -19,12 +18,9 @@ mod physics;
 mod playerstate;
 mod quadtree;
 mod random;
-mod replay;
-mod soundfx;
-mod terrain;
 
 pub use self::codes::*;
-pub use self::compass::*;
+pub use chipty::Compass;
 pub use self::entities::*;
 pub use self::entity::*;
 pub use self::entitymap::*;
@@ -37,9 +33,8 @@ pub use self::physics::*;
 pub use self::playerstate::*;
 pub use self::quadtree::*;
 pub use self::random::*;
-pub use self::replay::*;
-pub use self::soundfx::*;
-pub use self::terrain::*;
+pub use chipty::SoundFx;
+pub use chipty::Terrain;
 
 #[derive(Copy, Clone, Debug)]
 pub enum TrapState {
@@ -51,11 +46,5 @@ pub enum RngSeed {
 	System,
 	Manual(u64),
 }
-
-const SOLID_WALL: u8 = 0xf;
-const THIN_WALL_N: u8 = 0x1;
-const THIN_WALL_E: u8 = 0x2;
-const THIN_WALL_S: u8 = 0x4;
-const THIN_WALL_W: u8 = 0x8;
 
 type Time = i32;

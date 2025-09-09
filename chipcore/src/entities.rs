@@ -18,15 +18,7 @@ mod teeth;
 mod thief;
 mod walker;
 
-/// Entity construction arguments.
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Copy, Clone, Debug)]
-pub struct EntityArgs {
-	pub kind: EntityKind,
-	pub pos: Vec2i,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub face_dir: Option<Compass>,
-}
+pub use chipty::EntityArgs;
 
 impl GameState {
 	/// Creates an entity from arguments.

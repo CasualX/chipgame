@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::ffi::CStr;
 use std::fs;
 
-use chipcore::{Compass, Conn, EntityArgs, EntityKind, FieldDto, MapDto, Terrain};
+use chipty::*;
 
 fn main() {
 	let app = clap::command!("ccdat")
@@ -71,7 +71,7 @@ fn read_level(data: &[u8]) {
 		conns.push(*lnk);
 	}
 
-	let field = FieldDto {
+	let level = LevelDto {
 		name: md.title,
 		author: md.author,
 		hint: md.hint,
@@ -84,7 +84,7 @@ fn read_level(data: &[u8]) {
 		replays: None,
 	};
 
-	let json = serde_json::to_string(&field).unwrap();
+	let json = serde_json::to_string(&level).unwrap();
 	print!("{}", json);
 }
 
@@ -228,7 +228,7 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 	}
 }
 
-fn parse_content(upper: &[u8], lower: &[u8]) -> (MapDto, Vec<EntityArgs>, Vec<Conn>) {
+fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>, Vec<FieldConn>) {
 	let mut terrain = vec![Terrain::Floor; 32 * 32];
 	let mut entities = Vec::new();
 
@@ -255,7 +255,7 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (MapDto, Vec<EntityArgs>, Vec<Co
 					last_teleport = Some(pos);
 				}
 				if let Some(prev_teleport) = prev_teleport {
-					conns.push(Conn { src: prev_teleport, dest: pos });
+					conns.push(FieldConn { src: prev_teleport, dest: pos });
 				}
 				prev_teleport = Some(pos);
 			}
@@ -263,7 +263,7 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (MapDto, Vec<EntityArgs>, Vec<Co
 	}
 	if let Some(last_teleport) = last_teleport {
 		if let Some(prev_teleport) = prev_teleport {
-			conns.push(Conn { src: prev_teleport, dest: last_teleport });
+			conns.push(FieldConn { src: prev_teleport, dest: last_teleport });
 		}
 	}
 
@@ -286,7 +286,7 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (MapDto, Vec<EntityArgs>, Vec<Co
 		terrain.iter().map(|&terrain| legend_map[&terrain]).collect()
 	};
 
-	let map = MapDto { width: 32, height: 32, data, legend };
+	let map = FieldDto { width: 32, height: 32, data, legend };
 	return (map, entities, conns);
 }
 
@@ -299,8 +299,8 @@ struct Metadata {
 	time_limit: i32,
 	required_chips: i32,
 	title: String,
-	trap_linkage: Vec<Conn>,
-	cloner_linkage: Vec<Conn>,
+	trap_linkage: Vec<FieldConn>,
+	cloner_linkage: Vec<FieldConn>,
 	password: String,
 	hint: Option<String>,
 	author: Option<String>,
@@ -347,7 +347,7 @@ fn read_metadata(data: &[u8]) -> Metadata {
 					let trap_y = view.read::<u16>(j + 6);
 					let src = cvmath::Vec2i(brown_x as i32, brown_y as i32);
 					let dest = cvmath::Vec2i(trap_x as i32, trap_y as i32);
-					trap_linkage.push(Conn { src, dest });
+					trap_linkage.push(FieldConn { src, dest });
 					j += 10;
 				}
 			}
@@ -360,7 +360,7 @@ fn read_metadata(data: &[u8]) -> Metadata {
 					let cloner_y = view.read::<u16>(j + 6);
 					let src = cvmath::Vec2i(red_x as i32, red_y as i32);
 					let dest = cvmath::Vec2i(cloner_x as i32, cloner_y as i32);
-					cloner_linkage.push(Conn { src, dest });
+					cloner_linkage.push(FieldConn { src, dest });
 					j += 8;
 				}
 			}

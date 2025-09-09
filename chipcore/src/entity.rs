@@ -1,33 +1,6 @@
 use super::*;
 
-/// Kinds of an entity.
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum EntityKind {
-	Player,
-	Chip,
-	Socket,
-	Block,
-	Flippers,
-	FireBoots,
-	IceSkates,
-	SuctionBoots,
-	BlueKey,
-	RedKey,
-	GreenKey,
-	YellowKey,
-	Thief,
-	Bomb,
-	Bug,
-	FireBall,
-	PinkBall,
-	Tank,
-	Glider,
-	Teeth,
-	Walker,
-	Blob,
-	Paramecium,
-}
+pub use chipty::EntityKind;
 
 /// Static entity data.
 #[derive(Debug)]

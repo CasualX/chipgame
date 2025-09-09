@@ -1,45 +1,6 @@
 use super::*;
 
-/// Field map data transfer object.
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct MapDto {
-	pub width: i32,
-	pub height: i32,
-	pub data: Vec<u8>,
-	pub legend: Vec<Terrain>,
-}
-
-/// Field data transfer object.
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct FieldDto {
-	pub name: String,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub author: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub hint: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub password: Option<String>,
-	pub required_chips: i32,
-	pub time_limit: i32,
-	pub map: MapDto,
-	pub entities: Vec<EntityArgs>,
-	pub connections: Vec<Conn>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub replays: Option<Vec<ReplayDto>>,
-}
-
-/// Connection between terrain tiles.
-///
-/// The connection defines the relationship between:
-/// * A red button and associated clone machine terrain.
-/// * A brown button and associated bear trap terrain.
-/// * A teleport pad and destination terrain.
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub struct Conn {
-	pub src: Vec2i,
-	pub dest: Vec2i,
-}
+pub use chipty::{FieldDto, LevelDto, FieldConn};
 
 /// Game playfield.
 #[derive(Default)]
@@ -54,7 +15,7 @@ pub struct Field {
 	pub width: i32,
 	pub height: i32,
 	pub terrain: Vec<Terrain>,
-	pub conns: Vec<Conn>,
+	pub conns: Vec<FieldConn>,
 }
 
 impl Field {
@@ -80,7 +41,7 @@ impl Field {
 		*ptr = terrain;
 		Some(old)
 	}
-	pub fn find_conn_by_src(&self, pos: Vec2i) -> Option<&Conn> {
+	pub fn find_conn_by_src(&self, pos: Vec2i) -> Option<&FieldConn> {
 		self.conns.iter().find(|conn| conn.src == pos)
 	}
 }

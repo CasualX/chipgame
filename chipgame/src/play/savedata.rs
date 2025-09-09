@@ -129,7 +129,7 @@ impl SaveData {
 			Some(level_pack.levels[level_index].field.name.clone())
 		});
 
-		let mut save_data = SaveDto {
+		let save_data = SaveFileDto {
 			current_level: level_name,
 			unlocked_levels: unlocked_levels.collect(),
 			completed_levels: completed_levels.collect(),
@@ -146,9 +146,6 @@ impl SaveData {
 				auto_save_replay: self.auto_save_replay,
 			},
 		};
-
-		save_data.unlocked_levels.sort();
-		save_data.completed_levels.sort();
 
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
 		match std::fs::write(&file_name, content) {
@@ -184,7 +181,7 @@ impl SaveData {
 		let Ok(content) = std::fs::read_to_string(&file_name) else {
 			return this;
 		};
-		let Some(dto) = serde_json::from_str::<SaveDto>(&content).ok() else {
+		let Some(dto) = serde_json::from_str::<SaveFileDto>(&content).ok() else {
 			return this;
 		};
 
@@ -233,54 +230,4 @@ fn get_levelset_state_filename(level_pack: &LevelSet) -> String {
 	filename
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, Debug, Default)]
-pub struct SaveDto {
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub current_level: Option<String>,
-	pub unlocked_levels: Vec<String>,
-	#[serde(default)]
-	pub completed_levels: Vec<String>,
-	#[serde(default)]
-	pub high_scores: HighScoresDto,
-	pub options: OptionsDto,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, Debug, Default)]
-pub struct HighScoresDto {
-	#[serde(default)]
-	pub ticks: BTreeMap<String, i32>,
-	#[serde(default)]
-	pub steps: BTreeMap<String, i32>,
-	#[serde(default)]
-	pub attempts: BTreeMap<String, i32>,
-}
-
-fn default_true() -> bool {
-	true
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, Debug)]
-pub struct OptionsDto {
-	pub background_music: bool,
-	pub sound_effects: bool,
-	pub developer_mode: bool,
-	#[serde(default = "default_true")]
-	pub perspective: bool,
-	#[serde(default)]
-	pub auto_save_replay: bool,
-}
-
-impl Default for OptionsDto {
-	fn default() -> Self {
-		Self {
-			background_music: true,
-			sound_effects: true,
-			developer_mode: false,
-			perspective: true,
-			auto_save_replay: false,
-		}
-	}
-}
+pub use chipty::{SaveFileDto, HighScoresDto, OptionsDto};

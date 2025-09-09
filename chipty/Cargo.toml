@@ -1,11 +1,12 @@
 [package]
-name = "levelstats"
+name = "chipty"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap.workspace = true
-dataview = "1.0"
-chipty = { path = "../../chipty" }
+urandom.workspace = true
 cvmath.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+flate2.workspace = true
+basenc.workspace = true

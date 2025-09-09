@@ -1,53 +1,54 @@
+use chipty::*;
 
 const LEVEL_PACK: &str = "levelsets/cclp1";
 
 fn main() {
-	for i in 1..150 {
-		let path = format!("{}/lv/level{}.json", LEVEL_PACK, i);
+	for number in 1..150 {
+		let path = format!("{}/lv/level{}.json", LEVEL_PACK, number);
 		// dbg!(&path);
 		let Ok(content) = std::fs::read_to_string(&path)
 		else {
 			continue;
 		};
 
-		let mut data: chipcore::FieldDto = serde_json::from_str(&content).unwrap();
-		if fix_level(i, &mut data) {
-			let new_content = serde_json::to_string(&data).unwrap();
+		let mut level: LevelDto = serde_json::from_str(&content).unwrap();
+		if fix_level(number, &mut level) {
+			let new_content = serde_json::to_string(&level).unwrap();
 			std::fs::write(&path, new_content).unwrap();
 		}
 	}
 }
 
-fn fix_level(n: usize, data: &mut chipcore::FieldDto) -> bool {
+fn fix_level(number: i32, level: &mut LevelDto) -> bool {
 	let mut fixed = false;
 
 	let mut ents_to_remove = Vec::new();
 
 	// Looking for Block entities targetted by a red connection
-	for (ent_index, ent_args) in data.entities.iter().enumerate() {
-		if ent_args.kind != chipcore::EntityKind::Block {
+	for (ent_index, ent_args) in level.entities.iter().enumerate() {
+		if ent_args.kind != EntityKind::Block {
 			continue;
 		}
 
-		let Some(&conn) = data.connections.iter().find(|&conn| conn.dest == ent_args.pos)
+		let Some(&conn) = level.connections.iter().find(|&conn| conn.dest == ent_args.pos)
 		else {
 			continue
 		};
 
 		{
-			let index = (conn.src.y * data.map.width + conn.src.x) as usize;
-			let tile = data.map.data[index] as usize;
-			let terrain = data.map.legend[tile];
-			if terrain != chipcore::Terrain::RedButton {
+			let index = (conn.src.y * level.map.width + conn.src.x) as usize;
+			let tile = level.map.data[index] as usize;
+			let terrain = level.map.legend[tile];
+			if terrain != Terrain::RedButton {
 				continue;
 			}
 		}
 
 		let new_terrain = match ent_args.face_dir {
-			Some(chipcore::Compass::Up) => chipcore::Terrain::CloneBlockN,
-			Some(chipcore::Compass::Down) => chipcore::Terrain::CloneBlockS,
-			Some(chipcore::Compass::Left) => chipcore::Terrain::CloneBlockW,
-			Some(chipcore::Compass::Right) => chipcore::Terrain::CloneBlockE,
+			Some(Compass::Up) => Terrain::CloneBlockN,
+			Some(Compass::Down) => Terrain::CloneBlockS,
+			Some(Compass::Left) => Terrain::CloneBlockW,
+			Some(Compass::Right) => Terrain::CloneBlockE,
 			_ => continue,
 		};
 
@@ -56,25 +57,25 @@ fn fix_level(n: usize, data: &mut chipcore::FieldDto) -> bool {
 		ents_to_remove.push(ent_index);
 
 		let new_tile = {
-			if let Some(new_tile) = data.map.legend.iter().position(|&t| t == new_terrain) {
+			if let Some(new_tile) = level.map.legend.iter().position(|&t| t == new_terrain) {
 				new_tile as u8
 			} else {
-				data.map.legend.push(new_terrain);
-				data.map.legend.len() as u8 - 1
+				level.map.legend.push(new_terrain);
+				level.map.legend.len() as u8 - 1
 			}
 		};
 
-		let index = (ent_args.pos.y * data.map.width + ent_args.pos.x) as usize;
-		data.map.data[index] = new_tile;
+		let index = (ent_args.pos.y * level.map.width + ent_args.pos.x) as usize;
+		level.map.data[index] = new_tile;
 		fixed = true;
 	}
 
 	for &ent_index in ents_to_remove.iter().rev() {
-		data.entities.remove(ent_index);
+		level.entities.remove(ent_index);
 	}
 
 	if fixed {
-		eprintln!("Fixed level{}", n);
+		eprintln!("Fixed level{}", number);
 	}
 
 	return fixed;

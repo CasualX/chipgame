@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use cvmath::*;
-use chipcore::{Compass, Conn, EntityArgs, EntityHandle, EntityKind, FieldDto, MapDto, Terrain};
+use chipcore::{Compass, EntityArgs, EntityHandle, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
 
 use crate::fx;
 use crate::data;
@@ -133,14 +133,14 @@ impl EditorState {
 		}).collect();
 		entities.sort_unstable_by_key(|ent| (ent.kind as i32, ent.pos.y, ent.pos.x));
 
-		let dto = FieldDto {
+		let dto = LevelDto {
 			name: self.game.gs.field.name.clone(),
 			author: self.game.gs.field.author.clone(),
 			hint: self.game.gs.field.hint.clone(),
 			password: self.game.gs.field.password.clone(),
 			time_limit: self.game.gs.field.time_limit,
 			required_chips: self.game.gs.field.required_chips,
-			map: MapDto {
+			map: FieldDto {
 				width: self.game.gs.field.width,
 				height: self.game.gs.field.height,
 				data,
