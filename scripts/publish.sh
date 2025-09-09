@@ -18,10 +18,10 @@ cp target/release/chipedit target/publish
 
 # Package the levelsets
 mkdir -p target/publish/levelsets
-"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp1.paks 0 "" levelsets/cclp1/
-"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp3.paks 0 "" levelsets/cclp3/
-"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp4.paks 0 "" levelsets/cclp4/
-"$SCRIPT_DIR/createpak.sh" target/publish/levelsets/cclp5.paks 0 "" levelsets/cclp5/
+cargo run --bin packset levelsets/cclp1 target/publish/levelsets/cclp1.paks
+cargo run --bin packset levelsets/cclp3 target/publish/levelsets/cclp3.paks
+cargo run --bin packset levelsets/cclp4 target/publish/levelsets/cclp4.paks
+cargo run --bin packset levelsets/cclp5 target/publish/levelsets/cclp5.paks
 
 # Create the save dir
 mkdir -p target/publish/save

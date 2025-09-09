@@ -7,7 +7,7 @@ fn test_replay(level: &str, replay: &chipty::ReplayDto, activity: chipcore::Play
 	let mut game = chipcore::GameState::default();
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
-	let inputs = chipty::decode_bytes(&replay.replay);
+	let inputs = chipty::decode(&replay.replay);
 	for &byte in &inputs {
 		let input = chipcore::Input::decode(byte);
 		game.tick(&input);

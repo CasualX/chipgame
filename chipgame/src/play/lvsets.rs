@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use super::*;
 
-pub use chipty::LevelSetIndirectDto as LevelSetDto;
+pub use chipty::{LevelRef, LevelSetDto};
 
 pub struct LevelData {
 	pub content: String,
@@ -55,14 +55,14 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 				let path = entry.path();
 				if path.is_dir() {
 					let fs = FileSystem::StdFs(path.clone());
-					load_levelset_pak(&fs, packs);
+					load_levelset(&fs, packs);
 				}
 				// Check for .paks files and if a folder by that name does not exist
 				if path.is_file() && path.extension().map_or(false, |ext| ext == "paks") && !path.with_extension("").exists() {
 					match paks::FileReader::open(&path, &paks::Key::default()) {
 						Ok(paks) => {
 							let fs = FileSystem::Paks(paks);
-							load_levelset_pak(&fs, packs);
+							load_levelset(&fs, packs);
 						},
 						Err(err) => {
 							eprintln!("Error reading {}: {}", path.display(), err);
@@ -78,9 +78,9 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 	packs.sort_by(|a, b| a.name.cmp(&b.name));
 }
 
-fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
+fn load_levelset(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 	let index: LevelSetDto = {
-		let index = match fs.read("index.json") {
+		let index = match fs.read_compressed("index.json") {
 			Ok(data) => data,
 			Err(err) => {
 				eprintln!("Error reading index.json: {}", err);
@@ -97,26 +97,32 @@ fn load_levelset_pak(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 	};
 
 	let mut levels = Vec::new();
-	for level_path in &index.levels {
-		let s = match fs.read_to_string(level_path) {
-			Ok(data) => data,
-			Err(err) => {
-				eprintln!("Error reading {level_path}: {}", err);
-				continue;
+	for level_ref in index.levels {
+		let (content, field) = match level_ref {
+			LevelRef::Direct(field) => {
+				let content = serde_json::to_string(&field).unwrap();
+				(content, field)
+			}
+			LevelRef::Indirect(level_path) => {
+				let content = match fs.read_to_string(&level_path) {
+					Ok(data) => data,
+					Err(err) => {
+						eprintln!("Error reading {level_path}: {err}");
+						continue;
+					}
+				};
+				let field: chipcore::LevelDto = match serde_json::from_str(&content) {
+					Ok(field) => field,
+					Err(err) => {
+						eprintln!("Error parsing level at {level_path}: {err}");
+						continue;
+					}
+				};
+				(content, field)
 			}
 		};
-
-		let field: chipcore::LevelDto = match serde_json::from_str(&s) {
-			Ok(field) => field,
-			Err(err) => {
-				eprintln!("Error parsing field data in {level_path}: {}", err);
-				continue;
-			}
-		};
-
-		levels.push(LevelData { content: s, field });
+		levels.push(LevelData { content, field });
 	}
-
 
 	let splash = index.splash.map(|s| match fs {
 		FileSystem::StdFs(path) => path.join(s),

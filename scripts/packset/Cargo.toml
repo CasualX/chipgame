@@ -1,0 +1,10 @@
+[package]
+name = "packset"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chipty = { path = "../../chipty" }
+serde_json.workspace = true
+clap.workspace = true
+paks.workspace = true

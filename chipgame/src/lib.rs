@@ -30,4 +30,17 @@ impl FileSystem {
 			FileSystem::StdFs(base) => std::fs::read(base.join(path)),
 		}
 	}
+	/// Reads and decompresses a file.
+	///
+	/// If the file is in a paks archive, it will be decompressed using [chipty::decompress].
+	pub fn read_compressed(&self, path: &str) -> std::io::Result<Vec<u8>> {
+		match self {
+			FileSystem::Paks(paks) => {
+				let desc = paks.find_desc(path.as_bytes()).ok_or_else(|| std::io::Error::from(std::io::ErrorKind::NotFound))?;
+				let data = paks.read_data(&desc, &paks::Key::default())?;
+				Ok(chipty::decompress(&data))
+			}
+			FileSystem::StdFs(base) => std::fs::read(base.join(path)),
+		}
+	}
 }

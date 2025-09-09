@@ -259,7 +259,7 @@ impl GameState {
 			steps: self.ps.steps,
 			bonks: self.ps.bonks,
 			seed: format!("{:016x}", self.field.seed),
-			replay: chipty::encode_bytes(&self.inputs),
+			replay: chipty::encode(&self.inputs),
 		}
 	}
 }
