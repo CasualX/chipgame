@@ -13,14 +13,15 @@ copy target\release\chipplay.exe target\publish
 copy target\release\chipedit.exe target\publish
 
 rem Package the assets
-xcopy data target\publish\data /E /Y /I /Q
+PAKStool target/publish/data.paks 0 new
+PAKStool target/publish/data.paks 0 copy "" data
 
 rem Package the levelsets
 mkdir target\publish\levelsets
-cargo run --bin packset levelsets\cclp1 target\publish\levelsets\cclp1.paks
-cargo run --bin packset levelsets\cclp3 target\publish\levelsets\cclp3.paks
-cargo run --bin packset levelsets\cclp4 target\publish\levelsets\cclp4.paks
-cargo run --bin packset levelsets\cclp5 target\publish\levelsets\cclp5.paks
+cargo run --release --bin packset levelsets\cclp1 target\publish\levelsets\cclp1.paks
+cargo run --release --bin packset levelsets\cclp3 target\publish\levelsets\cclp3.paks
+cargo run --release --bin packset levelsets\cclp4 target\publish\levelsets\cclp4.paks
+cargo run --release --bin packset levelsets\cclp5 target\publish\levelsets\cclp5.paks
 
 rem Create the save dir
 mkdir target\publish\save

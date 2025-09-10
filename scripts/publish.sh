@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Clean the publish directory
 rm -rf target/publish
@@ -14,7 +13,8 @@ cp target/release/chipplay target/publish
 cp target/release/chipedit target/publish
 
 # Package the assets
-"$SCRIPT_DIR/createpak.sh" target/publish/data.paks 0 "" data/
+PAKStool target/publish/data.paks 0 new
+PAKStool target/publish/data.paks 0 copy "" data
 
 # Package the levelsets
 mkdir -p target/publish/levelsets
