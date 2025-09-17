@@ -68,6 +68,7 @@ impl AudioPlayer {
 	}
 }
 
+#[track_caller]
 fn load_png(
 	g: &mut shade::Graphics,
 	name: Option<&str>,
@@ -155,7 +156,7 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = load_png(&mut g, Some("scene tiles"), &fs, "Color_Tileset.png", &shade::image::TextureProps {
+	let tileset = load_png(&mut g, Some("scene tiles"), &fs, "tileset/Kayu.png", &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,

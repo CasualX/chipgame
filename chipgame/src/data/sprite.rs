@@ -190,7 +190,7 @@ impl SpriteId {
 			SpriteId::TankLeft => Vec2(4, 13),
 			SpriteId::TankDown => Vec2(4, 14),
 			SpriteId::TankRight => Vec2(4, 15),
-			SpriteId::PinkBall => Vec2(4, 5),
+			SpriteId::PinkBall => Vec2(4, 8),
 			SpriteId::FireBall => Vec2(4, 4),
 			SpriteId::GliderUp => Vec2(5, 0),
 			SpriteId::GliderLeft => Vec2(5, 1),

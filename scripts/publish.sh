@@ -13,8 +13,8 @@ cp target/release/chipplay target/publish
 cp target/release/chipedit target/publish
 
 # Package the assets
-PAKStool target/publish/data.paks 0 new
-PAKStool target/publish/data.paks 0 copy "" data
+pakscmd target/publish/data.paks 0 new
+pakscmd target/publish/data.paks 0 copy "" data
 
 # Package the levelsets
 mkdir -p target/publish/levelsets

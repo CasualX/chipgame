@@ -13,8 +13,8 @@ copy target\release\chipplay.exe target\publish
 copy target\release\chipedit.exe target\publish
 
 rem Package the assets
-PAKStool target/publish/data.paks 0 new
-PAKStool target/publish/data.paks 0 copy "" data
+pakscmd target/publish/data.paks 0 new
+pakscmd target/publish/data.paks 0 copy "" data
 
 rem Package the levelsets
 mkdir target\publish\levelsets
