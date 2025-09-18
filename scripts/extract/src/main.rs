@@ -1,109 +1,97 @@
 use std::collections::HashMap;
-use std::ffi::CStr;
 use std::fs;
 
 use chipty::*;
 
 fn main() {
-	let app = clap::command!("ccdat")
-		.arg(clap::arg!(-f <file> "Path to .dat file"))
-		.arg(clap::arg!(-n <level> "Level number to extract"));
-	let matches = app.get_matches();
+	let matches = clap::App::new("ccdat")
+		.about("Extract a Chip's Challenge DAT file into a JSON levelset structure")
+		.arg(clap::Arg::new("INPUT")
+			.help("Path to the input .dat file (MS/Steam style DAT)")
+			.required(true))
+		.arg(clap::Arg::new("OUT_DIR")
+			.help("Directory to write the extracted levelset (created if missing)")
+			.required(true))
+		.arg(clap::Arg::new("ENCODING")
+			.short('e')
+			.long("encoding")
+			.takes_value(true)
+			.possible_values(&["utf8", "latin1", "windows1252"])
+			.help("Text encoding (ascii|utf8|latin1|windows1252) [default: windows1252]"))
+		.get_matches();
 
-	let file_path = matches.value_of("file").expect("No file path provided");
-	let level = matches.value_of_t::<i32>("level").expect("Invalid level number");
-
-	let file_data = fs::read(file_path).expect("Failed to read file");
-	let view = dataview::DataView::from(&file_data[..]);
-
-	let magic = view.read::<u32>(0);
-	let level_count = view.read::<u16>(4) as i32;
-	eprintln!("Magic: 0x{:08x}", magic);
-	eprintln!("Levels: {}", level_count);
-	eprintln!();
-
-	let mut offset = 6;
-	for i in 0..level_count {
-		let len = view.read::<u16>(offset) as usize;
-		offset += 2;
-
-		if i + 1 == level {
-			let level_data = view.slice::<u8>(offset, len);
-			read_level(level_data);
-			break;
-		}
-
-		offset += len;
-	}
-}
-
-fn read_level(data: &[u8]) {
-	let data = dataview::DataView::from(data);
-
-	let level_nr = data.read::<u16>(0) as i32;
-	let time_limit = data.read::<u16>(2) as i32;
-	let chips = data.read::<u16>(4) as i32;
-	let upper_layer_len = data.read::<u16>(8) as usize;
-	let upper_layer = data.slice::<u8>(10, upper_layer_len);
-	let lower_layer_len = data.read::<u16>(10 + upper_layer_len) as usize;
-	let lower_layer = data.slice::<u8>(12 + upper_layer_len, lower_layer_len);
-	let metadata_len = data.read::<u16>(12 + upper_layer_len + lower_layer_len) as usize;
-	let metadata = data.slice::<u8>(14 + upper_layer_len + lower_layer_len, metadata_len);
-
-	eprintln!("Level: {}", level_nr);
-	eprintln!("Time limit: {}", time_limit);
-	eprintln!("Chips: {}", chips);
-	eprintln!("Upper layer: {} bytes", upper_layer_len);
-	eprintln!("Lower layer: {} bytes", lower_layer_len);
-	eprintln!("Metadata: {} bytes", metadata_len);
-
-	let md = read_metadata(metadata);
-
-	let upper_content = decode_content(upper_layer);
-	let lower_content = decode_content(lower_layer);
-	let (map, ents, mut conns) = parse_content(&upper_content, &lower_content);
-
-	// let mut conns = Vec::new();
-	for lnk in &md.trap_linkage {
-		conns.push(*lnk);
-	}
-	for lnk in &md.cloner_linkage {
-		conns.push(*lnk);
-	}
-
-	let level = LevelDto {
-		name: md.title,
-		author: md.author,
-		hint: md.hint,
-		password: Some(md.password),
-		time_limit,
-		required_chips: chips,
-		map,
-		entities: ents,
-		connections: conns,
-		replays: None,
+	let input = std::path::PathBuf::from(matches.value_of("INPUT").unwrap());
+	let out_dir = std::path::PathBuf::from(matches.value_of("OUT_DIR").unwrap());
+	let encoding = match matches.value_of("ENCODING").unwrap_or("windows1252") {
+		"utf8" => ccdat::Encoding::Utf8,
+		"latin1" => ccdat::Encoding::Latin1,
+		"windows1252" => ccdat::Encoding::Windows1252,
+		_ => ccdat::Encoding::Windows1252,
 	};
 
-	let json = serde_json::to_string(&level).unwrap();
-	print!("{}", json);
-}
+	let opts = ccdat::Options { encoding };
 
-fn decode_content(data: &[u8]) -> Vec<u8> {
-	let mut tiles = Vec::new();
-	let mut offset = 0;
-	while offset < data.len() {
-		if data[offset] == 0xff {
-			let count = data[offset + 1] as usize;
-			let tile = data[offset + 2];
-			tiles.extend(std::iter::repeat(tile).take(count));
-			offset += 3;
+	let dat = ccdat::read(&input, &opts).expect("Failed to read DAT file");
+
+	let dat_name = input.file_stem().unwrap().to_str().unwrap();
+	let levelset_path = format!("{}/{}", out_dir.display(), dat_name);
+	let _ = fs::create_dir(&levelset_path);
+	let levelset_index = format!("{}/index.json", levelset_path);
+
+	let levelset = LevelSetDto {
+		name: dat_name.to_string(),
+		title: format!("{} Level Pack", dat_name),
+		about: None,
+		splash: None,
+		unlock_all_levels: false,
+		levels: (0..dat.levels.len()).map(|i| LevelRef::Indirect(format!("lv/level{}.json", i + 1))).collect(),
+	};
+	fs::write(&levelset_index, serde_json::to_string_pretty(&levelset).unwrap()).expect("Failed to write levelset index");
+	eprintln!("Wrote levelset {}", levelset_index);
+
+	for (i, level) in dat.levels.iter().enumerate() {
+		let (map, ents, mut conns) = parse_content(&level.top_layer, &level.bottom_layer);
+
+		if let Some(traps) = &level.metadata.traps {
+			for lnk in traps {
+				conns.push(FieldConn {
+					src: cvmath::Vec2i(lnk.brown_button_x as i32, lnk.brown_button_y as i32),
+					dest: cvmath::Vec2i(lnk.trap_x as i32, lnk.trap_y as i32),
+				});
+			}
 		}
-		else {
-			tiles.push(data[offset]);
-			offset += 1;
+
+		if let Some(cloners) = &level.metadata.cloners {
+			for lnk in cloners {
+				conns.push(FieldConn {
+					src: cvmath::Vec2i(lnk.red_button_x as i32, lnk.red_button_y as i32),
+					dest: cvmath::Vec2i(lnk.cloner_x as i32, lnk.cloner_y as i32),
+				});
+			}
 		}
+
+		let mut level = LevelDto {
+			name: level.metadata.title.clone().unwrap(),
+			author: level.metadata.author.clone(),
+			hint: level.metadata.hint.clone(),
+			password: level.metadata.password.clone(),
+			time_limit: level.time_limit as i32,
+			required_chips: level.required_chips as i32,
+			map,
+			entities: ents,
+			connections: conns,
+			replays: None,
+		};
+
+		post_process(&mut level);
+
+		let json = serde_json::to_string(&level).unwrap();
+		let levels_path = format!("{}/{}/lv", out_dir.display(), dat_name);
+		let _ = fs::create_dir(&levels_path);
+		let level_path = format!("{}/{}/lv/level{}.json", out_dir.display(), dat_name, i + 1);
+		fs::write(&level_path, json).expect("Failed to write level file");
+		eprintln!("Wrote level {}", level_path);
 	}
-	return tiles;
 }
 
 fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos: cvmath::Vec2<i32>, tile: u8) {
@@ -274,9 +262,6 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>, Vec<
 		legend_map.insert(Terrain::Floor, 1); legend.push(Terrain::Floor);
 		let mut idx = 2;
 		for &terrain in terrain.iter() {
-			if terrain == Terrain::Teleport {
-				eprintln!("---- TELEPORT DETECTED!! ----");
-			}
 			if !legend_map.contains_key(&terrain) {
 				legend_map.insert(terrain, idx);
 				legend.push(terrain);
@@ -294,112 +279,58 @@ fn ent_args(kind: EntityKind, pos: cvmath::Vec2i, face_dir: Option<Compass>) -> 
 	EntityArgs { kind, pos, face_dir }
 }
 
-#[allow(dead_code)]
-struct Metadata {
-	time_limit: i32,
-	required_chips: i32,
-	title: String,
-	trap_linkage: Vec<FieldConn>,
-	cloner_linkage: Vec<FieldConn>,
-	password: String,
-	hint: Option<String>,
-	author: Option<String>,
-}
+fn post_process(level: &mut LevelDto) -> bool {
+	let mut fixed = false;
 
-fn read_metadata(data: &[u8]) -> Metadata {
-	let mut time_limit = 0;
-	let mut required_chips = 0;
-	let mut title = String::new();
-	let mut trap_linkage = Vec::new();
-	let mut cloner_linkage = Vec::new();
-	let mut password = String::new();
-	let mut hint = None;
-	let mut author = None;
+	let mut ents_to_remove = Vec::new();
 
-	let mut i = 0;
-	while i < data.len() {
-		let ty = data[i];
-		let len = data[i + 1] as usize;
-		i += 2;
-
-		let view = dataview::DataView::from(&data[i..i + len]);
-
-		match ty {
-			1 => {
-				time_limit = view.read::<u16>(0) as i32;
-				eprintln!("Time limit: {}", time_limit);
-			}
-			2 => {
-				required_chips = view.read::<u16>(0) as i32;
-				eprintln!("Required chips: {}", required_chips);
-			}
-			3 => {
-				let title_ = CStr::from_bytes_with_nul(view.slice(0, len)).unwrap();
-				title = title_.to_str().unwrap().to_string();
-				eprintln!("Title: {}", title);
-			}
-			4 => {
-				let mut j = 0;
-				while j < len {
-					let brown_x = view.read::<u16>(j);
-					let brown_y = view.read::<u16>(j + 2);
-					let trap_x = view.read::<u16>(j + 4);
-					let trap_y = view.read::<u16>(j + 6);
-					let src = cvmath::Vec2i(brown_x as i32, brown_y as i32);
-					let dest = cvmath::Vec2i(trap_x as i32, trap_y as i32);
-					trap_linkage.push(FieldConn { src, dest });
-					j += 10;
-				}
-			}
-			5 => {
-				let mut j = 0;
-				while j < len {
-					let red_x = view.read::<u16>(j);
-					let red_y = view.read::<u16>(j + 2);
-					let cloner_x = view.read::<u16>(j + 4);
-					let cloner_y = view.read::<u16>(j + 6);
-					let src = cvmath::Vec2i(red_x as i32, red_y as i32);
-					let dest = cvmath::Vec2i(cloner_x as i32, cloner_y as i32);
-					cloner_linkage.push(FieldConn { src, dest });
-					j += 8;
-				}
-			}
-			6 => {
-				let mut bytes = view.slice::<u8>(0, len).to_vec();
-				if bytes.len() > 0 {
-					for k in 0..bytes.len() - 1 {
-						bytes[k] ^= 0x99;
-					}
-				}
-				let password_ = CStr::from_bytes_with_nul(&bytes).unwrap();
-				password = password_.to_str().unwrap().to_string();
-				eprintln!("Password: {}", password);
-			}
-			7 => {
-				let hint_ = CStr::from_bytes_with_nul(view.slice(0, len)).unwrap();
-				hint = Some(hint_.to_str().unwrap().to_string());
-				eprintln!("Hint: {:?}", hint);
-			}
-			9 => {
-				let author_ = CStr::from_bytes_with_nul(view.slice(0, len)).unwrap();
-				author = Some(author_.to_string_lossy().to_string());
-				eprintln!("Author: {:?}", author);
-			}
-			10 => eprintln!("Monster list"),
-			ty => unimplemented!("Metadata type: {}", ty),
+	// Replace Block entities targetted by a red connection with CloneBlock terrain
+	for (ent_index, ent_args) in level.entities.iter().enumerate() {
+		if !matches!(ent_args.kind, EntityKind::Block) {
+			continue;
 		}
 
-		i += len;
+		let Some(&conn) = level.connections.iter().find(|&conn| conn.dest == ent_args.pos) else {
+			continue
+		};
+
+		{
+			let index = (conn.src.y * level.map.width + conn.src.x) as usize;
+			let tile = level.map.data[index] as usize;
+			let terrain = level.map.legend[tile];
+			if !matches!(terrain, Terrain::RedButton) {
+				continue;
+			}
+		}
+
+		let new_terrain = match ent_args.face_dir {
+			Some(Compass::Up) => Terrain::CloneBlockN,
+			Some(Compass::Down) => Terrain::CloneBlockS,
+			Some(Compass::Left) => Terrain::CloneBlockW,
+			Some(Compass::Right) => Terrain::CloneBlockE,
+			_ => continue,
+		};
+
+		ents_to_remove.push(ent_index);
+
+		let new_tile = {
+			if let Some(new_tile) = level.map.legend.iter().position(|&t| t == new_terrain) {
+				new_tile as u8
+			}
+			else {
+				level.map.legend.push(new_terrain);
+				level.map.legend.len() as u8 - 1
+			}
+		};
+
+		let index = (ent_args.pos.y * level.map.width + ent_args.pos.x) as usize;
+		level.map.data[index] = new_tile;
+		fixed = true;
 	}
 
-	Metadata {
-		time_limit,
-		required_chips,
-		title,
-		trap_linkage,
-		cloner_linkage,
-		password,
-		hint,
-		author,
+	for &ent_index in ents_to_remove.iter().rev() {
+		level.entities.remove(ent_index);
 	}
+
+	return fixed;
 }
