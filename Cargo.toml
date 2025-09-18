@@ -1,13 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
+	"./ccdat",
 	"./chipcore",
 	"./chipedit",
 	"./chipgame",
 	"./chipplay",
 	"./chipty",
-	"./scripts/ccdat",
 	"./scripts/colorkey",
+	"./scripts/extract",
 	"./scripts/fixer",
 	"./scripts/levelstats",
 	"./scripts/spritec",

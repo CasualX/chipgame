@@ -1,9 +1,10 @@
 [package]
-name = "ccdat_extract"
+name = "extract"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ccdat = { path = "../../ccdat" }
 clap.workspace = true
 dataview = "1.0"
 chipty = { path = "../../chipty" }
