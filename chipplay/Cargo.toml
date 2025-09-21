@@ -7,6 +7,8 @@ edition = "2021"
 chipcore = { path = "../chipcore" }
 chipgame = { path = "../chipgame" }
 
+ini_core.workspace = true
+
 serde.workspace = true
 serde_json.workspace = true
 

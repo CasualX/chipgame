@@ -33,6 +33,21 @@ fn load_png(
 }
 
 fn main() {
+	let mut tileset_texture = "tileset/MS.png";
+	let settings_storage = fs::read_to_string("chipgame.ini");
+	if let Ok(settings) = &settings_storage {
+		for item in ini_core::Parser::new(settings) {
+			match item {
+				ini_core::Item::Property(key, Some(value)) => {
+					if key == "TilesetTexture" {
+						tileset_texture = value;
+					}
+				}
+				_ => { /* Ignore other items */ }
+			}
+		}
+	}
+
 	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &paks::Key::default()) {
 		FileSystem::Paks(paks)
 	}
@@ -62,7 +77,7 @@ fn main() {
 	let mut g = shade::gl::GlGraphics::new();
 
 	// Load the texture
-	let tileset = load_png(&mut g, Some("scene tiles"), &fs, "tileset/MS.png", &shade::image::TextureProps {
+	let tileset = load_png(&mut g, Some("scene tiles"), &fs, tileset_texture, &shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
@@ -131,6 +146,8 @@ fn main() {
 		texdigits,
 		font,
 	};
+
+	drop(settings_storage);
 
 	let mut editor = editor::EditorState::default();
 	editor.init();
