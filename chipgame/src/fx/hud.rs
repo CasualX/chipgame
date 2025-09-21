@@ -21,55 +21,62 @@ impl FxState {
 		cv.uniform.transform = Transform2f::ortho(cv.viewport.cast());
 		cv.uniform.texture = resx.texdigits;
 
-		// let paint = shade::d2::Paint {
-		// 	template: UiVertex {
-		// 		pos: Vec2f::ZERO,
-		// 		uv: Vec2f::ZERO,
-		// 		color: [255, 255, 255, 255],
-		// 	},
-		// };
+		// Draw the backgrounds for various UI elements
+		let paint = shade::d2::Paint {
+			template: UiVertex {
+				pos: Vec2f::ZERO,
+				uv: Vec2f::ZERO,
+				color: [255, 255, 255, 64],
+			},
+		};
 		let ss = resx.viewport.size();
-		let a = ss.y as f32 * 0.075;
-		// cv.fill_rect(&paint, &Bounds2::c(0.0, 0.0, ss.x as f32, a + a));
-
-		cv.uniform.texture = resx.tileset;
-
+		let a = f32::max(ss.y as f32 * 0.075, ss.x as f32 * 0.05);
+		let y = resx.viewport.bottom() as f32 - a * 1.1;
 		let ref gs = self.gs;
 
+		let [[keys_x1, keys_x2], [items_x1, items_x2]] = shade::d2::layout::flex1d(resx.viewport.left() as f32, resx.viewport.right() as f32, None, shade::d2::layout::Justify::SpaceAround, &[
+			shade::d2::layout::Unit::Abs(a * 5.0),
+			shade::d2::layout::Unit::Abs(a * 5.0),
+		]);
+		if gs.ps.keys.iter().any(|&k| k > 0) {
+			cv.fill_rect(&paint, &Bounds2::c(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
+		}
+		if gs.ps.flippers || gs.ps.fire_boots || gs.ps.ice_skates || gs.ps.suction_boots {
+			cv.fill_rect(&paint, &Bounds2::c(items_x1, y, items_x2, resx.viewport.bottom() as f32));
+		}
+		if !self.darken {
+			cv.fill_rect(&paint, &Bounds2::c(keys_x1, 0.0, keys_x2, a * 0.9));
+			cv.fill_rect(&paint, &Bounds2::c(items_x1, 0.0, items_x2, a * 0.9));
+		}
+
+		// Draw the inventory items
+		cv.uniform.texture = resx.tileset;
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(a * 0.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(keys_x1 + a * 0.5, y), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(a * 1.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(keys_x1 + a * 1.5, y), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(a * 2.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(keys_x1 + a * 2.5, y), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(a * 3.0, 0.0), a);
+			draw_sprite(cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(keys_x1 + a * 3.5, y), a);
 		}
-
 		if gs.ps.flippers {
-			draw_sprite(cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(a * 0.0, a), a);
+			draw_sprite(cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(items_x1 + a * 0.5, y), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(a * 1.0, a), a);
+			draw_sprite(cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(items_x1 + a * 1.5, y), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(a * 2.0, a), a);
+			draw_sprite(cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(items_x1 + a * 2.5, y), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(a * 3.0, a), a);
+			draw_sprite(cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(items_x1 + a * 3.5, y), a);
 		}
 
-		cv.uniform.texture = resx.texdigits;
-		let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
-		let chips_color = if chips_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(cv, chips_remaining, Vec2(ss.x as f32 - a * 1.4, a * 0.6).round(), chips_color);
-		let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
-		let time_color = if time_remaining <= 0 { 0xFF00FFFF } else { 0xFF00FF00 };
-		draw_digits(cv, time_remaining, Vec2(ss.x as f32 - a * 1.4, a * 1.2).round(), time_color);
-
+		// Draw the CHIPS and TIME counters
 		{
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
@@ -86,7 +93,6 @@ impl FxState {
 			let mut scribe = shade::d2::Scribe {
 				font_size: size,
 				line_height: size,
-				// color: Vec4(255, 255, 0, 255),
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
@@ -99,27 +105,36 @@ impl FxState {
 						3 => Vec4(255, 255, 0, 255),
 						_ => Vec4(255, 255, 255, 255),
 					};
-					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(a * i as f32, 0.0, a * (i + 1) as f32, a), shade::d2::TextAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
+					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(keys_x1 + a * (i as f32 + 0.5), y + 0.0, keys_x1 + a * (i as f32 + 1.5), y + a), shade::d2::TextAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
 				}
 			}
 
-
-			// let a = a * 0.75;
 			scribe.font_size = a * 0.5;
 			scribe.line_height = scribe.font_size * 1.2;
+
+			let digits_w = scribe.text_width(&mut Vec2(0.0, 0.0), &resx.font.font, "000");
+			let chips_x = (keys_x1 + keys_x2) * 0.5;
+			let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
+			let time_x = (items_x1 + items_x2) * 0.5;
+			let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
+
 			scribe.color = Vec4(255, 0, 128, 255);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "CHIPS:");
+			scribe.color = if chips_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x + a * 0.125, 0.0, chips_x, a), shade::d2::TextAlign::TopLeft, &format!("{chips_remaining}"));
 
-			// scribe.color = Vec4::unpack8(chips_color);
-			// let chips_display = format!("Chips: {:0>3}", chips_remaining);
-			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::TextAlign::BottomLeft, &chips_display);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, 0.0, ss.x as f32, a), shade::d2::TextAlign::BottomLeft, "CHIPS");
-
-			// scribe.color = Vec4::unpack8(time_color);
-			// let time_display = if time_remaining > 0 { format!("Time:  {:0>3}", time_remaining) } else { String::from("Time:  -") };
-			// tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::TextAlign::TopLeft, &time_display);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(ss.x as f32 - a * 3.0, a, ss.x as f32, a * 2.0), shade::d2::TextAlign::TopLeft, "TIME");
+			scribe.color = Vec4(255, 0, 128, 255);
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "TIME:");
+			scribe.color = if time_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
+			if time_remaining >= 0 {
+				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x + digits_w + a * 0.125, a), shade::d2::TextAlign::TopRight, &format!("{time_remaining}"));
+			}
+			else {
+				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x, a), shade::d2::TextAlign::TopLeft, "- - -");
+			}
 		}
 
+		// Draw the level title or hint text
 		let mut darken = false;
 		if matches!(self.gs.ts, core::TimeState::Waiting) {
 			darken = true;
@@ -179,8 +194,6 @@ impl FxState {
 					..Default::default()
 				};
 				tbuf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, &hint);
-				// let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font, hint);
-				// tbuf.text_write(&resx.font, &scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.5), hint);
 			}
 		}
 
@@ -202,54 +215,4 @@ fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, sprite: dat
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
 	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(size, size)));
-}
-
-fn draw_digits(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, n: i32, pos: Vec2<f32>, color: u32) {
-	if n < 0 {
-		draw_digit(cv, None, pos + Vec2(0.0, 0.0), color);
-		draw_digit(cv, None, pos + Vec2(17.0, 0.0), color);
-		draw_digit(cv, None, pos + Vec2(34.0, 0.0), color);
-	}
-	else {
-		let d1 = n % 10;
-		let d2 = (n / 10) % 10;
-		let d3 = (n / 100) % 10;
-
-		let d3 = if d3 > 0 { Some((d3 as u8 + b'0') as char) } else { None };
-		let d2 = if d2 > 0 || d3.is_some() { Some((d2 as u8 + b'0') as char) } else { None };
-		let d1 = Some((d1 as u8 + b'0') as char);
-
-		draw_digit(cv, d3, pos + Vec2(0.0, 0.0), color);
-		draw_digit(cv, d2, pos + Vec2(17.0, 0.0), color);
-		draw_digit(cv, d1, pos + Vec2(34.0, 0.0), color);
-	}
-}
-
-fn draw_digit(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, digit: Option<char>, pos: Vec2<f32>, color: u32) {
-	let index = match digit {
-		Some('0') => 1,
-		Some('1') => 2,
-		Some('2') => 3,
-		Some('3') => 4,
-		Some('4') => 5,
-		Some('5') => 6,
-		Some('6') => 7,
-		Some('7') => 8,
-		Some('8') => 9,
-		Some('9') => 10,
-		_ => 0,
-	};
-
-	let u1 = index as f32 * 17.0 / 187.0;
-	let u2 = (index + 1) as f32 * 17.0 / 187.0;
-	let v1 = 0.0;
-	let v2 = 1.0;
-	let color = Vec4::unpack8(color).into();
-
-	let top_left = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u1, v1), color };
-	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u1, v2), color };
-	let top_right = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u2, v1), color };
-	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: Vec2(u2, v2), color };
-	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
-	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(17.0, 25.0)));
 }
