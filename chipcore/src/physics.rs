@@ -215,6 +215,9 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				_ => false,
 			};
 			if solid {
+				if is_player {
+					flick(s, &new_pos, step_dir);
+				}
 				return false;
 			}
 		}
