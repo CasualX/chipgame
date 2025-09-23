@@ -97,8 +97,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		'end_move: {
 			if let Some(step_dir) = ent.step_dir {
 				if matches!(terrain, Terrain::Teleport) {
-					teleport(s, ent, step_dir);
-					break 'end_move;
+					if teleport(s, ent, step_dir) {
+						break 'end_move;
+					}
 				}
 
 				// Handle ice physics

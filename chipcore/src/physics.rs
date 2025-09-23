@@ -444,7 +444,10 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::ForceS => try_move(s, ent, Compass::Down),
 		Terrain::ForceE => try_move(s, ent, Compass::Right),
 		Terrain::ForceRandom => { let dir = s.rand.next(); try_move(s, ent, dir) },
-		Terrain::Teleport => if let Some(step_dir) = step_dir { teleport(s, ent, step_dir) } else { false },
+		Terrain::Teleport => match step_dir {
+			Some(step_dir) => teleport(s, ent, step_dir), // If this fails the entity gets softlocked, player is not affected
+			None => false,
+		},
 		_ => return false,
 	};
 	ent.flags |= EF_MOMENTUM;
@@ -454,24 +457,33 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 /// Teleports the entity to the destination of a teleporter.
 pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
 	let old_pos = ent.pos;
+	let mut teleported;
 	loop {
 		// Find the teleport connection
 		let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return false };
 		// Teleport the entity
 		s.qt.update(ent.handle, ent.pos, conn.dest);
 		ent.pos = conn.dest;
+		teleported = ent.pos != old_pos;
 		// Force the entity to move out of the teleporter
 		if try_move(s, ent, step_dir) {
 			break;
 		}
-		// Do nothing if no valid teleport exit is found
+		// Reflect the entity back if they're softlocked
+		// This happens when all destinations are blocked (including the source)
 		if old_pos == ent.pos {
-			return false;
+			if !try_move(s, ent, step_dir.turn_around()) {
+				return false;
+			}
+			break;
 		}
 	}
 
-	// Teleport the entity
-	s.events.fire(GameEvent::EntityTeleport { entity: ent.handle });
+	// Teleport the entity if they actually moved
+	if teleported {
+		s.events.fire(GameEvent::EntityTeleport { entity: ent.handle });
+	}
+	// Play sound only for player to avoid cacophony
 	if matches!(ent.kind, EntityKind::Player) {
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::Teleporting });
 	}
