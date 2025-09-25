@@ -48,8 +48,9 @@ fn main() {
 		}
 	}
 
-	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &paks::Key::default()) {
-		FileSystem::Paks(paks)
+	let key = paks::Key::default();
+	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &key) {
+		FileSystem::Paks(paks, key)
 	}
 	else {
 		FileSystem::StdFs(std::path::PathBuf::from("data"))

@@ -61,9 +61,21 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 				else if path.is_file() && !path.with_extension("").exists() {
 					let Some(ext) = path.extension() else { continue; };
 					if ext == "paks" {
-						match paks::FileReader::open(&path, &paks::Key::default()) {
+						let key_name = format!("chipgame_{}", path.file_stem().unwrap().to_string_lossy());
+						let key = match std::env::var(key_name) {
+							Ok(val) => {
+								match paks::parse_key(&val) {
+								Ok(key) => key,
+								Err(err) => {
+									eprintln!("Invalid key: {err}: {}", path.display());
+									continue;
+								}
+							}},
+							Err(_) => paks::Key::default(),
+						};
+						match paks::FileReader::open(&path, &key) {
 							Ok(paks) => {
-								let fs = FileSystem::Paks(paks);
+								let fs = FileSystem::Paks(paks, key);
 								load_levelset(&fs, packs);
 							},
 							Err(err) => {
@@ -132,7 +144,7 @@ fn load_levelset(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 
 	let splash = index.splash.map(|s| match fs {
 		FileSystem::StdFs(path) => path.join(s),
-		FileSystem::Paks(_) => PathBuf::from(s),// This is wrong, load the splash image here... Or pass the FS through everywhere
+		FileSystem::Paks(_, _) => PathBuf::from(s),// This is wrong, load the splash image here... Or pass the FS through everywhere
 	});
 
 	packs.push(LevelSet {
