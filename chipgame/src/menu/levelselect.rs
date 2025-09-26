@@ -19,7 +19,11 @@ impl LevelSelectMenu {
 	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
 		self.items.clear();
 		self.items.push((0, "Unlock level".to_string()));
-		for level_number in sd.unlocked_levels.iter().enumerate().filter_map(|(i, &unlocked)| if unlocked { Some((i + 1) as i32) } else { None }) {
+		for level_index in 0..sd.unlocked_levels.len() {
+			let level_number = (level_index + 1) as i32;
+			if !sd.is_level_unlocked(level_number) {
+				continue;
+			}
 			let Some(lv) = lp.levels.get((level_number - 1) as usize) else { continue };
 			if sd.current_level == level_number {
 				self.selected = self.items.len() as i32;

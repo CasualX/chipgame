@@ -25,6 +25,7 @@ pub struct SaveData {
 	pub dev_mode: bool,
 	pub perspective: bool,
 	pub auto_save_replay: bool,
+	pub show_hidden_levels: bool,
 }
 
 impl Default for SaveData {
@@ -43,6 +44,7 @@ impl Default for SaveData {
 			dev_mode: false,
 			perspective: true,
 			auto_save_replay: false,
+			show_hidden_levels: false,
 		}
 	}
 }
@@ -85,6 +87,9 @@ impl SaveData {
 	}
 
 	pub fn is_level_unlocked(&self, level_number: i32) -> bool {
+		if self.show_hidden_levels {
+			return true;
+		}
 		let level_index = (level_number - 1) as usize;
 		self.unlocked_levels.get(level_index).copied().unwrap_or(false)
 	}
@@ -175,6 +180,7 @@ impl SaveData {
 			dev_mode: false,
 			perspective: true,
 			auto_save_replay: true,
+			show_hidden_levels: false,
 		};
 		this.unlocked_levels[0] = true;
 
