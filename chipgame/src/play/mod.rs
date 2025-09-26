@@ -327,16 +327,17 @@ impl PlayState {
 						let scores = savedata::Scores {
 							ticks: fx.gs.time,
 							steps: fx.gs.ps.steps,
-							// attempts: fx.gs.ps.attempts,
 						};
 						let time_high_score = self.save_data.is_time_high_score(fx.level_number, scores.ticks);
 						let steps_high_score = self.save_data.is_steps_high_score(fx.level_number, scores.steps);
-						if time_high_score || steps_high_score {
+						let high_score = time_high_score || steps_high_score;
+						if high_score {
 							self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::GameWin });
 						}
 						self.save_data.complete_level(fx.level_number, scores);
 						self.save_data.save(&self.lvsets.current());
-						if self.save_data.auto_save_replay {
+						// Auto-save replay if enabled or if a new high score was achieved
+						if self.save_data.auto_save_replay || high_score {
 							save_replay(self.lvsets.current(), fx);
 						}
 
