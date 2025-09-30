@@ -332,7 +332,7 @@ pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Unifo
 fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
 	for h in state.gs.qt.get(pos) {
 		if let Some(ent) = state.gs.ents.get(h) {
-			if matches!(ent.kind, core::EntityKind::Block) {
+			if matches!(ent.kind, core::EntityKind::Block | core::EntityKind::IceBlock) {
 				return true;
 			}
 		}

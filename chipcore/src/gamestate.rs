@@ -86,7 +86,7 @@ impl GameState {
 
 		for ehandle in self.ents.handles() {
 			if let Some(ent) = self.ents.take(ehandle) {
-				if matches!(ent.kind, EntityKind::Block) {
+				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
 					self.update_hidden_flag(ent.pos, true);
 				}
 				self.ents.put(ent);
@@ -100,7 +100,7 @@ impl GameState {
 				let template = self.qt.get(conn.dest)[0];
 				if let Some(template_ent) = self.ents.get_mut(template) {
 					let valid = matches!(template_ent.kind,
-						EntityKind::Block | EntityKind::Bug | EntityKind::FireBall | EntityKind::PinkBall | EntityKind::Tank |
+						EntityKind::Block | EntityKind::IceBlock | EntityKind::Bug | EntityKind::FireBall | EntityKind::PinkBall | EntityKind::Tank |
 						EntityKind::Glider | EntityKind::Teeth | EntityKind::Walker | EntityKind::Blob | EntityKind::Paramecium);
 					if valid {
 						template_ent.flags |= EF_TEMPLATE;

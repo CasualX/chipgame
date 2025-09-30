@@ -93,7 +93,7 @@ impl Object {
 			let elevated = matches!(terrain, core::Terrain::Wall | core::Terrain::RedLock | core::Terrain::BlueLock | core::Terrain::GreenLock | core::Terrain::YellowLock);
 
 			if elevated {
-				if !matches!(ent.kind, core::EntityKind::Block) {
+				if !matches!(ent.kind, core::EntityKind::Block | core::EntityKind::IceBlock) {
 					self.pos.z = 20.0;
 				}
 			}

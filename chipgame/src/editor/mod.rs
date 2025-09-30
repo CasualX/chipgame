@@ -47,11 +47,12 @@ static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
 	[Terrain::CloneBlockN, Terrain::CloneBlockW],
 ];
 
-static ENTITY_SAMPLES: [(EntityKind, data::SpriteId); 23] = [
+static ENTITY_SAMPLES: [(EntityKind, data::SpriteId); 24] = [
 	(EntityKind::Player, data::SpriteId::PlayerWalkNeutral),
 	(EntityKind::Chip, data::SpriteId::Chip),
 	(EntityKind::Socket, data::SpriteId::Socket),
 	(EntityKind::Block, data::SpriteId::DirtBlock),
+	(EntityKind::IceBlock, data::SpriteId::IceBlock),
 	(EntityKind::Flippers, data::SpriteId::Flippers),
 	(EntityKind::FireBoots, data::SpriteId::FireBoots),
 	(EntityKind::IceSkates, data::SpriteId::IceSkates),

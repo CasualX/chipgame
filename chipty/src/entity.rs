@@ -8,6 +8,7 @@ pub enum EntityKind {
 	Chip,
 	Socket,
 	Block,
+	IceBlock,
 	Flippers,
 	FireBoots,
 	IceSkates,

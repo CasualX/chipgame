@@ -1,7 +1,7 @@
 use std::{env, fs};
 use std::path::Path;
 
-fn test_replay(level: &str, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity) {
+fn test_replay(level: &str, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity) -> bool {
 	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
 
 	let mut game = chipcore::GameState::default();
@@ -13,27 +13,61 @@ fn test_replay(level: &str, replay: &chipty::ReplayDto, activity: chipcore::Play
 		game.tick(&input);
 	}
 
-	assert_eq!(game.ps.activity, activity);
-	assert_eq!(game.time, replay.ticks);
-	assert_eq!(game.ps.bonks, replay.bonks);
+	let mut success = true;
+	if game.ps.activity != activity {
+		eprintln!(" - activity mismatch: expected {:?}, got {:?}", activity, game.ps.activity);
+		success = false;
+	}
+	if game.time != replay.ticks {
+		eprintln!(" - ticks mismatch: expected {}, got {}", replay.ticks, game.time);
+		success = false;
+	}
+	if game.ps.bonks != replay.bonks {
+		eprintln!(" - bonks mismatch: expected {}, got {}", replay.bonks, game.ps.bonks);
+		success = false;
+	}
+
+	success
 }
 
 fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 	eprintln!("\x1b[33mLevels\x1b[m: {:?}", levels_dir);
 	eprintln!("\x1b[33mReplays\x1b[m: {:?}", replays_dir);
+	let mut fail_count = 0usize;
 	for level_number in 1..150 {
 		let level_path = levels_dir.join(format!("level{level_number}.json"));
 		let level_content = fs::read_to_string(&level_path).unwrap();
 		let level: chipcore::LevelDto = serde_json::from_str(&level_content).unwrap();
+		let password = level.password.unwrap();
 		let replay_path = replays_dir.join(level_path.file_name().unwrap());
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 			let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
-			eprintln!("Playing: level{} {:?}: \x1b[32m{}\x1b[m", level_number, level.password.unwrap(), level.name);
-			test_replay(&level_content, &replay, chipcore::PlayerActivity::Win);
+			eprintln!("Playing: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
+			fail_count += !test_replay(&level_content, &replay, chipcore::PlayerActivity::Win) as usize;
 		}
 		else {
-			eprintln!("\x1b[31mSkipped\x1b[m: level{} {:?}: \x1b[32m{}\x1b[m", level_number, level.password.unwrap(), level.name);
+			eprintln!("\x1b[31mSkipped\x1b[m: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
 		}
+	}
+	if fail_count > 0 {
+		panic!("{} replay(s) failed", fail_count);
+	}
+}
+
+fn test_level(levels_dir: &Path, replays_dir: &Path, level_name: &str) {
+	let level_path = levels_dir.join(format!("{level_name}.json"));
+	let level_content = fs::read_to_string(&level_path).unwrap();
+	let level: chipcore::LevelDto = serde_json::from_str(&level_content).unwrap();
+	let replay_path = replays_dir.join(level_path.file_name().unwrap());
+	if let Ok(replay_content) = fs::read_to_string(&replay_path) {
+		let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
+		eprintln!("Playing {:?}: \x1b[32m{}\x1b[m", level_name, level.name);
+		if !test_replay(&level_content, &replay, chipcore::PlayerActivity::Win) {
+			panic!("replay failed for {:?}", level_name);
+		}
+	}
+	else {
+		eprintln!("\x1b[31mSkipped\x1b[m {:?}: \x1b[32m{}\x1b[m", level_name, level.name);
 	}
 }
 
@@ -75,4 +109,12 @@ fn cclp5() {
 	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp5/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp5");
 	test_levelset(&levels_dir, &replays_dir);
+}
+
+#[test]
+fn dev() {
+	let current_dir = env::current_dir().unwrap();
+	let levels_dir = current_dir.parent().unwrap().join("levelsets/dev");
+	let replays_dir = current_dir.join("tests/replays/dev");
+	test_level(&levels_dir, &replays_dir, "iceblock");
 }

@@ -28,7 +28,7 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 
 	if let Some(step_dir) = step_dir {
 		// Check for panels on the current terrain
-		let solidf = terrain_solid_flags(terrain);
+		let solidf = terrain_solid_flags(terrain, flags);
 		let panel = match step_dir {
 			Compass::Up => THIN_WALL_N,
 			Compass::Left => THIN_WALL_W,
@@ -50,27 +50,14 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 			Compass::Down => THIN_WALL_N,
 			Compass::Right => THIN_WALL_W,
 		};
-		if terrain_solid_flags(terrain) & panel != 0 {
+		if terrain_solid_flags(terrain, flags) & panel != 0 {
 			return false;
 		}
 	}
 
 	// Check if the terrain is solid
-	if terrain_solid_flags(terrain) == SOLID_WALL {
+	if terrain_solid_flags(terrain, flags) == SOLID_WALL {
 		return false;
-	}
-
-	// Check if allowed to move on certain terrains
-	match terrain {
-		Terrain::Gravel if flags.gravel => return false,
-		Terrain::Fire if flags.fire => return false,
-		Terrain::Dirt if flags.dirt => return false,
-		Terrain::Exit if flags.exit => return false,
-		Terrain::Water if flags.water => return false,
-		Terrain::FakeBlueWall if flags.blue_fake => return false,
-		Terrain::RecessedWall if flags.recessed_wall => return false,
-		// Terrain::Hint if flags.hint => return false,
-		_ => (),
 	}
 
 	for ehandle in s.qt.get(pos) {
@@ -80,6 +67,7 @@ pub fn can_move(s: &GameState, mut pos: Vec2i, step_dir: Option<Compass>, flags:
 			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => true,
 			EntityKind::Block => true,
+			EntityKind::IceBlock => true,
 			EntityKind::Flippers => flags.boots,
 			EntityKind::FireBoots => flags.boots,
 			EntityKind::IceSkates => flags.boots,
@@ -177,7 +165,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 	if !dev_wtw {
 		// Check for panels on the current terrain
-		let solidf = terrain_solid_flags(from_terrain);
+		let solidf = terrain_solid_flags(from_terrain, &ent.data.flags);
 		let panel = match step_dir {
 			Compass::Up => THIN_WALL_N,
 			Compass::Left => THIN_WALL_W,
@@ -186,9 +174,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		};
 		// If on a solid wall, allow movement out
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
-			if is_player {
-				flick(s, &new_pos, step_dir);
-			}
+			flick(s, ent.kind, &new_pos, step_dir);
 			return false;
 		}
 
@@ -215,9 +201,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				_ => false,
 			};
 			if solid {
-				if is_player {
-					flick(s, &new_pos, step_dir);
-				}
+				flick(s, ent.kind, &new_pos, step_dir);
 				return false;
 			}
 		}
@@ -231,34 +215,14 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Down => THIN_WALL_N,
 			Compass::Right => THIN_WALL_W,
 		};
-		if terrain_solid_flags(to_terrain) & panel != 0 {
-			if is_player {
-				flick(s, &new_pos, step_dir);
-			}
+		if terrain_solid_flags(to_terrain, &ent.data.flags) & panel != 0 {
+			flick(s, ent.kind, &new_pos, step_dir);
 			return false;
-		}
-
-		// Check if the terrain is solid
-		if terrain_solid_flags(to_terrain) == SOLID_WALL {
-			return false;
-		}
-
-		// Check if allowed to move on certain terrains
-		let flags = &ent.data.flags;
-		match to_terrain {
-			Terrain::Gravel if flags.gravel => return false,
-			Terrain::Fire if flags.fire => return false,
-			Terrain::Dirt if flags.dirt => return false,
-			Terrain::Exit if flags.exit => return false,
-			Terrain::Water if flags.water => return false,
-			Terrain::FakeBlueWall if flags.blue_fake => return false,
-			Terrain::RecessedWall if flags.recessed_wall => return false,
-			// Terrain::Hint if flags.hint => return false,
-			_ => (),
 		}
 	}
 
 	let flags = &ent.data.flags;
+	let pusher = ent.kind;
 	for ehandle in s.qt.get(new_pos) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 		let solid = match ent.kind {
@@ -281,6 +245,21 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+					false
+				}
+				else {
+					true
+				}
+			}
+			EntityKind::IceBlock => {
+				let allowed_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
+				if allowed_pusher && try_move(s, &mut ent, step_dir) {
+					s.update_hidden_flag(ent.pos, true);
+					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
+					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+					if is_player { // Only play sound if player is pushing the ice block
+						s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
+					}
 					false
 				}
 				else {
@@ -356,11 +335,22 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 }
 
 /// To flick a block is to push it off of a tile that Chip cannot enter.
-fn flick(s: &mut GameState, &new_pos: &Vec2i, step_dir: Compass) {
+fn flick(s: &mut GameState, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Compass) {
+	let allowed_block_pusher = matches!(pusher, EntityKind::Player);
+	let allowed_iceblock_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
+
+	if !(allowed_block_pusher || allowed_iceblock_pusher) {
+		return;
+	}
+
 	for ehandle in s.qt.get(new_pos) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 
-		if matches!(ent.kind, EntityKind::Block) {
+		let allowed_pusher =
+			matches!(ent.kind, EntityKind::Block) && allowed_block_pusher ||
+			matches!(ent.kind, EntityKind::IceBlock) && allowed_iceblock_pusher;
+
+		if allowed_pusher {
 			if try_move(s, &mut ent, step_dir) {
 				s.update_hidden_flag(ent.pos, true);
 				s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
@@ -391,7 +381,7 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 	for ehandle in s.qt.get(pos) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 
-		if matches!(ent.kind, EntityKind::Block) {
+		if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
 			if try_move(s, &mut ent, slap_dir) {
 				s.update_hidden_flag(ent.pos, true);
 				s.update_hidden_flag(ent.pos - slap_dir.to_vec(), false);
@@ -492,7 +482,7 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	// Play sound only for player and blocks to avoid a cacophony
-	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block);
+	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock);
 
 	let terrain = s.field.get_terrain(ent.pos);
 	if matches!(terrain, Terrain::BearTrap) {
@@ -622,7 +612,7 @@ const THIN_WALL_E: u8 = 0x2;
 const THIN_WALL_S: u8 = 0x4;
 const THIN_WALL_W: u8 = 0x8;
 
-fn terrain_solid_flags(terrain: Terrain) -> u8 {
+fn terrain_solid_flags(terrain: Terrain, flags: &SolidFlags) -> u8 {
 	match terrain {
 		Terrain::Blank => SOLID_WALL,
 		Terrain::Floor => 0,
@@ -632,15 +622,15 @@ fn terrain_solid_flags(terrain: Terrain) -> u8 {
 		Terrain::RedLock => SOLID_WALL,
 		Terrain::GreenLock => SOLID_WALL,
 		Terrain::YellowLock => SOLID_WALL,
-		Terrain::Hint => 0,
-		Terrain::Exit => 0,
+		Terrain::Hint => 0, //if flags.hint { SOLID_WALL } else { 0 },
+		Terrain::Exit => if flags.exit { SOLID_WALL } else { 0 },
 		Terrain::FakeExit => 0,
-		Terrain::Water => 0,
+		Terrain::Water => if flags.water { SOLID_WALL } else { 0 },
 		Terrain::WaterHazard => SOLID_WALL,
-		Terrain::Fire => 0,
-		Terrain::Dirt => 0,
+		Terrain::Fire => if flags.fire { SOLID_WALL } else { 0 },
+		Terrain::Dirt => if flags.dirt { SOLID_WALL } else { 0 },
 		Terrain::DirtBlock => SOLID_WALL,
-		Terrain::Gravel => 0,
+		Terrain::Gravel => if flags.gravel { SOLID_WALL } else { 0 },
 		Terrain::Ice => 0,
 		Terrain::IceNW => THIN_WALL_N | THIN_WALL_W,
 		Terrain::IceNE => THIN_WALL_N | THIN_WALL_E,
@@ -666,13 +656,13 @@ fn terrain_solid_flags(terrain: Terrain) -> u8 {
 		Terrain::HiddenWall => SOLID_WALL,
 		Terrain::InvisibleWall => SOLID_WALL,
 		Terrain::RealBlueWall => SOLID_WALL,
-		Terrain::FakeBlueWall => 0,
+		Terrain::FakeBlueWall => if flags.blue_fake { SOLID_WALL } else { 0 },
 		Terrain::GreenButton => 0,
 		Terrain::RedButton => 0,
 		Terrain::BrownButton => 0,
 		Terrain::BlueButton => 0,
 		Terrain::Teleport => 0,
 		Terrain::BearTrap => 0,
-		Terrain::RecessedWall => 0,
+		Terrain::RecessedWall => if flags.recessed_wall { SOLID_WALL } else { 0 },
 	}
 }

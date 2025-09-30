@@ -286,6 +286,7 @@ mod dat {
 			0x31 => terrain[index] = Terrain::CloneMachine,
 			0x32 => terrain[index] = Terrain::ForceRandom,
 			0x33 => terrain[index] = Terrain::WaterHazard, // Drowned chip
+			0x38 => entities.push(ent_args(EntityKind::IceBlock, pos, None)),
 			0x39 => terrain[index] = Terrain::FakeExit,
 			0x3a => terrain[index] = Terrain::FakeExit,
 			0x3b => terrain[index] = Terrain::FakeExit,

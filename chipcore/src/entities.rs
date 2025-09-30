@@ -8,6 +8,7 @@ mod bomb;
 mod bug;
 mod fireball;
 mod glider;
+mod iceblock;
 mod paramecium;
 mod pickup;
 mod player;
@@ -34,6 +35,7 @@ impl GameState {
 			EntityKind::Chip => pickup::create(s, data),
 			EntityKind::Socket => socket::create(s, data),
 			EntityKind::Block => block::create(s, data),
+			EntityKind::IceBlock => iceblock::create(s, data),
 			EntityKind::Flippers => pickup::create(s, data),
 			EntityKind::FireBoots => pickup::create(s, data),
 			EntityKind::IceSkates => pickup::create(s, data),

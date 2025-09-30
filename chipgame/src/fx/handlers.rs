@@ -138,7 +138,9 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 }
 pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	for obj in ctx.objects.map.values_mut() {
-		if obj.pos.xy().map(|c| (c / 32.0) as i32) == pos {
+		// Fire sprites are drawn 2px lower (y-2) to appear under other sprites
+		// This is a horrible hack! Figure out a better way to find fire objects related to a position
+		if obj.sprite == data::SpriteId::Fire && (obj.pos.xy() + Vec2(0.0, 2.0)).map(|c| (c / 32.0).round() as i32) == pos {
 			obj.anim = data::AnimationId::FadeOut;
 			obj.mover = MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) });
 			obj.unalive_after_anim = true;
@@ -189,6 +191,7 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 fn model_for_ent(ent: &core::Entity) -> data::ModelId {
 	match ent.kind {
 		core::EntityKind::Block => data::ModelId::Wall,
+		core::EntityKind::IceBlock => data::ModelId::Wall,
 		core::EntityKind::Tank => data::ModelId::ReallyFlatSprite,
 		core::EntityKind::Bug => data::ModelId::FlatSprite,
 		core::EntityKind::Blob => data::ModelId::ReallyFlatSprite,
@@ -223,6 +226,7 @@ fn sprite_for_ent(ent: &core::Entity, pl: &core::PlayerState) -> data::SpriteId 
 		core::EntityKind::Chip => data::SpriteId::Chip,
 		core::EntityKind::Socket => data::SpriteId::Socket,
 		core::EntityKind::Block => data::SpriteId::DirtBlock,
+		core::EntityKind::IceBlock => data::SpriteId::IceBlock,
 		core::EntityKind::Flippers => data::SpriteId::Flippers,
 		core::EntityKind::FireBoots => data::SpriteId::FireBoots,
 		core::EntityKind::IceSkates => data::SpriteId::IceSkates,
