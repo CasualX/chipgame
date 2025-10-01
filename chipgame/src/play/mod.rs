@@ -111,14 +111,11 @@ impl PlayState {
 		let music = if !self.save_data.bg_music {
 			None
 		}
-		else if let Some(fx) = &self.fx {
-			match fx.level_number % 2 {
-				0 => Some(data::MusicId::Chip1),
-				_ => Some(data::MusicId::Chip2),
-			}
+		else if let Some(_) = &self.fx {
+			Some(data::MusicId::GameMusic)
 		}
 		else {
-			Some(data::MusicId::Canyon)
+			Some(data::MusicId::MenuMusic)
 		};
 		self.events.push(PlayEvent::PlayMusic { music });
 	}

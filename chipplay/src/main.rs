@@ -151,9 +151,8 @@ fn main() {
 	ap.load_wav(chipcore::SoundFx::FireWalking, &fs, "sfx/crackle.wav");
 	ap.load_wav(chipcore::SoundFx::CursorMove, &fs, "sfxui/click-buttons-ui-menu.mp3");
 	ap.load_wav(chipcore::SoundFx::CursorSelect, &fs, "sfx/bump.wav");
-	ap.load_music(chipgame::data::MusicId::Chip1, &fs, "music/2Chip1.ogg");
-	ap.load_music(chipgame::data::MusicId::Chip2, &fs, "music/2Chip2.ogg");
-	ap.load_music(chipgame::data::MusicId::Canyon, &fs, "music/2Canyon.ogg");
+	ap.load_music(chipgame::data::MusicId::MenuMusic, &fs, "music/menumusic.ogg");
+	ap.load_music(chipgame::data::MusicId::GameMusic, &fs, "music/music.ogg");
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 

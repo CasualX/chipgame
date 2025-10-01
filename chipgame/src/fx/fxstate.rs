@@ -83,22 +83,6 @@ impl FxState {
 		}
 	}
 	pub fn think(&mut self, input: &Input) {
-		let music = if self.music_enabled {
-			let music = match self.level_number.wrapping_sub(1) % 2 {
-				0 => data::MusicId::Chip1,
-				_ => data::MusicId::Chip2,
-				// _ => data::MusicId::Canyon,
-			};
-			Some(music)
-		}
-		else {
-			None
-		};
-		if music != self.music {
-			self.music = music;
-			self.events.push(FxEvent::PlayMusic { music });
-		}
-
 		if input.start.is_pressed() && !self.gs.ps.activity.is_game_over() {
 			self.pause();
 		}
