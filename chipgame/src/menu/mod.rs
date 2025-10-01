@@ -2,6 +2,7 @@ use std::{fmt, mem};
 use cvmath::*;
 use shade::d2::layout;
 use crate::fx::Resources;
+use crate::play;
 
 mod draw;
 mod event;

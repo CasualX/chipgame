@@ -4,4 +4,6 @@ Levelsets are collections of levels that can be played in the game.
 
 ## Installing levelsets
 
-To install a levelset, download the levelset file and place in this directory. The levelset file should have a `.paks` extension.
+Visit [https://sets.bitbusters.club/](https://sets.bitbusters.club/) to download additional levelsets.
+
+Place the downloaded `.dat` files in this _levelsets_ folder.

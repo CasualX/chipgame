@@ -6,29 +6,41 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 	i32::max(0, i32::min(len - LEVELS_PER_PAGE, offset))
 }
 
+pub struct LevelSelectEntry {
+	pub level_number: i32,
+	pub state: play::LevelState,
+	pub name: String,
+}
+
 #[derive(Default)]
 pub struct LevelSelectMenu {
 	pub selected: i32,
 	pub offset: i32,
 	pub offsetf: f32,
-	pub items: Vec<(i32, String)>,
+	pub items: Vec<LevelSelectEntry>,
 	pub preview: Option<Box<crate::fx::FxState>>,
 }
 
 impl LevelSelectMenu {
 	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
 		self.items.clear();
-		self.items.push((0, "Unlock level".to_string()));
+		self.items.push(LevelSelectEntry { level_number: 0, state: play::LevelState::Completed, name: "Unlock level".to_string() });
 		for level_index in 0..sd.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
-			if !sd.is_level_unlocked(level_number) {
+			let state = sd.get_level_state(level_number);
+			if !sd.show_hidden_levels && matches!(state, play::LevelState::Locked) {
 				continue;
 			}
 			let Some(lv) = lp.levels.get((level_number - 1) as usize) else { continue };
 			if sd.current_level == level_number {
 				self.selected = self.items.len() as i32;
 			}
-			self.items.push((level_number, format!("Level {}: {}", level_number, lv.field.name)));
+			let prefix = match state {
+				play::LevelState::Locked => "\x1b[draw_mask=0][#]\x1b[draw_mask=1]",
+				play::LevelState::Unlocked => "[\x1b[draw_mask=0]#\x1b[draw_mask=1]]",
+				play::LevelState::Completed => "[#]",
+			};
+			self.items.push(LevelSelectEntry { level_number, state, name: format!("{prefix} Level {}: {}", level_number, lv.field.name) });
 		}
 		self.offset = clip_offset(self.selected - LEVELS_PER_PAGE / 2 + 1, self.items.len() as i32);
 		self.offsetf = self.offset as f32;
@@ -47,7 +59,7 @@ impl LevelSelectMenu {
 			}
 
 			// Request the level preview
-			let level_number = self.items[selected as usize].0;
+			let level_number = self.items[selected as usize].level_number;
 			events.push(MenuEvent::LevelPreview { level_number });
 		}
 	}
@@ -68,7 +80,7 @@ impl LevelSelectMenu {
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::UnlockLevel,
-				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].0 },
+				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].level_number },
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);
@@ -120,6 +132,8 @@ impl LevelSelectMenu {
 		let bottom_transparent = bottom_opaque + scribe.line_height * 1.5;
 
 		for i in 0..self.items.len() as i32 {
+			let item = &self.items[i as usize];
+
 			if y < top_transparent {
 				y += scribe.line_height;
 				continue;
@@ -137,14 +151,14 @@ impl LevelSelectMenu {
 			else {
 				1.0
 			};
+			let alpha = if matches!(item.state, play::LevelState::Locked) && i != self.selected { alpha * 0.5 } else { alpha };
 			let alpha = (f32::clamp(alpha, 0.0, 1.0) * 255.0) as u8;
 			let color = if i == self.selected { 255 } else { 128 };
 			scribe.color = Vec4(color, color, color, alpha);
 			scribe.outline.w = alpha;
 
-			let item = &self.items[i as usize];
 			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.25, y), Vec2::ZERO);
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.1);
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.name);
 
 			y += scribe.line_height;
 		}

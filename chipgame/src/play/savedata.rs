@@ -3,6 +3,16 @@ use std::path::Path;
 
 use super::*;
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum LevelState {
+	/// The level is not yet unlocked, hidden from the level select screen.
+	Locked,
+	/// The level is unlocked and can be played.
+	Unlocked,
+	/// The level is completed.
+	Completed,
+}
+
 pub struct Scores {
 	pub ticks: i32,
 	pub steps: i32,
@@ -64,7 +74,7 @@ impl SaveData {
 	/// Completes the level, unlocks the next level and saves the scores.
 	pub fn complete_level(&mut self, level_number: i32, scores: Scores) {
 		let level_index = (level_number - 1) as usize;
-		if let Some(lock) = self.unlocked_levels.get_mut(level_index) {
+		if let Some(lock) = self.completed_levels.get_mut(level_index) {
 			*lock = true;
 		}
 
@@ -92,6 +102,17 @@ impl SaveData {
 		}
 		let level_index = (level_number - 1) as usize;
 		self.unlocked_levels.get(level_index).copied().unwrap_or(false)
+	}
+
+	pub fn get_level_state(&self, level_number: i32) -> LevelState {
+		let level_index = (level_number - 1) as usize;
+		if self.completed_levels.get(level_index).copied().unwrap_or(false) {
+			return LevelState::Completed;
+		}
+		if self.unlocked_levels.get(level_index).copied().unwrap_or(false) {
+			return LevelState::Unlocked;
+		}
+		LevelState::Locked
 	}
 
 	/// Updates and returns the current attempt for this level.
