@@ -34,12 +34,11 @@ unsafe impl shade::TVertex for Vertex {
 	};
 }
 
-// Uniform definition
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Uniform {
 	pub transform: Mat4<f32>,
 	pub texture: shade::Texture2D,
+	pub pixel_bias: f32,
 }
 
 impl Default for Uniform {
@@ -47,14 +46,16 @@ impl Default for Uniform {
 		Uniform {
 			transform: Mat4::IDENTITY,
 			texture: shade::Texture2D::INVALID,
+			pixel_bias: 0.5,
 		}
 	}
 }
 
 impl shade::UniformVisitor for Uniform {
 	fn visit(&self, set: &mut dyn shade::UniformSetter) {
-		set.value("transform", &self.transform);
-		set.value("tex", &self.texture);
+		set.value("u_transform", &self.transform);
+		set.value("u_tex", &self.texture);
+		set.value("u_pixel_bias", &self.pixel_bias);
 	}
 }
 

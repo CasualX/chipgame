@@ -195,8 +195,8 @@ fn main() {
 
 	// Create the shader
 	let shader = {
-		let vs = fs.read_to_string("standard.vs.glsl").unwrap();
-		let fs = fs.read_to_string("standard.fs.glsl").unwrap();
+		let vs = fs.read_to_string("pixelart.vs.glsl").unwrap();
+		let fs = fs.read_to_string("pixelart.fs.glsl").unwrap();
 		g.shader_create(None, &vs, &fs)
 	};
 	let colorshader = {
