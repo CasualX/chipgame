@@ -219,7 +219,6 @@ impl PlayState {
 						self.menu.stack.push(menu::Menu::About(menu));
 					}
 				}
-				menu::MenuEvent::HighScores => {}
 				menu::MenuEvent::Exit => {
 					self.menu.close_all();
 					self.fx = None;

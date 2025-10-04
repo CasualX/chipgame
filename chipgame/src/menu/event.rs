@@ -11,7 +11,6 @@ pub enum MenuEvent {
 	NewGame,
 	Continue,
 	LevelSelect,
-	HighScores,
 	Options,
 	About,
 	Exit,

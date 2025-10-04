@@ -7,7 +7,7 @@ pub struct MainMenu {
 }
 
 impl MainMenu {
-	const ITEMS: [&'static str; 7] = ["New game", "Continue", "Go to level", "High scores", "Options", "About", "Exit"];
+	const ITEMS: [&'static str; 6] = ["New game", "Continue", "Go to level", "Options", "About", "Exit"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -26,9 +26,8 @@ impl MainMenu {
 				0 => MenuEvent::NewGame,
 				1 => MenuEvent::Continue,
 				2 => MenuEvent::LevelSelect,
-				3 => MenuEvent::HighScores,
-				4 => MenuEvent::Options,
-				5 => MenuEvent::About,
+				3 => MenuEvent::Options,
+				4 => MenuEvent::About,
 				_ => MenuEvent::Exit,
 				// _ => MenuEvent::None,
 			};
