@@ -11,6 +11,8 @@ pub struct Resources {
 	pub colorshader: shade::Shader,
 	pub uishader: shade::Shader,
 	pub texdigits: shade::Texture2D,
+	pub menubg: shade::Texture2D,
+	pub menubg_scale: f32,
 
 	pub font: shade::d2::FontResource<Option<shade::msdfgen::Font>>,
 }

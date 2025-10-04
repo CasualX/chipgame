@@ -217,6 +217,7 @@ impl EditorState {
 			}
 		}
 
+		fx::drawbg(g, resx);
 		self.game.draw(g, resx);
 
 		let cam = self.game.camera.setup(self.screen_size);

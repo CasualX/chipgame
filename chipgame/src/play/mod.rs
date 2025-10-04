@@ -372,13 +372,7 @@ impl PlayState {
 	}
 
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
-		// Clear the screen
-		g.clear(&shade::ClearArgs {
-			surface: shade::Surface::BACK_BUFFER,
-			color: Some(cvmath::Vec4(0.2, 0.2, 0.5, 1.0)),
-			depth: Some(1.0),
-			..Default::default()
-		});
+		fx::drawbg(g, resx);
 
 		if let Some(fx) = &mut self.fx {
 			fx.hud_enabled = self.menu.stack.is_empty();

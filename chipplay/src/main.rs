@@ -193,6 +193,13 @@ fn main() {
 		wrap_v: shade::TextureWrap::ClampEdge,
 	}, None).unwrap();
 
+	let menubg = load_png(&mut g, Some("menubg"), &fs, "menubg.png", &shade::image::TextureProps {
+		filter_min: shade::TextureFilter::Linear,
+		filter_mag: shade::TextureFilter::Linear,
+		wrap_u: shade::TextureWrap::Repeat,
+		wrap_v: shade::TextureWrap::Repeat,
+	}, None).unwrap();
+
 	// Create the shader
 	let shader = {
 		let vs = fs.read_to_string("pixelart.vs.glsl").unwrap();
@@ -243,6 +250,8 @@ fn main() {
 		colorshader,
 		uishader,
 		texdigits,
+		menubg,
+		menubg_scale: 4.0,
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
