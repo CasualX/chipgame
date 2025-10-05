@@ -12,6 +12,9 @@ cargo build --release --bin chipedit
 cp target/release/chipplay target/publish
 cp target/release/chipedit target/publish
 
+# Copy the config
+cp chipgame.ini target/publish
+
 # Package the assets
 pakscmd target/publish/data.paks 0 new
 pakscmd target/publish/data.paks 0 copy "" data
@@ -29,5 +32,5 @@ mkdir -p target/publish/save
 makurust levelsets/readme.md
 mv levelsets/readme.html target/publish/levelsets
 
-makurust chipgame.md
-mv chipgame.html target/publish/readme.html
+makurust readme.md
+mv readme.html target/publish/readme.html

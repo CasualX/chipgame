@@ -12,6 +12,9 @@ rem Copy the executables to the publish directory
 copy target\release\chipplay.exe target\publish
 copy target\release\chipedit.exe target\publish
 
+rem Copy the config
+copy chipgame.ini target\publish
+
 rem Package the assets
 pakscmd target/publish/data.paks 0 new
 pakscmd target/publish/data.paks 0 copy "" data
@@ -29,5 +32,5 @@ mkdir target\publish\save
 makurust levelsets\readme.md
 move levelsets\readme.html target\publish\levelsets\readme.html
 
-makurust chipgame.md
-move chipgame.html target\publish\readme.html
+makurust readme.md
+move readme.html target\publish\readme.html

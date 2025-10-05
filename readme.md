@@ -1,7 +1,7 @@
 Chip's Challenge Remake
 =======================
 
-A passion project born from fond memories of the classic puzzle game *Chip’s Challenge*, rewritten from scratch in Rust.
+A passion project born from nostalgia of the classic puzzle game *Chip’s Challenge*, rewritten from scratch in Rust.
 
 Features
 --------
@@ -23,14 +23,15 @@ Other platforms can be built from source (see below).
 Getting Started
 ---------------
 
-### Playing
+### Download and Play
 
-1. Download the latest release.
+1. Download and extract the latest release.
 2. Run `chipplay.exe` to start the game.
-3. Place additional levelset files in the `levelsets` directory to play them.
-4. Create your own levels with `chipedit.exe`.
+3. Select a levelset from the menu to begin playing.
+4. Place additional levelset files in the `levelsets` directory to play them.
+5. Create your own levels with `chipedit.exe`.
 
-### Building from Source
+### Build from Source
 
 1. Install [Rust](https://www.rust-lang.org/tools/install).
 2. Clone this repository.
@@ -41,32 +42,59 @@ Getting Started
 
 * Install [Makurust](https://github.com/fromgodd/makurust).
 
+Controls
+--------
+
+### Keyboard Controls
+
+* Arrow keys, WASD: Move Chip
+* Space: Select menu item
+* Backspace: Close the current menu
+* Enter: Open the Pause menu
+* M: Toggle music
+
+### Controller Bindings
+
+* D-pad: Move Chip
+* A: Select menu item
+* B: Close the current menu
+* Start: Open the Pause menu
+
+Level Editor
+------------
+
+The game includes a level editor that can be used to create custom levels. The level editor is very bare-bones. Launch it by dragging a level onto the `chipedit.exe` executable.
+
 Community Resources
 -------------------
 
 * [Bit Busters Wiki](https://wiki.bitbusters.club/Main_Page)
-* [Chip's Challenge 1 Levels](https://sets.bitbusters.club/)
+* [Community levelsets](https://sets.bitbusters.club/)
 * [Andrew E.'s Chip's Challenge Page](https://tilde.town/~magical/chip/)
 * [pieguy's site](https://davidstolp.com/old/chips/)
 
 License & Credits
 -----------------
 
-### Source Code
-
-This remake is released under the GNU General Public License v3.0.  
-See the [license](license.md) file for more information.  
-
 ### Chip's Challenge
 
 *Chip's Challenge* was created by Chuck Sommerville and is owned by Niffler Ltd.  
 This project is an independent, open-source remake and is not affiliated with Niffler Ltd.
 
+### Source Code
+
+This remake is released under the GNU General Public License v3.0.  
+See the [license](license.md) file for more information.  
+
 ### Graphics
 
-Default tileset: **Kayu's Enhanced Interface**
+Default tileset: *Kayu's Enhanced Interface*
 
 - Sourced from [https://tilde.town/~magical/chip/#kayu](https://tilde.town/~magical/chip/#kayu)
+
+Additional graphics: *tileworld*
+
+- Sourced from [retrofw/tileworld](https://github.com/retrofw/tileworld)
 
 ### Music
 

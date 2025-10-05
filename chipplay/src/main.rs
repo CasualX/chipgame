@@ -251,7 +251,7 @@ fn main() {
 		uishader,
 		texdigits,
 		menubg,
-		menubg_scale: 4.0,
+		menubg_scale: 2.0,
 		font,
 	};
 	let mut state = chipgame::play::PlayState::default();
