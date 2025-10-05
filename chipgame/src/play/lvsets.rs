@@ -55,7 +55,8 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 				let path = entry.path();
 				if path.is_dir() {
 					let fs = FileSystem::StdFs(path.clone());
-					load_levelset(&fs, packs);
+					let name = path.file_name().unwrap().to_string_lossy().into_owned();
+					load_levelset(&fs, name, packs);
 				}
 				// Check for packed files if no directory by that name exist
 				else if path.is_file() && !path.with_extension("").exists() {
@@ -76,7 +77,8 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 						match paks::FileReader::open(&path, &key) {
 							Ok(paks) => {
 								let fs = FileSystem::Paks(paks, key);
-								load_levelset(&fs, packs);
+								let name = path.file_stem().unwrap().to_string_lossy().into_owned();
+								load_levelset(&fs, name, packs);
 							},
 							Err(err) => {
 								eprintln!("Error reading {}: {}", path.display(), err);
@@ -96,7 +98,7 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 	packs.sort_by(|a, b| a.name.cmp(&b.name));
 }
 
-fn load_levelset(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
+fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 	let index: LevelSetDto = {
 		let index = match fs.read_compressed("index.json") {
 			Ok(data) => data,
@@ -148,7 +150,7 @@ fn load_levelset(fs: &FileSystem, packs: &mut Vec<LevelSet>) {
 	});
 
 	packs.push(LevelSet {
-		name: index.name,
+		name,
 		title: index.title,
 		about: index.about.map(|lines| lines.join("\n")),
 		splash,
@@ -170,7 +172,7 @@ fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
 	};
 
 	let name = path.file_stem().map(|s| String::from_utf8_lossy(s.as_encoded_bytes()).into_owned()).unwrap_or(String::new());
-	let title = format!("{} Level Pack", name);
+	let title = format!("{}", name);
 
 	let mut levels = Vec::new();
 	for level in &dat.levels {

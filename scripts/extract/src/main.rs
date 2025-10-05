@@ -39,8 +39,7 @@ fn main() {
 	let levelset_index = format!("{}/index.json", levelset_path);
 
 	let levelset = LevelSetDto {
-		name: dat_name.to_string(),
-		title: format!("{} Level Pack", dat_name),
+		title: dat_name.to_string(),
 		about: None,
 		splash: None,
 		unlock_all_levels: false,
