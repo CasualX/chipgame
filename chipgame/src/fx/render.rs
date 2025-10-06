@@ -46,7 +46,7 @@ impl Default for Uniform {
 		Uniform {
 			transform: Mat4::IDENTITY,
 			texture: shade::Texture2D::INVALID,
-			pixel_bias: 0.5,
+			pixel_bias: 0.25,
 		}
 	}
 }

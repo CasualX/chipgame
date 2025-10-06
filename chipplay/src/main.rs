@@ -81,37 +81,14 @@ fn load_png(
 	shade::image::png::load(g, name, &mut &data[..], props, transform)
 }
 
+enum ConfigSection {
+	Error,
+	General,
+	SoundFx,
+	Music,
+}
+
 fn main() {
-	// let app = clap::command!("play")
-	// 	.arg(clap::arg!(--"level-pack" -p [level_pack] "Level pack to play"))
-	// 	.arg(clap::arg!(-n [n] "Level number to play"))
-	// 	.arg(clap::arg!(--dev "Enable developer mode"));
-	// let matches = app.get_matches();
-	// let level_pack = matches.value_of("level-pack").expect("Level pack not specified");
-	// let level_pack = std::path::Path::new(level_pack);
-	// let level = if let Some(n) = matches.value_of("n") {
-	// 	Some(n.parse::<i32>().expect("Invalid level number"))
-	// }
-	// else {
-	// 	None
-	// };
-	// let is_dev = matches.is_present("dev");
-
-	let mut tileset_texture = "tileset/MS.png";
-	let settings_storage = fs::read_to_string("chipgame.ini");
-	if let Ok(settings) = &settings_storage {
-		for item in ini_core::Parser::new(settings) {
-			match item {
-				ini_core::Item::Property(key, Some(value)) => {
-					if key == "TilesetTexture" {
-						tileset_texture = value;
-					}
-				}
-				_ => { /* Ignore other items */ }
-			}
-		}
-	}
-
 	let key = paks::Key::default();
 	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &key) {
 		FileSystem::Paks(paks, key)
@@ -129,30 +106,53 @@ fn main() {
 		music: HashMap::new(),
 		cur_music: None,
 	};
-	ap.load_wav(chipcore::SoundFx::GameOver, &fs, "sfx/death.wav");
-	ap.load_wav(chipcore::SoundFx::GameWin, &fs, "sfx/tada.wav");
-	ap.load_wav(chipcore::SoundFx::Derezz, &fs, "sfx/derezz.wav");
-	ap.load_wav(chipcore::SoundFx::ICCollected, &fs, "sfx/chack.wav");
-	ap.load_wav(chipcore::SoundFx::KeyCollected, &fs, "sfx/click.wav");
-	ap.load_wav(chipcore::SoundFx::BootCollected, &fs, "sfx/click.wav");
-	ap.load_wav(chipcore::SoundFx::LockOpened, &fs, "sfx/door.wav");
-	ap.load_wav(chipcore::SoundFx::SocketOpened, &fs, "sfx2/socket unlock.wav");
-	ap.load_wav(chipcore::SoundFx::CantMove, &fs, "sfx/oof.wav");
-	ap.load_wav(chipcore::SoundFx::BlockMoving, &fs, "sfx/whisk.wav");
-	ap.load_wav(chipcore::SoundFx::TrapEntered, &fs, "sfx/traphit.wav");
-	ap.load_wav(chipcore::SoundFx::BombExplosion, &fs, "sfx/bomb.wav");
-	ap.load_wav(chipcore::SoundFx::ButtonPressed, &fs, "sfx/tick.wav");
-	ap.load_wav(chipcore::SoundFx::Teleporting, &fs, "sfx/teleport.wav");
-	ap.load_wav(chipcore::SoundFx::WallPopup, &fs, "sfx/popup.wav");
-	ap.load_wav(chipcore::SoundFx::WaterSplash, &fs, "sfx/splash.wav");
-	ap.load_wav(chipcore::SoundFx::BootsStolen, &fs, "sfx/thief.wav");
-	ap.load_wav(chipcore::SoundFx::TileEmptied, &fs, "sfx/whisk.wav");
-	ap.load_wav(chipcore::SoundFx::BlueWallCleared, &fs, "sfx2/bump.wav");
-	ap.load_wav(chipcore::SoundFx::FireWalking, &fs, "sfx/crackle.wav");
-	ap.load_wav(chipcore::SoundFx::CursorMove, &fs, "sfxui/click-buttons-ui-menu.mp3");
-	ap.load_wav(chipcore::SoundFx::CursorSelect, &fs, "sfx/bump.wav");
-	ap.load_music(chipgame::data::MusicId::MenuMusic, &fs, "music/menumusic.ogg");
-	ap.load_music(chipgame::data::MusicId::GameMusic, &fs, "music/music.ogg");
+
+	let mut section = ConfigSection::General;
+
+	let mut tileset_texture = "tileset/MS.png";
+	let mut pixel_art_bias = 0.5;
+	let config_storage = fs::read_to_string("chipgame.ini");
+	if let Ok(config) = &config_storage {
+		for item in ini_core::Parser::new(config) {
+			match item {
+				ini_core::Item::Property(key, Some(value)) => {
+					match section {
+						ConfigSection::General => {
+							match key {
+								"TilesetTexture" => tileset_texture = value,
+								"PixelArtBias" => {
+									if let Ok(v) = value.parse::<f32>() {
+										pixel_art_bias = v;
+									}
+								}
+								_ => { /* Ignore other items */ }
+							}
+						}
+						ConfigSection::SoundFx => {
+							if let Ok(fx) = key.parse::<chipcore::SoundFx>() {
+								println!("Loading sound effect {} as {:?}", value, fx);
+								ap.load_wav(fx, &fs, value);
+							}
+						}
+						ConfigSection::Music => {
+							if let Ok(music) = key.parse::<chipgame::data::MusicId>() {
+								ap.load_music(music, &fs, value);
+							}
+						}
+						_ => { /* Ignore other sections */ }
+					}
+				}
+				ini_core::Item::Section(name) => {
+					section = match name {
+						"SoundFx" => ConfigSection::SoundFx,
+						"Music" => ConfigSection::Music,
+						_ => ConfigSection::Error,
+					};
+				}
+				_ => { /* Ignore other items */ }
+			}
+		}
+	}
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -235,7 +235,7 @@ fn main() {
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	drop(settings_storage);
+	drop(config_storage);
 
 	let viewport = shade::cvmath::Bounds2(
 		shade::cvmath::Vec2::ZERO,
@@ -246,6 +246,7 @@ fn main() {
 		tileset,
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
+		pixel_art_bias,
 		viewport,
 		colorshader,
 		uishader,

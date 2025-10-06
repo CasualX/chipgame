@@ -229,6 +229,7 @@ impl EditorState {
 			cv.shader = resx.shader;
 			cv.uniform.transform = cam.view_proj;
 			cv.uniform.texture = resx.tileset;
+			cv.uniform.pixel_bias = resx.pixel_art_bias;
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -265,6 +266,7 @@ impl EditorState {
 			cv.shader = resx.shader;
 			cv.uniform.transform = cam.view_proj;
 			cv.uniform.texture = resx.tileset;
+			cv.uniform.pixel_bias = resx.pixel_art_bias;
 
 			struct ToVertex {
 				color: [u8; 4],

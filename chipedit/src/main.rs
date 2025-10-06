@@ -35,13 +35,20 @@ fn load_png(
 
 fn main() {
 	let mut tileset_texture = "tileset/MS.png";
-	let settings_storage = fs::read_to_string("chipgame.ini");
-	if let Ok(settings) = &settings_storage {
-		for item in ini_core::Parser::new(settings) {
+	let mut pixel_art_bias = 0.5;
+	let config_storage = fs::read_to_string("chipgame.ini");
+	if let Ok(config) = &config_storage {
+		for item in ini_core::Parser::new(config) {
 			match item {
 				ini_core::Item::Property(key, Some(value)) => {
-					if key == "TilesetTexture" {
-						tileset_texture = value;
+					match key {
+						"TilesetTexture" => tileset_texture = value,
+						"PixelArtBias" => {
+							if let Ok(v) = value.parse::<f32>() {
+								pixel_art_bias = v;
+							}
+						}
+						_ => { /* Ignore other items */ }
 					}
 				}
 				_ => { /* Ignore other items */ }
@@ -150,6 +157,7 @@ fn main() {
 		tileset,
 		tileset_size: [tex_info.width, tex_info.height].into(),
 		shader,
+		pixel_art_bias,
 		viewport,
 		colorshader,
 		uishader,
@@ -159,7 +167,7 @@ fn main() {
 		font,
 	};
 
-	drop(settings_storage);
+	drop(config_storage);
 
 	let mut editor = editor::EditorState::default();
 	editor.init();

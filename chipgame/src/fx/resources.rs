@@ -6,6 +6,7 @@ pub struct Resources {
 	pub tileset: shade::Texture2D,
 	pub tileset_size: Vec2<i32>,
 	pub shader: shade::Shader,
+	pub pixel_art_bias: f32,
 	pub viewport: Bounds2i,
 
 	pub colorshader: shade::Shader,
