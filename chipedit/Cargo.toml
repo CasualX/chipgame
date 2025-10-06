@@ -20,4 +20,7 @@ shade.workspace = true
 glutin = "0.26"
 winit = "0.24"
 
+# Use only synchronous GTK backend (provides FileDialog + MessageDialog) on Linux/BSD; no effect on Win/mac.
+rfd = { version = "0.15", default-features = false, features = ["gtk3"] }
+
 paks.workspace = true

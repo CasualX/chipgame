@@ -63,7 +63,17 @@ Controls
 Level Editor
 ------------
 
-The game includes a level editor that can be used to create custom levels. The level editor is very bare-bones. Launch it by dragging a level onto the `chipedit.exe` executable.
+The game includes a very bare-bones level editor that can be used to create custom levels. Launch it by dragging a level onto the `chipedit.exe` executable.
+
+* F2: Load level
+* F5: Save level
+* Arrow keys, WASD: Move cursor
+* Left click: Select Tile or Entity, Place tile, Select Entity, Place Connection
+* Right click: Rotate Entity
+* Delete: Remove Entity
+* T: Select Terrain Tool
+* E: Select Entity Tool
+* C: Select Connection Tool
 
 Community Resources
 -------------------

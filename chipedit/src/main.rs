@@ -3,6 +3,7 @@
 use std::{fs, thread, time};
 
 use chipgame::editor;
+use std::path::Path;
 use chipgame::FileSystem;
 
 #[cfg(windows)]
@@ -56,10 +57,11 @@ fn main() {
 		FileSystem::StdFs(std::path::PathBuf::from("data"))
 	};
 
+	// Make the level argument optional so the editor can start blank or open via Save/Load dialogs.
 	let app = clap::command!("play")
-		.arg(clap::arg!(<level> "Level file to play"));
+	.arg(clap::arg!([level] "Level file to open"));
 	let matches = app.get_matches();
-	let file_path = matches.value_of("level").unwrap();
+	let mut file_path: Option<String> = matches.value_of("level").map(|s| s.to_string());
 
 	let mut size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -161,9 +163,16 @@ fn main() {
 
 	let mut editor = editor::EditorState::default();
 	editor.init();
-	editor.load_level(&fs::read_to_string(&file_path).unwrap());
-
-	context.window().set_title(&format!("ChipEdit - {}", file_path));
+	if let Some(ref fp) = file_path {
+		if let Ok(contents) = fs::read_to_string(fp) {
+			editor.load_level(&contents);
+			context.window().set_title(&format!("ChipEdit - {}", fp));
+		}
+	}
+	else {
+		editor.load_level(include_str!("template.json"));
+		context.window().set_title("ChipEdit - (unsaved)");
+	}
 
 	// Main loop
 	let mut quit = false;
@@ -205,9 +214,51 @@ fn main() {
 						Some(winit::event::VirtualKeyCode::Up) => editor.key_up(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::Down) => editor.key_down(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::Delete) => editor.delete(is_pressed(state)),
+						Some(winit::event::VirtualKeyCode::F2) if is_pressed(state) => {
+							// Open file dialog to load a level
+							let mut dialog = rfd::FileDialog::new()
+								.add_filter("Level", &["json"])
+								.set_title("Open Level");
+							if let Some(ref existing) = file_path {
+								let p = Path::new(existing);
+								if let Some(parent) = p.parent() { dialog = dialog.set_directory(parent); }
+							}
+							if let Some(path) = dialog.pick_file() {
+								match fs::read_to_string(&path) {
+									Ok(contents) => {
+										editor.load_level(&contents);
+										file_path = Some(path.display().to_string());
+										context.window().set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap()));
+									}
+									Err(e) => eprintln!("Failed to open level: {e}"),
+								}
+							}
+						}
 						Some(winit::event::VirtualKeyCode::F5) if is_pressed(state) => {
-							let s = editor.save_level();
-							fs::write(&file_path, s).unwrap();
+							// Serialize current level
+							let contents = editor.save_level();
+
+							// Prepare save dialog with existing path (if any) for convenience
+							let mut dialog = rfd::FileDialog::new()
+								.add_filter("Level", &["json"])
+								.set_title("Save Level");
+
+							if let Some(ref existing) = file_path {
+								let p = Path::new(existing);
+								if let Some(parent) = p.parent() { dialog = dialog.set_directory(parent); }
+								if let Some(name) = p.file_name().and_then(|s| s.to_str()) { dialog = dialog.set_file_name(name); }
+							}
+
+							if let Some(path) = dialog.save_file() {
+								if let Err(e) = fs::write(&path, contents) {
+									eprintln!("Failed to save level: {e}");
+								}
+								else {
+									// Update current file path and window title
+									file_path = Some(path.display().to_string());
+									context.window().set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap()));
+								}
+							}
 						}
 						Some(winit::event::VirtualKeyCode::T) => editor.tool_terrain(is_pressed(state)),
 						Some(winit::event::VirtualKeyCode::E) => editor.tool_entity(is_pressed(state)),
