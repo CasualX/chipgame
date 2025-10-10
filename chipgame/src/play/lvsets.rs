@@ -14,7 +14,7 @@ pub struct LevelSet {
 	pub name: String,
 	pub title: String,
 	pub about: Option<String>,
-	pub splash: Option<PathBuf>,
+	pub splash: Option<Vec<u8>>,
 	pub unlock_all_levels: bool,
 	pub levels: Vec<LevelData>,
 }
@@ -144,9 +144,9 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 		levels.push(LevelData { content, field });
 	}
 
-	let splash = index.splash.map(|s| match fs {
-		FileSystem::StdFs(path) => path.join(s),
-		FileSystem::Paks(_, _) => PathBuf::from(s),// This is wrong, load the splash image here... Or pass the FS through everywhere
+	let splash = index.splash.and_then(|s| match fs {
+		FileSystem::StdFs(path) => fs::read(path.join(s)).ok(),
+		FileSystem::Paks(paks, key) => paks.read(s.as_bytes(), key).ok(),
 	});
 
 	packs.push(LevelSet {

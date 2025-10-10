@@ -78,7 +78,7 @@ fn load_png(
 	transform: Option<&mut dyn FnMut(&mut Vec<u8>, &mut shade::image::ImageSize)>,
 ) -> Result<shade::Texture2D, shade::image::png::LoadError> {
 	let data = fs.read(path).expect("Failed to read PNG file");
-	shade::image::png::load(g, name, &mut &data[..], props, transform)
+	shade::image::png::load_stream(g, name, &mut &data[..], props, transform)
 }
 
 enum ConfigSection {
@@ -130,7 +130,6 @@ fn main() {
 						}
 						ConfigSection::SoundFx => {
 							if let Ok(fx) = key.parse::<chipcore::SoundFx>() {
-								println!("Loading sound effect {} as {:?}", value, fx);
 								ap.load_wav(fx, &fs, value);
 							}
 						}

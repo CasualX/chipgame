@@ -27,7 +27,7 @@ impl PlayState {
 		}
 		let mut splash = Vec::new();
 		for set in &self.lvsets.collection {
-			let Some(path) = &set.splash
+			let Some(data) = &set.splash
 			else {
 				splash.push(None);
 				continue
@@ -38,15 +38,8 @@ impl PlayState {
 				wrap_u: shade::TextureWrap::ClampEdge,
 				wrap_v: shade::TextureWrap::ClampEdge,
 			};
-			match shade::image::AnimatedImage::load(g, None, path, &props) {
-				Ok(texs) => {
-					eprintln!("Loaded splash image: {}", path.display());
-					splash.push(Some(texs));
-				}
-				Err(err) => {
-					eprintln!("Error loading splash image: {:?}", err);
-					splash.push(None);
-				}
+			if let Ok(texs) = shade::image::AnimatedImage::load_memory(g, None, data, &props) {
+				splash.push(Some(texs));
 			}
 		}
 		self.menu.stack.push(menu::Menu::PackSelect(menu::LevelPackSelectMenu {

@@ -33,7 +33,6 @@ pub struct FxState {
 	pub darken_time: f32,
 	pub tiles: &'static [TileGfx],
 	pub events: Vec<FxEvent>,
-	pub axes: Option<shade::d3::axes::AxesModel>,
 }
 
 impl FxState {
@@ -200,17 +199,6 @@ impl FxState {
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 		self.effects.retain(|efx| time < efx.start + 1.0);
-
-		if self.axes.is_none() {
-			let shader = g.shader_create(None, shade::gl::shaders::COLOR3D_VS, shade::gl::shaders::COLOR3D_FS);
-			self.axes = Some(shade::d3::axes::AxesModel::create(g, shader));
-		}
-		if let Some(axes) = &self.axes {
-			axes.draw(g, &camera, &shade::d3::axes::AxesInstance {
-				local: Transform3f::scale(Vec3::dup(50.0)),
-				depth_test: None,
-			});
-		}
 
 		if self.hud_enabled {
 			self.render_ui(g, resx);
