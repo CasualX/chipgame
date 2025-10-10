@@ -34,3 +34,9 @@ move levelsets\readme.html target\publish\levelsets\readme.html
 
 makurust readme.md
 move readme.html target\publish\readme.html
+
+rem Zip it all up
+del /Q target\chipgame.zip 2> NUL
+pushd target\publish
+powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\chipgame.zip -Force"
+popd

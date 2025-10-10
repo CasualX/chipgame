@@ -34,3 +34,7 @@ mv levelsets/readme.html target/publish/levelsets
 
 makurust readme.md
 mv readme.html target/publish/readme.html
+
+# Zip it all up
+rm -f target/chipgame.zip
+( cd target/publish && zip -r ../chipgame.zip . )
