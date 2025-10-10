@@ -3,6 +3,8 @@ Chip's Challenge Remake
 
 A passion project born from nostalgia of the classic puzzle game *Chip’s Challenge*, rewritten from scratch in Rust.
 
+https://github.com/user-attachments/assets/56e8d731-c48c-4b1c-aff3-c182bce03abc
+
 Features
 --------
 
