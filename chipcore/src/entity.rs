@@ -25,6 +25,7 @@ pub struct Entity {
 }
 
 impl Entity {
+	#[inline]
 	pub fn to_entity_args(&self) -> EntityArgs {
 		EntityArgs {
 			kind: self.kind,

@@ -581,6 +581,10 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 			if press_once(ent) {
 				for other in s.ents.iter_mut() {
 					if matches!(other.kind, EntityKind::Tank) {
+						// Ignore Tank template entities
+						if other.flags & EF_TEMPLATE != 0 {
+							continue;
+						}
 						if let Some(face_dir) = other.face_dir {
 							other.face_dir = Some(face_dir.turn_around());
 							s.events.fire(GameEvent::EntityTurn { entity: other.handle });
