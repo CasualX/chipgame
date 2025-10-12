@@ -29,8 +29,8 @@ impl GameOverMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::Retry,
-				_ => MenuEvent::MainMenu,
+				0 => MenuEvent::RetryLevel,
+				_ => MenuEvent::OpenMainMenu,
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);

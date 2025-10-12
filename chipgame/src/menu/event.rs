@@ -4,38 +4,38 @@ pub enum MenuEvent {
 	CursorMove,
 	CursorSelect,
 	CloseMenu,
-	LevelPreview { level_number: i32 },
 
-	// Main Events
-	LevelPackSelect { index: usize },
+	LoadLevelPack { index: usize },
+	OpenMainMenu,
+
+	// MainMenu Events
 	NewGame,
 	Continue,
-	LevelSelect,
-	Options,
-	About,
-	Exit,
-	MainMenu,
+	OpenGoToLevel,
+	OpenOptions,
+	OpenAbout,
+	ExitGame,
 
-	// Pause Events
-	Resume,
-	Restart,
-	PauseMenu,
+	// GoToLevel Events
+	OpenUnlockLevel,
+	PreviewLevel { level_number: i32 },
+	PreviewExit,
+	PlayLevel { level_number: i32 },
 
-	// Options Events
+	// UnlockLevel Events
+	EnterPassword { code: [u8; 4] },
+
+	// OptionsMenu Events
 	SetBackgroundMusic { value: bool },
 	SetSoundEffects { value: bool },
 	SetDeveloperMode { value: bool },
 	SetPerspective { value: bool },
 
-	// Level select Events
-	UnlockLevel,
-	PlayLevel { level_number: i32 },
-
-	// Unlock level Events
-	EnterPassword { code: [u8; 4] },
-
-	// Game Over Events
-	NextLevel,
-	Retry,
+	// PauseMenu Events
+	OpenPauseMenu,
+	RestartLevel,
+	PlayNextLevel,
+	RetryLevel,
 	SaveReplay,
+	Resume,
 }

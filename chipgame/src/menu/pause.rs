@@ -32,9 +32,9 @@ impl PauseMenu {
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::Resume,
-				1 => MenuEvent::Restart,
-				2 => MenuEvent::Options,
-				_ => MenuEvent::MainMenu,
+				1 => MenuEvent::RestartLevel,
+				2 => MenuEvent::OpenOptions,
+				_ => MenuEvent::OpenMainMenu,
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);

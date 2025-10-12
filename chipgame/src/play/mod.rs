@@ -18,6 +18,8 @@ pub struct PlayState {
 	pub input: chipcore::Input,
 	pub lvsets: LevelSets,
 	pub save_data: SaveData,
+	// Tracks that the current `fx` holds a preview (not an active run).
+	is_preview: bool,
 }
 
 impl PlayState {
@@ -78,6 +80,8 @@ impl PlayState {
 		// If loading a level fails just... do nothing
 		let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
 
+		self.is_preview = false;
+
 		let attempts = self.save_data.update_level_attempts(level_number);
 		self.fx = Some(fx::FxState::default());
 		let fx = self.fx.as_mut().unwrap();
@@ -105,7 +109,12 @@ impl PlayState {
 			None
 		}
 		else if let Some(_) = &self.fx {
-			Some(data::MusicId::GameMusic)
+			if self.is_preview {
+				Some(data::MusicId::MenuMusic)
+			}
+			else {
+				Some(data::MusicId::GameMusic)
+			}
 		}
 		else {
 			Some(data::MusicId::MenuMusic)
@@ -118,7 +127,7 @@ impl PlayState {
 		for evt in events {
 			eprintln!("MenuEvent: {:?}", evt);
 			match evt {
-				menu::MenuEvent::LevelPackSelect { index } => {
+				menu::MenuEvent::LoadLevelPack { index } => {
 					self.lvsets.selected = index;
 					self.save_data.load(&self.lvsets.current());
 					self.save_data.save(&self.lvsets.current());
@@ -128,29 +137,24 @@ impl PlayState {
 				menu::MenuEvent::NewGame => {
 					self.play_level(1);
 				}
-				menu::MenuEvent::MainMenu => {
+				menu::MenuEvent::OpenMainMenu => {
 					self.fx = None;
 					self.events.push(PlayEvent::PlayLevel);
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
 					self.play_music();
 				}
-				menu::MenuEvent::LevelPreview { level_number } => {
-					for menu in &mut self.menu.stack {
-						match menu {
-							menu::Menu::LevelSelect(menu) => {
-								load_preview(&mut menu.preview, self.lvsets.current(), level_number);
-							}
-							_ => {}
-						}
-					}
+				menu::MenuEvent::PreviewLevel { level_number } => {
+					// Reuse PlayState.fx to show a preview of the requested level
+					self.load_preview_level(level_number);
 				}
-				menu::MenuEvent::LevelSelect => {
+				menu::MenuEvent::OpenGoToLevel => {
 					let mut menu = menu::LevelSelectMenu::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);
-					load_preview(&mut menu.preview, self.lvsets.current(), self.save_data.current_level);
+					// Start previewing at the current level
+					self.load_preview_level(self.save_data.current_level);
 					self.menu.stack.push(menu::Menu::LevelSelect(menu));
 				}
-				menu::MenuEvent::UnlockLevel => {
+				menu::MenuEvent::OpenUnlockLevel => {
 					let menu = menu::UnlockLevelMenu {
 						selected: 0,
 						password: [None; 4],
@@ -181,11 +185,11 @@ impl PlayState {
 				menu::MenuEvent::PlayLevel { level_number } => {
 					self.play_level(level_number);
 				}
-				menu::MenuEvent::NextLevel => {
+				menu::MenuEvent::PlayNextLevel => {
 					let level_number = if let Some(fx) = &self.fx { fx.level_number + 1 } else { 1 };
 					self.play_level(level_number);
 				}
-				menu::MenuEvent::Retry | menu::MenuEvent::Restart => {
+				menu::MenuEvent::RetryLevel | menu::MenuEvent::RestartLevel => {
 					let level_number = if let Some(fx) = &self.fx { fx.level_number } else { 1 };
 					self.play_level(level_number);
 				}
@@ -204,7 +208,7 @@ impl PlayState {
 						save_replay(self.lvsets.current(), fx);
 					}
 				}
-				menu::MenuEvent::About => {
+				menu::MenuEvent::OpenAbout => {
 					if let Some(about) = &self.lvsets.current().about {
 						let menu = menu::AboutMenu {
 							text: about.clone(),
@@ -212,12 +216,12 @@ impl PlayState {
 						self.menu.stack.push(menu::Menu::About(menu));
 					}
 				}
-				menu::MenuEvent::Exit => {
+				menu::MenuEvent::ExitGame => {
 					self.menu.close_all();
 					self.fx = None;
 					self.events.push(PlayEvent::Quit);
 				}
-				menu::MenuEvent::Options => {
+				menu::MenuEvent::OpenOptions => {
 					let menu = menu::OptionsMenu {
 						selected: 0,
 						bg_music: self.save_data.bg_music,
@@ -227,7 +231,7 @@ impl PlayState {
 					};
 					self.menu.stack.push(menu::Menu::Options(menu));
 				}
-				menu::MenuEvent::PauseMenu => {
+				menu::MenuEvent::OpenPauseMenu => {
 					if let Some(fx) = &mut self.fx {
 						let menu = menu::PauseMenu {
 							selected: 0,
@@ -277,6 +281,12 @@ impl PlayState {
 				}
 				menu::MenuEvent::CloseMenu => {
 					self.menu.close_menu(self.fx.is_some());
+				}
+				menu::MenuEvent::PreviewExit => {
+					if self.is_preview && self.fx.is_some() {
+						self.fx = None;
+						self.is_preview = false;
+					}
 				}
 			}
 		}
@@ -376,6 +386,22 @@ impl PlayState {
 		}
 		self.menu.draw(g, resx, time);
 	}
+
+	fn load_preview_level(&mut self, level_number: i32) {
+		// Only parse if the level exists in the current pack
+		if let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) {
+			let mut preview = fx::FxState::default();
+			preview.init();
+			preview.parse_level(level_number, &lv.content);
+			preview.camera.set_perspective(self.save_data.perspective);
+			// HUD hidden when any menu is open; leave runtime flags at defaults
+			self.fx = Some(preview);
+			self.is_preview = true;
+		}
+		else {
+			self.fx = None;
+		}
+	}
 }
 
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
@@ -391,17 +417,3 @@ fn write_replay(path: &path::Path, record: &str) {
 		eprintln!("Error saving replay: {}", err);
 	}
 }
-
-fn load_preview(field: &mut Option<Box<fx::FxState>>, lvset: &LevelSet, level_number: i32) {
-	if let Some(lv) = lvset.levels.get((level_number - 1) as usize) {
-		let mut fx = Box::new(crate::fx::FxState::default());
-		fx.init();
-		fx.parse_level(level_number, &lv.content);
-		fx.hud_enabled = false;
-		*field = Some(fx);
-	}
-	else {
-		*field = None;
-	}
-}
-

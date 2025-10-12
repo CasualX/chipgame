@@ -18,7 +18,6 @@ pub struct LevelSelectMenu {
 	pub offset: i32,
 	pub offsetf: f32,
 	pub items: Vec<LevelSelectEntry>,
-	pub preview: Option<Box<crate::fx::FxState>>,
 }
 
 impl LevelSelectMenu {
@@ -60,7 +59,7 @@ impl LevelSelectMenu {
 
 			// Request the level preview
 			let level_number = self.items[selected as usize].level_number;
-			events.push(MenuEvent::LevelPreview { level_number });
+			events.push(MenuEvent::PreviewLevel { level_number });
 		}
 	}
 
@@ -79,23 +78,18 @@ impl LevelSelectMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::UnlockLevel,
+				0 => MenuEvent::OpenUnlockLevel,
 				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].level_number },
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
+			events.push(MenuEvent::PreviewExit);
 			events.push(MenuEvent::CloseMenu);
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
-		// Draw the level preview when available
-		if let Some(fx) = &mut self.preview {
-			fx.draw(g, resx);
-			darken(g, resx, 168);
-		}
-
 		let mut buf = shade::d2::TextBuffer::new();
 		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;

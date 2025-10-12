@@ -25,11 +25,10 @@ impl MainMenu {
 			let evt = match self.selected {
 				0 => MenuEvent::NewGame,
 				1 => MenuEvent::Continue,
-				2 => MenuEvent::LevelSelect,
-				3 => MenuEvent::Options,
-				4 => MenuEvent::About,
-				_ => MenuEvent::Exit,
-				// _ => MenuEvent::None,
+				2 => MenuEvent::OpenGoToLevel,
+				3 => MenuEvent::OpenOptions,
+				4 => MenuEvent::OpenAbout,
+				_ => MenuEvent::ExitGame,
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);

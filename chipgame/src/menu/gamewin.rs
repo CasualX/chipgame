@@ -83,10 +83,10 @@ impl GameWinMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::NextLevel,
-				1 => MenuEvent::Retry,
+				0 => MenuEvent::PlayNextLevel,
+				1 => MenuEvent::RetryLevel,
 				2 => MenuEvent::SaveReplay,
-				_ => MenuEvent::MainMenu,
+				_ => MenuEvent::OpenMainMenu,
 			};
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);
