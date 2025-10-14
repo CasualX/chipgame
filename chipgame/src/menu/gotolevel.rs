@@ -6,24 +6,24 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 	i32::max(0, i32::min(len - LEVELS_PER_PAGE, offset))
 }
 
-pub struct LevelSelectEntry {
-	pub level_number: i32,
-	pub state: play::LevelState,
-	pub name: String,
+struct LevelEntry {
+	level_number: i32,
+	state: play::LevelState,
+	name: String,
 }
 
 #[derive(Default)]
-pub struct LevelSelectMenu {
-	pub selected: i32,
-	pub offset: i32,
-	pub offsetf: f32,
-	pub items: Vec<LevelSelectEntry>,
+pub struct GoToLevel {
+	selected: i32,
+	offset: i32,
+	offsetf: f32,
+	items: Vec<LevelEntry>,
 }
 
-impl LevelSelectMenu {
+impl GoToLevel {
 	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
 		self.items.clear();
-		self.items.push(LevelSelectEntry { level_number: 0, state: play::LevelState::Completed, name: "Unlock level".to_string() });
+		self.items.push(LevelEntry { level_number: 0, state: play::LevelState::Completed, name: "Unlock level".to_string() });
 		for level_index in 0..sd.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
 			let state = sd.get_level_state(level_number);
@@ -39,7 +39,7 @@ impl LevelSelectMenu {
 				play::LevelState::Unlocked => "[\x1b[draw_mask=0]#\x1b[draw_mask=1]]",
 				play::LevelState::Completed => "[#]",
 			};
-			self.items.push(LevelSelectEntry { level_number, state, name: format!("{prefix} Level {}: {}", level_number, lv.field.name) });
+			self.items.push(LevelEntry { level_number, state, name: format!("{prefix} Level {}: {}", level_number, lv.field.name) });
 		}
 		self.offset = clip_offset(self.selected - LEVELS_PER_PAGE / 2 + 1, self.items.len() as i32);
 		self.offsetf = self.offset as f32;

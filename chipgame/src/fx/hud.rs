@@ -112,7 +112,6 @@ impl FxState {
 			scribe.font_size = a * 0.5;
 			scribe.line_height = scribe.font_size * 1.2;
 
-			let digits_w = scribe.text_width(&mut Vec2(0.0, 0.0), &resx.font.font, "000");
 			let chips_x = (keys_x1 + keys_x2) * 0.5;
 			let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
 			let time_x = (items_x1 + items_x2) * 0.5;
@@ -127,7 +126,7 @@ impl FxState {
 			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "TIME:");
 			scribe.color = if time_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			if time_remaining >= 0 {
-				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x + digits_w + a * 0.125, a), shade::d2::TextAlign::TopRight, &format!("{time_remaining}"));
+				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x + a * 0.125, a), shade::d2::TextAlign::TopLeft, &format!("{time_remaining}"));
 			}
 			else {
 				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x, a), shade::d2::TextAlign::TopLeft, "- - -");

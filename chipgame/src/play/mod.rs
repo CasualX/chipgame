@@ -44,7 +44,7 @@ impl PlayState {
 				splash.push(Some(texs));
 			}
 		}
-		self.menu.stack.push(menu::Menu::PackSelect(menu::LevelPackSelectMenu {
+		self.menu.stack.push(menu::Menu::PackSelect(menu::PackSelectMenu {
 			selected: self.lvsets.selected,
 			items: self.lvsets.collection.iter().map(|lp| lp.title.clone()).collect(),
 			splash,
@@ -148,11 +148,11 @@ impl PlayState {
 					self.load_preview_level(level_number);
 				}
 				menu::MenuEvent::OpenGoToLevel => {
-					let mut menu = menu::LevelSelectMenu::default();
+					let mut menu = menu::GoToLevel::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);
 					// Start previewing at the current level
 					self.load_preview_level(self.save_data.current_level);
-					self.menu.stack.push(menu::Menu::LevelSelect(menu));
+					self.menu.stack.push(menu::Menu::GoToLevel(menu));
 				}
 				menu::MenuEvent::OpenUnlockLevel => {
 					let menu = menu::UnlockLevelMenu {
@@ -296,77 +296,12 @@ impl PlayState {
 			for evt in events {
 				eprintln!("FxEvent: {:?}", evt);
 				match evt {
-					fx::FxEvent::PlaySound { sound } => {
-						if self.save_data.sound_fx {
-							self.events.push(PlayEvent::PlaySound { sound });
-						}
-					}
-					fx::FxEvent::PlayMusic { mut music } => {
-						if !self.save_data.bg_music {
-							music = None;
-						}
-						self.events.push(PlayEvent::PlayMusic { music });
-					}
-					fx::FxEvent::Pause => {
-						let menu = menu::PauseMenu {
-							selected: 0,
-							level_number: fx.level_number,
-							level_name: fx.gs.field.name.clone(),
-							attempts: fx.gs.ps.attempts,
-							time: fx.gs.time,
-							steps: fx.gs.ps.steps,
-							bonks: fx.gs.ps.bonks,
-						};
-						self.menu.stack.push(menu::Menu::Pause(menu));
-					}
-					fx::FxEvent::Unpause => {
-						self.menu.close_all();
-					}
-					fx::FxEvent::GameWin => {
-						let scores = savedata::Scores {
-							ticks: fx.gs.time,
-							steps: fx.gs.ps.steps,
-						};
-						let time_high_score = self.save_data.is_time_high_score(fx.level_number, scores.ticks);
-						let steps_high_score = self.save_data.is_steps_high_score(fx.level_number, scores.steps);
-						let high_score = time_high_score || steps_high_score;
-						if high_score {
-							self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::GameWin });
-						}
-						self.save_data.complete_level(fx.level_number, scores);
-						self.save_data.save(&self.lvsets.current());
-						// Auto-save replay if enabled or if a new high score was achieved
-						if self.save_data.auto_save_replay || high_score {
-							save_replay(self.lvsets.current(), fx);
-						}
-
-						let menu = menu::GameWinMenu {
-							selected: 0,
-							level_number: fx.level_number,
-							level_name: fx.gs.field.name.clone(),
-							attempts: fx.gs.ps.attempts,
-							time: fx.gs.time,
-							steps: fx.gs.ps.steps,
-							bonks: fx.gs.ps.bonks,
-							time_high_score,
-							steps_high_score,
-							..Default::default()
-						};
-						self.menu.stack.push(menu::Menu::GameWin(menu));
-					}
-					fx::FxEvent::GameOver => {
-						let menu = menu::GameOverMenu {
-							selected: 0,
-							activity: fx.gs.ps.activity,
-							level_number: fx.level_number,
-							level_name: fx.gs.field.name.clone(),
-							attempts: fx.gs.ps.attempts,
-							time: fx.gs.time,
-							steps: fx.gs.ps.steps,
-							bonks: fx.gs.ps.bonks,
-						};
-						self.menu.stack.push(menu::Menu::GameOver(menu));
-					}
+					fx::FxEvent::PlaySound { sound } => play_fx_play_sound(self, sound),
+					fx::FxEvent::PlayMusic { music } => play_fx_play_music(self, music),
+					fx::FxEvent::Pause => play_fx_pause(self),
+					fx::FxEvent::Unpause => play_fx_unpause(self),
+					fx::FxEvent::GameWin => play_fx_game_win(self),
+					fx::FxEvent::GameOver => play_fx_game_over(self),
 					// _ => {}
 				}
 			}
@@ -402,6 +337,95 @@ impl PlayState {
 			self.fx = None;
 		}
 	}
+}
+
+fn play_fx_play_sound(this: &mut PlayState, sound: chipcore::SoundFx) {
+	if this.save_data.sound_fx {
+		this.events.push(PlayEvent::PlaySound { sound });
+	}
+}
+
+fn play_fx_play_music(this: &mut PlayState, mut music: Option<data::MusicId>) {
+	if !this.save_data.bg_music {
+		music = None;
+	}
+	this.events.push(PlayEvent::PlayMusic { music });
+}
+
+fn play_fx_pause(this: &mut PlayState) {
+	let Some(fx) = &this.fx else {
+		return
+	};
+
+	let menu = menu::PauseMenu {
+		selected: 0,
+		level_number: fx.level_number,
+		level_name: fx.gs.field.name.clone(),
+		attempts: fx.gs.ps.attempts,
+		time: fx.gs.time,
+		steps: fx.gs.ps.steps,
+		bonks: fx.gs.ps.bonks,
+	};
+	this.menu.stack.push(menu::Menu::Pause(menu));
+}
+
+fn play_fx_unpause(this: &mut PlayState) {
+	this.menu.close_all();
+}
+
+fn play_fx_game_win(this: &mut PlayState) {
+	let Some(fx) = &this.fx else {
+		return
+	};
+
+	let scores = savedata::Scores {
+		ticks: fx.gs.time,
+		steps: fx.gs.ps.steps,
+	};
+	let time_high_score = this.save_data.is_time_high_score(fx.level_number, scores.ticks);
+	let steps_high_score = this.save_data.is_steps_high_score(fx.level_number, scores.steps);
+	let high_score = time_high_score || steps_high_score;
+	if high_score {
+		this.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::GameWin });
+	}
+	this.save_data.complete_level(fx.level_number, scores);
+	this.save_data.save(&this.lvsets.current());
+	// Auto-save replay if enabled or if a new high score was achieved
+	if this.save_data.auto_save_replay || high_score {
+		save_replay(this.lvsets.current(), fx);
+	}
+
+	let menu = menu::GameWinMenu {
+		selected: 0,
+		level_number: fx.level_number,
+		level_name: fx.gs.field.name.clone(),
+		attempts: fx.gs.ps.attempts,
+		time: fx.gs.time,
+		steps: fx.gs.ps.steps,
+		bonks: fx.gs.ps.bonks,
+		time_high_score,
+		steps_high_score,
+		..Default::default()
+	};
+	this.menu.stack.push(menu::Menu::GameWin(menu));
+}
+
+fn play_fx_game_over(this: &mut PlayState) {
+	let Some(fx) = &this.fx else {
+		return
+	};
+
+	let menu = menu::GameOverMenu {
+		selected: 0,
+		activity: fx.gs.ps.activity,
+		level_number: fx.level_number,
+		level_name: fx.gs.field.name.clone(),
+		attempts: fx.gs.ps.attempts,
+		time: fx.gs.time,
+		steps: fx.gs.ps.steps,
+		bonks: fx.gs.ps.bonks,
+	};
+	this.menu.stack.push(menu::Menu::GameOver(menu));
 }
 
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {

@@ -42,7 +42,7 @@ impl AudioPlayer {
 		let data = fs.read(path).expect("Failed to read music file");
 		wav.load_mem(&data).expect("Failed to load music");
 		wav.set_looping(true);
-		wav.set_volume(0.5);
+		wav.set_volume(0.375); // TODO: Music is too loud by default, add a volume control later
 		self.music.insert(music, wav);
 	}
 }

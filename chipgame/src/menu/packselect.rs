@@ -1,14 +1,14 @@
 use super::*;
 
 #[derive(Default)]
-pub struct LevelPackSelectMenu {
+pub struct PackSelectMenu {
 	pub selected: usize,
 	pub items: Vec<String>,
 	pub splash: Vec<Option<shade::image::AnimatedImage>>,
 	pub ntime: i32,
 }
 
-impl LevelPackSelectMenu {
+impl PackSelectMenu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {

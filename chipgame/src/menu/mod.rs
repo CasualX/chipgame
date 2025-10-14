@@ -12,7 +12,7 @@ mod gamewin;
 mod gameover;
 mod pause;
 mod options;
-mod levelselect;
+mod gotolevel;
 mod unlocklevel;
 mod about;
 mod u;
@@ -25,7 +25,7 @@ pub use self::gamewin::*;
 pub use self::gameover::*;
 pub use self::pause::*;
 pub use self::options::*;
-pub use self::levelselect::*;
+pub use self::gotolevel::*;
 pub use self::unlocklevel::*;
 pub use self::about::*;
 pub use self::u::*;
@@ -65,13 +65,13 @@ pub struct Input {
 }
 
 pub enum Menu {
-	PackSelect(packselect::LevelPackSelectMenu),
+	PackSelect(packselect::PackSelectMenu),
 	Main(MainMenu),
 	GameWin(GameWinMenu),
 	GameOver(GameOverMenu),
 	Pause(PauseMenu),
 	Options(OptionsMenu),
-	LevelSelect(levelselect::LevelSelectMenu),
+	GoToLevel(gotolevel::GoToLevel),
 	UnlockLevel(unlocklevel::UnlockLevelMenu),
 	About(AboutMenu),
 }
@@ -84,7 +84,7 @@ impl Menu {
 			Menu::GameOver(menu) => menu.think(input, events),
 			Menu::Pause(menu) => menu.think(input, events),
 			Menu::Options(menu) => menu.think(input, events),
-			Menu::LevelSelect(menu) => menu.think(input, events),
+			Menu::GoToLevel(menu) => menu.think(input, events),
 			Menu::UnlockLevel(menu) => menu.think(input, events),
 			Menu::About(menu) => menu.think(input, events),
 		}
@@ -97,7 +97,7 @@ impl Menu {
 			Menu::GameOver(menu) => menu.draw(g, resx),
 			Menu::Pause(menu) => menu.draw(g, resx),
 			Menu::Options(menu) => menu.draw(g, resx),
-			Menu::LevelSelect(menu) => menu.draw(g, resx),
+			Menu::GoToLevel(menu) => menu.draw(g, resx),
 			Menu::UnlockLevel(menu) => menu.draw(g, resx),
 			Menu::About(menu) => menu.draw(g, resx),
 		}
