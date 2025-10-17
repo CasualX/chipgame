@@ -135,7 +135,7 @@ impl FxState {
 
 		// Draw the level title or hint text
 		let mut darken = false;
-		if matches!(self.gs.ts, core::TimeState::Waiting) {
+		if matches!(self.gs.ts, chipcore::TimeState::Waiting) {
 			darken = true;
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
@@ -168,7 +168,7 @@ impl FxState {
 				tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
 			}
 		}
-		else if matches!(self.gs.ts, core::TimeState::Running) && self.gs.is_show_hint() {
+		else if matches!(self.gs.ts, chipcore::TimeState::Running) && self.gs.is_show_hint() {
 			if let Some(hint) = &self.gs.field.hint {
 				darken = true;
 

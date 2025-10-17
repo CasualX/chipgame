@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use cvmath::*;
-use chipcore::{Compass, EntityArgs, EntityHandle, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
+use chipcore::EntityHandle;
+use chipty::{Compass, EntityArgs, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
 
 use crate::fx;
 use crate::data;

@@ -4,6 +4,7 @@ Core chipgame gameplay code.
 
 use std::{cmp, ops};
 use cvmath::Vec2i;
+use chipty::*;
 
 mod codes;
 mod entities;
@@ -20,7 +21,6 @@ mod quadtree;
 mod random;
 
 pub use self::codes::*;
-pub use chipty::Compass;
 pub use self::entities::*;
 pub use self::entity::*;
 pub use self::entitymap::*;
@@ -33,8 +33,6 @@ pub use self::physics::*;
 pub use self::playerstate::*;
 pub use self::quadtree::*;
 pub use self::random::*;
-pub use chipty::SoundFx;
-pub use chipty::Terrain;
 
 #[derive(Copy, Clone, Debug)]
 pub enum TrapState {

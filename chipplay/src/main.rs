@@ -24,19 +24,19 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 
 struct AudioPlayer {
 	sl: soloud::Soloud,
-	sfx: HashMap<chipcore::SoundFx, soloud::Wav>,
-	music: HashMap<chipgame::data::MusicId, soloud::Wav>,
-	cur_music: Option<(chipgame::data::MusicId, soloud::Handle)>,
+	sfx: HashMap<chipty::SoundFx, soloud::Wav>,
+	music: HashMap<chipty::MusicId, soloud::Wav>,
+	cur_music: Option<(chipty::MusicId, soloud::Handle)>,
 }
 impl AudioPlayer {
-	fn load_wav(&mut self, fx: chipcore::SoundFx, fs: &FileSystem, path: &str) {
+	fn load_wav(&mut self, fx: chipty::SoundFx, fs: &FileSystem, path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
 		let data = fs.read(path).expect("Failed to read sound file");
 		wav.load_mem(&data).expect("Failed to load sound");
 		self.sfx.insert(fx, wav);
 	}
-	fn load_music(&mut self, music: chipgame::data::MusicId, fs: &FileSystem,path: &str) {
+	fn load_music(&mut self, music: chipty::MusicId, fs: &FileSystem, path: &str) {
 		use soloud::*;
 		let mut wav = Wav::default();
 		let data = fs.read(path).expect("Failed to read music file");
@@ -47,12 +47,12 @@ impl AudioPlayer {
 	}
 }
 impl AudioPlayer {
-	fn play(&mut self, sound: chipcore::SoundFx) {
+	fn play(&mut self, sound: chipty::SoundFx) {
 		if let Some(wav) = self.sfx.get(&sound) {
 			self.sl.play(wav);
 		}
 	}
-	fn play_music(&mut self, music: Option<chipgame::data::MusicId>) {
+	fn play_music(&mut self, music: Option<chipty::MusicId>) {
 		if self.cur_music.map(|(music, _)| music) != music {
 			if let Some((_, handle)) = self.cur_music {
 				self.sl.stop(handle);
@@ -129,12 +129,12 @@ fn main() {
 							}
 						}
 						ConfigSection::SoundFx => {
-							if let Ok(fx) = key.parse::<chipcore::SoundFx>() {
+							if let Ok(fx) = key.parse::<chipty::SoundFx>() {
 								ap.load_wav(fx, &fs, value);
 							}
 						}
 						ConfigSection::Music => {
-							if let Ok(music) = key.parse::<chipgame::data::MusicId>() {
+							if let Ok(music) = key.parse::<chipty::MusicId>() {
 								ap.load_music(music, &fs, value);
 							}
 						}

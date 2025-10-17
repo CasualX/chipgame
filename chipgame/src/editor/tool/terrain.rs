@@ -3,7 +3,7 @@ use super::*;
 fn put(s: &mut EditorState) {
 	s.game.gs.set_terrain(s.cursor_pos, s.selected_terrain);
 	// Remove block entities if we are placing a dirt block terrain
-	if matches!(s.selected_terrain, chipcore::Terrain::DirtBlock) {
+	if matches!(s.selected_terrain, chipty::Terrain::DirtBlock) {
 		let cursor_pos = s.cursor_pos;
 		loop {
 			let Some(ehandle) = s.game.gs.ents.iter().find_map(|ent| {

@@ -1,9 +1,8 @@
-use super::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum FxEvent {
-	PlaySound { sound: core::SoundFx },
-	PlayMusic { music: Option<data::MusicId> },
+	PlaySound { sound: chipty::SoundFx },
+	PlayMusic { music: Option<chipty::MusicId> },
 	Pause,
 	Scout,
 	Unpause,

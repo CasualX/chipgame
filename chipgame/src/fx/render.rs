@@ -324,7 +324,7 @@ pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sp
 	}
 }
 
-pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, terrain: core::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
+pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, terrain: chipty::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
 	let tile = tiles[terrain as usize];
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
@@ -332,7 +332,7 @@ pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Unifo
 fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
 	for h in state.gs.qt.get(pos) {
 		if let Some(ent) = state.gs.ents.get(h) {
-			if matches!(ent.kind, core::EntityKind::Block | core::EntityKind::IceBlock) {
+			if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) {
 				return true;
 			}
 		}

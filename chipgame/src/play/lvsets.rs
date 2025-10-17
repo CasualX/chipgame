@@ -6,7 +6,7 @@ pub use chipty::{LevelRef, LevelSetDto};
 
 pub struct LevelData {
 	pub content: String,
-	pub field: chipcore::LevelDto,
+	pub field: chipty::LevelDto,
 }
 
 #[derive(Default)]
@@ -131,7 +131,7 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 						continue;
 					}
 				};
-				let field: chipcore::LevelDto = match serde_json::from_str(&content) {
+				let field: chipty::LevelDto = match serde_json::from_str(&content) {
 					Ok(field) => field,
 					Err(err) => {
 						eprintln!("Error parsing level at {level_path}: {err}");

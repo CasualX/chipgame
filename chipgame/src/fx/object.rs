@@ -68,7 +68,7 @@ pub enum AnimState {
 #[derive(Clone, Debug)]
 pub struct Object {
 	pub handle: ObjectHandle,
-	pub ehandle: core::EntityHandle,
+	pub ehandle: chipcore::EntityHandle,
 	pub pos: Vec3<f32>,
 	pub lerp_pos: Vec3<f32>,
 	pub mover: MoveType,
@@ -90,10 +90,10 @@ impl Object {
 
 		if let Some(ent) = ctx.gs.ents.get(self.ehandle) {
 			let terrain = ctx.gs.field.get_terrain(ent.pos);
-			let elevated = matches!(terrain, core::Terrain::Wall | core::Terrain::RedLock | core::Terrain::BlueLock | core::Terrain::GreenLock | core::Terrain::YellowLock);
+			let elevated = matches!(terrain, chipty::Terrain::Wall | chipty::Terrain::RedLock | chipty::Terrain::BlueLock | chipty::Terrain::GreenLock | chipty::Terrain::YellowLock);
 
 			if elevated {
-				if !matches!(ent.kind, core::EntityKind::Block | core::EntityKind::IceBlock) {
+				if !matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) {
 					self.pos.z = 20.0;
 				}
 			}

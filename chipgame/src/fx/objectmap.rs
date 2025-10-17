@@ -3,7 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct ObjectMap {
 	pub map: HashMap<ObjectHandle, Object>,
-	pub lookup: HashMap<core::EntityHandle, ObjectHandle>,
+	pub lookup: HashMap<chipcore::EntityHandle, ObjectHandle>,
 	pub next: ObjectHandle,
 }
 impl ObjectMap {

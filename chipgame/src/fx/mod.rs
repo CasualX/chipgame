@@ -5,7 +5,6 @@ Presentation layer
 
 use std::collections::HashMap;
 use cvmath::*;
-use chipcore as core;
 
 mod camera;
 mod event;

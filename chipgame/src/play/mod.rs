@@ -110,14 +110,14 @@ impl PlayState {
 		}
 		else if let Some(_) = &self.fx {
 			if self.is_preview {
-				Some(data::MusicId::MenuMusic)
+				Some(chipty::MusicId::MenuMusic)
 			}
 			else {
-				Some(data::MusicId::GameMusic)
+				Some(chipty::MusicId::GameMusic)
 			}
 		}
 		else {
-			Some(data::MusicId::MenuMusic)
+			Some(chipty::MusicId::MenuMusic)
 		};
 		self.events.push(PlayEvent::PlayMusic { music });
 	}
@@ -300,10 +300,10 @@ impl PlayState {
 					}
 				}
 				menu::MenuEvent::CursorMove => {
-					self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::CursorMove });
+					self.events.push(PlayEvent::PlaySound { sound: chipty::SoundFx::CursorMove });
 				}
 				menu::MenuEvent::CursorSelect => {
-					self.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::CursorSelect });
+					self.events.push(PlayEvent::PlaySound { sound: chipty::SoundFx::CursorSelect });
 				}
 				menu::MenuEvent::CloseMenu => {
 					self.menu.close_menu(self.fx.is_some());
@@ -366,13 +366,13 @@ impl PlayState {
 	}
 }
 
-fn play_fx_play_sound(this: &mut PlayState, sound: chipcore::SoundFx) {
+fn play_fx_play_sound(this: &mut PlayState, sound: chipty::SoundFx) {
 	if this.save_data.sound_fx {
 		this.events.push(PlayEvent::PlaySound { sound });
 	}
 }
 
-fn play_fx_play_music(this: &mut PlayState, mut music: Option<data::MusicId>) {
+fn play_fx_play_music(this: &mut PlayState, mut music: Option<chipty::MusicId>) {
 	if !this.save_data.bg_music {
 		music = None;
 	}
@@ -422,7 +422,7 @@ fn play_fx_game_win(this: &mut PlayState) {
 	let steps_high_score = this.save_data.is_steps_high_score(fx.level_number, scores.steps);
 	let high_score = time_high_score || steps_high_score;
 	if high_score {
-		this.events.push(PlayEvent::PlaySound { sound: chipcore::SoundFx::GameWin });
+		this.events.push(PlayEvent::PlaySound { sound: chipty::SoundFx::GameWin });
 	}
 	this.save_data.complete_level(fx.level_number, scores);
 	this.save_data.save(&this.lvsets.current());

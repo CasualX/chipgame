@@ -17,7 +17,7 @@ pub struct FxState {
 	pub ntime: i32,
 	pub time: f32,
 	pub dt: f32,
-	pub gs: core::GameState,
+	pub gs: chipcore::GameState,
 	pub gs_realtime: f32,
 	pub camera: PlayCamera,
 	pub objects: ObjectMap,
@@ -26,7 +26,7 @@ pub struct FxState {
 	pub next_level_load: f32,
 	pub game_win: bool,
 	pub music_enabled: bool,
-	pub music: Option<data::MusicId>,
+	pub music: Option<chipty::MusicId>,
 	pub hud_enabled: bool,
 	pub darken: bool,
 	pub darken_changed: bool,
@@ -43,16 +43,16 @@ impl FxState {
 	}
 	pub fn parse_level(&mut self, level_number: i32, json: &str) {
 		self.objects.clear();
-		self.gs.parse(json, core::RngSeed::System);
+		self.gs.parse(json, chipcore::RngSeed::System);
 
 		for y in 0..self.gs.field.height {
 			for x in 0..self.gs.field.width {
 				let index = (y * self.gs.field.width + x) as usize;
 				let terrain = self.gs.field.terrain[index];
 				match terrain {
-					core::Terrain::Fire => create_fire(self, Vec2::new(x, y)),
-					core::Terrain::ToggleFloor => create_toggle_floor(self, Vec2(x, y)),
-					core::Terrain::ToggleWall => create_toggle_wall(self, Vec2(x, y)),
+					chipty::Terrain::Fire => create_fire(self, Vec2::new(x, y)),
+					chipty::Terrain::ToggleFloor => create_toggle_floor(self, Vec2(x, y)),
+					chipty::Terrain::ToggleWall => create_toggle_wall(self, Vec2(x, y)),
 					_ => {}
 				}
 			}
@@ -68,18 +68,18 @@ impl FxState {
 		self.darken_time = -1.0;
 	}
 	pub fn scout(&mut self) {
-		self.gs.ts = core::TimeState::Paused;
+		self.gs.ts = chipcore::TimeState::Paused;
 		self.events.push(FxEvent::Scout);
 		self.hud_enabled = true;
 	}
 	pub fn pause(&mut self) {
-		self.gs.ts = core::TimeState::Paused;
+		self.gs.ts = chipcore::TimeState::Paused;
 		self.events.push(FxEvent::Pause);
 		self.hud_enabled = false;
 	}
 	pub fn unpause(&mut self) {
-		if matches!(self.gs.ts, core::TimeState::Paused) {
-			self.gs.ts = core::TimeState::Running;
+		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
+			self.gs.ts = chipcore::TimeState::Running;
 			self.events.push(FxEvent::Unpause);
 			self.hud_enabled = true;
 
@@ -99,7 +99,7 @@ impl FxState {
 			}
 		}
 
-		self.gs.tick(&core::Input {
+		self.gs.tick(&chipcore::Input {
 			a: input.a.is_held(),
 			b: input.b.is_held(),
 			up: input.up.is_held(),
@@ -115,39 +115,39 @@ impl FxState {
 		for ev in &self.gs.events.take() {
 			eprintln!("GameEvent: {:?}", ev);
 			match ev {
-				&core::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
-				&core::GameEvent::EntityRemoved { entity, kind } => entity_removed(self, entity, kind),
-				&core::GameEvent::EntityStep { entity } => entity_step(self, entity),
-				&core::GameEvent::EntityTurn { entity } => entity_face_dir(self, entity),
-				&core::GameEvent::EntityHidden { entity, hidden } => entity_hidden(self, entity, hidden),
-				&core::GameEvent::EntityTeleport { entity } => entity_teleport(self, entity),
-				&core::GameEvent::EntityDrown { entity } => entity_drown(self, entity),
-				&core::GameEvent::PlayerActivity { player } => player_activity(self, player),
-				&core::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
-				&core::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
-				&core::GameEvent::FireHidden { pos, hidden } => fire_hidden(self, pos, hidden),
-				&core::GameEvent::TerrainUpdated { pos, old, new } => {
+				&chipcore::GameEvent::EntityCreated { entity, kind } => entity_created(self, entity, kind),
+				&chipcore::GameEvent::EntityRemoved { entity, kind } => entity_removed(self, entity, kind),
+				&chipcore::GameEvent::EntityStep { entity } => entity_step(self, entity),
+				&chipcore::GameEvent::EntityTurn { entity } => entity_face_dir(self, entity),
+				&chipcore::GameEvent::EntityHidden { entity, hidden } => entity_hidden(self, entity, hidden),
+				&chipcore::GameEvent::EntityTeleport { entity } => entity_teleport(self, entity),
+				&chipcore::GameEvent::EntityDrown { entity } => entity_drown(self, entity),
+				&chipcore::GameEvent::PlayerActivity { player } => player_activity(self, player),
+				&chipcore::GameEvent::ItemPickup { entity, item } => item_pickup(self, entity, item),
+				&chipcore::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
+				&chipcore::GameEvent::FireHidden { pos, hidden } => fire_hidden(self, pos, hidden),
+				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => {
 					let mut tw = false;
 					match (old, new) {
-						(core::Terrain::FakeBlueWall, _) => blue_wall_cleared(self, pos),
-						(core::Terrain::HiddenWall, _) => hidden_wall_bumped(self, pos),
-						(core::Terrain::ToggleFloor, _) => tw = true,
-						(core::Terrain::ToggleWall, _) => tw = true,
-						(core::Terrain::Fire, _) => remove_fire(self, pos),
-						(_, core::Terrain::Fire) => create_fire(self, pos),
-						(core::Terrain::RecessedWall, core::Terrain::Wall) => recessed_wall_raised(self, pos),
+						(chipty::Terrain::FakeBlueWall, _) => blue_wall_cleared(self, pos),
+						(chipty::Terrain::HiddenWall, _) => hidden_wall_bumped(self, pos),
+						(chipty::Terrain::ToggleFloor, _) => tw = true,
+						(chipty::Terrain::ToggleWall, _) => tw = true,
+						(chipty::Terrain::Fire, _) => remove_fire(self, pos),
+						(_, chipty::Terrain::Fire) => create_fire(self, pos),
+						(chipty::Terrain::RecessedWall, chipty::Terrain::Wall) => recessed_wall_raised(self, pos),
 						_ => {}
 					}
 					if tw {
 						toggle_walls(self);
 					}
 				},
-				&core::GameEvent::GameWin { .. } => game_win(self),
-				&core::GameEvent::GameOver { .. } => game_over(self),
-				&core::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
-				&core::GameEvent::BombExplode { pos } => effect(self, pos, EffectType::Sparkles),
-				&core::GameEvent::WaterSplash { pos } => effect(self, pos, EffectType::Splash),
-				&core::GameEvent::Fireworks { pos } => effect(self, pos, EffectType::Fireworks),
+				&chipcore::GameEvent::GameWin { .. } => game_win(self),
+				&chipcore::GameEvent::GameOver { .. } => game_over(self),
+				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
+				&chipcore::GameEvent::BombExplode { pos } => effect(self, pos, EffectType::Sparkles),
+				&chipcore::GameEvent::WaterSplash { pos } => effect(self, pos, EffectType::Splash),
+				&chipcore::GameEvent::Fireworks { pos } => effect(self, pos, EffectType::Fireworks),
 				_ => {}
 			}
 		}
@@ -158,7 +158,7 @@ impl FxState {
 		}
 	}
 	pub fn follow_player(&mut self) {
-		if matches!(self.gs.ts, core::TimeState::Paused) {
+		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
 			return;
 		}
 		if let Some(obj) = self.objects.lookup.get(&self.gs.ps.ehandle).and_then(|h| self.objects.get(*h)) {

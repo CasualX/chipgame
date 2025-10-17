@@ -1,7 +1,5 @@
 use super::*;
 
-pub use chipty::{FieldDto, LevelDto, FieldConn};
-
 /// Game playfield.
 #[derive(Default)]
 pub struct Field {

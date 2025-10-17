@@ -37,7 +37,7 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 	for level_number in 1..150 {
 		let level_path = levels_dir.join(format!("level{level_number}.json"));
 		let level_content = fs::read_to_string(&level_path).unwrap();
-		let level: chipcore::LevelDto = serde_json::from_str(&level_content).unwrap();
+		let level: chipty::LevelDto = serde_json::from_str(&level_content).unwrap();
 		let password = level.password.unwrap();
 		let replay_path = replays_dir.join(level_path.file_name().unwrap());
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
@@ -57,7 +57,7 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 fn test_level(levels_dir: &Path, replays_dir: &Path, level_name: &str) {
 	let level_path = levels_dir.join(format!("{level_name}.json"));
 	let level_content = fs::read_to_string(&level_path).unwrap();
-	let level: chipcore::LevelDto = serde_json::from_str(&level_content).unwrap();
+	let level: chipty::LevelDto = serde_json::from_str(&level_content).unwrap();
 	let replay_path = replays_dir.join(level_path.file_name().unwrap());
 	if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 		let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
