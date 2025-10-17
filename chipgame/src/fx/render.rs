@@ -321,7 +321,6 @@ pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sp
 		data::ModelId::FlatSprite => draw_floor(cv, pos, sprite, 3.0, 12.0, alpha),
 		data::ModelId::ReallyFlatSprite => draw_floor(cv, pos, sprite, 6.0, 10.0, alpha),
 		data::ModelId::FloorSprite => draw_floor(cv, pos, sprite, 1.0, 1.0, alpha),
-		_ => unimplemented!(),
 	}
 }
 

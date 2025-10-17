@@ -67,23 +67,36 @@ impl FxState {
 		self.darken = true;
 		self.darken_time = -1.0;
 	}
+	pub fn scout(&mut self) {
+		self.gs.ts = core::TimeState::Paused;
+		self.events.push(FxEvent::Scout);
+		self.hud_enabled = true;
+	}
 	pub fn pause(&mut self) {
-		// if matches!(self.gs.ts, core::TimeState::Running) {
-			self.gs.ts = core::TimeState::Paused;
-			self.events.push(FxEvent::Pause);
-			self.hud_enabled = false;
-		// }
+		self.gs.ts = core::TimeState::Paused;
+		self.events.push(FxEvent::Pause);
+		self.hud_enabled = false;
 	}
 	pub fn unpause(&mut self) {
 		if matches!(self.gs.ts, core::TimeState::Paused) {
 			self.gs.ts = core::TimeState::Running;
 			self.events.push(FxEvent::Unpause);
 			self.hud_enabled = true;
+
+			// Center camera on player again
+			let Some(&obj_handle) = self.objects.lookup.get(&self.gs.ps.ehandle) else { return };
+			let Some(obj) = self.objects.get_mut(obj_handle) else { return };
+			self.camera.teleport(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
 		}
 	}
 	pub fn think(&mut self, input: &Input) {
-		if input.start.is_pressed() && !self.gs.ps.activity.is_game_over() {
-			self.pause();
+		if !self.gs.ps.activity.is_game_over() {
+			if input.start.is_pressed() {
+				self.pause();
+			}
+			else if input.select.is_pressed() {
+				self.scout();
+			}
 		}
 
 		self.gs.tick(&core::Input {
@@ -145,9 +158,15 @@ impl FxState {
 		}
 	}
 	pub fn follow_player(&mut self) {
+		if matches!(self.gs.ts, core::TimeState::Paused) {
+			return;
+		}
 		if let Some(obj) = self.objects.lookup.get(&self.gs.ps.ehandle).and_then(|h| self.objects.get(*h)) {
 			self.camera.set_target(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
 		}
+	}
+	pub fn scout_dir(&mut self, dir: chipty::Compass) {
+		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * 2.0);
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		self.ntime += 1;
@@ -162,8 +181,9 @@ impl FxState {
 		}
 
 		if self.gs.time != 0 {
-			self.camera.animate();
+			self.camera.animate_blend();
 		}
+		self.camera.animate_position();
 
 		let camera = self.camera.setup(resx.viewport.size());
 

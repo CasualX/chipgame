@@ -15,6 +15,7 @@ mod options;
 mod gotolevel;
 mod unlocklevel;
 mod about;
+mod scout;
 mod u;
 mod v;
 
@@ -28,6 +29,7 @@ pub use self::options::*;
 pub use self::gotolevel::*;
 pub use self::unlocklevel::*;
 pub use self::about::*;
+pub use self::scout::*;
 pub use self::u::*;
 pub use self::v::*;
 
@@ -74,6 +76,7 @@ pub enum Menu {
 	GoToLevel(gotolevel::GoToLevel),
 	UnlockLevel(unlocklevel::UnlockLevelMenu),
 	About(AboutMenu),
+	Scout(ScoutMode),
 }
 impl Menu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
@@ -87,6 +90,7 @@ impl Menu {
 			Menu::GoToLevel(menu) => menu.think(input, events),
 			Menu::UnlockLevel(menu) => menu.think(input, events),
 			Menu::About(menu) => menu.think(input, events),
+			Menu::Scout(menu) => menu.think(input, events),
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
@@ -100,6 +104,7 @@ impl Menu {
 			Menu::GoToLevel(menu) => menu.draw(g, resx),
 			Menu::UnlockLevel(menu) => menu.draw(g, resx),
 			Menu::About(menu) => menu.draw(g, resx),
+			Menu::Scout(menu) => menu.draw(g, resx),
 		}
 	}
 }

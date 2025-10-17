@@ -125,7 +125,7 @@ impl PlayState {
 	pub fn sync(&mut self) {
 		let events = mem::replace(&mut self.menu.events, Vec::new());
 		for evt in events {
-			eprintln!("MenuEvent: {:?}", evt);
+			// eprintln!("MenuEvent: {:?}", evt);
 			match evt {
 				menu::MenuEvent::LoadLevelPack { index } => {
 					self.lvsets.selected = index;
@@ -197,7 +197,7 @@ impl PlayState {
 					let level_number = i32::max(1, self.save_data.current_level);
 					self.play_level(level_number);
 				}
-				menu::MenuEvent::Resume => {
+				menu::MenuEvent::ResumePlay => {
 					if let Some(fx) = &mut self.fx {
 						self.menu.close_all();
 						fx.unpause();
@@ -243,6 +243,32 @@ impl PlayState {
 							bonks: fx.gs.ps.bonks,
 						};
 						self.menu.stack.push(menu::Menu::Pause(menu));
+					}
+				}
+				menu::MenuEvent::OpenScoutMode => {
+					if let Some(_) = &self.fx {
+						let menu = menu::ScoutMode {};
+						self.menu.stack.push(menu::Menu::Scout(menu));
+					}
+				}
+				menu::MenuEvent::ScoutN => {
+					if let Some(fx) = &mut self.fx {
+						fx.scout_dir(chipty::Compass::Up);
+					}
+				}
+				menu::MenuEvent::ScoutE => {
+					if let Some(fx) = &mut self.fx {
+						fx.scout_dir(chipty::Compass::Right);
+					}
+				}
+				menu::MenuEvent::ScoutS => {
+					if let Some(fx) = &mut self.fx {
+						fx.scout_dir(chipty::Compass::Down);
+					}
+				}
+				menu::MenuEvent::ScoutW => {
+					if let Some(fx) = &mut self.fx {
+						fx.scout_dir(chipty::Compass::Left);
 					}
 				}
 				menu::MenuEvent::SetBackgroundMusic { value } => {
@@ -294,10 +320,11 @@ impl PlayState {
 		if let Some(fx) = &mut self.fx {
 			let events = mem::replace(&mut fx.events, Vec::new());
 			for evt in events {
-				eprintln!("FxEvent: {:?}", evt);
+				// eprintln!("FxEvent: {:?}", evt);
 				match evt {
 					fx::FxEvent::PlaySound { sound } => play_fx_play_sound(self, sound),
 					fx::FxEvent::PlayMusic { music } => play_fx_play_music(self, music),
+					fx::FxEvent::Scout => play_fx_scout(self),
 					fx::FxEvent::Pause => play_fx_pause(self),
 					fx::FxEvent::Unpause => play_fx_unpause(self),
 					fx::FxEvent::GameWin => play_fx_game_win(self),
@@ -350,6 +377,15 @@ fn play_fx_play_music(this: &mut PlayState, mut music: Option<data::MusicId>) {
 		music = None;
 	}
 	this.events.push(PlayEvent::PlayMusic { music });
+}
+
+fn play_fx_scout(this: &mut PlayState) {
+	let Some(_fx) = &mut this.fx else {
+		return
+	};
+
+	let menu = menu::ScoutMode {};
+	this.menu.stack.push(menu::Menu::Scout(menu));
 }
 
 fn play_fx_pause(this: &mut PlayState) {

@@ -78,15 +78,17 @@ impl PlayCamera {
 		self.position = pos + self.get_offset();
 	}
 
-	pub fn animate(&mut self) {
-		// Update blend over time
+	// Update blend over time
+	pub fn animate_blend(&mut self) {
 		if self.perspective {
 			self.blend = f32::min(1.0, self.blend + 0.01);
 		}
 		else {
 			self.blend = f32::max(0.0, self.blend - 0.01);
 		}
+	}
 
+	pub fn animate_position(&mut self) {
 		let position_target = self.target + self.get_offset();
 		self.position = self.position.exp_decay(position_target, 15.0, 1.0 / 60.0).set_x(position_target.x);
 	}

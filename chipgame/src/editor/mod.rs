@@ -204,7 +204,7 @@ impl EditorState {
 			self.game.camera.target.y += 5.0;
 		}
 
-		self.game.camera.animate();
+		self.game.camera.animate_position();
 
 		if let Some(tool_pos) = self.tool_pos {
 			if tool_pos != self.cursor_pos {

@@ -14,9 +14,6 @@ pub struct PauseMenu {
 impl PauseMenu {
 	const ITEMS: [&'static str; 4] = ["Resume", "Restart", "Options", "Main menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
-		// if input.start.is_pressed() {
-		// 	events.push(MenuEvent::Resume);
-		// }
 		if input.up.is_pressed() {
 			if self.selected > 0 {
 				self.selected -= 1;
@@ -31,7 +28,7 @@ impl PauseMenu {
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::Resume,
+				0 => MenuEvent::ResumePlay,
 				1 => MenuEvent::RestartLevel,
 				2 => MenuEvent::OpenOptions,
 				_ => MenuEvent::OpenMainMenu,
@@ -40,7 +37,11 @@ impl PauseMenu {
 			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
+			events.push(MenuEvent::ResumePlay);
+		}
+		if input.select.is_pressed() {
 			events.push(MenuEvent::CloseMenu);
+			events.push(MenuEvent::OpenScoutMode);
 		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {

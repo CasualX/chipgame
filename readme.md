@@ -52,6 +52,7 @@ Controls
 * Arrow keys, WASD: Move Chip
 * Space: Select menu item
 * Backspace: Close the current menu
+* Esc: Open the scout menu
 * Enter: Open the Pause menu
 * M: Toggle music
 
@@ -61,6 +62,7 @@ Controls
 * A: Select menu item
 * B: Close the current menu
 * Start: Open the Pause menu
+* Select: Open the scout menu
 
 Level Editor
 ------------
