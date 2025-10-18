@@ -118,12 +118,12 @@ impl FxState {
 			let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "CHIPS:");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "💎");
 			scribe.color = if chips_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x + a * 0.125, 0.0, chips_x, a), shade::d2::TextAlign::TopLeft, &format!("{chips_remaining}"));
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "TIME:");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "⏰");
 			scribe.color = if time_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			if time_remaining >= 0 {
 				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x + a * 0.125, a), shade::d2::TextAlign::TopLeft, &format!("{time_remaining}"));

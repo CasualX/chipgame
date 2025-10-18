@@ -219,8 +219,8 @@ fn main() {
 	let mut past_now = time::Instant::now();
 
 	let font = {
-		let font: shade::msdfgen::Font = serde_json::from_str(fs.read_to_string("font.json").unwrap().as_str()).unwrap();
-		let font = Some(font);
+		let font: shade::msdfgen::FontDto = serde_json::from_str(fs.read_to_string("font.json").unwrap().as_str()).unwrap();
+		let font: Option<shade::msdfgen::Font> = Some(font.into());
 
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
