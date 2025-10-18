@@ -247,7 +247,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::OpenScoutMode => {
 					if let Some(_) = &self.fx {
-						let menu = menu::ScoutMode {};
+						let menu = menu::ScoutMode::default();
 						self.menu.stack.push(menu::Menu::Scout(menu));
 					}
 				}
@@ -384,7 +384,7 @@ fn play_fx_scout(this: &mut PlayState) {
 		return
 	};
 
-	let menu = menu::ScoutMode {};
+	let menu = menu::ScoutMode::default();
 	this.menu.stack.push(menu::Menu::Scout(menu));
 }
 

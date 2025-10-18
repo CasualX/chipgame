@@ -34,6 +34,8 @@ fn load_png(
 }
 
 fn main() {
+	let mut font_atlas = "font.png";
+	let mut font_meta = "font.json";
 	let mut tileset_texture = "tileset/MS.png";
 	let mut pixel_art_bias = 0.5;
 	let config_storage = fs::read_to_string("chipgame.ini");
@@ -42,6 +44,8 @@ fn main() {
 			match item {
 				ini_core::Item::Property(key, Some(value)) => {
 					match key {
+						"FontAtlas" => font_atlas = value,
+						"FontMeta" => font_meta = value,
 						"TilesetTexture" => tileset_texture = value,
 						"PixelArtBias" => {
 							if let Ok(v) = value.parse::<f32>() {
@@ -136,12 +140,12 @@ fn main() {
 	let mut past_now = time::Instant::now();
 
 	let font = {
-		let font: shade::msdfgen::Font = serde_json::from_str(fs.read_to_string("font.json").unwrap().as_str()).unwrap();
-		let font = Some(font);
+		let font: shade::msdfgen::FontDto = serde_json::from_str(fs.read_to_string(font_meta).unwrap().as_str()).unwrap();
+		let font: Option<shade::msdfgen::Font> = Some(font.into());
 
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 
-		let texture = load_png(&mut g, Some("font"), &fs, "font.png", &shade::image::TextureProps {
+		let texture = load_png(&mut g, Some("font"), &fs, font_atlas, &shade::image::TextureProps {
 			filter_min: shade::TextureFilter::Linear,
 			filter_mag: shade::TextureFilter::Linear,
 			wrap_u: shade::TextureWrap::ClampEdge,

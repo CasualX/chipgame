@@ -2,6 +2,10 @@ use super::*;
 
 #[derive(Default)]
 pub struct ScoutMode {
+	up: bool,
+	down: bool,
+	left: bool,
+	right: bool,
 }
 
 impl ScoutMode {
@@ -14,16 +18,21 @@ impl ScoutMode {
 			events.push(MenuEvent::OpenPauseMenu);
 		}
 
-		if input.up.is_held() {
+		self.up = input.up.is_held();
+		self.down = input.down.is_held();
+		self.left = input.left.is_held();
+		self.right = input.right.is_held();
+
+		if self.up {
 			events.push(MenuEvent::ScoutN);
 		}
-		if input.down.is_held() {
+		if self.down {
 			events.push(MenuEvent::ScoutS);
 		}
-		if input.left.is_held() {
+		if self.left {
 			events.push(MenuEvent::ScoutW);
 		}
-		if input.right.is_held() {
+		if self.right {
 			events.push(MenuEvent::ScoutE);
 		}
 	}
@@ -47,10 +56,10 @@ impl ScoutMode {
 		};
 
 		// buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, "Paused");
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, "^");
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::BottomCenter, "v");
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, " <");
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, "> ");
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, if !self.up { "▲" } else { "△" });
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::BottomCenter, if !self.down { "▼" } else { "▽" });
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, if !self.left { "◀" } else { "◁" });
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, if !self.right { "▶" } else { "▷" });
 
 		buf.draw(g, shade::Surface::BACK_BUFFER);
 	}

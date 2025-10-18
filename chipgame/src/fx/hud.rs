@@ -38,6 +38,10 @@ impl FxState {
 			shade::d2::layout::Unit::Abs(a * 5.0),
 			shade::d2::layout::Unit::Abs(a * 5.0),
 		]);
+		let [[chips_x1, chips_x2], [time_x1, time_x2]] = shade::d2::layout::flex1d(resx.viewport.left() as f32, resx.viewport.right() as f32, None, shade::d2::layout::Justify::SpaceAround, &[
+			shade::d2::layout::Unit::Abs(a * 3.0),
+			shade::d2::layout::Unit::Abs(a * 3.0),
+		]);
 		if gs.ps.keys.iter().any(|&k| k > 0) {
 			cv.fill_rect(&paint, &Bounds2::c(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
 		}
@@ -45,8 +49,8 @@ impl FxState {
 			cv.fill_rect(&paint, &Bounds2::c(items_x1, y, items_x2, resx.viewport.bottom() as f32));
 		}
 		if !self.darken {
-			cv.fill_rect(&paint, &Bounds2::c(keys_x1, 0.0, keys_x2, a * 0.9));
-			cv.fill_rect(&paint, &Bounds2::c(items_x1, 0.0, items_x2, a * 0.9));
+			cv.fill_rect(&paint, &Bounds2::c(chips_x1, 0.0, chips_x2, a * 0.9));
+			cv.fill_rect(&paint, &Bounds2::c(time_x1, 0.0, time_x2, a * 0.9));
 		}
 
 		// Draw the inventory items
@@ -118,12 +122,12 @@ impl FxState {
 			let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "CHIPS:");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "💎");
 			scribe.color = if chips_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x + a * 0.125, 0.0, chips_x, a), shade::d2::TextAlign::TopLeft, &format!("{chips_remaining}"));
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "TIME:");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "⏰");
 			scribe.color = if time_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			if time_remaining >= 0 {
 				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x + a * 0.125, a), shade::d2::TextAlign::TopLeft, &format!("{time_remaining}"));
