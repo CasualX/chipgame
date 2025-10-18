@@ -172,9 +172,10 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Down => THIN_WALL_S,
 			Compass::Right => THIN_WALL_E,
 		};
-		// If on a solid wall, allow movement out
+		// Allow movement out of solid tiles (e.g. toggle walls)
+		// Otherwise block movement when a panel blocks exit and disable flicks
 		if solidf != SOLID_WALL && (solidf & panel) != 0 {
-			flick(s, ent.kind, &new_pos, step_dir);
+			//flick(s, ent.kind, &new_pos, step_dir);
 			return false;
 		}
 
