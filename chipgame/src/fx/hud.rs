@@ -185,13 +185,23 @@ impl FxState {
 					..Default::default()
 				};
 				let size = ss.y as f32 * 0.05;
-				let scribe = shade::d2::Scribe {
+				let mut scribe = shade::d2::Scribe {
 					font_size: size,
 					line_height: size * 1.2,
 					color: Vec4(255, 255, 255, 255),
 					outline: Vec4(0, 0, 0, 255),
 					..Default::default()
 				};
+
+				// Temporarily adjust font size if hint is too wide
+				// TODO: Implement word-wrapping
+				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &hint);
+				if width > rect.size().x {
+					// Hint is too wide, use a smaller font size
+					scribe.font_size = size * rect.size().x / width * 0.9;
+					scribe.line_height = scribe.font_size * 1.2;
+				}
+
 				tbuf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, &hint);
 			}
 		}
