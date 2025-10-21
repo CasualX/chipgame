@@ -60,8 +60,8 @@ pub struct GameWinMenu {
 	pub time: i32,
 	pub steps: i32,
 	pub bonks: i32,
-	pub time_high_score: bool,
-	pub steps_high_score: bool,
+	pub time_high_score: i32,
+	pub steps_high_score: i32,
 	pub time_fireworks: Fireworks,
 	pub steps_fireworks: Fireworks,
 }
@@ -117,6 +117,8 @@ impl GameWinMenu {
 			time: self.time,
 			steps: self.steps,
 			bonks: self.bonks,
+			time_high_score: self.time_high_score,
+			steps_high_score: self.steps_high_score,
 		}.draw(&mut buf, &middle, resx);
 
 		draw::DrawMenuItems {
@@ -127,12 +129,12 @@ impl GameWinMenu {
 		buf.draw(g, shade::Surface::BACK_BUFFER);
 
 		let size = resx.viewport.height() as f32 * FONT_SIZE;
-		if self.time_high_score {
+		if self.time_high_score < 0 || self.time < self.time_high_score {
 			let mins = Vec2f(middle.right() - size * 3.0, middle.center().y - size);
 			let maxs = Vec2f(middle.right(), middle.center().y);
 			self.time_fireworks.draw(g, resx, time, Bounds2f(mins, maxs));
 		}
-		if self.steps_high_score {
+		if self.steps_high_score < 0 || self.steps < self.steps_high_score {
 			let mins = Vec2f(middle.right() - size, middle.center().y);
 			let maxs = Vec2f(middle.right(), middle.center().y + size);
 			self.steps_fireworks.draw(g, resx, time, Bounds2f(mins, maxs));

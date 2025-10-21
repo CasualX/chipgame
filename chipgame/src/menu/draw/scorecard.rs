@@ -5,6 +5,8 @@ pub struct DrawScoreCard {
 	pub time: i32,
 	pub steps: i32,
 	pub bonks: i32,
+	pub time_high_score: i32,
+	pub steps_high_score: i32,
 }
 impl DrawScoreCard {
 	pub fn draw(&self, buf: &mut shade::d2::TextBuffer, rect: &Bounds2<f32>, resx: &Resources) {
@@ -30,5 +32,27 @@ impl DrawScoreCard {
 		else {
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, &format!("{}\n{}.{:02}\n{}\n{}", self.attempts, seconds, frames, self.steps, self.bonks));
 		}
+
+		if self.time_high_score < -1 || self.steps_high_score < -1 {
+			return;
+		}
+
+		let rect = Bounds2::c(rect.right(), rect.top(), rect.right(), rect.bottom());
+		scribe.color = Vec4(255, 223, 0, 255); // Gold color
+
+		fn status_str(score: i32, high_score: i32) -> impl fmt::Display {
+			fmtools::fmt! { move
+				if high_score < 0 || score < high_score { " 🏆" }
+				else if score == high_score { " 🎯" }
+				else { " +"{score - high_score} }
+			}
+		}
+
+		buf.text_lines(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &[
+			&"",
+			&status_str(self.time, self.time_high_score),
+			&status_str(self.steps, self.steps_high_score),
+			&"",
+		]);
 	}
 }

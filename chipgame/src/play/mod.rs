@@ -418,9 +418,11 @@ fn play_fx_game_win(this: &mut PlayState) {
 		ticks: fx.gs.time,
 		steps: fx.gs.ps.steps,
 	};
-	let time_high_score = this.save_data.is_time_high_score(fx.level_number, scores.ticks);
-	let steps_high_score = this.save_data.is_steps_high_score(fx.level_number, scores.steps);
-	let high_score = time_high_score || steps_high_score;
+	let time_high_score = this.save_data.get_time_high_score(fx.level_number);
+	let steps_high_score = this.save_data.get_steps_high_score(fx.level_number);
+	let high_score =
+		(time_high_score < 0 || scores.ticks < time_high_score) ||
+		(steps_high_score < 0 || scores.steps < steps_high_score);
 	if high_score {
 		this.events.push(PlayEvent::PlaySound { sound: chipty::SoundFx::GameWin });
 	}

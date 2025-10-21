@@ -63,3 +63,11 @@ pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
 	cv.draw(g, shade::Surface::BACK_BUFFER);
 	g.clear(&shade::ClearArgs { surface: shade::Surface::BACK_BUFFER, depth: Some(1.0), ..Default::default() });
 }
+
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
+pub enum HighScore {
+	Record,
+	Tied,
+	#[default]
+	None,
+}

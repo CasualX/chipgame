@@ -126,16 +126,13 @@ impl SaveData {
 		*attempts_entry
 	}
 
-	pub fn is_time_high_score(&self, level_number: i32, time: i32) -> bool {
+	pub fn get_time_high_score(&self, level_number: i32) -> i32 {
 		let level_index = (level_number - 1) as usize;
-		let Some(ticks_entry) = self.high_scores.ticks.get(level_index) else { return false };
-		return *ticks_entry < 0 || *ticks_entry > time;
+		self.high_scores.ticks.get(level_index).copied().unwrap_or(-1)
 	}
-
-	pub fn is_steps_high_score(&self, level_number: i32, steps: i32) -> bool {
+	pub fn get_steps_high_score(&self, level_number: i32) -> i32 {
 		let level_index = (level_number - 1) as usize;
-		let Some(steps_entry) = self.high_scores.steps.get(level_index) else { return false };
-		return *steps_entry < 0 || *steps_entry > steps;
+		self.high_scores.steps.get(level_index).copied().unwrap_or(-1)
 	}
 
 	pub fn save(&mut self, level_pack: &LevelSet) {

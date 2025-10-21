@@ -69,6 +69,8 @@ impl PauseMenu {
 			time: self.time,
 			steps: self.steps,
 			bonks: self.bonks,
+			time_high_score: -2,
+			steps_high_score: -2,
 		}.draw(&mut buf, &middle, resx);
 
 		draw::DrawMenuItems {
