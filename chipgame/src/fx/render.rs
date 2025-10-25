@@ -385,7 +385,15 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		if !obj.live || !obj.vis {
 			continue;
 		}
-		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha);
+		// Flatten the sprite if it's on an elevated terrain
+		let model = if obj.pos.z > 0.0 { data::ModelId::ReallyFlatSprite } else { obj.model };
+		// Dim the template entities
+		let mut alpha = obj.alpha;
+		if state.gs.ents.get(obj.ehandle).map_or(false, |e| e.flags & chipcore::EF_TEMPLATE != 0) {
+			alpha *= 0.5;
+		}
+		// Draw the object
+		draw(cv, obj.pos, obj.sprite, model, alpha);
 	}
 }
 

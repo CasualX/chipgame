@@ -338,7 +338,7 @@ fn main() {
 				&chipgame::play::PlayEvent::Quit => quit = true,
 				&chipgame::play::PlayEvent::PlayLevel => {
 					if let Some(fx) = &state.fx {
-						context.window().set_title(&format!("{} - Level {} - {}", state.lvsets.current().name, fx.level_number, fx.gs.field.name));
+						context.window().set_title(&format!("{} - Level {} - {}", state.lvsets.current().title, fx.level_number, fx.gs.field.name));
 					}
 					else if let Some(level_pack) = state.lvsets.collection.get(state.lvsets.selected) {
 						context.window().set_title(&level_pack.title);

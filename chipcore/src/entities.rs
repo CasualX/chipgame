@@ -58,10 +58,10 @@ impl GameState {
 		};
 		s.events.fire(GameEvent::EntityCreated { entity: ehandle, kind: data.kind });
 
+		// Mark entities starting on a clone machine as templates
 		if s.time == 0 && matches!(s.field.get_terrain(data.pos), Terrain::CloneMachine) {
 			if let Some(ent) = s.ents.get_mut(ehandle) {
-				ent.flags |= EF_TEMPLATE | EF_HIDDEN;
-				s.events.fire(GameEvent::EntityHidden { entity: ehandle, hidden: true });
+				ent.flags |= EF_TEMPLATE;
 			}
 		}
 

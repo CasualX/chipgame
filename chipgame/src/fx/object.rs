@@ -90,7 +90,7 @@ impl Object {
 
 		if let Some(ent) = ctx.gs.ents.get(self.ehandle) {
 			let terrain = ctx.gs.field.get_terrain(ent.pos);
-			let elevated = matches!(terrain, chipty::Terrain::Wall | chipty::Terrain::RedLock | chipty::Terrain::BlueLock | chipty::Terrain::GreenLock | chipty::Terrain::YellowLock);
+			let elevated = terrain.is_wall();
 
 			if elevated {
 				if !matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) {

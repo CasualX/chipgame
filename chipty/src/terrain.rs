@@ -56,3 +56,12 @@ pub enum Terrain {
 	BearTrap,
 	RecessedWall,
 }
+
+impl Terrain {
+	#[inline]
+	pub const fn is_wall(self) -> bool {
+		matches!(self,
+			Terrain::Wall | Terrain::DirtBlock | Terrain::CloneMachine | Terrain::FakeBlueWall | Terrain::RealBlueWall |
+			Terrain::ToggleWall | Terrain::RedLock | Terrain::BlueLock | Terrain::GreenLock | Terrain::YellowLock)
+	}
+}
