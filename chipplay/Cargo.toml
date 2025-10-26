@@ -8,20 +8,21 @@ chipcore = { path = "../chipcore" }
 chipgame = { path = "../chipgame" }
 chipty = { path = "../chipty" }
 
-ini_core.workspace = true
-
 serde.workspace = true
 serde_json.workspace = true
+ini_core.workspace = true
+paks.workspace = true
 
 clap.workspace = true
 
 shade.workspace = true
-glutin = "0.26"
-winit = "0.24"
+
+glutin = "0.31"
+glutin-winit = "0.4"
+winit = "0.29"
+raw-window-handle = "0.5"
 
 soloud = "1.0"
-
-paks.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.3"

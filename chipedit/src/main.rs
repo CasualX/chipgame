@@ -1,9 +1,14 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 use std::{fs, thread, time};
+use std::ffi::CString;
+use std::num::NonZeroU32;
+use std::path::PathBuf;
+
+use glutin::prelude::*;
+use raw_window_handle::HasRawWindowHandle;
 
 use chipgame::editor;
-use std::path::Path;
 use chipgame::FileSystem;
 
 #[cfg(windows)]
@@ -21,6 +26,7 @@ fn window_builder(size: winit::dpi::PhysicalSize<u32>) -> winit::window::WindowB
 		.with_inner_size(size)
 }
 
+#[track_caller]
 fn load_png(
 	g: &mut shade::Graphics,
 	name: Option<&str>,
@@ -33,135 +39,146 @@ fn load_png(
 	shade::image::png::load_stream(g, name, &mut &data[..], props, transform)
 }
 
-fn main() {
-	let mut font_atlas = "font.png";
-	let mut font_meta = "font.json";
-	let mut tileset_texture = "tileset/MS.png";
-	let mut pixel_art_bias = 0.5;
-	let config_storage = fs::read_to_string("chipgame.ini");
-	if let Ok(config) = &config_storage {
-		for item in ini_core::Parser::new(config) {
-			match item {
-				ini_core::Item::Property(key, Some(value)) => {
-					match key {
-						"FontAtlas" => font_atlas = value,
-						"FontMeta" => font_meta = value,
-						"TilesetTexture" => tileset_texture = value,
-						"PixelArtBias" => {
-							if let Ok(v) = value.parse::<f32>() {
-								pixel_art_bias = v;
-							}
-						}
-						_ => { /* Ignore other items */ }
-					}
-				}
-				_ => { /* Ignore other items */ }
-			}
+struct Config {
+	tileset_texture: String,
+	font_atlas: String,
+	font_meta: String,
+	pixel_art_bias: f32,
+}
+
+fn parse_config(cfg_text: &str) -> Config {
+	let mut tileset_texture = "tileset/Kayu.png".to_string();
+	let mut font_atlas = "font.png".to_string();
+	let mut font_meta = "font.json".to_string();
+	let mut pixel_art_bias = 0.5f32;
+
+	for item in ini_core::Parser::new(cfg_text) {
+		match item {
+			ini_core::Item::Property(key, Some(value)) => match key {
+				"TilesetTexture" => tileset_texture = value.to_string(),
+				"FontAtlas" => font_atlas = value.to_string(),
+				"FontMeta" => font_meta = value.to_string(),
+				"PixelArtBias" => if let Ok(v) = value.parse::<f32>() { pixel_art_bias = v; },
+				_ => {}
+			},
+			_ => {}
 		}
 	}
 
-	let key = paks::Key::default();
-	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &key) {
-		FileSystem::Paks(paks, key)
-	}
-	else {
-		FileSystem::StdFs(std::path::PathBuf::from("data"))
-	};
+	Config { tileset_texture, font_atlas, font_meta, pixel_art_bias }
+}
 
-	// Make the level argument optional so the editor can start blank or open via Save/Load dialogs.
-	let app = clap::command!("play")
-	.arg(clap::arg!([level] "Level file to open"));
-	let matches = app.get_matches();
-	let mut file_path: Option<String> = matches.value_of("level").map(|s| s.to_string());
+struct AppStuff {
+	window: winit::window::Window,
+	surface: glutin::surface::Surface<glutin::surface::WindowSurface>,
+	context: glutin::context::PossiblyCurrentContext,
+	g: shade::gl::GlGraphics,
+	resx: chipgame::fx::Resources,
+}
 
-	let mut size = winit::dpi::PhysicalSize::new(800, 600);
+fn init_app(
+	elwt: &winit::event_loop::EventLoopWindowTarget<()>,
+	size: winit::dpi::PhysicalSize<u32>,
+	vfs: &FileSystem,
+	config: &Config,
+) -> AppStuff {
+	use glutin::config::ConfigTemplateBuilder;
+	use glutin::context::{ContextApi, ContextAttributesBuilder, Version};
+	use glutin::display::GetGlDisplay;
+	use glutin::surface::{SurfaceAttributesBuilder, WindowSurface};
 
-	let mut event_loop = winit::event_loop::EventLoop::new();
+	let template = ConfigTemplateBuilder::new()
+		.with_alpha_size(8)
+		.with_multisampling(4);
 
-	let window_context = glutin::ContextBuilder::new()
-		.with_multisampling(4)
-		.build_windowed(window_builder(size), &event_loop)
-		.unwrap();
+	let (window, gl_config) = glutin_winit::DisplayBuilder::new()
+		.with_window_builder(Some(window_builder(size)))
+		.build(elwt, template, |configs| configs.max_by_key(|c| c.num_samples()).unwrap().clone())
+		.expect("Failed to build window and GL config");
 
-	let context = unsafe { window_context.make_current().unwrap() };
+	let window = window.expect("DisplayBuilder did not build a Window");
+	let raw_window_handle = window.raw_window_handle();
 
-	shade::gl::capi::load_with(|s| context.get_proc_address(s) as *const _);
+	let context_attributes = ContextAttributesBuilder::new()
+		.with_context_api(ContextApi::OpenGl(Some(Version::new(3, 3))))
+		.build(Some(raw_window_handle));
 
-	// Create the graphics context
+	let gl_display = gl_config.display();
+
+	let not_current = unsafe {
+		gl_display.create_context(&gl_config, &context_attributes)
+	}.expect("Failed to create GL context");
+
+	let attrs = SurfaceAttributesBuilder::<WindowSurface>::new().build(
+		raw_window_handle,
+		NonZeroU32::new(size.width.max(1)).unwrap(),
+		NonZeroU32::new(size.height.max(1)).unwrap(),
+	);
+
+	let surface = unsafe {
+		gl_display.create_window_surface(&gl_config, &attrs)
+	}.expect("Failed to create GL surface");
+	let context = not_current
+		.make_current(&surface)
+		.expect("Failed to make GL context current");
+
+	// Load GL functions for shaders/textures
+	shade::gl::capi::load_with(|s| {
+		let c = CString::new(s).unwrap();
+		gl_display.get_proc_address(&c)
+	});
+
+	// Now that GL is ready, create graphics and resources
 	let mut g = shade::gl::GlGraphics::new();
-
-	// Load the texture
-	let tileset = load_png(&mut g, Some("scene tiles"), &fs, tileset_texture, &shade::image::TextureProps {
+	let tex_props = shade::image::TextureProps {
 		filter_min: shade::TextureFilter::Linear,
 		filter_mag: shade::TextureFilter::Linear,
 		wrap_u: shade::TextureWrap::ClampEdge,
 		wrap_v: shade::TextureWrap::ClampEdge,
-	}, Some(&mut shade::image::gutter(32, 32))).unwrap();
-	let tex_info = g.texture2d_get_info(tileset);
-
-	let effects = load_png(&mut g, Some("effects"), &fs, "effects.png", &shade::image::TextureProps {
-		filter_min: shade::TextureFilter::Linear,
-		filter_mag: shade::TextureFilter::Linear,
-		wrap_u: shade::TextureWrap::ClampEdge,
-		wrap_v: shade::TextureWrap::ClampEdge,
-	}, None).unwrap();
-
-	let texdigits = load_png(&mut g, Some("digits"), &fs, "digits.png", &shade::image::TextureProps {
-		filter_min: shade::TextureFilter::Linear,
-		filter_mag: shade::TextureFilter::Linear,
-		wrap_u: shade::TextureWrap::ClampEdge,
-		wrap_v: shade::TextureWrap::ClampEdge,
-	}, None).unwrap();
-
-	let menubg = load_png(&mut g, Some("menubg"), &fs, "menubg.png", &shade::image::TextureProps {
-		filter_min: shade::TextureFilter::Linear,
-		filter_mag: shade::TextureFilter::Linear,
+	};
+	let tex_props_repeat = shade::image::TextureProps {
 		wrap_u: shade::TextureWrap::Repeat,
 		wrap_v: shade::TextureWrap::Repeat,
-	}, None).unwrap();
+		..tex_props
+	};
 
-	// Create the shader
+	let tileset = load_png(&mut g, Some("scene tiles"), vfs, &config.tileset_texture, &tex_props, Some(&mut shade::image::gutter(32, 32))).unwrap();
+	let effects = load_png(&mut g, Some("effects"), vfs, "effects.png", &tex_props, None).unwrap();
+	let texdigits = load_png(&mut g, Some("digits"), vfs, "digits.png", &tex_props, None).unwrap();
+	let menubg = load_png(&mut g, Some("menubg"), vfs, "menubg.png", &tex_props_repeat, None).unwrap();
+	let tileset_info = g.texture2d_get_info(tileset);
+
 	let shader = {
-		let vs = fs.read_to_string("pixelart.vs.glsl").unwrap();
-		let fs = fs.read_to_string("pixelart.fs.glsl").unwrap();
-		g.shader_create(None, &vs, &fs)
+		let vs = vfs.read_to_string("pixelart.vs.glsl").unwrap();
+		let fs_src = vfs.read_to_string("pixelart.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs_src)
 	};
 	let colorshader = {
-		let vs = fs.read_to_string("color.vs.glsl").unwrap();
-		let fs = fs.read_to_string("color.fs.glsl").unwrap();
-		g.shader_create(None, &vs, &fs)
+		let vs = vfs.read_to_string("color.vs.glsl").unwrap();
+		let fs_src = vfs.read_to_string("color.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs_src)
 	};
 	let uishader = {
-		let vs = fs.read_to_string("ui.vs.glsl").unwrap();
-		let fs = fs.read_to_string("ui.fs.glsl").unwrap();
-		g.shader_create(None, &vs, &fs)
+		let vs = vfs.read_to_string("ui.vs.glsl").unwrap();
+		let fs_src = vfs.read_to_string("ui.fs.glsl").unwrap();
+		g.shader_create(None, &vs, &fs_src)
 	};
 
-	let mut past_now = time::Instant::now();
-
 	let font = {
-		let font: shade::msdfgen::FontDto = serde_json::from_str(fs.read_to_string(font_meta).unwrap().as_str()).unwrap();
-		let font: Option<shade::msdfgen::Font> = Some(font.into());
-
+		let dto: shade::msdfgen::FontDto = serde_json::from_str(vfs.read_to_string(&config.font_meta).unwrap().as_str()).unwrap();
+		let font: Option<shade::msdfgen::Font> = Some(dto.into());
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
-
-		let texture = load_png(&mut g, Some("font"), &fs, font_atlas, &shade::image::TextureProps {
-			filter_min: shade::TextureFilter::Linear,
-			filter_mag: shade::TextureFilter::Linear,
-			wrap_u: shade::TextureWrap::ClampEdge,
-			wrap_v: shade::TextureWrap::ClampEdge,
-		}, None).unwrap();
-
+		let texture = load_png(&mut g, Some("font"), vfs, &config.font_atlas, &tex_props, None).unwrap();
 		shade::d2::FontResource { font, shader, texture }
 	};
 
-	let viewport = cvmath::Bounds2(cvmath::Vec2::ZERO, cvmath::Vec2(size.width as i32, size.height as i32));
-	let mut resx = chipgame::fx::Resources {
+	let viewport = cvmath::Bounds2::vec(cvmath::Vec2(size.width as i32, size.height as i32));
+	let resx = chipgame::fx::Resources {
 		effects,
 		tileset,
-		tileset_size: [tex_info.width, tex_info.height].into(),
+		tileset_size: [tileset_info.width, tileset_info.height].into(),
 		shader,
-		pixel_art_bias,
+		pixel_art_bias: config.pixel_art_bias,
 		viewport,
 		colorshader,
 		uishader,
@@ -171,154 +188,195 @@ fn main() {
 		font,
 	};
 
-	drop(config_storage);
+	AppStuff { window, surface, context, g, resx }
+}
 
-	let mut editor = editor::EditorState::default();
-	editor.init();
-	if let Some(ref fp) = file_path {
-		if let Ok(contents) = fs::read_to_string(fp) {
-			editor.load_level(&contents);
-			context.window().set_title(&format!("ChipEdit - {}", fp));
-		}
+fn set_fullscreen(app: &AppStuff, fullscreen: bool) {
+	// Borderless fullscreen on the current monitor
+	let target = if fullscreen {
+		let monitor = app.window.current_monitor();
+		Some(winit::window::Fullscreen::Borderless(monitor))
 	}
 	else {
-		editor.load_level(include_str!("template.json"));
-		context.window().set_title("ChipEdit - (unsaved)");
+		None
+	};
+	app.window.set_fullscreen(target);
+}
+
+fn main() {
+	let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
+	let config = parse_config(&config);
+
+	// VFS
+	let key = paks::Key::default();
+	let vfs = if let Ok(paks) = paks::FileReader::open("data.paks", &key) {
+		FileSystem::Paks(paks, key)
 	}
+	else {
+		FileSystem::StdFs(PathBuf::from("data"))
+	};
 
-	// Main loop
-	let mut quit = false;
-	while !quit {
-		// Handle events
-		use winit::platform::run_return::EventLoopExtRunReturn as _;
-		event_loop.run_return(|event, _, control_flow| {
-			*control_flow = winit::event_loop::ControlFlow::Wait;
+	// CLI: optional level path
+	let app = clap::command!("play").arg(clap::arg!([level] "Level file to open"));
+	let matches = app.get_matches();
+	let mut file_path = matches.value_of("level").map(PathBuf::from);
 
-			// if let winit::event::Event::WindowEvent { event, .. } = &event {
-			// 	// Print only Window events to reduce noise
-			// 	println!("{:?}", event);
-			// }
+	let mut size = winit::dpi::PhysicalSize::new(800, 600);
+	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
-			editor.set_screen_size(size.width as i32, size.height as i32);
+	// App state
+	let mut app: Option<AppStuff> = None;
+	let mut editor = editor::EditorState::default();
+	editor.init();
 
-			match event {
-				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::Resized(new_size), .. } => {
+	let mut past_now = time::Instant::now();
+
+	let _ = event_loop.run(move |event, elwt| {
+		use winit::event::{Event, WindowEvent};
+		use winit::keyboard::{KeyCode, PhysicalKey};
+
+		match event {
+			Event::Resumed => {
+				if app.is_none() {
+					let built = init_app(elwt, size, &vfs, &config);
+
+					// Window title and initial level
+					built.window.set_title("ChipEdit - (unsaved)");
+					if let Some(fp) = file_path.as_ref() {
+						if let Ok(contents) = fs::read_to_string(fp) {
+							editor.load_level(&contents);
+							built.window.set_title(&format!("ChipEdit - {}", fp.display()));
+						}
+					}
+					else {
+						editor.load_level(include_str!("template.json"));
+					}
+
+					app = Some(built);
+				}
+			}
+			Event::WindowEvent { event, .. } => match event {
+				WindowEvent::Resized(new_size) => {
 					size = new_size;
-					context.resize(new_size);
+					if let Some(app) = app.as_ref() {
+						let w = NonZeroU32::new(size.width.max(1)).unwrap();
+						let h = NonZeroU32::new(size.height.max(1)).unwrap();
+						app.surface.resize(&app.context, w, h);
+					}
 				}
-				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CloseRequested, .. } => {
-					quit = true;
+				WindowEvent::CloseRequested => elwt.exit(),
+				WindowEvent::RedrawRequested => {
+					if let Some(app) = app.as_mut() {
+						app.resx.viewport.maxs = [size.width as i32, size.height as i32].into();
+						editor.set_screen_size(size.width as i32, size.height as i32);
+
+						app.g.begin();
+						editor.draw(&mut app.g, &app.resx);
+						app.g.end();
+
+						app.surface.swap_buffers(&app.context).unwrap();
+						let now = time::Instant::now();
+						let sleep_dur = time::Duration::from_millis(24).saturating_sub(now - past_now);
+						past_now = now;
+						thread::sleep(sleep_dur);
+					}
 				}
-				winit::event::Event::WindowEvent {
-					event: winit::event::WindowEvent::KeyboardInput {
-						input: winit::event::KeyboardInput {
-							virtual_keycode,
-							state,
-							..
-						},
-						..
-					},
-					..
-				} => {
-					match virtual_keycode {
-						Some(winit::event::VirtualKeyCode::Left) => editor.key_left(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Right) => editor.key_right(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Up) => editor.key_up(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Down) => editor.key_down(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Delete) => editor.delete(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::F2) if is_pressed(state) => {
+				WindowEvent::KeyboardInput { event, .. } => {
+					let pressed = matches!(event.state, winit::event::ElementState::Pressed);
+
+					match event.physical_key {
+						PhysicalKey::Code(KeyCode::ArrowLeft) => editor.key_left(pressed),
+						PhysicalKey::Code(KeyCode::ArrowRight) => editor.key_right(pressed),
+						PhysicalKey::Code(KeyCode::ArrowUp) => editor.key_up(pressed),
+						PhysicalKey::Code(KeyCode::ArrowDown) => editor.key_down(pressed),
+						PhysicalKey::Code(KeyCode::Delete) => editor.delete(pressed),
+						PhysicalKey::Code(KeyCode::F2) if pressed => {
 							// Open file dialog to load a level
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
 								.set_title("Open Level");
 							if let Some(ref existing) = file_path {
-								let p = Path::new(existing);
-								if let Some(parent) = p.parent() { dialog = dialog.set_directory(parent); }
+								if let Some(parent) = existing.parent() {
+									dialog = dialog.set_directory(parent);
+								}
 							}
 							if let Some(path) = dialog.pick_file() {
 								match fs::read_to_string(&path) {
 									Ok(contents) => {
 										editor.load_level(&contents);
-										file_path = Some(path.display().to_string());
-										context.window().set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap()));
+										file_path = Some(path.clone());
+										if let Some(app) = app.as_ref() {
+											app.window.set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap().display()));
+										}
 									}
 									Err(e) => eprintln!("Failed to open level: {e}"),
 								}
 							}
 						}
-						Some(winit::event::VirtualKeyCode::F5) if is_pressed(state) => {
-							// Serialize current level
+						PhysicalKey::Code(KeyCode::F5) if pressed => {
 							let contents = editor.save_level();
-
-							// Prepare save dialog with existing path (if any) for convenience
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
 								.set_title("Save Level");
-
 							if let Some(ref existing) = file_path {
-								let p = Path::new(existing);
-								if let Some(parent) = p.parent() { dialog = dialog.set_directory(parent); }
-								if let Some(name) = p.file_name().and_then(|s| s.to_str()) { dialog = dialog.set_file_name(name); }
+								if let Some(parent) = existing.parent() {
+									dialog = dialog.set_directory(parent);
+								}
+								if let Some(name) = existing.file_name().and_then(|s| s.to_str()) {
+									dialog = dialog.set_file_name(name);
+								}
 							}
-
 							if let Some(path) = dialog.save_file() {
 								if let Err(e) = fs::write(&path, contents) {
 									eprintln!("Failed to save level: {e}");
 								}
 								else {
-									// Update current file path and window title
-									file_path = Some(path.display().to_string());
-									context.window().set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap()));
+									file_path = Some(path.clone());
+									if let Some(app) = app.as_ref() {
+										app.window.set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap().display()));
+									}
 								}
 							}
 						}
-						Some(winit::event::VirtualKeyCode::T) => editor.tool_terrain(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::E) => editor.tool_entity(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::C) => editor.tool_connection(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Numpad8) => editor.crop_top(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Numpad2) => editor.crop_bottom(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Numpad4) => editor.crop_left(is_pressed(state)),
-						Some(winit::event::VirtualKeyCode::Numpad6) => editor.crop_right(is_pressed(state)),
-						_ => (),
+						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
+						PhysicalKey::Code(KeyCode::KeyE) => editor.tool_entity(pressed),
+						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
+						PhysicalKey::Code(KeyCode::Numpad8) => editor.crop_top(pressed),
+						PhysicalKey::Code(KeyCode::Numpad2) => editor.crop_bottom(pressed),
+						PhysicalKey::Code(KeyCode::Numpad4) => editor.crop_left(pressed),
+						PhysicalKey::Code(KeyCode::Numpad6) => editor.crop_right(pressed),
+						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
+							if let Some(app) = app.as_mut() {
+								let want_fullscreen = app.window.fullscreen().is_none();
+								set_fullscreen(app, want_fullscreen);
+							}
+						}
+						PhysicalKey::Code(KeyCode::Escape) if pressed => {
+							if let Some(app) = app.as_mut() {
+								set_fullscreen(app, false);
+							}
+						}
+						_ => {}
 					}
 				}
-				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::MouseInput { state, button, .. }, .. } => {
+				WindowEvent::MouseInput { state, button, .. } => {
 					match button {
-						winit::event::MouseButton::Left => editor.left_click(is_pressed(state)),
-						winit::event::MouseButton::Right => editor.right_click(is_pressed(state)),
-						_ => (),
+						winit::event::MouseButton::Left => editor.left_click(matches!(state, winit::event::ElementState::Pressed)),
+						winit::event::MouseButton::Right => editor.right_click(matches!(state, winit::event::ElementState::Pressed)),
+						_ => {}
 					}
 				}
-				winit::event::Event::WindowEvent { event: winit::event::WindowEvent::CursorMoved { position, .. }, .. } => {
+				WindowEvent::CursorMoved { position, .. } => {
 					editor.mouse_move(position.x as i32, position.y as i32);
 				}
-				winit::event::Event::MainEventsCleared => {
-					*control_flow = winit::event_loop::ControlFlow::Exit;
+				_ => {}
+			},
+			Event::AboutToWait => {
+				if let Some(app) = app.as_ref() {
+					app.window.request_redraw();
 				}
-				_ => (),
 			}
-		});
-
-		resx.viewport.maxs = [size.width as i32, size.height as i32].into();
-
-		g.begin();
-		editor.draw(&mut g, &resx);
-		g.end();
-
-		// Swap the buffers and wait for the next frame
-		context.swap_buffers().unwrap();
-
-		// Sleep with a target frame rate of 60 FPS
-		let now = time::Instant::now();
-		let sleep_dur = time::Duration::from_millis(24).saturating_sub(now - past_now);
-		past_now = now;
-		thread::sleep(sleep_dur);
-	}
-}
-
-fn is_pressed(state: winit::event::ElementState) -> bool {
-	match state {
-		winit::event::ElementState::Pressed => true,
-		winit::event::ElementState::Released => false,
-	}
+			_ => {}
+		}
+	});
 }

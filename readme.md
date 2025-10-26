@@ -52,9 +52,11 @@ Controls
 * Arrow keys, WASD: Move Chip
 * Space: Select menu item
 * Backspace: Close the current menu
-* Esc: Open the scout menu
 * Enter: Open the Pause menu
+* Shift: Open scouting mode
 * M: Toggle music
+* F: Toggle fullscreen
+* ESC: Exit fullscreen
 
 ### Controller Bindings
 
@@ -62,7 +64,7 @@ Controls
 * A: Select menu item
 * B: Close the current menu
 * Start: Open the Pause menu
-* Select: Open the scout menu
+* Select: Open scouting mode
 
 Level Editor
 ------------
@@ -78,6 +80,8 @@ The game includes a very bare-bones level editor that can be used to create cust
 * T: Select Terrain Tool
 * E: Select Entity Tool
 * C: Select Connection Tool
+* F: Toggle fullscreen
+* ESC: Exit fullscreen
 
 Community Resources
 -------------------

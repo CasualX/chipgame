@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 chipgame = { path = "../chipgame" }
 
-ini_core.workspace = true
-
 serde.workspace = true
 serde_json.workspace = true
+ini_core.workspace = true
+paks.workspace = true
 
 clap.workspace = true
 
@@ -17,10 +17,10 @@ urandom.workspace = true
 cvmath.workspace = true
 shade.workspace = true
 
-glutin = "0.26"
-winit = "0.24"
+glutin = "0.31"
+glutin-winit = "0.4"
+winit = "0.29"
+raw-window-handle = "0.5"
 
 # Use only synchronous GTK backend (provides FileDialog + MessageDialog) on Linux/BSD; no effect on Win/mac.
 rfd = { version = "0.15", default-features = false, features = ["gtk3"] }
-
-paks.workspace = true
