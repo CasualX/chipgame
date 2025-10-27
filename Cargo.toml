@@ -8,6 +8,7 @@ members = [
 	"./chipplay",
 	"./chipty",
 	"./scripts/colorkey",
+	"./scripts/copyrecords",
 	"./scripts/extract",
 	"./scripts/fixer",
 	"./scripts/levelstats",

@@ -118,3 +118,11 @@ fn dev() {
 	let replays_dir = current_dir.join("tests/replays/dev");
 	test_level(&levels_dir, &replays_dir, "iceblock");
 }
+
+#[test]
+fn walls_of_cc1() {
+	let current_dir = env::current_dir().unwrap();
+	let levels_dir = current_dir.parent().unwrap().join("levelsets/Walls_of_CC1/lv");
+	let replays_dir = current_dir.join("tests/replays/Walls_of_CC1");
+	test_levelset(&levels_dir, &replays_dir);
+}
