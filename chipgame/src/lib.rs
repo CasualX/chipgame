@@ -4,6 +4,7 @@ pub mod fx;
 pub mod menu;
 pub mod play;
 pub mod data;
+pub mod config;
 
 pub enum FileSystem {
 	Paks(paks::FileReader, paks::Key),

@@ -19,7 +19,7 @@ impl FxState {
 		cv.shader = resx.uishader;
 
 		cv.uniform.transform = Transform2f::ortho(cv.viewport.cast());
-		cv.uniform.texture = resx.texdigits;
+		cv.uniform.texture = resx.menubg;
 
 		// Draw the backgrounds for various UI elements
 		let paint = shade::d2::Paint {
