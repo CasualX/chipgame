@@ -39,6 +39,7 @@ pub struct Uniform {
 	pub transform: Mat4<f32>,
 	pub texture: shade::Texture2D,
 	pub pixel_bias: f32,
+	pub greyscale: f32,
 }
 
 impl Default for Uniform {
@@ -47,6 +48,7 @@ impl Default for Uniform {
 			transform: Mat4::IDENTITY,
 			texture: shade::Texture2D::INVALID,
 			pixel_bias: 0.25,
+			greyscale: 0.0,
 		}
 	}
 }
@@ -56,6 +58,7 @@ impl shade::UniformVisitor for Uniform {
 		set.value("u_transform", &self.transform);
 		set.value("u_tex", &self.texture);
 		set.value("u_pixel_bias", &self.pixel_bias);
+		set.value("u_greyscale", &self.greyscale);
 	}
 }
 
@@ -386,14 +389,13 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 			continue;
 		}
 		// Flatten the sprite if it's on an elevated terrain
-		let model = if obj.pos.z > 0.0 { data::ModelId::ReallyFlatSprite } else { obj.model };
-		// Dim the template entities
-		let mut alpha = obj.alpha;
-		if state.gs.ents.get(obj.ehandle).map_or(false, |e| e.flags & chipcore::EF_TEMPLATE != 0) {
-			alpha *= 0.5;
-		}
+		// Z coordinate handled in Object update...
+		let model = if obj.pos.z > 0.0 { data::ModelId::FloorSprite } else { obj.model };
+		// Grayscale the template entities
+		let is_template_ent = state.gs.ents.get(obj.ehandle).map_or(false, |e| e.flags & chipcore::EF_TEMPLATE != 0);
+		cv.uniform.greyscale = if is_template_ent { 1.0 } else { 0.0 };
 		// Draw the object
-		draw(cv, obj.pos, obj.sprite, model, alpha);
+		draw(cv, obj.pos, obj.sprite, model, obj.alpha);
 	}
 }
 

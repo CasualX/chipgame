@@ -7,6 +7,7 @@ in vec2 v_texcoord;
 
 uniform sampler2D u_tex;
 uniform float u_pixel_bias; // 0.0 = no shift (original filtering), 1.0 = snap to nearest texel center (nearest-like)
+uniform float u_greyscale; // 0.0 = full color, 1.0 = full greyscale
 
 void main() {
 	// Push UVs toward the nearest texel center to reduce blurriness on pixel art
@@ -22,5 +23,10 @@ void main() {
 	}
 
 	color *= v_color;
+
+	// Apply greyscale effect
+	float grey = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+	color.rgb = mix(color.rgb, vec3(grey), u_greyscale);
+
 	FragColor = color;
 }
