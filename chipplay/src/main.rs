@@ -9,7 +9,7 @@ use glutin::prelude::*;
 
 use chipgame::FileSystem;
 
-mod xinput;
+mod gamepad;
 
 struct AudioPlayer {
 	sl: soloud::Soloud,
@@ -188,7 +188,7 @@ fn main() {
 		FileSystem::StdFs(std::path::PathBuf::from("data"))
 	};
 
-	let xinput = xinput::XInput::new();
+	let mut gamepads = gamepad::GamepadManager::new();
 
 	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
 	let mut ap = AudioPlayer { sl, sfx: HashMap::new(), music: HashMap::new(), cur_music: None };
@@ -264,13 +264,11 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = &mut app {
-						let mut x_input = chipcore::Input::default();
-						xinput.get_state(&mut x_input);
-
-						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
-						let input = kbd_input | x_input;
+						let pad_input = gamepads.poll();
+						let input = kbd_input | pad_input;
 						state.think(&input);
 
+						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 						app.g.begin();
 						let time = time_base.elapsed().as_secs_f64();
 						state.draw(&mut app.g, &mut app.resx, time);

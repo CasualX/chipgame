@@ -21,6 +21,7 @@ glutin = "0.31"
 glutin-winit = "0.4"
 winit = "0.29"
 raw-window-handle = "0.5"
+gilrs = "0.10"
 
 soloud = "1.0"
 
