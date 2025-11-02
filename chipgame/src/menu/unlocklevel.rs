@@ -38,6 +38,16 @@ static PRESS_UP_MAP: [i8; 26] = create_map! {
 	A=>Q, S=>W, D=>E, F=>R, G=>T, H=>Y, J=>U, K=>I, L=>O,
 	Z=>S, X=>D, C=>F, V=>G, B=>H, N=>J, M=>K,
 };
+static PRESS_LEFT_MAP: [i8; 26] = create_map! {
+	Q=>P, W=>Q, E=>W, R=>E, T=>R, Y=>T, U=>Y, I=>U, O=>I, P=>O,
+	A=>L, S=>A, D=>S, F=>D, G=>F, H=>G, J=>H, K=>J, L=>K,
+	Z=>M, X=>Z, C=>X, V=>C, B=>V, N=>B, M=>N,
+};
+static PRESS_RIGHT_MAP: [i8; 26] = create_map! {
+	Q=>W, W=>E, E=>R, R=>T, T=>Y, Y=>U, U=>I, I=>O, O=>P, P=>Q,
+	A=>S, S=>D, D=>F, F=>G, G=>H, H=>J, J=>K, K=>L, L=>A,
+	Z=>X, X=>C, C=>V, V=>B, B=>N, N=>M, M=>Z,
+};
 
 impl UnlockLevelMenu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
@@ -56,20 +66,16 @@ impl UnlockLevelMenu {
 		}
 
 		if input.left.is_pressed() {
-			if self.selected > 0 {
-				self.selected -= 1;
-			}
-			else {
-				self.selected = 25;
+			let new_index = PRESS_LEFT_MAP[self.selected as usize];
+			if new_index >= 0 {
+				self.selected = new_index;
 			}
 		}
 
 		if input.right.is_pressed() {
-			if self.selected < 25 {
-				self.selected += 1;
-			}
-			else {
-				self.selected = 0;
+			let new_index = PRESS_RIGHT_MAP[self.selected as usize];
+			if new_index >= 0 {
+				self.selected = new_index;
 			}
 		}
 
