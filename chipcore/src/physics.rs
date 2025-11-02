@@ -531,6 +531,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 						s.set_terrain(Vec2i::new(x, y), new);
 					}
 				}
+				s.events.fire(GameEvent::ToggleWalls { entity: ent.handle });
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}

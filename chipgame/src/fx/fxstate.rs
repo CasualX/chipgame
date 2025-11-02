@@ -112,6 +112,7 @@ impl FxState {
 		self.sync();
 	}
 	pub fn sync(&mut self) {
+		let mut tw = false;
 		for ev in &self.gs.events.take() {
 			eprintln!("GameEvent: {:?}", ev);
 			match ev {
@@ -127,21 +128,18 @@ impl FxState {
 				&chipcore::GameEvent::LockOpened { pos, key } => lock_opened(self, pos, key),
 				&chipcore::GameEvent::FireHidden { pos, hidden } => fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => {
-					let mut tw = false;
 					match (old, new) {
 						(chipty::Terrain::FakeBlueWall, _) => blue_wall_cleared(self, pos),
 						(chipty::Terrain::HiddenWall, _) => hidden_wall_bumped(self, pos),
-						(chipty::Terrain::ToggleFloor, _) => tw = true,
-						(chipty::Terrain::ToggleWall, _) => tw = true,
+						// (chipty::Terrain::ToggleFloor, _) => tw = true,
+						// (chipty::Terrain::ToggleWall, _) => tw = true,
 						(chipty::Terrain::Fire, _) => remove_fire(self, pos),
 						(_, chipty::Terrain::Fire) => create_fire(self, pos),
 						(chipty::Terrain::RecessedWall, chipty::Terrain::Wall) => recessed_wall_raised(self, pos),
 						_ => {}
 					}
-					if tw {
-						toggle_walls(self);
-					}
 				},
+				&chipcore::GameEvent::ToggleWalls { .. } => tw ^= true,
 				&chipcore::GameEvent::GameWin { .. } => game_win(self),
 				&chipcore::GameEvent::GameOver { .. } => game_over(self),
 				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
@@ -150,6 +148,9 @@ impl FxState {
 				&chipcore::GameEvent::Fireworks { pos } => effect(self, pos, EffectType::Fireworks),
 				_ => {}
 			}
+		}
+		if tw {
+			toggle_walls(self);
 		}
 
 		if self.next_level_load != 0.0 && self.time > self.next_level_load {

@@ -48,6 +48,7 @@ pub enum GameEvent {
 	ItemsThief { player: PlayerIndex },
 	LockOpened { pos: Vec2i, key: KeyColor },
 	TerrainUpdated { pos: Vec2i, old: Terrain, new: Terrain },
+	ToggleWalls { entity: EntityHandle },
 	GameWin { player: PlayerIndex },
 	GameOver { player: PlayerIndex },
 	SoundFx { sound: SoundFx },
