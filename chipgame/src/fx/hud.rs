@@ -180,6 +180,9 @@ impl FxState {
 				tbuf.shader = resx.font.shader;
 
 				let rect = resx.viewport.cast();
+				let max_hint_width = rect.size().x * 0.9;
+				let hpad = (rect.size().x - max_hint_width) * 0.5;
+				let hint_rect = Bounds2::c(rect.mins.x + hpad, rect.mins.y, rect.maxs.x - hpad, rect.maxs.y);
 				let transform = Transform2f::ortho(rect);
 				tbuf.uniform = shade::d2::TextUniform {
 					transform,
@@ -199,14 +202,14 @@ impl FxState {
 
 				// Temporarily adjust font size if hint is too wide
 				// TODO: Implement word-wrapping
-				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &hint);
-				if width > rect.size().x {
-					// Hint is too wide, use a smaller font size
-					scribe.font_size = size * rect.size().x / width * 0.9;
+				let hint_width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &hint);
+				if hint_width > max_hint_width {
+					// Hint is too wide, use a smaller font size but keep a screen edge margin
+					scribe.font_size = size * max_hint_width / hint_width;
 					scribe.line_height = scribe.font_size * 1.2;
 				}
 
-				tbuf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleCenter, &hint);
+				tbuf.text_box(&resx.font, &scribe, &hint_rect, shade::d2::TextAlign::MiddleCenter, &hint);
 			}
 		}
 
