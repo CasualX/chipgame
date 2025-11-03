@@ -9,7 +9,7 @@ use crate::data;
 mod tool;
 mod tiles;
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Tool {
 	Terrain,
 	Entity,

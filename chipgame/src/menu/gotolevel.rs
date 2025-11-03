@@ -35,9 +35,9 @@ impl GoToLevel {
 				self.selected = self.items.len() as i32;
 			}
 			let prefix = match state {
-				play::LevelState::Locked => "\x1b[draw_mask=0][#]\x1b[draw_mask=1]",
-				play::LevelState::Unlocked => "[\x1b[draw_mask=0]#\x1b[draw_mask=1]]",
-				play::LevelState::Completed => "[#]",
+				play::LevelState::Locked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
+				play::LevelState::Unlocked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
+				play::LevelState::Completed => "🌟",
 			};
 			self.items.push(LevelEntry { level_number, state, name: format!("{prefix} Level {}: {}", level_number, lv.field.name) });
 		}

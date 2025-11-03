@@ -135,6 +135,7 @@ fn main() {
 	let mut app: Option<AppStuff> = None;
 	let mut editor = editor::EditorState::default();
 	editor.init();
+	let mut current_tool = None;
 
 	let mut past_now = time::Instant::now();
 
@@ -264,6 +265,16 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = &mut app {
+						if current_tool != Some(editor.tool) {
+							current_tool = Some(editor.tool);
+							let cursor_icon = match editor.tool {
+								editor::Tool::Terrain => winit::window::CursorIcon::Crosshair,
+								editor::Tool::Entity => winit::window::CursorIcon::Pointer,
+								editor::Tool::Connection => winit::window::CursorIcon::Alias,
+							};
+							app.window.set_cursor_icon(cursor_icon);
+						}
+
 						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 						editor.set_screen_size(app.size.width as i32, app.size.height as i32);
 
