@@ -68,7 +68,6 @@ pub enum AnimState {
 #[derive(Clone, Debug)]
 pub struct Object {
 	pub handle: ObjectHandle,
-	pub ehandle: chipcore::EntityHandle,
 	pub pos: Vec3<f32>,
 	pub lerp_pos: Vec3<f32>,
 	pub mover: MoveType,
@@ -80,26 +79,13 @@ pub struct Object {
 	pub vis: bool,
 	pub live: bool,
 	pub unalive_after_anim: bool,
+	pub greyscale: bool,
 }
 
 impl Object {
 	pub fn update(&mut self, ctx: &mut FxState) {
 		if !self.live {
 			return;
-		}
-
-		if let Some(ent) = ctx.gs.ents.get(self.ehandle) {
-			let terrain = ctx.gs.field.get_terrain(ent.pos);
-			let elevated = terrain.is_wall();
-
-			if elevated {
-				if !matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) {
-					self.pos.z = 20.0;
-				}
-			}
-			else {
-				self.pos.z = 0.0;
-			}
 		}
 
 		match &mut self.mover {

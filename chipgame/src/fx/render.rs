@@ -332,27 +332,14 @@ pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Unifo
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
 
-fn is_block_on_pos(state: &FxState, pos: Vec2<i32>) -> bool {
-	for h in state.gs.qt.get(pos) {
-		if let Some(ent) = state.gs.ents.get(h) {
-			if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) {
-				return true;
-			}
-		}
-	}
-	false
-}
-
-pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, state: &FxState, time: f32, shadow: f32) {
+pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, fx: &FxState, field: &chipcore::Field, time: f32, shadow: f32) {
 	let i = (time * 8.0) as i32;
-	let field = &state.gs.field;
-	// let resx = &state.resources;
 	// Render the level geometry
 	cv.blend_mode = shade::BlendMode::Solid;
 	for y in 0..field.height {
 		for x in 0..field.width {
 			let tile = field.get_terrain(Vec2(x, y));
-			let tile = state.tiles[tile as usize];
+			let tile = fx.tiles[tile as usize];
 			if tile.sprite == data::SpriteId::Blank || tile.model == data::ModelId::Empty {
 				continue;
 			}
@@ -365,14 +352,12 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 					_ => (),
 				}
 			}
-			// Make Blocks appear on top of walls
-			let z = if matches!(model, data::ModelId::Wall) && is_block_on_pos(state, Vec2(x, y)) { -2.0 } else { 0.0 };
-			draw(cv, Vec3(x, y, 0).map(|c| c as f32 * 32.0).set_z(z), sprite, model, 1.0);
+			draw(cv, Vec2(x, y).map(|c| c as f32 * 32.0).vec3(0.0), sprite, model, 1.0);
 		}
 	}
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;
-	for obj in state.objects.map.values() {
+	for obj in fx.objects.map.values() {
 		if !obj.live || !obj.vis {
 			continue;
 		}
@@ -384,18 +369,14 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		}
 	}
 	// Render the objects
-	for obj in state.objects.map.values() {
+	for obj in fx.objects.map.values() {
 		if !obj.live || !obj.vis {
 			continue;
 		}
-		// Flatten the sprite if it's on an elevated terrain
-		// Z coordinate handled in Object update...
-		let model = if obj.pos.z > 0.0 { data::ModelId::FloorSprite } else { obj.model };
 		// Grayscale the template entities
-		let is_template_ent = state.gs.ents.get(obj.ehandle).map_or(false, |e| e.flags & chipcore::EF_TEMPLATE != 0);
-		cv.uniform.greyscale = if is_template_ent { 1.0 } else { 0.0 };
+		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Draw the object
-		draw(cv, obj.pos, obj.sprite, model, obj.alpha);
+		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha);
 	}
 }
 

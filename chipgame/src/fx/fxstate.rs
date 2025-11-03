@@ -198,7 +198,7 @@ impl FxState {
 			cv.uniform.texture = resx.tileset;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
-			render::field(&mut cv, self, time, 1.0);
+			render::field(&mut cv, self, &self.gs.field, time, 1.0);
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 

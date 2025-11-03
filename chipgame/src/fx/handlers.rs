@@ -1,26 +1,38 @@
 use super::*;
 
+fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i) -> Vec3f {
+	let terrain = gs.field.get_terrain(pos);
+	let elevated = terrain.is_wall();
+	// Blocks appear on top of walls
+	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 1.0 } else if elevated { 20.0 } else { 0.0 };
+	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
+	return pos;
+}
+
 pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 	let handle = ctx.objects.alloc();
-	let pos = Vec3::new(ent.pos.x as f32 * 32.0, ent.pos.y as f32 * 32.0, 0.0);
+	let pos = ent_pos(&ctx.gs, ent, ent.pos);
+	// Quick hack to flatten sprites on top of walls
+	let model = if pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
+	let greyscale = ent.flags & chipcore::EF_TEMPLATE != 0;
 	let obj = Object {
 		handle,
-		ehandle: ent.handle,
 		pos,
 		lerp_pos: pos,
 		mover: MoveType::Vel(MoveVel { vel: Vec3::ZERO }),
 		sprite: sprite_for_ent(ent, &ctx.gs.ps),
-		model: model_for_ent(ent),
+		model,
 		anim: data::AnimationId::None,
 		atime: 0.0,
 		alpha: 1.0,
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale,
 	};
 	ctx.objects.insert(obj);
-	ctx.objects.lookup.insert(ent.handle, handle);
+	ctx.objects.lookup.insert(ehandle, handle);
 
 	if matches!(kind, chipty::EntityKind::Player) {
 		ctx.camera.teleport(pos + Vec3(16.0, 16.0, 0.0));
@@ -61,13 +73,15 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
-	obj.pos = src.map(|c| c as f32 * 32.0).vec3(0.0);
+	obj.pos = ent_pos(&ctx.gs, ent, src);
 	obj.mover = MoveType::Step(MoveStep {
 		src,
 		dest: ent.pos,
 		move_time: ctx.time,
 		move_spd: ent.step_spd as f32 / 60.0,
 	});
+	// Quick hack to flatten sprites on top of walls
+	obj.model = if obj.pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
 }
 
 pub fn entity_teleport(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
@@ -121,7 +135,6 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -133,6 +146,7 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -152,7 +166,6 @@ pub fn create_toggle_floor(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, -21.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, -21.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -164,6 +177,7 @@ pub fn create_toggle_floor(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -172,7 +186,6 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -184,6 +197,7 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -293,7 +307,6 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, -200.0) }),
@@ -310,6 +323,7 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 		vis: true,
 		live: true,
 		unalive_after_anim: true,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -318,7 +332,6 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -330,6 +343,7 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: true,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -338,7 +352,6 @@ pub fn hidden_wall_bumped(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -350,6 +363,7 @@ pub fn hidden_wall_bumped(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
@@ -359,7 +373,6 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.objects.alloc();
 	let obj = Object {
 		handle,
-		ehandle: chipcore::EntityHandle::INVALID,
 		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 		mover: MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
@@ -371,6 +384,7 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 		vis: true,
 		live: true,
 		unalive_after_anim: false,
+		greyscale: false,
 	};
 	ctx.objects.insert(obj);
 }
