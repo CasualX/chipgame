@@ -463,7 +463,8 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		// Reflect the entity back if they're softlocked
 		// This happens when all destinations are blocked (including the source)
 		if old_pos == ent.pos {
-			if !try_move(s, ent, step_dir.turn_around()) {
+			// CCLP3: level 50 bug fix - only reflect player entities, requires a block to be softlocked on the teleporter
+			if matches!(ent.kind, EntityKind::Player) && !try_move(s, ent, step_dir.turn_around()) {
 				return false;
 			}
 			break;

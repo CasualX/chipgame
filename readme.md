@@ -14,6 +14,7 @@ Features
 - Built-in level editor for creating and modifying levels
 - Includes community level packs: CCLP1, CCLP3, CCLP4, and CCLP5
 - Supports additional levelsets in the game's native .DAT level format
+- Over 500 community levels available to play, thousands of hours of fun!
 
 Downloads
 ---------

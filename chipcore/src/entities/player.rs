@@ -139,6 +139,10 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 						if !try_move(s, ent, back_dir) {
 							// Softlocked!
 						}
+						else {
+							s.events.fire(GameEvent::PlayerBump { player: () });
+							s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
+						}
 					}
 					break 'end_move;
 				}
