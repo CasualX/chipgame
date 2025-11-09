@@ -1,3 +1,5 @@
+//! Level editor.
+
 use std::collections::HashMap;
 use cvmath::*;
 use chipcore::EntityHandle;
@@ -5,6 +7,7 @@ use chipty::{Compass, EntityArgs, EntityKind, FieldConn, FieldDto, LevelDto, Ter
 
 use crate::fx;
 use crate::data;
+use crate::render;
 
 mod tool;
 mod tiles;
@@ -105,7 +108,7 @@ pub struct EditorState {
 
 impl EditorState {
 	pub fn init(&mut self) {
-		self.game.tiles = &tiles::TILES_EDIT;
+		self.game.render.tiles = &tiles::TILES_EDIT;
 	}
 	pub fn load_level(&mut self, json: &str) {
 		self.game.parse_level(0, json);
@@ -218,13 +221,13 @@ impl EditorState {
 			}
 		}
 
-		fx::drawbg(g, resx);
+		render::drawbg(g, resx);
 		self.game.draw(g, resx);
 
 		let cam = self.game.camera.setup(self.screen_size);
 
 		let p = self.mouse_pos; {
-			let mut cv = shade::d2::DrawBuilder::<fx::render::Vertex, fx::render::Uniform>::new();
+			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;
@@ -236,19 +239,19 @@ impl EditorState {
 				for x in 0..2 {
 					let terrain = TERRAIN_SAMPLES[y as usize][x as usize];
 					let pos = Vec3::new((x - 3) as f32 * 32.0, y as f32 * 32.0, 0.0);
-					fx::render::draw_tile(&mut cv, terrain, pos, &self.game.tiles);
+					render::draw_tile(&mut cv, terrain, pos, &self.game.render.tiles);
 				}
 			}
 
 			for i in 0..ENTITY_SAMPLES.len() as i32 {
 				let (_, sprite) = ENTITY_SAMPLES[i as usize];
 				let pos = Vec3::new(i as f32 * 32.0, -2.0 * 32.0, 0.0);
-				fx::render::draw(&mut cv, pos, sprite, data::ModelId::ReallyFlatSprite, 1.0);
+				render::draw(&mut cv, pos, sprite, data::ModelId::ReallyFlatSprite, 1.0);
 			}
 
 			match self.tool {
 				Tool::Terrain => {
-					fx::render::draw_tile(&mut cv, self.selected_terrain, p, &self.game.tiles);
+					render::draw_tile(&mut cv, self.selected_terrain, p, &self.game.render.tiles);
 				}
 				_ => (),
 			}
@@ -261,7 +264,7 @@ impl EditorState {
 		}
 
 		{
-			let mut cv = shade::d2::DrawBuilder::<fx::render::Vertex, fx::render::Uniform>::new();
+			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;
@@ -272,9 +275,9 @@ impl EditorState {
 			struct ToVertex {
 				color: [u8; 4],
 			}
-			impl shade::d2::ToVertex<fx::render::Vertex> for ToVertex {
-				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> fx::render::Vertex {
-					fx::render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
+			impl shade::d2::ToVertex<render::Vertex> for ToVertex {
+				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> render::Vertex {
+					render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
 				}
 			}
 			let pen = shade::d2::Pen { template: ToVertex { color: [0, 0, 255, 255] } };

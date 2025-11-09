@@ -1,3 +1,5 @@
+//! Menu system.
+
 use std::{fmt, mem};
 use cvmath::*;
 use shade::d2::layout;

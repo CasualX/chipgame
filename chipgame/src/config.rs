@@ -1,3 +1,5 @@
+//! Configuration parsing.
+
 use std::collections::HashMap;
 
 #[derive(Default)]

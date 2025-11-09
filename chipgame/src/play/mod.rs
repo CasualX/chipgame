@@ -1,3 +1,5 @@
+//! Gameplay module.
+
 use std::{mem, path, fs};
 
 use super::*;
@@ -5,6 +7,7 @@ use super::*;
 mod event;
 mod savedata;
 mod lvsets;
+mod tiles;
 
 pub use self::event::*;
 pub use self::savedata::*;
@@ -88,7 +91,7 @@ impl PlayState {
 		self.save_data.current_level = level_number;
 		self.save_data.save(&self.lvsets.current());
 
-		fx.init();
+		fx.render.tiles = &tiles::TILES_PLAY;
 		fx.parse_level(level_number, &lv.content);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.set_perspective(self.save_data.perspective);
@@ -336,7 +339,7 @@ impl PlayState {
 	}
 
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
-		fx::drawbg(g, resx);
+		render::drawbg(g, resx);
 
 		if let Some(fx) = &mut self.fx {
 			fx.hud_enabled = self.menu.stack.is_empty();
@@ -353,7 +356,7 @@ impl PlayState {
 		// Only parse if the level exists in the current pack
 		if let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) {
 			let mut preview = fx::FxState::default();
-			preview.init();
+			preview.render.tiles = &tiles::TILES_PLAY;
 			preview.parse_level(level_number, &lv.content);
 			preview.camera.set_perspective(self.save_data.perspective);
 			// HUD hidden when any menu is open; leave runtime flags at defaults
@@ -467,7 +470,7 @@ fn play_fx_game_over(this: &mut PlayState) {
 }
 
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
-	let replay = fx.gs.save_replay(fx.gs_realtime);
+	let replay = fx.gs.save_replay(fx.game_realtime);
 	let record = serde_json::to_string_pretty(&replay).unwrap();
 	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.gs.ps.attempts);
 	write_replay(path::Path::new(&path), &record);

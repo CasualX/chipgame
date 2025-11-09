@@ -2,9 +2,8 @@ use super::*;
 
 #[derive(Default)]
 pub struct ObjectMap {
-	pub map: HashMap<ObjectHandle, Object>,
-	pub lookup: HashMap<chipcore::EntityHandle, ObjectHandle>,
-	pub next: ObjectHandle,
+	pub(super) map: HashMap<ObjectHandle, Object>,
+	pub(super) next: ObjectHandle,
 }
 impl ObjectMap {
 	pub fn alloc(&mut self) -> ObjectHandle {
@@ -32,7 +31,6 @@ impl ObjectMap {
 	}
 	pub fn clear(&mut self) {
 		self.map.clear();
-		self.lookup.clear();
 		self.next = ObjectHandle(0);
 	}
 }

@@ -332,10 +332,11 @@ pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Unifo
 	draw(cv, pos, tile.sprite, tile.model, 1.0);
 }
 
-pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, fx: &FxState, field: &chipcore::Field, time: f32, shadow: f32) {
+pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, time: f32, shadow: f32) {
 	let i = (time * 8.0) as i32;
 	// Render the level geometry
 	cv.blend_mode = shade::BlendMode::Solid;
+	let field = &fx.field;
 	for y in 0..field.height {
 		for x in 0..field.width {
 			let tile = field.get_terrain(Vec2(x, y));

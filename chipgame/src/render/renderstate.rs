@@ -1,0 +1,103 @@
+use super::*;
+
+pub enum EffectType {
+	Splash,
+	Sparkles,
+	Fireworks,
+}
+
+pub struct Effect {
+	pub ty: EffectType,
+	pub pos: Vec3f,
+	pub start: f32,
+}
+
+#[derive(Default)]
+pub struct RenderField {
+	pub width: i32,
+	pub height: i32,
+	pub terrain: Vec<chipty::Terrain>,
+}
+
+impl RenderField {
+	pub fn get_terrain(&self, pos: Vec2i) -> chipty::Terrain {
+		let Vec2i { x, y } = pos;
+		if x < 0 || y < 0 || x >= self.width || y >= self.height {
+			return chipty::Terrain::Blank;
+		}
+		let index = (y * self.width + x) as usize;
+		self.terrain.get(index).cloned().unwrap_or(chipty::Terrain::Blank)
+	}
+	pub fn set_terrain(&mut self, pos: Vec2i, terrain: chipty::Terrain) {
+		let Vec2i { x, y } = pos;
+		if x < 0 || y < 0 || x >= self.width || y >= self.height {
+			return;
+		}
+		let index = (y * self.width + x) as usize;
+		if let Some(ptr) = self.terrain.get_mut(index) {
+			*ptr = terrain;
+		}
+	}
+}
+
+#[derive(Default)]
+pub struct RenderState {
+	pub framecnt: i32,
+	pub time: f32,
+	pub dt: f32,
+	pub objects: ObjectMap,
+	pub field: RenderField,
+	pub effects: Vec<Effect>,
+	pub tiles: &'static [TileGfx],
+}
+
+impl RenderState {
+	pub fn update(&mut self) {
+		self.framecnt += 1;
+		let time = self.framecnt as f32 / 60.0;
+		self.time = time;
+		self.dt = 1.0 / 60.0;
+
+		for handle in self.objects.map.keys().cloned().collect::<Vec<_>>() {
+			let Some(mut obj) = self.objects.remove(handle) else { continue };
+			obj.update(self);
+			self.objects.insert(obj);
+		}
+
+		self.effects.retain(|efx| time < efx.start + 1.0);
+		self.objects.map.retain(|_, obj| obj.live);
+	}
+	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup) {
+		{
+			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			cv.viewport = resx.viewport;
+			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.cull_mode = Some(shade::CullMode::CW);
+			cv.shader = resx.shader;
+			cv.uniform.transform = camera.view_proj;
+			cv.uniform.texture = resx.tileset;
+			cv.uniform.pixel_bias = resx.pixel_art_bias;
+			cv.uniform.pixel_bias = resx.pixel_art_bias;
+			render::field(&mut cv, self, self.time, 1.0);
+			cv.draw(g, shade::Surface::BACK_BUFFER);
+		}
+
+		// Render the effects
+		{
+			let mut cv = shade::d2::DrawBuilder::<Vertex, Uniform>::new();
+			cv.viewport = resx.viewport;
+			cv.blend_mode = shade::BlendMode::Solid;
+			cv.depth_test = Some(shade::DepthTest::Always);
+			// cv.cull_mode = Some(shade::CullMode::CW);
+
+			cv.shader = resx.shader;
+			cv.uniform.transform = camera.view_proj;
+			cv.uniform.texture = resx.effects;
+
+			for efx in &self.effects {
+				render::draw_effect(&mut cv, efx, self.time);
+			}
+			cv.draw(g, shade::Surface::BACK_BUFFER);
+		}
+	}
+}

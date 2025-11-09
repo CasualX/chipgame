@@ -148,7 +148,7 @@ impl AppStuff {
 		// Now that GL is ready, create graphics and resources
 		let mut g = shade::gl::GlGraphics::new();
 		let mut resx = chipgame::fx::Resources::default();
-		chipgame::fx::load_graphics(fs, config, &mut g, &mut resx);
+		resx.load(fs, config, &mut g);
 
 		AppStuff { size, window, surface, context, g, resx }
 	}

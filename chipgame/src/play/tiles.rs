@@ -1,6 +1,6 @@
 use super::*;
 
-pub static TILES_EDIT: [render::TileGfx; 50] = [
+pub static TILES_PLAY: [render::TileGfx; 50] = [
 	render::TileGfx { sprite: data::SpriteId::Blank, model: data::ModelId::Empty }, // Terrain::Blank
 	render::TileGfx { sprite: data::SpriteId::Floor, model: data::ModelId::Floor }, // Terrain::Floor
 	render::TileGfx { sprite: data::SpriteId::Wall, model: data::ModelId::Wall }, // Terrain::Wall
@@ -34,16 +34,16 @@ pub static TILES_EDIT: [render::TileGfx; 50] = [
 	render::TileGfx { sprite: data::SpriteId::CloneBlockS, model: data::ModelId::Wall }, // Terrain::CloneBlockS
 	render::TileGfx { sprite: data::SpriteId::CloneBlockE, model: data::ModelId::Wall }, // Terrain::CloneBlockE
 	render::TileGfx { sprite: data::SpriteId::OnOffFloor, model: data::ModelId::Floor }, // Terrain::ToggleFloor
-	render::TileGfx { sprite: data::SpriteId::OnOffWall, model: data::ModelId::Wall }, // Terrain::ToggleWall
+	render::TileGfx { sprite: data::SpriteId::OnOffFloor, model: data::ModelId::Floor }, // Terrain::ToggleWall
 	render::TileGfx { sprite: data::SpriteId::ThinWallN, model: data::ModelId::Floor }, // Terrain::ThinWallN
 	render::TileGfx { sprite: data::SpriteId::ThinWallW, model: data::ModelId::Floor }, // Terrain::ThinWallW
 	render::TileGfx { sprite: data::SpriteId::ThinWallS, model: data::ModelId::Floor }, // Terrain::ThinWallS
 	render::TileGfx { sprite: data::SpriteId::ThinWallE, model: data::ModelId::Floor }, // Terrain::ThinWallE
 	render::TileGfx { sprite: data::SpriteId::ThinWallSE, model: data::ModelId::Floor }, // Terrain::ThinWallSE
-	render::TileGfx { sprite: data::SpriteId::HiddenWall, model: data::ModelId::Wall }, // Terrain::HiddenWall
-	render::TileGfx { sprite: data::SpriteId::InvisWall, model: data::ModelId::Wall }, // Terrain::InvisibleWall
+	render::TileGfx { sprite: data::SpriteId::Floor, model: data::ModelId::Floor }, // Terrain::HiddenWall
+	render::TileGfx { sprite: data::SpriteId::Floor, model: data::ModelId::Floor }, // Terrain::InvisibleWall
 	render::TileGfx { sprite: data::SpriteId::BlueWall, model: data::ModelId::Wall }, // Terrain::RealBlueWall
-	render::TileGfx { sprite: data::SpriteId::BlueWallFake, model: data::ModelId::Wall }, // Terrain::FakeBlueWall
+	render::TileGfx { sprite: data::SpriteId::BlueWall, model: data::ModelId::Wall }, // Terrain::FakeBlueWall
 	render::TileGfx { sprite: data::SpriteId::GreenSwitch, model: data::ModelId::Floor }, // Terrain::GreenButton
 	render::TileGfx { sprite: data::SpriteId::RedSwitch, model: data::ModelId::Floor }, // Terrain::RedButton
 	render::TileGfx { sprite: data::SpriteId::BrownSwitch, model: data::ModelId::Floor }, // Terrain::BrownButton

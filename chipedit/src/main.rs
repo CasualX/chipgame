@@ -91,7 +91,7 @@ impl AppStuff {
 		// Now that GL is ready, create graphics and resources
 		let mut g = shade::gl::GlGraphics::new();
 		let mut resx = chipgame::fx::Resources::default();
-		chipgame::fx::load_graphics(fs, config, &mut g, &mut resx);
+		resx.load(fs, config, &mut g);
 
 		AppStuff { size, window, surface, context, g, resx }
 	}
@@ -170,7 +170,9 @@ fn main() {
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
 						app.surface.resize(&app.context, width, height);
+						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 					}
+					editor.set_screen_size(new_size.width as i32, new_size.height as i32);
 				}
 				WindowEvent::CloseRequested => elwt.exit(),
 				WindowEvent::KeyboardInput { event, .. } => {
@@ -274,9 +276,6 @@ fn main() {
 							};
 							app.window.set_cursor_icon(cursor_icon);
 						}
-
-						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
-						editor.set_screen_size(app.size.width as i32, app.size.height as i32);
 
 						app.g.begin();
 						editor.draw(&mut app.g, &app.resx);

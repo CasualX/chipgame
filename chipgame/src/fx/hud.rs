@@ -3,8 +3,8 @@ use super::*;
 use crate::menu::{UiUniform, UiVertex};
 
 impl FxState {
-	pub fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
-		let darken_time = f32::min(1.0, (self.time - self.darken_time) / 0.2);
+	pub(super) fn render_ui(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+		let darken_time = f32::min(1.0, (self.render.time - self.darken_time) / 0.2);
 		let alpha = if self.darken { darken_time } else { 1.0 - darken_time };
 		if alpha > 0.0 {
 			let alpha = (alpha * 0.625 * 255.0) as u8;
@@ -215,7 +215,7 @@ impl FxState {
 
 		if self.darken != darken {
 			self.darken = darken;
-			self.darken_time = self.time;
+			self.darken_time = self.render.time;
 		}
 
 		pool.draw(g, shade::Surface::BACK_BUFFER);
