@@ -13,7 +13,7 @@ from urllib.request import urlopen
 
 EXE_NAME = "msdf-atlas-gen.exe"
 DOWNLOAD_URL = "https://github.com/Chlumsky/msdf-atlas-gen/releases/download/v1.3/msdf-atlas-gen-1.3-win64.zip"
-CHARSET_SYMBOLS = "↑↓←→↔↕★☆✓✗●○▴▾◂▸▲▼◀▶△▽◁▷☐☑☒🗹🗷⏰💎🔹⚡⛔🏁🎮🏆🚀💥🔥⚖💤❌🌟💯📈🌈🎯📊🚩🌍👑🥇🏅🕹"
+CHARSET_SYMBOLS = "⁓∿≈↑↓←→↔↕★☆✓✗●○▴▾◂▸▲▼◀▶△▽◁▷☐☑☒🗹🗷⏰💎🔹⚡⛔🏁🎮🏆🚀💥🔥⚖💤❌🌟💯📈🌈🎯📊🚩🌍👑🥇🏅🕹"
 
 
 def download_file(url: str, dest: Path) -> None:
