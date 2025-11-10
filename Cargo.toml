@@ -35,3 +35,10 @@ basenc = "0.2"
 shade = { git = "https://github.com/CasualX/shade", features = ["gl", "msdfgen", "png", "gif"] }
 
 paks = "0.1.1"
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+panic = "abort"

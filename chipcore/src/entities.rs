@@ -30,32 +30,33 @@ impl GameState {
 		}
 
 		let s = self;
-		let ehandle = match data.kind {
-			EntityKind::Player => player::create(s, data),
-			EntityKind::Chip => pickup::create(s, data),
-			EntityKind::Socket => socket::create(s, data),
-			EntityKind::Block => block::create(s, data),
-			EntityKind::IceBlock => iceblock::create(s, data),
-			EntityKind::Flippers => pickup::create(s, data),
-			EntityKind::FireBoots => pickup::create(s, data),
-			EntityKind::IceSkates => pickup::create(s, data),
-			EntityKind::SuctionBoots => pickup::create(s, data),
-			EntityKind::BlueKey => pickup::create(s, data),
-			EntityKind::RedKey => pickup::create(s, data),
-			EntityKind::GreenKey => pickup::create(s, data),
-			EntityKind::YellowKey => pickup::create(s, data),
-			EntityKind::Thief => thief::create(s, data),
-			EntityKind::Bomb => bomb::create(s, data),
-			EntityKind::Bug => bug::create(s, data),
-			EntityKind::FireBall => fireball::create(s, data),
-			EntityKind::PinkBall => pinkball::create(s, data),
-			EntityKind::Tank => tank::create(s, data),
-			EntityKind::Glider => glider::create(s, data),
-			EntityKind::Teeth => teeth::create(s, data),
-			EntityKind::Walker => walker::create(s, data),
-			EntityKind::Blob => blob::create(s, data),
-			EntityKind::Paramecium => paramecium::create(s, data),
+		let create_fn = match data.kind {
+			EntityKind::Player => player::create,
+			EntityKind::Chip => pickup::create,
+			EntityKind::Socket => socket::create,
+			EntityKind::Block => block::create,
+			EntityKind::IceBlock => iceblock::create,
+			EntityKind::Flippers => pickup::create,
+			EntityKind::FireBoots => pickup::create,
+			EntityKind::IceSkates => pickup::create,
+			EntityKind::SuctionBoots => pickup::create,
+			EntityKind::BlueKey => pickup::create,
+			EntityKind::RedKey => pickup::create,
+			EntityKind::GreenKey => pickup::create,
+			EntityKind::YellowKey => pickup::create,
+			EntityKind::Thief => thief::create,
+			EntityKind::Bomb => bomb::create,
+			EntityKind::Bug => bug::create,
+			EntityKind::FireBall => fireball::create,
+			EntityKind::PinkBall => pinkball::create,
+			EntityKind::Tank => tank::create,
+			EntityKind::Glider => glider::create,
+			EntityKind::Teeth => teeth::create,
+			EntityKind::Walker => walker::create,
+			EntityKind::Blob => blob::create,
+			EntityKind::Paramecium => paramecium::create,
 		};
+		let ehandle = create_fn(s, data);
 		s.events.fire(GameEvent::EntityCreated { entity: ehandle, kind: data.kind });
 
 		// Mark entities starting on a clone machine as templates

@@ -7,7 +7,7 @@ pub struct CodeSequenceState {
 
 impl CodeSequenceState {
 	pub fn next(&mut self, btn: Button, code: &[Button]) -> bool {
-		if btn == code[self.pos as usize] {
+		if code.get(self.pos as usize) == Some(&btn) {
 			self.pos += 1;
 			if self.pos as usize == code.len() {
 				self.pos = 0;
