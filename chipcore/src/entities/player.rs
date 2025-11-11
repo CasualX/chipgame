@@ -58,7 +58,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 		if matches!(terrain, Terrain::Exit) {
 			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
-			s.events.fire(GameEvent::Fireworks { pos: ent.pos });
 			ps_activity(s, PlayerActivity::Win);
 			return;
 		}

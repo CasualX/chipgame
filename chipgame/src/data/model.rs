@@ -17,7 +17,6 @@ pub enum ModelId {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum AnimationId {
 	None,
-	Rise,
 	FadeOut,
 	FadeIn,
 	Fall,

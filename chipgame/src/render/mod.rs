@@ -6,11 +6,13 @@ use cvmath::*;
 use crate::data;
 use crate::fx::Resources;
 
+mod effect;
 mod object;
 mod objectmap;
 mod render;
 mod renderstate;
 
+pub use self::effect::*;
 pub use self::object::*;
 pub use self::objectmap::*;
 pub use self::render::*;

@@ -36,6 +36,7 @@ impl QuadTree {
 				tile[3] = ehandle;
 			}
 			else {
+				#[cfg(debug_assertions)]
 				panic!("QuadTree tile at {} is full: {:?}!", pos, tile);
 			}
 		}

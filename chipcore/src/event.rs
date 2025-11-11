@@ -43,13 +43,11 @@ pub enum GameEvent {
 	FireHidden { pos: Vec2i, hidden: bool },
 	BombExplode { pos: Vec2i },
 	WaterSplash { pos: Vec2i },
-	Fireworks { pos: Vec2i },
 	SocketFilled { pos: Vec2i },
 	ItemsThief { player: PlayerIndex },
 	LockOpened { pos: Vec2i, key: KeyColor },
 	TerrainUpdated { pos: Vec2i, old: Terrain, new: Terrain },
 	ToggleWalls { entity: EntityHandle },
-	GameWin { player: PlayerIndex },
 	GameOver { player: PlayerIndex },
 	SoundFx { sound: SoundFx },
 }

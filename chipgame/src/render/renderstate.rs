@@ -1,17 +1,5 @@
 use super::*;
 
-pub enum EffectType {
-	Splash,
-	Sparkles,
-	Fireworks,
-}
-
-pub struct Effect {
-	pub ty: EffectType,
-	pub pos: Vec3f,
-	pub start: f32,
-}
-
 #[derive(Default)]
 pub struct RenderField {
 	pub width: i32,
@@ -40,11 +28,15 @@ impl RenderField {
 	}
 }
 
+pub struct UpdateCtx {
+	pub time: f32,
+	pub dt: f32,
+}
+
 #[derive(Default)]
 pub struct RenderState {
 	pub framecnt: i32,
 	pub time: f32,
-	pub dt: f32,
 	pub objects: ObjectMap,
 	pub field: RenderField,
 	pub effects: Vec<Effect>,
@@ -56,16 +48,11 @@ impl RenderState {
 		self.framecnt += 1;
 		let time = self.framecnt as f32 / 60.0;
 		self.time = time;
-		self.dt = 1.0 / 60.0;
 
-		for handle in self.objects.map.keys().cloned().collect::<Vec<_>>() {
-			let Some(mut obj) = self.objects.remove(handle) else { continue };
-			obj.update(self);
-			self.objects.insert(obj);
-		}
+		let ctx = UpdateCtx { time: self.time, dt: 1.0 / 60.0 };
+		self.objects.retain(|_, obj| obj.update(&ctx));
 
 		self.effects.retain(|efx| time < efx.start + 1.0);
-		self.objects.map.retain(|_, obj| obj.live);
 	}
 	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup) {
 		{
@@ -95,7 +82,7 @@ impl RenderState {
 			cv.uniform.texture = resx.effects;
 
 			for efx in &self.effects {
-				render::draw_effect(&mut cv, efx, self.time);
+				efx.draw(&mut cv, self.time);
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}

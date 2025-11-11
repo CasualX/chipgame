@@ -40,9 +40,6 @@ pub struct FontConfig {
 }
 
 pub struct Config {
-	pub tileset_texture: String,
-	pub font_atlas: String,
-	pub font_meta: String,
 	pub pixel_art_bias: f32,
 	pub sound_fx: HashMap<chipty::SoundFx, String>,
 	pub music: HashMap<chipty::MusicId, String>,
@@ -64,9 +61,6 @@ impl Config {
 		}
 
 		let mut section = Section::General;
-		let mut tileset_texture = String::from("tileset/Kayu.png");
-		let mut font_atlas = String::from("font.png");
-		let mut font_meta = String::from("font.json");
 		let mut pixel_art_bias = 0.5f32;
 		let mut sound_fx: HashMap<chipty::SoundFx, String> = HashMap::new();
 		let mut music: HashMap<chipty::MusicId, String> = HashMap::new();
@@ -79,9 +73,6 @@ impl Config {
 				ini_core::Item::Property(key, Some(value)) => match section {
 					Section::Error => (),
 					Section::General => match key {
-						"FontAtlas" => font_atlas = value.to_string(),
-						"FontMeta" => font_meta = value.to_string(),
-						"TilesetTexture" => tileset_texture = value.to_string(),
 						"PixelArtBias" => { if let Ok(v) = value.parse::<f32>() { pixel_art_bias = v; } }
 						_ => {}
 					},
@@ -169,9 +160,6 @@ impl Config {
 		}
 
 		Config {
-			tileset_texture,
-			font_atlas,
-			font_meta,
 			pixel_art_bias,
 			sound_fx,
 			music,

@@ -1,9 +1,5 @@
 use super::*;
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
-#[repr(transparent)]
-pub struct ObjectHandle(pub u32);
-
 #[derive(Clone, Debug)]
 pub struct MoveStep {
 	pub src: Vec2<i32>,
@@ -67,7 +63,6 @@ pub enum AnimState {
 
 #[derive(Clone, Debug)]
 pub struct Object {
-	pub handle: ObjectHandle,
 	pub pos: Vec3<f32>,
 	pub lerp_pos: Vec3<f32>,
 	pub mover: MoveType,
@@ -76,17 +71,14 @@ pub struct Object {
 	pub anim: data::AnimationId,
 	pub atime: f32,
 	pub alpha: f32,
-	pub vis: bool,
-	pub live: bool,
+	pub visible: bool,
 	pub unalive_after_anim: bool,
 	pub greyscale: bool,
 }
 
 impl Object {
-	pub fn update(&mut self, ctx: &mut RenderState) {
-		if !self.live {
-			return;
-		}
+	pub fn update(&mut self, ctx: &UpdateCtx) -> bool {
+		let mut retain = true;
 
 		match &mut self.mover {
 			MoveType::Step(step) => {
@@ -99,9 +91,9 @@ impl Object {
 					self.pos = dest;
 				}
 				if t >= 0.75 && self.unalive_after_anim {
-					self.live = false;
+					retain = false;
 				}
-				return;
+				return retain;
 			},
 			MoveType::Vel(vel) => {
 				self.pos += vel.vel * ctx.dt;
@@ -109,7 +101,7 @@ impl Object {
 		}
 
 		match self.anim {
-			data::AnimationId::Rise | data::AnimationId::FadeOut => {
+			data::AnimationId::FadeOut => {
 				if self.atime == 0.0 {
 					self.atime = ctx.time;
 				}
@@ -117,7 +109,7 @@ impl Object {
 				if self.alpha == 0.0 {
 					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 					if self.unalive_after_anim {
-						self.live = false;
+						retain = false;
 					}
 				}
 			}
@@ -138,7 +130,7 @@ impl Object {
 					self.pos.z = -21.0;
 					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 					if self.unalive_after_anim {
-						self.live = false;
+						retain = false;
 					}
 				}
 			}
@@ -152,15 +144,17 @@ impl Object {
 					self.pos.z = 0.0;
 					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
 					if self.unalive_after_anim {
-						self.live = false;
+						retain = false;
 					}
 				}
 			}
 			data::AnimationId::None => {
 				if self.unalive_after_anim {
-					self.live = false;
+					retain = false;
 				}
 			}
 		}
+
+		return retain;
 	}
 }

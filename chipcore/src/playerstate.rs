@@ -197,7 +197,7 @@ pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
 			}
 			PlayerActivity::Win => {
-				s.events.fire(GameEvent::GameWin { player: () });
+				s.events.fire(GameEvent::GameOver { player: () });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameWin });
 			}
 			_ => (),

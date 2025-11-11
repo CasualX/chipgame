@@ -358,10 +358,7 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 	}
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;
-	for obj in fx.objects.map.values() {
-		if !obj.live || !obj.vis {
-			continue;
-		}
+	for obj in fx.objects.values() {
 		if matches!(obj.model, data::ModelId::Sprite | data::ModelId::FlatSprite) {
 			draw_shadow(cv, obj.pos, obj.sprite, 10.0, obj.alpha * shadow);
 		}
@@ -370,36 +367,10 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		}
 	}
 	// Render the objects
-	for obj in fx.objects.map.values() {
-		if !obj.live || !obj.vis {
-			continue;
-		}
+	for obj in fx.objects.values() {
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Draw the object
 		draw(cv, obj.pos, obj.sprite, obj.model, obj.alpha);
 	}
-}
-
-pub fn draw_effect(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, efx: &Effect, time: f32) {
-	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
-	let t = f32::clamp(time - efx.start, 0.0, 1.0);
-	// 12 frames of animation
-	let aindex = f32::floor(t * 13.0).min(12.0);
-	let d_size = 96.0;
-	let u = aindex * d_size;
-	let v = match efx.ty {
-		EffectType::Splash => d_size * 0.0,
-		EffectType::Sparkles => d_size * 1.0,
-		EffectType::Fireworks => d_size * 2.0,
-	};
-	p.add_indices_quad();
-	let s = 32.0;
-	let color = [255; 4];
-	p.add_vertices(&[
-		Vertex { pos: efx.pos + Vec3f(-s, s, 1.0), uv: Vec2f(u, v), color },
-		Vertex { pos: efx.pos + Vec3f(-s, -s, 1.0), uv: Vec2f(u, v + 96.0), color },
-		Vertex { pos: efx.pos + Vec3f(s, -s, 1.0), uv: Vec2f(u + 96.0, v + 96.0), color },
-		Vertex { pos: efx.pos + Vec3f(s, s, 1.0), uv: Vec2f(u + 96.0, v), color },
-	]);
 }
