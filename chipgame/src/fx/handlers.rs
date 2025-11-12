@@ -17,23 +17,28 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	let model = if pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
 	let greyscale = ent.flags & chipcore::EF_TEMPLATE != 0;
 	let obj = render::Object {
-		pos,
-		lerp_pos: pos,
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3::ZERO }),
-		sprite: sprite_for_ent(ent, &ctx.gs.ps),
-		model,
-		anim: data::AnimationId::None,
-		atime: 0.0,
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: false,
-		greyscale,
+		data: render::ObjectData {
+			pos,
+			sprite: sprite_for_ent(ent, &ctx.gs.ps),
+			model,
+			alpha: 1.0,
+			visible: true,
+			greyscale,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 	ctx.objlookup.insert(ehandle, handle);
 
 	if matches!(kind, chipty::EntityKind::Player) {
-		ctx.camera.teleport(pos + Vec3(16.0, 16.0, 0.0));
+		ctx.camera.move_src = ent.pos;
+		ctx.camera.move_dest = ent.pos;
+		ctx.camera.move_time = ctx.render.time;
+		ctx.camera.move_spd = ent.base_spd as f32 / 60.0;
+		ctx.camera.move_teleport = true;
 	}
 }
 
@@ -50,18 +55,17 @@ pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	let faded = matches!(kind, chipty::EntityKind::Socket);
 
 	if rises {
-		obj.anim = data::AnimationId::FadeOut;
-		obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) });
-		obj.unalive_after_anim = true;
+		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+		obj.anim.anims.push(render::AnimState::MoveVel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) }));
+		obj.anim.unalive_after_anim = true;
 	}
 	else if faded {
-		obj.anim = data::AnimationId::FadeOut;
-		obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 0.0) });
-		obj.unalive_after_anim = true;
+		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+		obj.anim.unalive_after_anim = true;
 	}
 	else {
 		// ctx.objects.remove(obj_handle);
-		obj.unalive_after_anim = true;
+		obj.anim.unalive_after_anim = true;
 	}
 }
 
@@ -71,30 +75,41 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
-	obj.pos = ent_pos(&ctx.gs, ent, src);
-	obj.mover = render::MoveType::Step(render::MoveStep {
-		src,
+	obj.data.pos = ent_pos(&ctx.gs, ent, src);
+	obj.anim.anims.push(render::AnimState::MoveStep(render::MoveStep {
 		dest: ent.pos,
 		move_time: ctx.render.time,
 		move_spd: ent.step_spd as f32 / 60.0,
-	});
+	}));
 	// Quick hack to flatten sprites on top of walls
 	let check_pos = ent_pos(&ctx.gs, ent, ent.pos);
-	obj.model = if check_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
+	obj.data.model = if check_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
+
+	if ent.handle == ctx.gs.ps.ehandle {
+		ctx.camera.move_src = src;
+		ctx.camera.move_dest = ent.pos;
+		ctx.camera.move_time = ctx.render.time;
+		ctx.camera.move_spd = ent.step_spd as f32 / 60.0;
+		ctx.camera.move_teleport = false;
+	}
 }
 
 pub fn entity_teleport(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// Step out of the teleport
 	entity_step(ctx, ehandle);
 
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+	// // let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
+	// // let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	// When teleporting the player snap the camera
+	// // When teleporting the player snap the camera
 	if ent.handle == ctx.gs.ps.ehandle {
-		obj.lerp_pos = obj.pos;
-		ctx.camera.teleport(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
+	// 	// ctx.camera.teleport(obj.pos + Vec3(16.0, 16.0, 0.0));
+	// 	ctx.camera.move_src = ent.pos;
+	// 	ctx.camera.move_dest = ent.pos;
+	// 	ctx.camera.move_time = ctx.render.time;
+	// 	ctx.camera.move_spd = ent.base_spd as f32 / 60.0;
+		ctx.camera.move_teleport = true;
 	}
 }
 
@@ -103,7 +118,7 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	obj.sprite = sprite_for_ent(ent, &ctx.gs.ps);
+	obj.data.sprite = sprite_for_ent(ent, &ctx.gs.ps);
 }
 
 pub fn player_activity(ctx: &mut FxState, _player: ()) {
@@ -123,7 +138,7 @@ pub fn entity_hidden(ctx: &mut FxState, ehandle: chipcore::EntityHandle, hidden:
 	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
-	obj.visible = !hidden;
+	obj.data.visible = !hidden;
 }
 
 pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: chipty::Terrain) {
@@ -151,23 +166,24 @@ pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new:
 pub fn fire_hidden(ctx: &mut FxState, pos: Vec2i, hidden: bool) {
 	let Some(&obj_handle) = ctx.firesprites.get(&pos) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-	obj.visible = !hidden;
+	obj.data.visible = !hidden;
 }
 
 pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
-		sprite: data::SpriteId::Fire,
-		model: data::ModelId::Sprite,
-		anim: data::AnimationId::None,
-		atime: 0.0,
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: false,
-		greyscale: false,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
+			sprite: data::SpriteId::Fire,
+			model: data::ModelId::Sprite,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 	ctx.firesprites.insert(pos, handle);
@@ -175,9 +191,8 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = ctx.firesprites.remove(&pos) else { return };
 	if let Some(obj) = ctx.render.objects.get_mut(obj_handle) {
-		obj.anim = data::AnimationId::FadeOut;
-		obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) });
-		obj.unalive_after_anim = true;
+		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+		obj.anim.unalive_after_anim = true;
 	}
 }
 
@@ -275,32 +290,37 @@ fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> data::S
 }
 
 pub fn item_pickup(ctx: &mut FxState, ehandle: chipcore::EntityHandle, _item: chipcore::ItemPickup) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
+	let Some(obj_handle) = ctx.objlookup.remove(&ehandle) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
-	obj.anim = data::AnimationId::FadeOut;
-	obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) });
+	obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+	obj.anim.anims.push(render::AnimState::MoveVel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) }));
+	obj.anim.unalive_after_anim = true;
 }
 
 pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, -200.0) }),
-		sprite: match key {
-			chipcore::KeyColor::Red => data::SpriteId::RedLock,
-			chipcore::KeyColor::Green => data::SpriteId::GreenLock,
-			chipcore::KeyColor::Blue => data::SpriteId::BlueLock,
-			chipcore::KeyColor::Yellow => data::SpriteId::YellowLock,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: match key {
+				chipcore::KeyColor::Red => data::SpriteId::RedLock,
+				chipcore::KeyColor::Green => data::SpriteId::GreenLock,
+				chipcore::KeyColor::Blue => data::SpriteId::BlueLock,
+				chipcore::KeyColor::Yellow => data::SpriteId::YellowLock,
+			},
+			model: data::ModelId::Wall,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
 		},
-		model: data::ModelId::Wall,
-		anim: data::AnimationId::Fall,
-		atime: 0.0,
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: true,
-		greyscale: false,
+		anim: render::Animation {
+			anims: vec![render::AnimState::MoveZ(render::MoveZ {
+				target_z: -21.0,
+				move_spd: 200.0,
+			})],
+			unalive_after_anim: true,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 }
@@ -308,17 +328,18 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
-		sprite: data::SpriteId::BlueWall,
-		model: data::ModelId::Wall,
-		anim: data::AnimationId::FadeOut,
-		atime: 0.0,
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: true,
-		greyscale: false,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: data::SpriteId::BlueWall,
+			model: data::ModelId::Wall,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: vec![render::AnimState::FadeOut(render::FadeOut { atime: 0.0 })],
+			unalive_after_anim: true,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 }
@@ -326,17 +347,21 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
-		sprite: data::SpriteId::Wall,
-		model: data::ModelId::Wall,
-		anim: data::AnimationId::Raise,
-		atime: 0.0,
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: false,
-		greyscale: false,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: data::SpriteId::Wall,
+			model: data::ModelId::Wall,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: vec![render::AnimState::MoveZ(render::MoveZ {
+				target_z: 0.0,
+				move_spd: 200.0,
+			})],
+			unalive_after_anim: false,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 
@@ -348,17 +373,23 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 	let handle = ctx.render.objects.alloc();
 	let z = if raised { 0.0 } else { -21.0 };
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, z),
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, z),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
-		sprite: data::SpriteId::Wall,
-		model: data::ModelId::ThinWall,
-		anim: if raised { data::AnimationId::Raise } else { data::AnimationId::Fall },
-		atime: 1.0, // atime == 0 resets the animation so set it to something else
-		alpha: 1.0,
-		visible: true,
-		unalive_after_anim: false,
-		greyscale: false,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, z),
+			sprite: data::SpriteId::Wall,
+			model: data::ModelId::ThinWall,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: vec![
+				render::AnimState::MoveZ(render::MoveZ {
+					target_z: if raised { 0.0 } else { -21.0 },
+					move_spd: 200.0,
+				}),
+			],
+			unalive_after_anim: false,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 	ctx.togglewalls.insert(pos, handle);
@@ -374,36 +405,31 @@ pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
 	let terrain = ctx.gs.field.get_terrain(pos);
-	if matches!(terrain, chipty::Terrain::ToggleFloor) && obj.anim != data::AnimationId::Fall {
-		obj.pos.z = 0.0;
-		obj.anim = data::AnimationId::Fall;
-		obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, -200.0) });
-	}
-	else if matches!(terrain, chipty::Terrain::ToggleWall) && obj.anim != data::AnimationId::Raise {
-		obj.pos.z = -21.0;
-		obj.anim = data::AnimationId::Raise;
-		obj.mover = render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 200.0) });
-	}
+	obj.anim.anims.clear();
+	obj.anim.anims.push(render::AnimState::MoveZ(render::MoveZ {
+		target_z: if matches!(terrain, chipty::Terrain::ToggleWall) { 0.0 } else { -21.0 },
+		move_spd: 200.0,
+	}));
 }
 
 pub fn create_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
-		pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		lerp_pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-		mover: render::MoveType::Vel(render::MoveVel { vel: Vec3(0.0, 0.0, 0.0) }),
-		sprite: data::SpriteId::Wall,
-		model: data::ModelId::Wall,
-		anim: data::AnimationId::FadeOut,
-		atime: -10.0,
-		alpha: 0.0,
-		visible: true,
-		unalive_after_anim: false,
-		greyscale: false,
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: data::SpriteId::Wall,
+			model: data::ModelId::Wall,
+			alpha: 0.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
 	};
 	ctx.render.objects.insert(handle, obj);
 	ctx.inviswalls.insert(pos, handle);
-	eprintln!("Created invisible wall at {:?}", pos);
 }
 
 pub fn remove_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {

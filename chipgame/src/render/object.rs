@@ -1,160 +1,36 @@
 use super::*;
 
 #[derive(Clone, Debug)]
-pub struct MoveStep {
-	pub src: Vec2<i32>,
-	pub dest: Vec2<i32>,
-	pub move_time: f32,
-	pub move_spd: f32,
+pub struct Animation {
+	pub anims: Vec<AnimState>,
+	pub unalive_after_anim: bool,
+}
+
+impl Animation {
+	pub fn update(&mut self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
+		self.anims.retain_mut(|anim| anim.animate(obj, ctx));
+		!(self.unalive_after_anim && self.anims.is_empty())
+	}
 }
 
 #[derive(Clone, Debug)]
-pub struct MoveVel {
-	pub vel: Vec3<f32>,
-}
-
-#[derive(Clone, Debug)]
-pub enum MoveType {
-	Step(MoveStep),
-	Vel(MoveVel),
-}
-
-pub struct StepAnim {
-	pub src: Vec2<i32>,
-	pub dest: Vec2<i32>,
-	pub move_time: f32,
-	pub move_spd: f32,
-}
-
-pub struct RiseAndFadeAnim {
-	pub start_time: f32,
-	pub duration: f32,
-}
-
-pub struct FadeOutAnim {
-	pub start_time: f32,
-	pub duration: f32,
-}
-
-pub struct FadeInAnim {
-	pub start_time: f32,
-	pub duration: f32,
-}
-
-pub struct MoveDownAnim {
-	pub start_time: f32,
-	pub duration: f32,
-}
-
-pub struct MoveUpAnim {
-	pub start_time: f32,
-	pub duration: f32,
-}
-
-pub enum AnimState {
-	Static,
-	Step(StepAnim),
-	RiseAndFade(RiseAndFadeAnim),
-	FadeOut(FadeOutAnim),
-	FadeIn(FadeInAnim),
-	MoveDown(MoveDownAnim),
-	MoveUp(MoveUpAnim),
+pub struct ObjectData {
+	pub pos: Vec3<f32>,
+	pub sprite: data::SpriteId,
+	pub model: data::ModelId,
+	pub alpha: f32,
+	pub visible: bool,
+	pub greyscale: bool,
 }
 
 #[derive(Clone, Debug)]
 pub struct Object {
-	pub pos: Vec3<f32>,
-	pub lerp_pos: Vec3<f32>,
-	pub mover: MoveType,
-	pub sprite: data::SpriteId,
-	pub model: data::ModelId,
-	pub anim: data::AnimationId,
-	pub atime: f32,
-	pub alpha: f32,
-	pub visible: bool,
-	pub unalive_after_anim: bool,
-	pub greyscale: bool,
+	pub data: ObjectData,
+	pub anim: Animation,
 }
 
 impl Object {
 	pub fn update(&mut self, ctx: &UpdateCtx) -> bool {
-		let mut retain = true;
-
-		match &mut self.mover {
-			MoveType::Step(step) => {
-				let t = f32::min(1.0, (ctx.time - step.move_time) / step.move_spd);
-				let src = step.src.map(|c| c as f32 * 32.0).vec3(0.0);
-				let dest = step.dest.map(|c| c as f32 * 32.0).vec3(0.0);
-				self.lerp_pos = src.lerp(dest, t);
-				self.pos = self.pos.exp_decay(dest, 100.0 * step.move_spd, ctx.dt);
-				if t > 0.75 {
-					self.pos = dest;
-				}
-				if t >= 0.75 && self.unalive_after_anim {
-					retain = false;
-				}
-				return retain;
-			},
-			MoveType::Vel(vel) => {
-				self.pos += vel.vel * ctx.dt;
-			},
-		}
-
-		match self.anim {
-			data::AnimationId::FadeOut => {
-				if self.atime == 0.0 {
-					self.atime = ctx.time;
-				}
-				self.alpha = f32::max(0.0, 1.0 - (ctx.time - self.atime) * 5.0);
-				if self.alpha == 0.0 {
-					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
-					if self.unalive_after_anim {
-						retain = false;
-					}
-				}
-			}
-			data::AnimationId::FadeIn => {
-				if self.atime == 0.0 {
-					self.atime = ctx.time;
-				}
-				self.alpha = f32::min(1.0, (ctx.time - self.atime) * 10.0);
-				if self.alpha == 1.0 {
-					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
-				}
-			}
-			data::AnimationId::Fall => {
-				if self.atime == 0.0 {
-					self.atime = ctx.time;
-				}
-				if self.pos.z <= -20.0 {
-					self.pos.z = -21.0;
-					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
-					if self.unalive_after_anim {
-						retain = false;
-					}
-				}
-			}
-			data::AnimationId::Raise => {
-				if self.atime == 0.0 {
-					self.atime = ctx.time;
-					self.mover = MoveType::Vel(MoveVel { vel: Vec3(0.0, 0.0, 200.0) });
-					self.pos.z = -20.0;
-				}
-				if self.pos.z >= 0.0 {
-					self.pos.z = 0.0;
-					self.mover = MoveType::Vel(MoveVel { vel: Vec3::ZERO });
-					if self.unalive_after_anim {
-						retain = false;
-					}
-				}
-			}
-			data::AnimationId::None => {
-				if self.unalive_after_anim {
-					retain = false;
-				}
-			}
-		}
-
-		return retain;
+		self.anim.update(&mut self.data, ctx)
 	}
 }

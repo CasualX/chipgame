@@ -116,6 +116,7 @@ impl EditorState {
 		self.game.hud_enabled = false;
 		self.game.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
 		self.game.camera.set_perspective(false);
+		self.game.pause(); // Unlock the camera
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();

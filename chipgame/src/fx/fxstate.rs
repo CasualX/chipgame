@@ -26,7 +26,7 @@ impl FxState {
 		// Reset the camera, adjusted when a player entity is created
 		self.camera = PlayCamera::default();
 
-		self.render.objects.clear();
+		self.render.clear();
 		self.objlookup.clear();
 		self.firesprites.clear();
 		self.togglewalls.clear();
@@ -34,7 +34,7 @@ impl FxState {
 
 		self.render.field.width = self.gs.field.width;
 		self.render.field.height = self.gs.field.height;
-		self.render.field.terrain = self.gs.field.terrain.clone();
+		self.render.field.terrain.extend_from_slice(&self.gs.field.terrain);
 		for y in 0..self.gs.field.height {
 			for x in 0..self.gs.field.width {
 				let index = (y * self.gs.field.width + x) as usize;
@@ -77,9 +77,7 @@ impl FxState {
 			self.hud_enabled = true;
 
 			// Center camera on player again
-			let Some(&obj_handle) = self.objlookup.get(&self.gs.ps.ehandle) else { return };
-			let Some(obj) = self.render.objects.get_mut(obj_handle) else { return };
-			self.camera.teleport(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
+			self.camera.move_teleport = true;
 		}
 	}
 	pub fn think(&mut self, input: &Input) {
@@ -114,15 +112,13 @@ impl FxState {
 			for (&pos, &obj_handle) in &self.inviswalls {
 				let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
 				if player.pos.distance_hat(pos) <= 2 {
-					if !matches!(obj.anim, data::AnimationId::FadeIn) {
-						obj.anim = data::AnimationId::FadeIn;
-						obj.atime = 0.0;
+					if obj.anim.anims.is_empty() && obj.data.alpha < 1.0 {
+						obj.anim.anims.push(render::AnimState::FadeIn(render::FadeIn { atime: 0.0 }));
 					}
 				}
 				else {
-					if !matches!(obj.anim, data::AnimationId::FadeOut) {
-						obj.anim = data::AnimationId::FadeOut;
-						obj.atime = 0.0;
+					if obj.anim.anims.is_empty() && obj.data.alpha > 0.0 {
+						obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 					}
 				}
 			}
@@ -157,7 +153,7 @@ impl FxState {
 			return;
 		}
 		if let Some(obj) = self.objlookup.get(&self.gs.ps.ehandle).and_then(|h| self.render.objects.get(*h)) {
-			self.camera.set_target(obj.lerp_pos + Vec3(16.0, 16.0, 0.0));
+			self.camera.set_target(obj.data.pos + Vec3(16.0, 16.0, 0.0));
 		}
 	}
 	pub fn scout_dir(&mut self, dir: chipty::Compass) {
@@ -166,6 +162,9 @@ impl FxState {
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		if self.gs.time != 0 {
 			self.camera.animate_blend();
+		}
+		if !matches!(self.gs.ts, chipcore::TimeState::Paused) {
+			self.camera.animate_move(self.render.time);
 		}
 		self.camera.animate_position();
 		self.render.update();

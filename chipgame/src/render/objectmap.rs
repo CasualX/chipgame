@@ -36,7 +36,7 @@ impl ObjectMap {
 	}
 	#[inline]
 	pub fn values(&self) -> impl Iterator<Item = &Object> {
-		self.map.values().filter(|obj| obj.visible)
+		self.map.values().filter(|obj| obj.data.visible)
 	}
 	#[inline]
 	pub fn retain<F: FnMut(&ObjectHandle, &mut Object) -> bool>(&mut self, f: F) {

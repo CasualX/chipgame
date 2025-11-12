@@ -18,6 +18,12 @@ pub struct PlayCamera {
 	// Blend between orthographic and perspective projection
 	blend: f32,
 	perspective: bool,
+
+	pub move_src: Vec2<i32>,
+	pub move_dest: Vec2<i32>,
+	pub move_time: f32,
+	pub move_spd: f32,
+	pub move_teleport: bool,
 }
 
 impl Default for PlayCamera {
@@ -28,6 +34,11 @@ impl Default for PlayCamera {
 			position: Vec3f::ONE,
 			blend: 0.0,
 			perspective: false,
+			move_src: Vec2::ZERO,
+			move_dest: Vec2::ZERO,
+			move_time: 0.0,
+			move_spd: 1.0,
+			move_teleport: true,
 		}
 	}
 }
@@ -73,11 +84,6 @@ impl PlayCamera {
 		self.target = pos;
 	}
 
-	pub fn teleport(&mut self, pos: Vec3f) {
-		self.target = pos;
-		self.position = pos + self.get_offset();
-	}
-
 	// Update blend over time
 	pub fn animate_blend(&mut self) {
 		if self.perspective {
@@ -91,6 +97,18 @@ impl PlayCamera {
 	pub fn animate_position(&mut self) {
 		let position_target = self.target + self.get_offset();
 		self.position = self.position.exp_decay(position_target, 15.0, 1.0 / 60.0).set_x(position_target.x);
+	}
+
+	pub fn animate_move(&mut self, time: f32) {
+		let t = f32::min(1.0, (time - self.move_time) / self.move_spd);
+		let src = self.move_src.map(|c| c as f32 * 32.0).vec3(0.0);
+		let dest = self.move_dest.map(|c| c as f32 * 32.0).vec3(0.0);
+		let new_target = src.lerp(dest, t);
+		self.target = new_target;
+		if self.move_teleport {
+			self.position = new_target + self.get_offset();
+			self.move_teleport = false;
+		}
 	}
 }
 

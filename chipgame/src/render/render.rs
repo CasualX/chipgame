@@ -361,7 +361,7 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 	}
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;
-	for obj in fx.objects.values() {
+	for obj in fx.objects.values().map(|obj| &obj.data) {
 		if matches!(obj.model, data::ModelId::Sprite | data::ModelId::FlatSprite) {
 			draw_shadow(cv, obj.pos, obj.sprite, 10.0, obj.alpha * shadow);
 		}
@@ -370,7 +370,7 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		}
 	}
 	// Render the objects
-	for obj in fx.objects.values() {
+	for obj in fx.objects.values().map(|obj| &obj.data) {
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Draw the object

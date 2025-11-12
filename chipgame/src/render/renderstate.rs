@@ -44,6 +44,15 @@ pub struct RenderState {
 }
 
 impl RenderState {
+	pub fn clear(&mut self) {
+		self.framecnt = 0;
+		self.time = 0.0;
+		self.objects.clear();
+		self.field.width = 0;
+		self.field.height = 0;
+		self.field.terrain.clear();
+		self.effects.clear();
+	}
 	pub fn update(&mut self) {
 		self.framecnt += 1;
 		let time = self.framecnt as f32 / 60.0;
