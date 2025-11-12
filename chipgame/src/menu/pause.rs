@@ -26,7 +26,7 @@ impl PauseMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::ResumePlay,
 				1 => MenuEvent::RestartLevel,
@@ -36,7 +36,7 @@ impl PauseMenu {
 			events.push(evt);
 			events.push(MenuEvent::CursorSelect);
 		}
-		if input.b.is_pressed() {
+		if input.b.is_pressed() || input.start.is_pressed() {
 			events.push(MenuEvent::ResumePlay);
 		}
 		if input.select.is_pressed() {
