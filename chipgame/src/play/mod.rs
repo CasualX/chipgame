@@ -92,7 +92,7 @@ impl PlayState {
 		self.save_data.save(&self.lvsets.current());
 
 		fx.render.tiles = &tiles::TILES_PLAY;
-		fx.parse_level(level_number, &lv.content);
+		fx.parse_level(level_number, &lv.field);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.set_perspective(self.save_data.perspective);
 
@@ -357,7 +357,7 @@ impl PlayState {
 		if let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) {
 			let mut preview = fx::FxState::default();
 			preview.render.tiles = &tiles::TILES_PLAY;
-			preview.parse_level(level_number, &lv.content);
+			preview.parse_level(level_number, &lv.field);
 			preview.camera.set_perspective(self.save_data.perspective);
 			// HUD hidden when any menu is open; leave runtime flags at defaults
 			self.fx = Some(preview);

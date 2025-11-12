@@ -20,8 +20,8 @@ pub struct FxState {
 }
 
 impl FxState {
-	pub fn parse_level(&mut self, level_number: i32, json: &str) {
-		self.gs.parse(json, chipcore::RngSeed::System);
+	pub fn parse_level(&mut self, level_number: i32, level_dto: &chipty::LevelDto) {
+		self.gs.parse(level_dto, chipcore::RngSeed::System);
 
 		// Reset the camera, adjusted when a player entity is created
 		self.camera = PlayCamera::default();

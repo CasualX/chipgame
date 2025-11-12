@@ -29,17 +29,16 @@ pub struct GameState {
 }
 
 impl GameState {
-	pub fn parse(&mut self, json: &str, rng_seed: RngSeed) {
+	pub fn parse(&mut self, ld: &chipty::LevelDto, rng_seed: RngSeed) {
 		self.time = 0;
 		self.ts = TimeState::Waiting;
 		self.ps = PlayerState::default();
 		self.input = Input::default();
 
-		let ld: LevelDto = serde_json::from_str(json).unwrap();
-		self.field.name = ld.name;
-		self.field.author = ld.author;
-		self.field.hint = ld.hint;
-		self.field.password = ld.password;
+		self.field.name = ld.name.clone();
+		self.field.author = ld.author.clone();
+		self.field.hint = ld.hint.clone();
+		self.field.password = ld.password.clone();
 		self.field.seed = match rng_seed {
 			RngSeed::Manual(seed) => seed,
 			RngSeed::System => {
@@ -54,7 +53,7 @@ impl GameState {
 		self.field.width = ld.map.width;
 		self.field.height = ld.map.height;
 		self.field.terrain.clear();
-		self.field.conns = ld.connections;
+		self.field.conns = ld.connections.clone();
 
 		self.qt.init(ld.map.width, ld.map.height);
 		self.ents.clear();
