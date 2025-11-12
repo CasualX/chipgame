@@ -1,5 +1,5 @@
 [package]
-name = "levelstats"
+name = "levelquery"
 version = "0.1.0"
 edition = "2021"
 

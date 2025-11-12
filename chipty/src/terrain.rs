@@ -1,3 +1,4 @@
+use super::*;
 
 /// Terrain types for the game.
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -55,6 +56,66 @@ pub enum Terrain {
 	Teleport,
 	BearTrap,
 	RecessedWall,
+}
+
+impl str::FromStr for Terrain {
+	type Err = &'static str;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Blank" => Ok(Terrain::Blank),
+			"Floor" => Ok(Terrain::Floor),
+			"Wall" => Ok(Terrain::Wall),
+			"Socket" => Ok(Terrain::Socket),
+			"BlueLock" => Ok(Terrain::BlueLock),
+			"RedLock" => Ok(Terrain::RedLock),
+			"GreenLock" => Ok(Terrain::GreenLock),
+			"YellowLock" => Ok(Terrain::YellowLock),
+			"Hint" => Ok(Terrain::Hint),
+			"Exit" => Ok(Terrain::Exit),
+			"FakeExit" => Ok(Terrain::FakeExit),
+			"Water" => Ok(Terrain::Water),
+			"WaterHazard" => Ok(Terrain::WaterHazard),
+			"Fire" => Ok(Terrain::Fire),
+			"Dirt" => Ok(Terrain::Dirt),
+			"DirtBlock" => Ok(Terrain::DirtBlock),
+			"Gravel" => Ok(Terrain::Gravel),
+			"Ice" => Ok(Terrain::Ice),
+			"IceNW" => Ok(Terrain::IceNW),
+			"IceNE" => Ok(Terrain::IceNE),
+			"IceSW" => Ok(Terrain::IceSW),
+			"IceSE" => Ok(Terrain::IceSE),
+			"ForceN" => Ok(Terrain::ForceN),
+			"ForceW" => Ok(Terrain::ForceW),
+			"ForceS" => Ok(Terrain::ForceS),
+			"ForceE" => Ok(Terrain::ForceE),
+			"ForceRandom" => Ok(Terrain::ForceRandom),
+			"CloneMachine" => Ok(Terrain::CloneMachine),
+			"CloneBlockN" => Ok(Terrain::CloneBlockN),
+			"CloneBlockW" => Ok(Terrain::CloneBlockW),
+			"CloneBlockS" => Ok(Terrain::CloneBlockS),
+			"CloneBlockE" => Ok(Terrain::CloneBlockE),
+			"ToggleFloor" => Ok(Terrain::ToggleFloor),
+			"ToggleWall" => Ok(Terrain::ToggleWall),
+			"ThinWallN" => Ok(Terrain::ThinWallN),
+			"ThinWallW" => Ok(Terrain::ThinWallW),
+			"ThinWallS" => Ok(Terrain::ThinWallS),
+			"ThinWallE" => Ok(Terrain::ThinWallE),
+			"ThinWallSE" => Ok(Terrain::ThinWallSE),
+			"HiddenWall" => Ok(Terrain::HiddenWall),
+			"InvisibleWall" => Ok(Terrain::InvisibleWall),
+			"RealBlueWall" => Ok(Terrain::RealBlueWall),
+			"FakeBlueWall" => Ok(Terrain::FakeBlueWall),
+			"GreenButton" => Ok(Terrain::GreenButton),
+			"RedButton" => Ok(Terrain::RedButton),
+			"BrownButton" => Ok(Terrain::BrownButton),
+			"BlueButton" => Ok(Terrain::BlueButton),
+			"Teleport" => Ok(Terrain::Teleport),
+			"BearTrap" => Ok(Terrain::BearTrap),
+			"RecessedWall" => Ok(Terrain::RecessedWall),
+			_ => Err("Unknown terrain type"),
+		}
+	}
 }
 
 impl Terrain {

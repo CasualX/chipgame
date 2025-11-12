@@ -11,7 +11,7 @@ members = [
 	"./scripts/copyrecords",
 	"./scripts/extract",
 	"./scripts/fixer",
-	"./scripts/levelstats",
+	"./scripts/levelquery",
 	"./scripts/spritec",
 	"./scripts/packset",
 ]

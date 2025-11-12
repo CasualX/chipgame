@@ -30,6 +30,40 @@ pub enum EntityKind {
 	Paramecium,
 }
 
+impl str::FromStr for EntityKind {
+	type Err = &'static str;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"Player" => Ok(EntityKind::Player),
+			"Chip" => Ok(EntityKind::Chip),
+			"Socket" => Ok(EntityKind::Socket),
+			"Block" => Ok(EntityKind::Block),
+			"IceBlock" => Ok(EntityKind::IceBlock),
+			"Flippers" => Ok(EntityKind::Flippers),
+			"FireBoots" => Ok(EntityKind::FireBoots),
+			"IceSkates" => Ok(EntityKind::IceSkates),
+			"SuctionBoots" => Ok(EntityKind::SuctionBoots),
+			"BlueKey" => Ok(EntityKind::BlueKey),
+			"RedKey" => Ok(EntityKind::RedKey),
+			"GreenKey" => Ok(EntityKind::GreenKey),
+			"YellowKey" => Ok(EntityKind::YellowKey),
+			"Thief" => Ok(EntityKind::Thief),
+			"Bomb" => Ok(EntityKind::Bomb),
+			"Bug" => Ok(EntityKind::Bug),
+			"FireBall" => Ok(EntityKind::FireBall),
+			"PinkBall" => Ok(EntityKind::PinkBall),
+			"Tank" => Ok(EntityKind::Tank),
+			"Glider" => Ok(EntityKind::Glider),
+			"Teeth" => Ok(EntityKind::Teeth),
+			"Walker" => Ok(EntityKind::Walker),
+			"Blob" => Ok(EntityKind::Blob),
+			"Paramecium" => Ok(EntityKind::Paramecium),
+			_ => Err("Unknown entity kind"),
+		}
+	}
+}
+
 /// Entity construction arguments.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug)]

@@ -1,3 +1,4 @@
+use std::str;
 use cvmath::*;
 
 mod compass;

@@ -314,6 +314,9 @@ fn draw_portal(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>,
 }
 
 pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, pos: Vec3<f32>, sprite: data::SpriteId, model: data::ModelId, alpha: f32) {
+	if alpha <= 0.0 {
+		return;
+	}
 	match model {
 		data::ModelId::Empty => (),
 		data::ModelId::Floor => draw_floor(cv, pos, sprite, 0.0, 0.0, alpha),
