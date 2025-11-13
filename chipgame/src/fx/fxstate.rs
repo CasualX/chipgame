@@ -156,8 +156,8 @@ impl FxState {
 			self.camera.set_target(obj.data.pos + Vec3(16.0, 16.0, 0.0));
 		}
 	}
-	pub fn scout_dir(&mut self, dir: chipty::Compass) {
-		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * 2.0);
+	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
+		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * speed);
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		if self.gs.time != 0 {

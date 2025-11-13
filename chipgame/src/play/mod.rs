@@ -256,22 +256,26 @@ impl PlayState {
 				}
 				menu::MenuEvent::ScoutN => {
 					if let Some(fx) = &mut self.fx {
-						fx.scout_dir(chipty::Compass::Up);
+						let speed = if self.input.a { 5.0 } else { 2.0 };
+						fx.scout_dir(chipty::Compass::Up, speed);
 					}
 				}
 				menu::MenuEvent::ScoutE => {
 					if let Some(fx) = &mut self.fx {
-						fx.scout_dir(chipty::Compass::Right);
+						let speed = if self.input.a { 5.0 } else { 2.0 };
+						fx.scout_dir(chipty::Compass::Right, speed);
 					}
 				}
 				menu::MenuEvent::ScoutS => {
 					if let Some(fx) = &mut self.fx {
-						fx.scout_dir(chipty::Compass::Down);
+						let speed = if self.input.a { 5.0 } else { 2.0 };
+						fx.scout_dir(chipty::Compass::Down, speed);
 					}
 				}
 				menu::MenuEvent::ScoutW => {
 					if let Some(fx) = &mut self.fx {
-						fx.scout_dir(chipty::Compass::Left);
+						let speed = if self.input.a { 5.0 } else { 2.0 };
+						fx.scout_dir(chipty::Compass::Left, speed);
 					}
 				}
 				menu::MenuEvent::SetBackgroundMusic { value } => {
