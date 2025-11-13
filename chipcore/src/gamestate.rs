@@ -54,6 +54,8 @@ impl GameState {
 		self.field.height = ld.map.height;
 		self.field.terrain.clear();
 		self.field.conns = ld.connections.clone();
+		self.field.replays = ld.replays.clone();
+		self.field.trophies = ld.trophies.clone();
 
 		self.qt.init(ld.map.width, ld.map.height);
 		self.ents.clear();

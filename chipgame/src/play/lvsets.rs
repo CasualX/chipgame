@@ -207,6 +207,7 @@ fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
 			entities: ents,
 			connections: conns,
 			replays: None,
+			trophies: None,
 		};
 
 		dat::post_process(&mut level);

@@ -134,6 +134,10 @@ impl SaveData {
 		let level_index = (level_number - 1) as usize;
 		self.high_scores.steps.get(level_index).copied().unwrap_or(-1)
 	}
+	pub fn get_attempts(&self, level_number: i32) -> i32 {
+		let level_index = (level_number - 1) as usize;
+		self.high_scores.attempts.get(level_index).copied().unwrap_or(0)
+	}
 
 	pub fn save(&mut self, level_pack: &LevelSet) {
 		let file_name = get_levelset_state_filename(level_pack);

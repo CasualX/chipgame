@@ -80,6 +80,7 @@ fn main() {
 			entities: ents,
 			connections: conns,
 			replays: None,
+			trophies: None,
 		};
 
 		post_process(&mut level);

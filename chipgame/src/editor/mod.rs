@@ -155,7 +155,8 @@ impl EditorState {
 			},
 			entities,
 			connections: self.game.gs.field.conns.clone(),
-			replays: None,
+			replays: self.game.gs.field.replays.clone(),
+			trophies: self.game.gs.field.trophies.clone(),
 		};
 		serde_json::to_string(&dto).unwrap()
 	}

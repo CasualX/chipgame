@@ -9,7 +9,8 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 struct LevelEntry {
 	level_number: i32,
 	state: play::LevelState,
-	name: String,
+	label: String,
+	trophies: Option<draw::DrawTrophies>,
 }
 
 #[derive(Default)]
@@ -23,7 +24,13 @@ pub struct GoToLevel {
 impl GoToLevel {
 	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
 		self.items.clear();
-		self.items.push(LevelEntry { level_number: 0, state: play::LevelState::Completed, name: "Unlock level".to_string() });
+		// Dummy entry for "Unlock level"
+		self.items.push(LevelEntry {
+			level_number: 0,
+			state: play::LevelState::Completed,
+			label: "\x1b[draw_mask=0]🌟\x1b[draw_mask=1] Unlock level".to_string(),
+			trophies: None,
+		});
 		for level_index in 0..sd.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
 			let state = sd.get_level_state(level_number);
@@ -39,7 +46,12 @@ impl GoToLevel {
 				play::LevelState::Unlocked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
 				play::LevelState::Completed => "🌟",
 			};
-			self.items.push(LevelEntry { level_number, state, name: format!("{prefix} Level {}: {}", level_number, lv.field.name) });
+			self.items.push(LevelEntry {
+				level_number,
+				state,
+				label: format!("{prefix} Level {}: {}", level_number, lv.field.name),
+				trophies: Some(draw::DrawTrophies::new(level_number, &lv.field, sd)),
+			});
 		}
 		self.offset = clip_offset(self.selected - LEVELS_PER_PAGE / 2 + 1, self.items.len() as i32);
 		self.offsetf = self.offset as f32;
@@ -101,6 +113,9 @@ impl GoToLevel {
 
 		let size = resx.viewport.height() as f32 * FONT_SIZE;
 
+		let [top, bottom] = draw::flexv(rect, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Fr(4.0)]);
+		let [_, panel, _] = draw::flexh(bottom, None, layout::Justify::Center, &[layout::Unit::Fr(8.0), layout::Unit::Abs(size * 10.0), layout::Unit::Fr(1.0)]);
+
 		let scribe = shade::d2::Scribe {
 			font_size: size,
 			line_height: size * (5.0 / 4.0),
@@ -108,8 +123,7 @@ impl GoToLevel {
 			..Default::default()
 		};
 
-		let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.5, size * 1.5), Vec2::ZERO);
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, "Go to level");
+		buf.text_box(&resx.font, &scribe, &top, shade::d2::TextAlign::MiddleCenter, "Go to level");
 
 		let mut scribe = shade::d2::Scribe {
 			font_size: size * 0.75,
@@ -151,10 +165,14 @@ impl GoToLevel {
 			scribe.color = Vec4(color, color, color, alpha);
 			scribe.outline.w = alpha;
 
-			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.25, y), Vec2::ZERO);
-			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.name);
+			let rect = Bounds2::point(Vec2(resx.viewport.width() as f32 * 0.125 * 0.75, y), Vec2::ZERO);
+			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &item.label);
 
 			y += scribe.line_height;
+		}
+
+		if let Some(trophies) = &self.items.get(self.selected as usize).and_then(|it| it.trophies.as_ref()) {
+			trophies.draw(&mut buf, &panel, resx);
 		}
 
 		buf.draw(g, shade::Surface::BACK_BUFFER);

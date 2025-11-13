@@ -9,6 +9,9 @@ pub use self::scorecard::*;
 mod playtitle;
 pub use self::playtitle::*;
 
+mod trophies;
+pub use self::trophies::*;
+
 pub fn flexv<const N: usize>(rect: Bounds2<f32>, gap: Option<layout::Unit>, justify: layout::Justify, template: &[layout::Unit; N]) -> [Bounds2<f32>; N] {
 	let values = layout::flex1d(rect.mins.y, rect.maxs.y, gap, justify, template);
 	let mut rects = [Bounds2::ZERO; N];

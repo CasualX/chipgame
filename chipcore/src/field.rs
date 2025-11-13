@@ -14,6 +14,8 @@ pub struct Field {
 	pub height: i32,
 	pub terrain: Vec<Terrain>,
 	pub conns: Vec<FieldConn>,
+	pub replays: Option<Vec<chipty::ReplayDto>>,
+	pub trophies: Option<chipty::Trophies>,
 }
 
 impl Field {
@@ -108,7 +110,7 @@ impl Field{
 }
 
 fn clamp_field_size(size: i32) -> i32 {
-	cmp::min(255, cmp::max(0, size))
+	i32::clamp(size, 0, 255)
 }
 
 impl GameState {

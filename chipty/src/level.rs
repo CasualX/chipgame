@@ -9,6 +9,43 @@ pub struct FieldDto {
 	pub legend: Vec<Terrain>,
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize)]
+pub enum Trophy {
+	Author,
+	Gold,
+	Silver,
+	Bronze,
+}
+
+impl Trophy {
+	#[inline]
+	pub fn to_str(self) -> &'static str {
+		match self {
+			Trophy::Author => "Author",
+			Trophy::Gold => "Gold",
+			Trophy::Silver => "Silver",
+			Trophy::Bronze => "Bronze",
+		}
+	}
+}
+
+#[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct TrophyValues {
+	pub author: i32,
+	pub gold: i32,
+	pub silver: i32,
+	pub bronze: i32,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
+pub struct Trophies {
+	pub ticks: TrophyValues,
+	pub steps: TrophyValues,
+}
+
 /// Level data transfer object.
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct LevelDto {
@@ -26,6 +63,8 @@ pub struct LevelDto {
 	pub connections: Vec<FieldConn>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub replays: Option<Vec<ReplayDto>>,
+	#[serde(default, skip_serializing_if = "Option::is_none")]
+	pub trophies: Option<Trophies>,
 }
 
 /// Connection between terrain tiles.
