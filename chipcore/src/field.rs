@@ -19,6 +19,39 @@ pub struct Field {
 }
 
 impl Field {
+	pub(super) fn parse(&mut self, ld: &chipty::LevelDto, seed: u64) {
+		self.name.clone_from(&ld.name);
+		self.author.clone_from(&ld.author);
+		self.hint.clone_from(&ld.hint);
+		self.password.clone_from(&ld.password);
+		self.seed = seed;
+		self.time_limit = ld.time_limit;
+		self.required_chips = ld.required_chips;
+		self.width = ld.map.width;
+		self.height = ld.map.height;
+		self.terrain.clear();
+		self.conns.clone_from(&ld.connections);
+		self.replays.clone_from(&ld.replays);
+		self.trophies.clone_from(&ld.trophies);
+
+		assert!(ld.map.width > 0 && ld.map.height > 0, "Invalid map size width={} height={}", ld.map.width, ld.map.height);
+		let size = ld.map.width as usize * ld.map.height as usize;
+		self.terrain.reserve_exact(size);
+
+		if ld.map.data.is_empty() {
+			self.terrain.resize(size, Terrain::Floor);
+		}
+		else {
+			assert_eq!(ld.map.data.len(), size, "Invalid map data length");
+			for y in 0..ld.map.height {
+				for x in 0..ld.map.width {
+					let index = (y * ld.map.width + x) as usize;
+					let terrain = ld.map.legend[ld.map.data[index] as usize];
+					self.terrain.push(terrain);
+				}
+			}
+		}
+	}
 	pub fn get_terrain(&self, pos: Vec2i) -> Terrain {
 		let Vec2i { x, y } = pos;
 		if x < 0 || y < 0 || x >= self.width || y >= self.height {

@@ -16,30 +16,20 @@ pub enum TimeState {
 #[derive(Default)]
 pub struct GameState {
 	pub time: Time,
+	pub ts: TimeState,
 	pub ps: PlayerState,
 	pub field: Field,
 	pub ents: EntityMap,
-	pub spawns: Vec<EntityArgs>,
 	pub qt: QuadTree,
 	pub rand: Random,
 	pub events: Events,
-	pub ts: TimeState,
 	pub input: Input,
 	pub inputs: Vec<u8>,
 }
 
 impl GameState {
 	pub fn parse(&mut self, ld: &chipty::LevelDto, rng_seed: RngSeed) {
-		self.time = 0;
-		self.ts = TimeState::Waiting;
-		self.ps = PlayerState::default();
-		self.input = Input::default();
-
-		self.field.name = ld.name.clone();
-		self.field.author = ld.author.clone();
-		self.field.hint = ld.hint.clone();
-		self.field.password = ld.password.clone();
-		self.field.seed = match rng_seed {
+		let seed = match rng_seed {
 			RngSeed::Manual(seed) => seed,
 			RngSeed::System => {
 				let mut seed = [0u8; 8];
@@ -47,44 +37,23 @@ impl GameState {
 				u64::from_le_bytes(seed)
 			},
 		};
-		self.rand.reseed(self.field.seed);
-		self.field.time_limit = ld.time_limit;
-		self.field.required_chips = ld.required_chips;
-		self.field.width = ld.map.width;
-		self.field.height = ld.map.height;
-		self.field.terrain.clear();
-		self.field.conns = ld.connections.clone();
-		self.field.replays = ld.replays.clone();
-		self.field.trophies = ld.trophies.clone();
 
-		self.qt.init(ld.map.width, ld.map.height);
+		self.time = 0;
+		self.ts = TimeState::Waiting;
+		self.ps = PlayerState::default();
+		self.field.parse(ld, seed);
 		self.ents.clear();
-
+		self.qt.init(ld.map.width, ld.map.height);
+		self.rand.reseed(seed);
+		self.events.clear();
+		self.input = Input::default();
 		self.inputs.clear();
 
-		assert!(ld.map.width > 0, "Invalid map width");
-		assert!(ld.map.height > 0, "Invalid map height");
-		let size = ld.map.width as usize * ld.map.height as usize;
-		self.field.terrain.reserve_exact(size);
-
-		if ld.map.data.is_empty() {
-			self.field.terrain.resize(size, Terrain::Floor);
-		}
-		else {
-			assert_eq!(ld.map.data.len(), size, "Invalid map data length");
-			for y in 0..ld.map.height {
-				for x in 0..ld.map.width {
-					let index = (y * ld.map.width + x) as usize;
-					let terrain = ld.map.legend[ld.map.data[index] as usize];
-					self.field.terrain.push(terrain);
-				}
-			}
-		}
-
+		// Create entities
 		for data in &ld.entities {
 			self.entity_create(data);
 		}
-
+		// And update their hidden flags
 		for ehandle in self.ents.handles() {
 			if let Some(ent) = self.ents.take(ehandle) {
 				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
@@ -93,29 +62,11 @@ impl GameState {
 				self.ents.put(ent);
 			}
 		}
-
-		// Find red buttons and mark the connected entities as templates
-		for conn in &self.field.conns {
-			let terrain = self.field.get_terrain(conn.src);
-			if matches!(terrain, Terrain::RedButton) {
-				let template = self.qt.get(conn.dest)[0];
-				if let Some(template_ent) = self.ents.get_mut(template) {
-					let valid = matches!(template_ent.kind,
-						EntityKind::Block | EntityKind::IceBlock | EntityKind::Bug | EntityKind::FireBall | EntityKind::PinkBall | EntityKind::Tank |
-						EntityKind::Glider | EntityKind::Teeth | EntityKind::Walker | EntityKind::Blob | EntityKind::Paramecium);
-					if valid {
-						template_ent.flags |= EF_TEMPLATE;
-					}
-				}
-			}
-		}
-
-		// let chips = ld.entities.iter().filter(|data| matches!(data.kind, EntityKind::Chip)).count();
-		// eprintln!("Found {} chips", chips);
 	}
 }
 
 impl GameState {
+	/// Advance the game state by one tick.
 	pub fn tick(&mut self, input: &Input) {
 		// Wait for the player to press any direction key to start the game
 		if !match self.ts {
@@ -138,9 +89,6 @@ impl GameState {
 		input.encode(&mut self.inputs);
 		ps_input(self, input);
 
-		// Spawn the cloned entities
-		self.spawn_clones();
-
 		// Let entities think
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
@@ -158,11 +106,18 @@ impl GameState {
 		}
 
 		// Handle entity-terrain interactions
+		let mut it_state = InteractTerrainState::default();
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
-				interact_terrain(self, &mut ent);
+				it_state.check(self, &mut ent);
 				self.ents.put(ent);
 			}
+		}
+		if it_state.toggle_walls & 1 != 0 {
+			self.toggle_walls();
+		}
+		if it_state.turn_around_tanks & 1 != 0 {
+			self.turn_around_tanks();
 		}
 
 		// Remove entities marked for removal
@@ -174,8 +129,14 @@ impl GameState {
 
 		self.input = *input;
 		self.time += 1;
+
+		// HACK: Spawn the cloned entities on the 'next' tick
+		// Otherwise the clones won't move out of the spawner correctly
+		// Try it yourself: move this code above the increment of time
+		self.spawn_clones(&it_state.spawns);
 	}
 
+	/// Returns the trap state at the given position.
 	pub fn get_trap_state(&self, pos: Vec2i) -> TrapState {
 		let mut state = TrapState::Closed;
 		for conn in &self.field.conns {
@@ -190,41 +151,35 @@ impl GameState {
 		return state;
 	}
 
-	fn spawn_clones(&mut self) {
-		let s = self;
-		for i in 0..s.spawns.len() {
-			let args = &{s.spawns[i]};
-
+	/// Spawn cloned entities from spawners.
+	pub fn spawn_clones(&mut self, spawns: &[EntityArgs]) {
+		for args in spawns {
 			// Clones are forced out of the spawner, so they must have a direction
 			let Some(face_dir) = args.face_dir else { continue };
 
-			let ehandle = s.entity_create(args);
-
-			if let Some(mut ent) = s.ents.take(ehandle) {
-				let mut remove = false;
+			let ehandle = self.entity_create(args);
+			if let Some(mut ent) = self.ents.take(ehandle) {
 				// Force the new entity to move out of the spawner
-				if !try_move(s, &mut ent, face_dir) {
-					remove = true;
-				}
-				s.ents.put(ent);
+				let success = try_move(self, &mut ent, face_dir);
+				self.ents.put(ent);
 				// If the entity movement out of the spawner fails, remove it
 				// This indicates that there's a lot of entities being spawned
-				if remove {
-					s.entity_remove(ehandle);
+				if !success {
+					self.entity_remove(ehandle);
 				}
 			}
 		}
-
-		// Clear the spawn list
-		s.spawns.clear();
 	}
 
+	/// Sets terrain at position and fires event if changed.
 	pub fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) {
 		if let Some(old) = self.field.set_terrain(pos, terrain) {
 			self.events.fire(GameEvent::TerrainUpdated { pos, old, new: terrain });
+			// TODO: Update hidden flags when terrain changes to fire?
 		}
 	}
 
+	/// Returns true if the player is standing on a hint tile.
 	pub fn is_show_hint(&self) -> bool {
 		let Some(pl) = self.ents.get(self.ps.ehandle) else { return false };
 		let terrain = self.field.get_terrain(pl.pos);
@@ -232,26 +187,56 @@ impl GameState {
 	}
 
 	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i, hidden: bool) {
-		let s = self;
-
-		for ehandle in s.qt.get(pos) {
-			if let Some(ent) = s.ents.get_mut(ehandle) {
+		for ehandle in self.qt.get(pos) {
+			if let Some(ent) = self.ents.get_mut(ehandle) {
 				if matches!(ent.kind, EntityKind::Block | EntityKind::Bomb) {
 					continue;
 				}
 				if (ent.flags & EF_HIDDEN != 0) != hidden {
 					ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
-					s.events.fire(GameEvent::EntityHidden { entity: ent.handle, hidden });
+					self.events.fire(GameEvent::EntityHidden { entity: ent.handle, hidden });
 				}
 			}
 		}
 
-		let terrain = s.field.get_terrain(pos);
+		let terrain = self.field.get_terrain(pos);
 		if matches!(terrain, Terrain::Fire) {
-			s.events.fire(GameEvent::FireHidden { pos, hidden });
+			self.events.fire(GameEvent::FireHidden { pos, hidden });
 		}
 	}
 
+	/// Toggle all toggleable walls and floors on the field.
+	pub fn toggle_walls(&mut self) {
+		for y in 0..self.field.height {
+			for x in 0..self.field.width {
+				let terrain = self.field.get_terrain(Vec2i::new(x, y));
+				let new = match terrain {
+					Terrain::ToggleFloor => Terrain::ToggleWall,
+					Terrain::ToggleWall => Terrain::ToggleFloor,
+					_ => continue,
+				};
+				self.set_terrain(Vec2i::new(x, y), new);
+			}
+		}
+	}
+
+	/// Turn around all tanks on the field.
+	pub fn turn_around_tanks(&mut self) {
+		for other in self.ents.iter_mut() {
+			if matches!(other.kind, EntityKind::Tank) {
+				// Ignore Tank template entities
+				if other.flags & EF_TEMPLATE != 0 {
+					continue;
+				}
+				if let Some(face_dir) = other.face_dir {
+					other.face_dir = Some(face_dir.turn_around());
+					self.events.fire(GameEvent::EntityTurn { entity: other.handle });
+				}
+			}
+		}
+	}
+
+	/// Save replay data.
 	pub fn save_replay(&self, realtime: f32) -> chipty::ReplayDto {
 		chipty::ReplayDto {
 			date: None,

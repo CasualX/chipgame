@@ -482,7 +482,21 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	return true;
 }
 
-pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
+#[derive(Default)]
+pub struct InteractTerrainState {
+	pub toggle_walls: u32,
+	pub turn_around_tanks: u32,
+	pub spawns: Vec<EntityArgs>,
+}
+
+impl InteractTerrainState {
+	#[inline]
+	pub fn check(&mut self, s: &mut GameState, ent: &mut Entity) {
+		interact_terrain(s, ent, self);
+	}
+}
+
+fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
 	// Play sound only for player and blocks to avoid a cacophony
 	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock);
 
@@ -521,18 +535,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 	match terrain {
 		Terrain::GreenButton => {
 			if press_once(ent) {
-				for y in 0..s.field.height {
-					for x in 0..s.field.width {
-						let terrain = s.field.get_terrain(Vec2i::new(x, y));
-						let new = match terrain {
-							Terrain::ToggleFloor => Terrain::ToggleWall,
-							Terrain::ToggleWall => Terrain::ToggleFloor,
-							_ => continue,
-						};
-						s.set_terrain(Vec2i::new(x, y), new);
-					}
-				}
-				s.events.fire(GameEvent::ToggleWalls { entity: ent.handle });
+				result.toggle_walls += 1;
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
@@ -568,7 +571,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 					}
 					template_ent.to_entity_args()
 				};
-				s.spawns.push(args);
+				result.spawns.push(args);
 
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
@@ -582,26 +585,7 @@ pub fn interact_terrain(s: &mut GameState, ent: &mut Entity) {
 		}
 		Terrain::BlueButton => {
 			if press_once(ent) {
-				for other in s.ents.iter_mut() {
-					if matches!(other.kind, EntityKind::Tank) {
-						// Ignore Tank template entities
-						if other.flags & EF_TEMPLATE != 0 {
-							continue;
-						}
-						if let Some(face_dir) = other.face_dir {
-							other.face_dir = Some(face_dir.turn_around());
-							s.events.fire(GameEvent::EntityTurn { entity: other.handle });
-						}
-					}
-				}
-				// Handle the Tank which triggered the button separately
-				// as it has been taken out of the entity list
-				if matches!(ent.kind, EntityKind::Tank) {
-					if let Some(face_dir) = ent.face_dir {
-						ent.face_dir = Some(face_dir.turn_around());
-						s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
-					}
-				}
+				result.turn_around_tanks += 1;
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
