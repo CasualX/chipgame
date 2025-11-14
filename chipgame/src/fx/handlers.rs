@@ -54,7 +54,7 @@ pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 
 	if rises {
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
-		obj.anim.anims.push(render::AnimState::MoveVel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) }));
+		obj.anim.anims.push(render::AnimState::MoveZ(render::MoveZ { target_z: 50.0, move_spd: 200.0 }));
 	}
 	else if faded {
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
@@ -274,15 +274,6 @@ fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> data::S
 		}
 		chipty::EntityKind::Bomb => data::SpriteId::Bomb,
 	}
-}
-
-pub fn item_pickup(ctx: &mut FxState, ehandle: chipcore::EntityHandle, _item: chipcore::ItemPickup) {
-	let Some(obj_handle) = ctx.objlookup.remove(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-
-	obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
-	obj.anim.anims.push(render::AnimState::MoveVel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) }));
-	obj.anim.unalive_after_anim = true;
 }
 
 pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {

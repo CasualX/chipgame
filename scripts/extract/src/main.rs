@@ -131,6 +131,7 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 		0x1e => terrain[index] = Terrain::FakeBlueWall,
 		0x1f => terrain[index] = Terrain::RealBlueWall,
 
+		0x20 => terrain[index] = Terrain::Blank, // Used internally as the Combination tile.
 		0x21 => entities.push(ent_args(EntityKind::Thief, pos, None)),
 		0x22 => entities.push(ent_args(EntityKind::Socket, pos, None)),
 		0x23 => terrain[index] = Terrain::GreenButton,
@@ -150,11 +151,19 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 		0x30 => terrain[index] = Terrain::ThinWallSE,
 		0x31 => terrain[index] = Terrain::CloneMachine,
 		0x32 => terrain[index] = Terrain::ForceRandom,
-		0x33 => terrain[index] = Terrain::WaterHazard, // Drowned chip
+		0x33 => terrain[index] = Terrain::WaterHazard, // Drowned Chip
+		0x34 => terrain[index] = Terrain::Blank, // Burned Chip
+		0x35 => terrain[index] = Terrain::Blank, // Burned Chip
+		0x36 => terrain[index] = Terrain::InvisibleWall, // This byte does not correspond to any defined tile, but acts like an invisible wall.
+		0x37 => terrain[index] = Terrain::InvisibleWall, // This byte does not correspond to any defined tile, but acts like an invisible wall.
 		0x38 => entities.push(ent_args(EntityKind::IceBlock, pos, None)),
 		0x39 => terrain[index] = Terrain::FakeExit,
 		0x3a => terrain[index] = Terrain::FakeExit,
 		0x3b => terrain[index] = Terrain::FakeExit,
+		0x3c => terrain[index] = Terrain::WaterHazard, // Swimming Chip (N)
+		0x3d => terrain[index] = Terrain::WaterHazard, // Swimming Chip (W)
+		0x3e => terrain[index] = Terrain::WaterHazard, // Swimming Chip (S)
+		0x3f => terrain[index] = Terrain::WaterHazard, // Swimming Chip (E)
 
 		0x40 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Up))),
 		0x41 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Left))),
@@ -213,6 +222,8 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 		0x6d => entities.push(ent_args(EntityKind::Player, pos, None)),
 		0x6e => entities.push(ent_args(EntityKind::Player, pos, None)),
 		0x6f => entities.push(ent_args(EntityKind::Player, pos, None)),
+
+		0x70 => terrain[index] = Terrain::Blank, // Values of $70 and above are used internally for graphical transparency.
 		value => unimplemented!("Tile: ${:02x}", value),
 	}
 }

@@ -136,7 +136,6 @@ impl FxState {
 				&chipcore::GameEvent::EntityHidden { entity, hidden } => handlers::entity_hidden(self, entity, hidden),
 				&chipcore::GameEvent::EntityTeleport { entity } => handlers::entity_teleport(self, entity),
 				&chipcore::GameEvent::PlayerActivity { player } => handlers::player_activity(self, player),
-				&chipcore::GameEvent::ItemPickup { entity, item } => handlers::item_pickup(self, entity, item),
 				&chipcore::GameEvent::LockOpened { pos, key } => handlers::lock_opened(self, pos, key),
 				&chipcore::GameEvent::FireHidden { pos, hidden } => handlers::fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),
