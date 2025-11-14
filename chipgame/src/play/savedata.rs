@@ -78,6 +78,8 @@ impl SaveData {
 			*lock = true;
 		}
 
+		// Allow skipping up to one level
+		self.unlock_level(level_number + 2);
 		self.unlock_level(level_number + 1);
 
 		let level_index = (level_number - 1) as usize;
@@ -91,9 +93,17 @@ impl SaveData {
 				*steps_entry = scores.steps;
 			}
 		}
-		// if let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index) {
-		// 	*attempts_entry = scores.attempts;
-		// }
+	}
+
+	/// Updates and returns the current attempt for this level.
+	pub fn update_level_attempts(&mut self, level_number: i32) -> i32 {
+		let level_index = (level_number - 1) as usize;
+		let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index)
+		else {
+			return 0;
+		};
+		*attempts_entry += 1;
+		*attempts_entry
 	}
 
 	pub fn is_level_unlocked(&self, level_number: i32) -> bool {
@@ -113,17 +123,6 @@ impl SaveData {
 			return LevelState::Unlocked;
 		}
 		LevelState::Locked
-	}
-
-	/// Updates and returns the current attempt for this level.
-	pub fn update_level_attempts(&mut self, level_number: i32) -> i32 {
-		let level_index = (level_number - 1) as usize;
-		let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index)
-		else {
-			return 0;
-		};
-		*attempts_entry += 1;
-		*attempts_entry
 	}
 
 	pub fn get_time_high_score(&self, level_number: i32) -> i32 {
