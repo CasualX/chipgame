@@ -4,32 +4,30 @@ fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i) -> Vec3
 	let terrain = gs.field.get_terrain(pos);
 	let elevated = terrain.is_wall();
 	// Blocks appear on top of walls
-	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 1.0 } else if elevated { 20.0 } else { 0.0 };
+	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if elevated { 20.0 } else { 0.0 };
 	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
 	return pos;
 }
 
 pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
-	let handle = ctx.render.objects.alloc();
+
 	let pos = ent_pos(&ctx.gs, ent, ent.pos);
-	// Quick hack to flatten sprites on top of walls
-	let model = if pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
-	let greyscale = ent.flags & chipcore::EF_TEMPLATE != 0;
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos,
 			sprite: sprite_for_ent(ent, &ctx.gs.ps),
-			model,
+			model: if pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) },
 			alpha: 1.0,
 			visible: true,
-			greyscale,
+			greyscale: ent.flags & chipcore::EF_TEMPLATE != 0,
 		},
 		anim: render::Animation {
 			anims: Vec::new(),
 			unalive_after_anim: false,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 	ctx.objlookup.insert(ehandle, handle);
 
@@ -57,16 +55,11 @@ pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	if rises {
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 		obj.anim.anims.push(render::AnimState::MoveVel(render::MoveVel { vel: Vec3::new(0.0, 0.0, 200.0) }));
-		obj.anim.unalive_after_anim = true;
 	}
 	else if faded {
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
-		obj.anim.unalive_after_anim = true;
 	}
-	else {
-		// ctx.objects.remove(obj_handle);
-		obj.anim.unalive_after_anim = true;
-	}
+	obj.anim.unalive_after_anim = true;
 }
 
 pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
@@ -81,6 +74,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 		move_time: ctx.render.time,
 		move_spd: ent.step_spd as f32 / 60.0,
 	}));
+
 	// Quick hack to flatten sprites on top of walls
 	let check_pos = ent_pos(&ctx.gs, ent, ent.pos);
 	obj.data.model = if check_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
@@ -98,17 +92,9 @@ pub fn entity_teleport(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// Step out of the teleport
 	entity_step(ctx, ehandle);
 
-	// // let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	// // let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+	// When teleporting the player snap the camera
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
-
-	// // When teleporting the player snap the camera
 	if ent.handle == ctx.gs.ps.ehandle {
-	// 	// ctx.camera.teleport(obj.pos + Vec3(16.0, 16.0, 0.0));
-	// 	ctx.camera.move_src = ent.pos;
-	// 	ctx.camera.move_dest = ent.pos;
-	// 	ctx.camera.move_time = ctx.render.time;
-	// 	ctx.camera.move_spd = ent.base_spd as f32 / 60.0;
 		ctx.camera.move_teleport = true;
 	}
 }
@@ -166,11 +152,11 @@ pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new:
 pub fn fire_hidden(ctx: &mut FxState, pos: Vec2i, hidden: bool) {
 	let Some(&obj_handle) = ctx.firesprites.get(&pos) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+
 	obj.data.visible = !hidden;
 }
 
 pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
-	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
@@ -185,15 +171,16 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 	ctx.firesprites.insert(pos, handle);
 }
 pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = ctx.firesprites.remove(&pos) else { return };
-	if let Some(obj) = ctx.render.objects.get_mut(obj_handle) {
-		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
-		obj.anim.unalive_after_anim = true;
-	}
+	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+
+	obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+	obj.anim.unalive_after_anim = true;
 }
 
 fn model_for_ent(ent: &chipcore::Entity) -> data::ModelId {
@@ -299,7 +286,6 @@ pub fn item_pickup(ctx: &mut FxState, ehandle: chipcore::EntityHandle, _item: ch
 }
 
 pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
-	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -322,11 +308,11 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 			unalive_after_anim: true,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 }
 
 pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
-	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -341,11 +327,11 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: true,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 }
 
 pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
-	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -363,6 +349,7 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 
 	// Keep the terrain as RecessedWall so that the wall object is drawn on top
@@ -370,7 +357,6 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 }
 
 pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
-	let handle = ctx.render.objects.alloc();
 	let z = if raised { 0.0 } else { -21.0 };
 	let obj = render::Object {
 		data: render::ObjectData {
@@ -391,6 +377,7 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 			unalive_after_anim: false,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 	ctx.togglewalls.insert(pos, handle);
 }
@@ -413,7 +400,6 @@ pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
 }
 
 pub fn create_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
-	let handle = ctx.render.objects.alloc();
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -428,12 +414,14 @@ pub fn create_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
+	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 	ctx.inviswalls.insert(pos, handle);
 }
 
 pub fn remove_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = ctx.inviswalls.remove(&pos) else { return };
+
 	ctx.render.objects.remove(obj_handle);
 }
 
@@ -451,9 +439,7 @@ pub fn game_over(ctx: &mut FxState, _player: ()) {
 }
 
 pub fn effect(ctx: &mut FxState, pos: Vec2i, ty: render::EffectType) {
-	ctx.render.effects.push(render::Effect {
-		ty,
-		pos: Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 10.0),
-		start: ctx.render.time,
-	});
+	let pos = Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 10.0);
+	let start = ctx.render.time;
+	ctx.render.effects.push(render::Effect { ty, pos, start });
 }

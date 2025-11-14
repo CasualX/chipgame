@@ -67,12 +67,11 @@ impl RenderState {
 		{
 			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = resx.viewport;
-			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.depth_test = Some(shade::DepthTest::LessEqual);
 			cv.cull_mode = Some(shade::CullMode::CW);
 			cv.shader = resx.shader;
 			cv.uniform.transform = camera.view_proj;
 			cv.uniform.texture = resx.tileset;
-			cv.uniform.pixel_bias = resx.pixel_art_bias;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
 			render::field(&mut cv, self, self.time, 1.0);
 			cv.draw(g, shade::Surface::BACK_BUFFER);
