@@ -4,6 +4,7 @@ const FOV_Y: f32 = 90.0;
 const NEAR: f32 = 10.0;
 const FAR: f32 = 2000.0;
 
+#[derive(Clone)]
 pub struct PlayCamera {
 	// Camera offset from the object
 	pub offset: Vec3f,

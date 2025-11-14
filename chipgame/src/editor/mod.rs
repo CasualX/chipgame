@@ -118,6 +118,13 @@ impl EditorState {
 		self.game.camera.set_perspective(false);
 		self.game.pause(); // Unlock the camera
 	}
+	pub fn reload_level(&mut self, json: &str) {
+		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		let old_cam = self.game.camera.clone();
+		self.game.parse_level(0, &level_dto);
+		self.game.pause(); // Unlock the camera
+		self.game.camera = old_cam;
+	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();
 		let mut legend = Vec::new();
@@ -344,21 +351,21 @@ impl EditorState {
 		}
 	}
 
-	pub fn crop_top(&mut self, pressed: bool) {
-		if pressed {
+	pub fn crop_top(&mut self) {
+		if self.game.gs.field.height > 1 {
 			self.game.gs.field.terrain.drain(0..self.game.gs.field.width as usize);
 			self.game.gs.field.height -= 1;
 			self.offset_positions(Vec2::new(0, -1));
 		}
 	}
-	pub fn crop_bottom(&mut self, pressed: bool) {
-		if pressed {
+	pub fn crop_bottom(&mut self) {
+		if self.game.gs.field.height > 1 {
 			self.game.gs.field.terrain.drain(self.game.gs.field.width as usize * (self.game.gs.field.height - 1) as usize..);
 			self.game.gs.field.height -= 1;
 		}
 	}
-	pub fn crop_left(&mut self, pressed: bool) {
-		if pressed {
+	pub fn crop_left(&mut self) {
+		if self.game.gs.field.width > 1 {
 			for y in (0..self.game.gs.field.height as usize).rev() {
 				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize);
 			}
@@ -366,8 +373,8 @@ impl EditorState {
 			self.offset_positions(Vec2::new(-1, 0));
 		}
 	}
-	pub fn crop_right(&mut self, pressed: bool) {
-		if pressed {
+	pub fn crop_right(&mut self) {
+		if self.game.gs.field.width > 1 {
 			for y in (0..self.game.gs.field.height as usize).rev() {
 				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize + self.game.gs.field.width as usize - 1);
 			}

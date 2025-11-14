@@ -235,10 +235,26 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
 						PhysicalKey::Code(KeyCode::KeyE) => editor.tool_entity(pressed),
 						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
-						PhysicalKey::Code(KeyCode::Numpad8) => editor.crop_top(pressed),
-						PhysicalKey::Code(KeyCode::Numpad2) => editor.crop_bottom(pressed),
-						PhysicalKey::Code(KeyCode::Numpad4) => editor.crop_left(pressed),
-						PhysicalKey::Code(KeyCode::Numpad6) => editor.crop_right(pressed),
+						PhysicalKey::Code(KeyCode::Numpad8) if pressed => {
+							editor.crop_top();
+							let level = editor.save_level();
+							editor.reload_level(&level);
+						}
+						PhysicalKey::Code(KeyCode::Numpad2) if pressed => {
+							editor.crop_bottom();
+							let level = editor.save_level();
+							editor.reload_level(&level);
+						}
+						PhysicalKey::Code(KeyCode::Numpad4) if pressed => {
+							editor.crop_left();
+							let level = editor.save_level();
+							editor.reload_level(&level);
+						}
+						PhysicalKey::Code(KeyCode::Numpad6) if pressed => {
+							editor.crop_right();
+							let level = editor.save_level();
+							editor.reload_level(&level);
+						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
 							if let Some(app) = &mut app {
 								let want_fullscreen = app.window.fullscreen().is_none();
