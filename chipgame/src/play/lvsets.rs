@@ -160,10 +160,10 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 }
 
 fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
-	let opts = ccdat::Options {
-		encoding: ccdat::Encoding::Windows1252,
+	let opts = chipdat::Options {
+		encoding: chipdat::Encoding::Windows1252,
 	};
-	let dat = match ccdat::read(path, &opts) {
+	let dat = match chipdat::read(path, &opts) {
 		Ok(dat) => dat,
 		Err(err) => {
 			eprintln!("Error reading {}: {:?}", path.display(), err);

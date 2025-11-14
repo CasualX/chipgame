@@ -4,7 +4,7 @@ use std::fs;
 use chipty::*;
 
 fn main() {
-	let matches = clap::App::new("ccdat")
+	let matches = clap::App::new("chipdat")
 		.about("Extract a Chip's Challenge DAT file into a JSON levelset structure")
 		.arg(clap::Arg::new("INPUT")
 			.help("Path to the input .dat file (MS/Steam style DAT)")
@@ -23,15 +23,15 @@ fn main() {
 	let input = std::path::PathBuf::from(matches.value_of("INPUT").unwrap());
 	let out_dir = std::path::PathBuf::from(matches.value_of("OUT_DIR").unwrap());
 	let encoding = match matches.value_of("ENCODING").unwrap_or("windows1252") {
-		"utf8" => ccdat::Encoding::Utf8,
-		"latin1" => ccdat::Encoding::Latin1,
-		"windows1252" => ccdat::Encoding::Windows1252,
-		_ => ccdat::Encoding::Windows1252,
+		"utf8" => chipdat::Encoding::Utf8,
+		"latin1" => chipdat::Encoding::Latin1,
+		"windows1252" => chipdat::Encoding::Windows1252,
+		_ => chipdat::Encoding::Windows1252,
 	};
 
-	let opts = ccdat::Options { encoding };
+	let opts = chipdat::Options { encoding };
 
-	let dat = ccdat::read(&input, &opts).expect("Failed to read DAT file");
+	let dat = chipdat::read(&input, &opts).expect("Failed to read DAT file");
 
 	let dat_name = input.file_stem().unwrap().to_str().unwrap();
 	let levelset_path = format!("{}/{}", out_dir.display(), dat_name);

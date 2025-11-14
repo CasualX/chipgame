@@ -10,7 +10,7 @@ Architecture (crates)
 - chipplay: the app. Translates OS input → `chipcore::Input`, loads assets, plays audio, manages window (`chipplay/src/main.rs`).
 - chipedit: editor UI using same rendering stack (`chipedit/src/main.rs`, `chipgame/src/editor/mod.rs`).
 - chipty: shared DTOs/contracts (level, replay, terrain, savedata, soundfx).
-- ccdat: DAT parsing/utilities for CC1 levelsets.
+- chipdat: DAT parsing/utilities for CC1 levelsets.
 
 Data/event flow
 ---------------
