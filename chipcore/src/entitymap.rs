@@ -1,22 +1,25 @@
 use super::*;
 
 /// Indirect entity reference.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
 #[repr(transparent)]
 pub struct EntityHandle(u32);
 
 impl EntityHandle {
-	pub const INVALID: EntityHandle = EntityHandle(0xffffffff);
-}
+	pub const INVALID: EntityHandle = EntityHandle(0);
 
-impl Default for EntityHandle {
-	fn default() -> Self {
-		EntityHandle::INVALID
+	#[inline]
+	fn index(self) -> Option<usize> {
+		if self.0 == 0 {
+			return None;
+		}
+		return Some(self.0 as usize - 1);
 	}
 }
 
+#[derive(Clone)]
 enum Slot {
-	Free { next: EntityHandle },
+	Free { next: usize },
 	Occupied { ent: Entity },
 	Taken,
 }
@@ -40,39 +43,36 @@ impl Slot {
 ///
 /// Has ownership of all entities in the game.  
 /// Manages relationship between entity handles and entities.
+#[derive(Clone, Default)]
 pub struct EntityMap {
 	slots: Vec<Slot>,
-	next: EntityHandle,
-}
-
-impl Default for EntityMap {
-	fn default() -> Self {
-		EntityMap {
-			slots: Vec::new(),
-			next: EntityHandle(0),
-		}
-	}
+	next: usize,
 }
 
 impl EntityMap {
 	/// Returns true if the ehandle is valid.
 	pub fn is_valid(&self, ehandle: EntityHandle) -> bool {
-		let Some(slot) = self.slots.get(ehandle.0 as usize) else { return false };
+		let Some(index) = ehandle.index() else { return false };
+		let Some(slot) = self.slots.get(index) else { return false };
 		return matches!(slot, Slot::Occupied { ent } if ent.handle == ehandle);
 	}
 	/// Allocates a new ehandle.
 	///
 	/// The entity is a placeholder and must be initialized by [`EntityMap::put`].
 	pub fn alloc(&mut self) -> EntityHandle {
-		let ehandle = self.next;
-		if ehandle.0 as usize >= self.slots.len() {
-			self.slots.push(Slot::Free { next: EntityHandle(ehandle.0 + 1) });
+		let index = self.next;
+		if index >= self.slots.len() {
+			self.slots.push(Slot::Free { next: index + 1 });
 		}
-		let Some(slot) = self.slots.get_mut(ehandle.0 as usize) else { return EntityHandle::INVALID };
-		let Slot::Free { next } = *slot else { return EntityHandle::INVALID };
-		self.next = next;
+		let Some(slot) = self.slots.get_mut(index) else {
+			broken_entity_map();
+		};
+		let Slot::Free { next } = slot else {
+			broken_entity_map();
+		};
+		self.next = *next;
 		*slot = Slot::Taken;
-		return ehandle;
+		return EntityHandle((index + 1) as u32);
 	}
 	/// Removes an entity by ehandle.
 	///
@@ -80,48 +80,67 @@ impl EntityMap {
 	///
 	/// Danger! Use [`entity_remove`] instead!
 	pub(super) fn remove(&mut self, ehandle: EntityHandle) -> Option<Entity> {
-		let slot = self.slots.get_mut(ehandle.0 as usize)?;
-		let Slot::Occupied { ent } = slot else { return None };
-		let mut ent = ent.clone();
+		let index = ehandle.index()?;
+		let slot = self.slots.get_mut(index)?;
+		// Only operate on truly occupied slots
+		let Slot::Occupied { ent } = slot else {
+			return None;
+		};
+		if ent.handle != ehandle {
+			entity_handle_mismatch(ehandle);
+		};
+		// Move the entity out of the slot, and mark the slot as free
+		let Slot::Occupied { mut ent } = mem::replace(slot, Slot::Free { next: self.next }) else {
+			return None;
+		};
+		self.next = index;
 		ent.handle = EntityHandle::INVALID;
-		*slot = Slot::Free { next: self.next };
-		self.next = ehandle;
 		return Some(ent);
 	}
 	/// Gets an entity by ehandle.
 	pub fn get(&self, ehandle: EntityHandle) -> Option<&Entity> {
-		self.slots.get(ehandle.0 as usize).and_then(Slot::as_ent)
+		let index = ehandle.index()?;
+		self.slots.get(index).and_then(Slot::as_ent)
 	}
 	/// Gets a mutable entity by ehandle.
 	pub fn get_mut(&mut self, ehandle: EntityHandle) -> Option<&mut Entity> {
-		self.slots.get_mut(ehandle.0 as usize).and_then(Slot::as_mut_ent)
+		let index = ehandle.index()?;
+		self.slots.get_mut(index).and_then(Slot::as_mut_ent)
 	}
 	/// Takes an entity out by ehandle.
 	///
 	/// This allows the entity to be updated with a mutable [`GameState`].
 	pub fn take(&mut self, ehandle: EntityHandle) -> Option<Entity> {
-		let slot = self.slots.get_mut(ehandle.0 as usize)?;
-		let Slot::Occupied { ent } = slot else { return None };
-		if ent.handle != ehandle { return None };
-		let ent = ent.clone();
-		*slot = Slot::Taken;
+		let index = ehandle.index()?;
+		let slot = self.slots.get_mut(index)?;
+		// Only operate on truly occupied slots
+		let Slot::Occupied { ent } = slot else {
+			return None;
+		};
+		if ent.handle != ehandle {
+			entity_handle_mismatch(ehandle);
+		};
+		// Move the entity out of the slot without cloning, and mark the slot as taken
+		let Slot::Occupied { ent } = mem::replace(slot, Slot::Taken) else {
+			return None;
+		};
 		return Some(ent);
 	}
 	/// Puts an entity back.
 	///
 	/// Can only be used with entities taken out by [`EntityMap::take`] and [`EntityMap::alloc`].
 	pub fn put(&mut self, ent: Entity) {
-		let Some(slot) = self.slots.get_mut(ent.handle.0 as usize) else {
-			panic!("Entity handle {:?} is not valid.", ent.handle)
+		let Some(slot) = ent.handle.index().and_then(|index| self.slots.get_mut(index)) else {
+			invalid_entity_handle(ent.handle);
 		};
 		let Slot::Taken = slot else {
-			panic!("Entity handle {:?} is not taken.", ent.handle)
+			invalid_entity_handle(ent.handle);
 		};
 		*slot = Slot::Occupied { ent };
 	}
 	/// Iterates over all entity handles.
 	pub fn handles(&self) -> impl Iterator<Item = EntityHandle> + Clone {
-		(0..self.slots.len() as u32).map(EntityHandle)
+		(0..self.slots.len()).map(|index| EntityHandle((index + 1) as u32))
 	}
 	/// Iterates over all entities.
 	pub fn iter(&self) -> impl Iterator<Item = &Entity> {
@@ -131,8 +150,27 @@ impl EntityMap {
 	pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Entity> {
 		self.slots.iter_mut().filter_map(Slot::as_mut_ent)
 	}
+	/// Removes all entities.
 	pub fn clear(&mut self) {
 		self.slots.clear();
-		self.next = EntityHandle(0);
+		self.next = 0;
 	}
+}
+
+#[cold]
+#[track_caller]
+fn invalid_entity_handle(ehandle: EntityHandle) -> ! {
+	panic!("Invalid entity handle: {:?}", ehandle);
+}
+
+#[cold]
+#[track_caller]
+fn entity_handle_mismatch(ehandle: EntityHandle) -> ! {
+	panic!("Entity handle mismatch: {:?}", ehandle);
+}
+
+#[cold]
+#[track_caller]
+fn broken_entity_map() -> ! {
+	panic!("Broken entity map detected");
 }
