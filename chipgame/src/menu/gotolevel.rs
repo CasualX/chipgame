@@ -22,7 +22,7 @@ pub struct GoToLevel {
 }
 
 impl GoToLevel {
-	pub fn load_items(&mut self, lp: &crate::play::LevelSet, sd: &crate::play::SaveData) {
+	pub fn load_items(&mut self, level_set: &crate::play::LevelSet, save_data: &crate::play::SaveData) {
 		self.items.clear();
 		// Dummy entry for "Unlock level"
 		self.items.push(LevelEntry {
@@ -31,14 +31,14 @@ impl GoToLevel {
 			label: "\x1b[draw_mask=0]🌟\x1b[draw_mask=1] Unlock level".to_string(),
 			trophies: None,
 		});
-		for level_index in 0..sd.unlocked_levels.len() {
+		for level_index in 0..save_data.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
-			let state = sd.get_level_state(level_number);
-			if !sd.show_hidden_levels && matches!(state, play::LevelState::Locked) {
+			let state = save_data.get_level_state(level_number);
+			if !save_data.show_hidden_levels && matches!(state, play::LevelState::Locked) {
 				continue;
 			}
-			let Some(lv) = lp.levels.get((level_number - 1) as usize) else { continue };
-			if sd.current_level == level_number {
+			let Some(level) = level_set.levels.get((level_number - 1) as usize) else { continue };
+			if save_data.current_level == level_number {
 				self.selected = self.items.len() as i32;
 			}
 			let prefix = match state {
@@ -49,8 +49,8 @@ impl GoToLevel {
 			self.items.push(LevelEntry {
 				level_number,
 				state,
-				label: format!("{prefix} Level {}: {}", level_number, lv.field.name),
-				trophies: Some(draw::DrawTrophies::new(level_number, &lv.field, sd)),
+				label: format!("{prefix} Level {level_number}: {}", level.name),
+				trophies: Some(draw::DrawTrophies::new(level_number, &level, save_data)),
 			});
 		}
 		self.offset = clip_offset(self.selected - LEVELS_PER_PAGE / 2 + 1, self.items.len() as i32);

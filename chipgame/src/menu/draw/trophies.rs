@@ -162,15 +162,15 @@ pub struct DrawTrophies {
 	steps: DrawTrophyValues,
 }
 impl DrawTrophies {
-	pub fn new(level_number: i32, lv: &chipty::LevelDto, sd: &crate::play::SaveData) -> DrawTrophies {
-		let tick_high_score = sd.get_time_high_score(level_number);
-		let steps_high_score = sd.get_steps_high_score(level_number);
-		let tick_values = lv.trophies.as_ref().map(|m| &m.ticks);
-		let steps_values = lv.trophies.as_ref().map(|m| &m.steps);
-		let attempts = sd.get_attempts(level_number);
+	pub fn new(level_number: i32, level: &chipty::LevelDto, save_data: &crate::play::SaveData) -> DrawTrophies {
+		let tick_high_score = save_data.get_time_high_score(level_number);
+		let steps_high_score = save_data.get_steps_high_score(level_number);
+		let tick_values = level.trophies.as_ref().map(|m| &m.ticks);
+		let steps_values = level.trophies.as_ref().map(|m| &m.steps);
+		let attempts = save_data.get_attempts(level_number);
 		DrawTrophies {
 			level_number,
-			level_name: lv.name.clone(),
+			level_name: level.name.clone(),
 			attempts,
 			tick: DrawTrophyValues::new(tick_high_score, tick_values),
 			steps: DrawTrophyValues::new(steps_high_score, steps_values),

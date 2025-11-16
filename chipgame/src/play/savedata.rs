@@ -138,21 +138,21 @@ impl SaveData {
 		self.high_scores.attempts.get(level_index).copied().unwrap_or(0)
 	}
 
-	pub fn save(&mut self, level_pack: &LevelSet) {
-		let file_name = get_levelset_state_filename(level_pack);
+	pub fn save(&mut self, level_set: &LevelSet) {
+		let file_name = get_levelset_state_filename(level_set);
 
-		let level_name = level_pack.levels.get((self.current_level - 1) as usize).map(|lv| lv.field.name.clone());
-		let unlocked_levels = (0..level_pack.levels.len()).filter_map(|level_index| {
+		let level_name = level_set.levels.get((self.current_level - 1) as usize).map(|level| level.name.clone());
+		let unlocked_levels = (0..level_set.levels.len()).filter_map(|level_index| {
 			if !self.unlocked_levels[level_index] {
 				return None;
 			}
-			Some(level_pack.levels[level_index].field.name.clone())
+			Some(level_set.levels[level_index].name.clone())
 		});
-		let completed_levels = (0..level_pack.levels.len()).filter_map(|level_index| {
+		let completed_levels = (0..level_set.levels.len()).filter_map(|level_index| {
 			if !self.completed_levels[level_index] {
 				return None;
 			}
-			Some(level_pack.levels[level_index].field.name.clone())
+			Some(level_set.levels[level_index].name.clone())
 		});
 
 		let save_data = SaveFileDto {
@@ -160,9 +160,9 @@ impl SaveData {
 			unlocked_levels: unlocked_levels.collect(),
 			completed_levels: completed_levels.collect(),
 			high_scores: HighScoresDto {
-				ticks: self.high_scores.ticks.iter().enumerate().filter(|(_, &v)| v >= 0).map(|(i, &v)| (level_pack.levels[i].field.name.clone(), v)).collect(),
-				steps: self.high_scores.steps.iter().enumerate().filter(|(_, &v)| v >= 0).map(|(i, &v)| (level_pack.levels[i].field.name.clone(), v)).collect(),
-				attempts: self.high_scores.attempts.iter().enumerate().filter(|(_, &v)| v > 0).map(|(i, &v)| (level_pack.levels[i].field.name.clone(), v)).collect(),
+				ticks: self.high_scores.ticks.iter().enumerate().filter(|(_, &v)| v >= 0).map(|(i, &v)| (level_set.levels[i].name.clone(), v)).collect(),
+				steps: self.high_scores.steps.iter().enumerate().filter(|(_, &v)| v >= 0).map(|(i, &v)| (level_set.levels[i].name.clone(), v)).collect(),
+				attempts: self.high_scores.attempts.iter().enumerate().filter(|(_, &v)| v > 0).map(|(i, &v)| (level_set.levels[i].name.clone(), v)).collect(),
 			},
 			options: OptionsDto {
 				background_music: self.bg_music,
@@ -180,21 +180,21 @@ impl SaveData {
 		}
 	}
 
-	pub fn load(&mut self, level_pack: &LevelSet) {
-		*self = Self::load_refactored(level_pack);
+	pub fn load(&mut self, level_set: &LevelSet) {
+		*self = Self::load_refactored(level_set);
 	}
 
-	fn load_refactored(level_pack: &LevelSet) -> SaveData {
-		let file_name = get_levelset_state_filename(level_pack);
+	fn load_refactored(level_set: &LevelSet) -> SaveData {
+		let file_name = get_levelset_state_filename(level_set);
 
 		let mut this = SaveData {
 			current_level: 0,
-			unlocked_levels: vec![level_pack.unlock_all_levels; level_pack.levels.len()],
-			completed_levels: vec![false; level_pack.levels.len()],
+			unlocked_levels: vec![level_set.unlock_all_levels; level_set.levels.len()],
+			completed_levels: vec![false; level_set.levels.len()],
 			high_scores: HighScores {
-				ticks: vec![-1; level_pack.levels.len()],
-				steps: vec![-1; level_pack.levels.len()],
-				attempts: vec![0; level_pack.levels.len()],
+				ticks: vec![-1; level_set.levels.len()],
+				steps: vec![-1; level_set.levels.len()],
+				attempts: vec![0; level_set.levels.len()],
 			},
 			bg_music: true,
 			sound_fx: true,
@@ -213,7 +213,7 @@ impl SaveData {
 		};
 
 		if let Some(current_level) = &dto.current_level {
-			if let Some(level_number) = level_pack.get_level_number(current_level) {
+			if let Some(level_number) = level_set.get_level_number(current_level) {
 				this.current_level = level_number;
 			}
 		}
@@ -224,35 +224,35 @@ impl SaveData {
 		this.perspective = dto.options.perspective;
 		this.auto_save_replay = dto.options.auto_save_replay;
 
-		for level_index in dto.unlocked_levels.iter().filter_map(|level_name| level_pack.get_level_index(level_name)) {
+		for level_index in dto.unlocked_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
 			this.unlocked_levels[level_index] = true;
 		}
 
-		for level_index in dto.completed_levels.iter().filter_map(|level_name| level_pack.get_level_index(level_name)) {
+		for level_index in dto.completed_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
 			this.completed_levels[level_index] = true;
 		}
 
 		fn load_high_scores(
-			level_pack: &LevelSet,
+			level_set: &LevelSet,
 			saved_data: &BTreeMap<String, i32>,
 			scores: &mut Vec<i32>,
 		) {
 			for (level_name, score) in saved_data {
-				if let Some(level_index) = level_pack.get_level_index(level_name) {
+				if let Some(level_index) = level_set.get_level_index(level_name) {
 					scores[level_index] = *score;
 				}
 			}
 		}
-		load_high_scores(level_pack, &dto.high_scores.ticks, &mut this.high_scores.ticks);
-		load_high_scores(level_pack, &dto.high_scores.steps, &mut this.high_scores.steps);
-		load_high_scores(level_pack, &dto.high_scores.attempts, &mut this.high_scores.attempts);
+		load_high_scores(level_set, &dto.high_scores.ticks, &mut this.high_scores.ticks);
+		load_high_scores(level_set, &dto.high_scores.steps, &mut this.high_scores.steps);
+		load_high_scores(level_set, &dto.high_scores.attempts, &mut this.high_scores.attempts);
 
 		return this;
 	}
 }
 
-fn get_levelset_state_filename(level_pack: &LevelSet) -> String {
-	let filename = format!("save/{}/state.json", level_pack.name);
+fn get_levelset_state_filename(level_set: &LevelSet) -> String {
+	let filename = format!("save/{}/state.json", level_set.name);
 	let _ = std::fs::create_dir(Path::new(&filename).parent().unwrap());
 	filename
 }

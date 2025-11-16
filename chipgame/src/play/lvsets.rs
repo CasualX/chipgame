@@ -4,11 +4,6 @@ use super::*;
 
 pub use chipty::{LevelRef, LevelSetDto};
 
-pub struct LevelData {
-	pub content: String,
-	pub field: chipty::LevelDto,
-}
-
 #[derive(Default)]
 pub struct LevelSet {
 	pub name: String,
@@ -16,14 +11,14 @@ pub struct LevelSet {
 	pub about: Option<String>,
 	pub splash: Option<Vec<u8>>,
 	pub unlock_all_levels: bool,
-	pub levels: Vec<LevelData>,
+	pub levels: Vec<chipty::LevelDto>,
 }
 impl LevelSet {
 	pub fn get_level_number(&self, name: &str) -> Option<i32> {
-		self.levels.iter().position(|lv| lv.field.name == name).map(|i| i as i32 + 1)
+		self.levels.iter().position(|level| level.name == name).map(|i| i as i32 + 1)
 	}
 	pub fn get_level_index(&self, name: &str) -> Option<usize> {
-		self.levels.iter().position(|lv| lv.field.name == name)
+		self.levels.iter().position(|level| level.name == name)
 	}
 }
 
@@ -91,7 +86,7 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 				}
 			}
 			Err(err) => {
-				eprintln!("Error reading pack: {}", err);
+				eprintln!("Error reading set: {}", err);
 			}
 		}
 	}
@@ -108,7 +103,7 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 			}
 		};
 		match serde_json::from_slice(&index) {
-			Ok(pack) => pack,
+			Ok(level_set) => level_set,
 			Err(err) => {
 				eprintln!("Error parsing index.json: {}", err);
 				return;
@@ -118,11 +113,8 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 
 	let mut levels = Vec::new();
 	for level_ref in index.levels {
-		let (content, field) = match level_ref {
-			LevelRef::Direct(field) => {
-				let content = serde_json::to_string(&field).unwrap();
-				(content, field)
-			}
+		let level = match level_ref {
+			LevelRef::Direct(level) => level,
 			LevelRef::Indirect(level_path) => {
 				let content = match fs.read_to_string(&level_path) {
 					Ok(data) => data,
@@ -131,17 +123,16 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 						continue;
 					}
 				};
-				let field: chipty::LevelDto = match serde_json::from_str(&content) {
-					Ok(field) => field,
+				match serde_json::from_str(&content) {
+					Ok(level) => level,
 					Err(err) => {
 						eprintln!("Error parsing level at {level_path}: {err}");
 						continue;
 					}
-				};
-				(content, field)
+				}
 			}
 		};
-		levels.push(LevelData { content, field });
+		levels.push(level);
 	}
 
 	let splash = index.splash.and_then(|s| match fs {
@@ -149,14 +140,10 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 		FileSystem::Paks(paks, key) => paks.read(s.as_bytes(), key).ok(),
 	});
 
-	packs.push(LevelSet {
-		name,
-		title: index.title,
-		about: index.about.map(|lines| lines.join("\n")),
-		splash,
-		unlock_all_levels: index.unlock_all_levels,
-		levels,
-	});
+	let title = index.title;
+	let about = index.about.map(|lines| lines.join("\n"));
+	let unlock_all_levels = index.unlock_all_levels;
+	packs.push(LevelSet { name, title, about, splash, unlock_all_levels, levels });
 }
 
 fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
@@ -221,10 +208,7 @@ fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
 		about: None,
 		splash: None,
 		unlock_all_levels: false,
-		levels: levels.into_iter().map(|field| LevelData {
-			content: serde_json::to_string(&field).unwrap(),
-			field,
-		}).collect(),
+		levels,
 	});
 }
 

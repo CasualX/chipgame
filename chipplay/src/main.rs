@@ -157,8 +157,8 @@ impl AppStuff {
 		if let Some(fx) = &state.fx {
 			self.window.set_title(&format!("{} - Level {} - {}", state.lvsets.current().title, fx.level_number, fx.gs.field.name));
 		}
-		else if let Some(level_pack) = state.lvsets.collection.get(state.lvsets.selected) {
-			self.window.set_title(&level_pack.title);
+		else if let Some(level_set) = state.lvsets.collection.get(state.lvsets.selected) {
+			self.window.set_title(&level_set.title);
 		}
 		else {
 			self.window.set_title("Play ChipGame");

@@ -31,8 +31,8 @@ impl PlayState {
 			return;
 		}
 		let mut splash = Vec::new();
-		for set in &self.lvsets.collection {
-			let Some(data) = &set.splash
+		for level_set in &self.lvsets.collection {
+			let Some(data) = &level_set.splash
 			else {
 				splash.push(None);
 				continue
@@ -49,7 +49,7 @@ impl PlayState {
 		}
 		self.menu.stack.push(menu::Menu::PackSelect(menu::PackSelectMenu {
 			selected: self.lvsets.selected,
-			items: self.lvsets.collection.iter().map(|lp| lp.title.clone()).collect(),
+			items: self.lvsets.collection.iter().map(|level_set| level_set.title.clone()).collect(),
 			splash,
 			ntime: 0,
 		}));
@@ -81,7 +81,7 @@ impl PlayState {
 
 	pub fn play_level(&mut self, level_number: i32) {
 		// If loading a level fails just... do nothing
-		let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
+		let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
 
 		self.is_preview = false;
 
@@ -92,7 +92,7 @@ impl PlayState {
 		self.save_data.save(&self.lvsets.current());
 
 		fx.render.tiles = &tiles::TILES_PLAY;
-		fx.parse_level(level_number, &lv.field);
+		fx.parse_level(level_number, level);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.set_perspective(self.save_data.perspective);
 
@@ -172,9 +172,9 @@ impl PlayState {
 						return;
 					}
 					let mut success = false;
-					for (index, lv) in self.lvsets.current().levels.iter().enumerate() {
-						if let Some(lv_pass) = &lv.field.password {
-							if lv_pass.as_bytes() == code.as_slice() {
+					for (index, level) in self.lvsets.current().levels.iter().enumerate() {
+						if let Some(level_password) = &level.password {
+							if level_password.as_bytes() == code.as_slice() {
 								let level_number = index as i32 + 1;
 								self.save_data.unlock_level(level_number);
 								success = true;
@@ -357,11 +357,11 @@ impl PlayState {
 	}
 
 	fn load_preview_level(&mut self, level_number: i32) {
-		// Only parse if the level exists in the current pack
-		if let Some(lv) = self.lvsets.current().levels.get((level_number - 1) as usize) {
+		// Only parse if the level exists in the current set
+		if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
 			let mut preview = fx::FxState::default();
 			preview.render.tiles = &tiles::TILES_PLAY;
-			preview.parse_level(level_number, &lv.field);
+			preview.parse_level(level_number, level);
 			preview.camera.set_perspective(self.save_data.perspective);
 			// HUD hidden when any menu is open; leave runtime flags at defaults
 			self.fx = Some(preview);

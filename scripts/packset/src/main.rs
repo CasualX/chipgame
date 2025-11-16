@@ -30,7 +30,7 @@ fn main() {
 			// Load level file
 			let level_path = format!("{}/{}", base_path, path);
 			let level: LevelDto = match serde_json::from_reader(fs::File::open(level_path).expect("Failed to open level file")) {
-				Ok(lv) => lv,
+				Ok(level) => level,
 				Err(e) => {
 					eprintln!("Error loading level {}: {}", path, e);
 					return;
