@@ -1,6 +1,6 @@
 use super::*;
 
-fn put(s: &mut EditorState) {
+fn put(s: &mut EditorEditState) {
 	s.game.gs.set_terrain(s.cursor_pos, s.selected_terrain);
 	// Remove block entities if we are placing a dirt block terrain
 	if matches!(s.selected_terrain, chipty::Terrain::DirtBlock) {
@@ -18,7 +18,7 @@ fn put(s: &mut EditorState) {
 	s.game.sync();
 }
 
-pub fn left_click(s: &mut EditorState, pressed: bool) {
+pub fn left_click(s: &mut EditorEditState, pressed: bool) {
 	if pressed {
 		if s.cursor_pos.x < 0 || s.cursor_pos.y < 0 {
 			s.sample();
@@ -28,13 +28,13 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 	}
 }
 
-pub fn right_click(s: &mut EditorState, pressed: bool) {
+pub fn right_click(s: &mut EditorEditState, pressed: bool) {
 	if pressed {
 		s.sample();
 	}
 }
 
-pub fn think(s: &mut EditorState) {
+pub fn think(s: &mut EditorEditState) {
 	if s.input.left_click {
 		put(s);
 	}

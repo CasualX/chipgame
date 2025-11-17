@@ -7,7 +7,7 @@ use super::*;
 mod event;
 mod savedata;
 mod lvsets;
-mod tiles;
+pub(crate) mod tiles;
 
 pub use self::event::*;
 pub use self::savedata::*;

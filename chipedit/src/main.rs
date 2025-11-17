@@ -183,6 +183,7 @@ fn main() {
 						PhysicalKey::Code(KeyCode::ArrowRight) => editor.key_right(pressed),
 						PhysicalKey::Code(KeyCode::ArrowUp) => editor.key_up(pressed),
 						PhysicalKey::Code(KeyCode::ArrowDown) => editor.key_down(pressed),
+						PhysicalKey::Code(KeyCode::KeyP) if pressed => editor.toggle_play(),
 						PhysicalKey::Code(KeyCode::Delete) => editor.delete(pressed),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
 							// Open file dialog to load a level
@@ -283,12 +284,14 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = &mut app {
-						if current_tool != Some(editor.tool) {
-							current_tool = Some(editor.tool);
-							let cursor_icon = match editor.tool {
-								editor::Tool::Terrain => winit::window::CursorIcon::Crosshair,
-								editor::Tool::Entity => winit::window::CursorIcon::Pointer,
-								editor::Tool::Connection => winit::window::CursorIcon::Alias,
+						let edit_tool = editor.get_tool();
+						if current_tool != edit_tool {
+							current_tool = edit_tool;
+							let cursor_icon = match edit_tool {
+								Some(editor::Tool::Terrain) => winit::window::CursorIcon::Crosshair,
+								Some(editor::Tool::Entity) => winit::window::CursorIcon::Pointer,
+								Some(editor::Tool::Connection) => winit::window::CursorIcon::Alias,
+								None => winit::window::CursorIcon::Default,
 							};
 							app.window.set_cursor_icon(cursor_icon);
 						}

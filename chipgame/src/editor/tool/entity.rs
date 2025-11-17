@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn left_click(s: &mut EditorState, pressed: bool) {
+pub fn left_click(s: &mut EditorEditState, pressed: bool) {
 	let cursor_pos = s.cursor_pos;
 	if pressed {
 		if cursor_pos.x < 0 || cursor_pos.y < 0 {
@@ -40,7 +40,7 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 	}
 }
 
-pub fn think(_s: &mut EditorState) {
+pub fn think(_s: &mut EditorEditState) {
 	// if s.input.left_click {
 	// 	if let Some(args) = s.selected_args {
 	// 		s.selected_ent = s.game.gs.entity_create(&EntityArgs { kind: args.kind, pos: s.cursor_pos, face_dir: args.face_dir });
@@ -49,7 +49,7 @@ pub fn think(_s: &mut EditorState) {
 	// }
 }
 
-pub fn right_click(s: &mut EditorState, pressed: bool) {
+pub fn right_click(s: &mut EditorEditState, pressed: bool) {
 	let cursor_pos = s.cursor_pos;
 	if pressed {
 		// Sample from the existing entities
@@ -76,7 +76,7 @@ pub fn right_click(s: &mut EditorState, pressed: bool) {
 	}
 }
 
-pub fn delete(s: &mut EditorState, pressed: bool) {
+pub fn delete(s: &mut EditorEditState, pressed: bool) {
 	if pressed {
 		if s.selected_ent == EntityHandle::INVALID {
 			let cursor_pos = s.cursor_pos;

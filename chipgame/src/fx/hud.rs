@@ -7,7 +7,7 @@ impl FxState {
 		let darken_time = f32::min(1.0, (self.render.time - self.darken_time) / 0.2);
 		let alpha = if self.darken { darken_time } else { 1.0 - darken_time };
 		if alpha > 0.0 {
-			let alpha = (alpha * 0.625 * 255.0) as u8;
+			let alpha = (alpha * 168.0).round() as u8;
 			crate::menu::darken(g, resx, alpha);
 		}
 

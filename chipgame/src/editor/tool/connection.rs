@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn left_click(s: &mut EditorState, pressed: bool) {
+pub fn left_click(s: &mut EditorEditState, pressed: bool) {
 	if pressed {
 		s.conn_src = s.cursor_pos;
 
@@ -21,5 +21,5 @@ pub fn left_click(s: &mut EditorState, pressed: bool) {
 		}
 	}
 }
-pub fn think(_s: &mut EditorState) { }
-pub fn right_click(_s: &mut EditorState, _pressed: bool) { }
+pub fn think(_s: &mut EditorEditState) { }
+pub fn right_click(_s: &mut EditorEditState, _pressed: bool) { }
