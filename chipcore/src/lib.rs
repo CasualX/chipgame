@@ -6,7 +6,6 @@ use std::{cmp, mem, ops};
 use cvmath::Vec2i;
 use chipty::*;
 
-mod codes;
 mod entities;
 mod entity;
 mod entitymap;
@@ -20,7 +19,6 @@ mod playerstate;
 mod quadtree;
 mod random;
 
-pub use self::codes::*;
 pub use self::entities::*;
 pub use self::entity::*;
 pub use self::entitymap::*;
