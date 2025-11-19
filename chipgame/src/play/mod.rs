@@ -91,8 +91,20 @@ impl PlayState {
 		self.save_data.current_level = level_number;
 		self.save_data.save(&self.lvsets.current());
 
+		let seed = chipcore::RngSeed::System;
+		// let set_name = &self.lvsets.current().name;
+		// let seed = if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{set_name}/level{level_number}.json")) {
+		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
+		// 	fx.replay = Some(chipty::decode(&replay.replay));
+		// 	let seed = u64::from_str_radix(&replay.seed, 16).unwrap();
+		// 	chipcore::RngSeed::Manual(seed)
+		// }
+		// else {
+		// 	chipcore::RngSeed::System
+		// };
+
 		fx.render.tiles = &tiles::TILES_PLAY;
-		fx.parse_level(level_number, level);
+		fx.parse_level(level_number, level, seed);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.set_perspective(self.save_data.perspective);
 
@@ -361,7 +373,7 @@ impl PlayState {
 		if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
 			let mut preview = fx::FxState::default();
 			preview.render.tiles = &tiles::TILES_PLAY;
-			preview.parse_level(level_number, level);
+			preview.parse_level(level_number, level, chipcore::RngSeed::System);
 			preview.camera.set_perspective(self.save_data.perspective);
 			// HUD hidden when any menu is open; leave runtime flags at defaults
 			self.fx = Some(preview);

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{cmp, fmt, fs, path};
 
 struct LevelStats {
 	level_number: usize,
@@ -15,7 +15,7 @@ fn main() {
 		.arg(clap::arg!(--entity [ENTITY] "Entity type to filter by").required(false).takes_value(true))
 		.arg(clap::arg!(--asc "Sort results in ascending order").required(false).takes_value(false))
 		.get_matches();
-	let path = PathBuf::from(app.value_of_os("PATH").unwrap());
+	let path = path::PathBuf::from(app.value_of_os("PATH").unwrap());
 	let terrain: Option<chipty::Terrain> = app.value_of("terrain").map(|s| s.parse().expect("Invalid terrain type"));
 	let entity: Option<chipty::EntityKind> = app.value_of("entity").map(|s| s.parse().expect("Invalid entity type"));
 	let asc = app.is_present("asc");
@@ -30,7 +30,7 @@ fn main() {
 
 	for number in 1..150 {
 		let path = path.join(format!("lv/level{}.json", number));
-		let Ok(content) = std::fs::read_to_string(&path)
+		let Ok(content) = fs::read_to_string(&path)
 		else {
 			continue;
 		};
@@ -58,10 +58,10 @@ fn main() {
 		stats.sort_by_key(|s| s.quantity);
 	}
 	else {
-		stats.sort_by_key(|s| std::cmp::Reverse(s.quantity));
+		stats.sort_by_key(|s| cmp::Reverse(s.quantity));
 	}
 
-	let label: &dyn std::fmt::Debug = if let Some(terrain) = &terrain { terrain }
+	let label: &dyn fmt::Debug = if let Some(terrain) = &terrain { terrain }
 	else if let Some(entity) = &entity { entity }
 	else { unreachable!() };
 

@@ -173,7 +173,7 @@ impl EditorState {
 				let level_dto = serde_json::from_str(&level).unwrap();
 				let mut game = fx::FxState::default();
 				game.render.tiles = &crate::play::tiles::TILES_PLAY;
-				game.parse_level(0, &level_dto);
+				game.parse_level(0, &level_dto, chipcore::RngSeed::System);
 				game.camera.set_perspective(true);
 				*self = EditorState::Play(Box::new(EditorPlayState {
 					level,

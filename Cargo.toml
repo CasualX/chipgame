@@ -14,6 +14,7 @@ members = [
 	"./scripts/levelquery",
 	"./scripts/spritec",
 	"./scripts/packset",
+	"./scripts/replayfix",
 ]
 
 [workspace.dependencies]

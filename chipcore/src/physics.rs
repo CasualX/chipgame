@@ -122,7 +122,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	let is_player = matches!(ent.kind, EntityKind::Player);
 	let dev_wtw = is_player && s.ps.dev_wtw;
 
-	if ent.base_spd == 0 || ent.flags & EF_TRAPPED != 0 {
+	// Kinda tricky workaround: Trapped entities can move if they have been released from the trap
+	if ent.base_spd == 0 || (ent.flags & EF_TRAPPED != 0 && ent.flags & EF_RELEASED == 0) {
 		return false;
 	}
 
@@ -320,7 +321,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_time = s.time;
 	ent.pos = new_pos;
 	ent.flags |= EF_NEW_POS;
-	ent.flags &= !EF_BUTTON_DOWN;
+	ent.flags &= !EF_RELEASED;
 
 	// Retain momentum when entity lands on a Trap
 	if !matches!(s.field.get_terrain(new_pos), Terrain::BearTrap) {
@@ -396,8 +397,24 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 }
 
 pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
-	let terrain = s.field.get_terrain(ent.pos);
-	match terrain {
+	// Entity is trapped, cannot move or turn
+	if ent.flags & EF_TRAPPED != 0 {
+		return true;
+	}
+
+	match s.field.get_terrain(ent.pos) {
+		// When an entity is released from a trap, push it out of the trap in the direction it entered
+		// CC1: Level 109 - Torturechamber
+		Terrain::BearTrap => {
+			if ent.flags & EF_MOMENTUM != 0 {
+				if let Some(step_dir) = ent.step_dir {
+					if try_move(s, ent, step_dir) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 		Terrain::Ice => match step_dir {
 			Some(dir) => !try_move(s, ent, dir) && try_move(s, ent, dir.turn_around()),
 			None => return false,
@@ -500,19 +517,6 @@ fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTe
 	// Play sound only for player and blocks to avoid a cacophony
 	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock);
 
-	let terrain = s.field.get_terrain(ent.pos);
-	if matches!(terrain, Terrain::BearTrap) {
-		let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
-		if trapped && ent.flags & EF_TRAPPED == 0 {
-			s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
-			// Avoid audio spam when the level is initially loaded
-			if s.time != 0 {
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
-			}
-		}
-		ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
-	}
-
 	if matches!(ent.kind, EntityKind::Player) {
 		if let Some(step_dir) = ent.step_dir {
 			let from_pos = ent.pos - step_dir.to_vec();
@@ -525,16 +529,24 @@ fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTe
 	}
 
 	#[inline]
-	fn press_once(ent: &mut Entity) -> bool {
-		// Checking for EF_NEW_POS prevents entities from pressing buttons when spawned...
-		let state = ent.flags & EF_BUTTON_DOWN == 0 && ent.flags & EF_NEW_POS != 0;
-		ent.flags |= EF_BUTTON_DOWN;
-		state
+	fn press_once(s: &GameState, ent: &Entity) -> bool {
+		s.time == ent.step_time && ent.flags & EF_NEW_POS != 0
 	}
 
-	match terrain {
+	match s.field.get_terrain(ent.pos) {
+		Terrain::BearTrap => {
+			let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
+			if trapped && ent.flags & EF_TRAPPED == 0 {
+				s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
+				// Avoid audio spam when the level is initially loaded
+				if s.time != 0 {
+					s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+				}
+			}
+			ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
+		}
 		Terrain::GreenButton => {
-			if press_once(ent) {
+			if press_once(s, ent) {
 				result.toggle_walls += 1;
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
@@ -542,7 +554,7 @@ fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTe
 			}
 		}
 		Terrain::RedButton => {
-			if press_once(ent) {
+			if press_once(s, ent) {
 				let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
 
 				// Handle CloneBlock tiles separately
@@ -579,21 +591,30 @@ fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTe
 			}
 		}
 		Terrain::BrownButton => {
-			if press_once(ent) && play_sound {
+			if press_once(s, ent) && play_sound {
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+			}
+			for conn in &s.field.conns {
+				if conn.src == ent.pos {
+					// Release trapped entities at the destination
+					for ehandle in s.qt.get(conn.dest) {
+						let Some(mut ent) = s.ents.take(ehandle) else { continue };
+						// ent.flags &= !EF_TRAPPED;
+						ent.flags |= EF_RELEASED;
+						s.ents.put(ent);
+					}
+				}
 			}
 		}
 		Terrain::BlueButton => {
-			if press_once(ent) {
+			if press_once(s, ent) {
 				result.turn_around_tanks += 1;
 				if play_sound {
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 				}
 			}
 		}
-		_ => {
-			ent.flags &= !EF_BUTTON_DOWN;
-		}
+		_ => {}
 	}
 }
 

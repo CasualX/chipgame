@@ -1,6 +1,6 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
-use std::{mem, thread, time};
+use std::{fs, mem, path, thread, time};
 use std::collections::HashMap;
 use std::ffi::CString;
 use std::num::NonZeroU32;
@@ -185,7 +185,7 @@ fn main() {
 		FileSystem::Paks(paks, key)
 	}
 	else {
-		FileSystem::StdFs(std::path::PathBuf::from("data"))
+		FileSystem::StdFs(path::PathBuf::from("data"))
 	};
 
 	let mut gamepads = gamepad::GamepadManager::new();
@@ -194,7 +194,7 @@ fn main() {
 	let mut ap = AudioPlayer { sl, sfx: HashMap::new(), music: HashMap::new(), cur_music: None };
 
 	let config = {
-		let config = std::fs::read_to_string("chipgame.ini").unwrap_or_default();
+		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
 		chipgame::config::Config::parse(config.as_str())
 	};
 	load_audio(&fs, &config, &mut ap);

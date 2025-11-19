@@ -1,3 +1,4 @@
+use std::fs;
 use chipty::*;
 
 const LEVEL_PACK: &str = "levelsets/cclp1";
@@ -6,7 +7,7 @@ fn main() {
 	for number in 1..150 {
 		let path = format!("{}/lv/level{}.json", LEVEL_PACK, number);
 		// dbg!(&path);
-		let Ok(content) = std::fs::read_to_string(&path)
+		let Ok(content) = fs::read_to_string(&path)
 		else {
 			continue;
 		};
@@ -14,7 +15,7 @@ fn main() {
 		let mut level: LevelDto = serde_json::from_str(&content).unwrap();
 		if fix_level(number, &mut level) {
 			let new_content = serde_json::to_string(&level).unwrap();
-			std::fs::write(&path, new_content).unwrap();
+			fs::write(&path, new_content).unwrap();
 		}
 	}
 }

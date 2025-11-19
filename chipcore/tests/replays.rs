@@ -27,6 +27,43 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: c
 		success = false;
 	}
 
+	// // Try brute-forcing the seed if the replay failed due to RNG changes
+	// if !success {
+	// 	brute_force(level, replay, activity, seed, 1000);
+	// }
+
+	success
+}
+
+#[allow(dead_code)]
+fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity, mut seed: u64, count: usize) -> bool {
+	let mut success = false;
+	for _ in 0..count {
+		seed += 1;
+		let mut game = chipcore::GameState::default();
+		game.parse(level, chipcore::RngSeed::Manual(seed));
+
+		let inputs = chipty::decode(&replay.replay);
+		for &byte in &inputs {
+			let input = chipcore::Input::decode(byte);
+			game.tick(&input);
+		}
+
+		if game.ps.activity != activity {
+			continue;
+		}
+		if game.time != replay.ticks {
+			continue;
+		}
+		if game.ps.bonks != replay.bonks {
+			continue;
+		}
+
+		success = true;
+		eprintln!(" - succeeded with seed {:016x}", seed);
+		break;
+	}
+
 	success
 }
 

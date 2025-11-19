@@ -17,11 +17,12 @@ pub struct FxState {
 	pub darken: bool,
 	pub darken_time: f32,
 	pub events: Vec<FxEvent>,
+	pub replay: Option<Vec<u8>>,
 }
 
 impl FxState {
-	pub fn parse_level(&mut self, level_number: i32, level_dto: &chipty::LevelDto) {
-		self.gs.parse(level_dto, chipcore::RngSeed::System);
+	pub fn parse_level(&mut self, level_number: i32, level_dto: &chipty::LevelDto, rng_seed: chipcore::RngSeed) {
+		self.gs.parse(level_dto, rng_seed);
 
 		// Reset the camera, adjusted when a player entity is created
 		self.camera = PlayCamera::default();
@@ -90,7 +91,7 @@ impl FxState {
 			}
 		}
 
-		self.gs.tick(&chipcore::Input {
+		let player_input = chipcore::Input {
 			a: input.a.is_held(),
 			b: input.b.is_held(),
 			up: input.up.is_held(),
@@ -99,7 +100,13 @@ impl FxState {
 			right: input.right.is_held(),
 			start: input.start.is_held(),
 			select: input.select.is_held(),
+		};
+
+		let replay_input = self.replay.as_ref().and_then(|replay| {
+			replay.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
 		});
+
+		self.gs.tick(&replay_input.unwrap_or(player_input));
 		self.sync();
 
 		if self.next_level_load != 0.0 && self.render.time > self.next_level_load {

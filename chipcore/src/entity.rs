@@ -37,12 +37,12 @@ impl Entity {
 
 /// Entity will be removed at the end of the current tick.
 pub const EF_REMOVE: u8 = 1 << 0;
-/// Entity is trapped and cannot move.
-pub const EF_TRAPPED: u8 = 1 << 1;
 /// Entity is hidden under a block.
-pub const EF_HIDDEN: u8 = 1 << 2;
-/// Entity has a button pressed.
-pub const EF_BUTTON_DOWN: u8 = 1 << 3;
+pub const EF_HIDDEN: u8 = 1 << 1;
+/// Entity is trapped and cannot move.
+pub const EF_TRAPPED: u8 = 1 << 2;
+/// Entity has been released from a trap.
+pub const EF_RELEASED: u8 = 1 << 3;
 /// Entity is a template for cloning.
 pub const EF_TEMPLATE: u8 = 1 << 4;
 /// Entity has been forced to move.

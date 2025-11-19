@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::fs;
+use std::{fs, path};
 
 use chipty::*;
 
@@ -20,8 +20,8 @@ fn main() {
 			.help("Text encoding (ascii|utf8|latin1|windows1252) [default: windows1252]"))
 		.get_matches();
 
-	let input = std::path::PathBuf::from(matches.value_of("INPUT").unwrap());
-	let out_dir = std::path::PathBuf::from(matches.value_of("OUT_DIR").unwrap());
+	let input = path::PathBuf::from(matches.value_of("INPUT").unwrap());
+	let out_dir = path::PathBuf::from(matches.value_of("OUT_DIR").unwrap());
 	let encoding = match matches.value_of("ENCODING").unwrap_or("windows1252") {
 		"utf8" => chipdat::Encoding::Utf8,
 		"latin1" => chipdat::Encoding::Latin1,
