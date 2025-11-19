@@ -1,5 +1,10 @@
 use super::*;
 
+pub const FIELD_MIN_WIDTH: i32 = 3;
+pub const FIELD_MAX_WIDTH: i32 = 255;
+pub const FIELD_MIN_HEIGHT: i32 = 3;
+pub const FIELD_MAX_HEIGHT: i32 = 255;
+
 /// Level map data transfer object.
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct FieldDto {
@@ -78,4 +83,20 @@ pub struct LevelDto {
 pub struct FieldConn {
 	pub src: Vec2i,
 	pub dest: Vec2i,
+}
+
+/// Level brush for editing levels.
+#[derive(Clone, Debug)]
+pub struct LevelBrush {
+	pub width: i32,
+	pub height: i32,
+	pub terrain: Vec<Option<Terrain>>,
+	pub entities: Vec<EntityArgs>,
+	pub connections: Vec<FieldConn>,
+}
+impl LevelBrush {
+	#[inline]
+	pub fn is_pos_inside(&self, pos: Vec2i) -> bool {
+		pos.x >= 0 && pos.x < self.width && pos.y >= 0 && pos.y < self.height
+	}
 }

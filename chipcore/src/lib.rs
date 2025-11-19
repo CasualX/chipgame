@@ -18,6 +18,7 @@ mod physics;
 mod playerstate;
 mod quadtree;
 mod random;
+mod edit;
 
 pub use self::entities::*;
 pub use self::entity::*;

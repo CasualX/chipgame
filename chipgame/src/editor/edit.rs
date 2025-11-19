@@ -243,55 +243,29 @@ impl EditorEditState {
 		}
 	}
 
-	fn offset_positions(&mut self, offset: Vec2i) {
-		for ent in self.game.gs.ents.iter_mut() {
-			ent.pos += offset;
-		}
-		for conn in self.game.gs.field.conns.iter_mut() {
-			conn.src += offset;
-			conn.dest += offset;
-		}
-	}
+	/// Resizes the playfield.
+	///
+	/// Positive values = expand, Negative values = crop.
+	pub fn resize(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+		let brush = self.game.gs.brush_create();
 
-	pub fn expand_top(&mut self, pressed: bool) {
-		if pressed {
-			for _ in 0..self.game.gs.field.width as usize {
-				self.game.gs.field.terrain.insert(0, Terrain::Floor);
-			}
-			self.game.gs.field.height += 1;
-			self.offset_positions(Vec2::new(0, 1));
+		let new_width = self.game.gs.field.width + left + right;
+		let new_height = self.game.gs.field.height + top + bottom;
+		if new_width < chipty::FIELD_MIN_WIDTH || new_width > chipty::FIELD_MAX_WIDTH {
+			return;
 		}
-	}
+		if new_height < chipty::FIELD_MIN_HEIGHT || new_height > chipty::FIELD_MAX_HEIGHT {
+			return;
+		}
 
-	pub fn crop_top(&mut self) {
-		if self.game.gs.field.height > 1 {
-			self.game.gs.field.terrain.drain(0..self.game.gs.field.width as usize);
-			self.game.gs.field.height -= 1;
-			self.offset_positions(Vec2::new(0, -1));
-		}
-	}
-	pub fn crop_bottom(&mut self) {
-		if self.game.gs.field.height > 1 {
-			self.game.gs.field.terrain.drain(self.game.gs.field.width as usize * (self.game.gs.field.height - 1) as usize..);
-			self.game.gs.field.height -= 1;
-		}
-	}
-	pub fn crop_left(&mut self) {
-		if self.game.gs.field.width > 1 {
-			for y in (0..self.game.gs.field.height as usize).rev() {
-				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize);
-			}
-			self.game.gs.field.width -= 1;
-			self.offset_positions(Vec2::new(-1, 0));
-		}
-	}
-	pub fn crop_right(&mut self) {
-		if self.game.gs.field.width > 1 {
-			for y in (0..self.game.gs.field.height as usize).rev() {
-				self.game.gs.field.terrain.remove(y * self.game.gs.field.width as usize + self.game.gs.field.width as usize - 1);
-			}
-			self.game.gs.field.width -= 1;
-		}
+		self.game.gs.field.width = new_width;
+		self.game.gs.field.height = new_height;
+		self.game.gs.field.terrain.clear();
+		self.game.gs.field.terrain.resize((new_width * new_height) as usize, self.selected_terrain);
+		self.game.gs.field.conns.clear();
+		self.game.gs.ents.clear();
+
+		self.game.gs.brush_apply(Vec2i(left, top), &brush);
 	}
 
 	pub fn left_click(&mut self, pressed: bool) {

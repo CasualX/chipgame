@@ -34,7 +34,10 @@ impl Field {
 		self.replays.clone_from(&ld.replays);
 		self.trophies.clone_from(&ld.trophies);
 
-		assert!(ld.map.width > 0 && ld.map.height > 0, "Invalid map size width={} height={}", ld.map.width, ld.map.height);
+		assert!(
+			ld.map.width >= chipty::FIELD_MIN_WIDTH && ld.map.width <= FIELD_MAX_WIDTH &&
+			ld.map.height >= chipty::FIELD_MIN_HEIGHT && ld.map.height <= FIELD_MAX_HEIGHT,
+			"Invalid map size width={} height={}", ld.map.width, ld.map.height);
 		let size = ld.map.width as usize * ld.map.height as usize;
 		self.terrain.reserve_exact(size);
 
@@ -77,107 +80,7 @@ impl Field {
 	pub fn find_conn_by_src(&self, pos: Vec2i) -> Option<&FieldConn> {
 		self.conns.iter().find(|conn| conn.src == pos)
 	}
-}
-
-impl Field{
-	pub(crate) fn resize_bottom(&mut self, additional: i32, terrain: Terrain) {
-		let new_height = clamp_field_size(self.height + additional);
-		self.terrain.resize((self.width * new_height) as usize, terrain);
-		self.height = new_height;
-	}
-	pub(crate) fn resize_top(&mut self, additional: i32, terrain: Terrain) {
-		let new_height = clamp_field_size(self.height + additional);
-		if additional > 0 {
-			self.terrain.resize((self.width * new_height) as usize, terrain);
-			// self.terrain.rotate_right((self.width * additional) as usize);
-			self.terrain.copy_within(0..(self.width * self.height) as usize, (additional * self.width) as usize);
-			self.terrain[..(additional * self.width) as usize].fill(terrain);
-		}
-		else {
-			self.terrain.drain(0..(-additional * self.width) as usize);
-		}
-		self.height = new_height;
-	}
-	pub(crate) fn resize_right(&mut self, additional: i32, terrain: Terrain) {
-		let new_width = clamp_field_size(self.width + additional);
-		if additional > 0 {
-			self.terrain.resize((new_width * self.height) as usize, terrain);
-			for y in (0..self.height).rev() {
-				let src = y * self.width;
-				let dest = y * new_width;
-				self.terrain.copy_within(src as usize..(src + self.width) as usize, dest as usize);
-				self.terrain[dest as usize..(dest + additional) as usize].fill(terrain);
-			}
-		}
-		else {
-			for y in 1..self.height {
-				let src = y * self.width;
-				let dest = y * new_width;
-				self.terrain.copy_within(src as usize..(src + self.width) as usize, dest as usize);
-			}
-			self.terrain.truncate((new_width * self.height) as usize);
-		}
-		self.width = new_width;
-	}
-	pub(crate) fn resize_left(&mut self, additional: i32, terrain: Terrain) {
-		let new_width = clamp_field_size(self.width + additional);
-		if additional > 0 {
-			self.terrain.resize((new_width * self.height) as usize, terrain);
-			for y in (0..self.height).rev() {
-				let src = y * self.width;
-				let dest = y * new_width + additional;
-				self.terrain.copy_within(src as usize..(src + self.width) as usize, dest as usize);
-				self.terrain[dest as usize..(dest + additional) as usize].fill(terrain);
-			}
-		}
-		else {
-			for y in 1..self.height {
-				let src = y * self.width;
-				let dest = y * new_width;
-				self.terrain.copy_within(src as usize..(src + self.width) as usize, dest as usize);
-			}
-			self.terrain.truncate((new_width * self.height) as usize);
-		}
-		self.width = new_width;
-	}
-}
-
-fn clamp_field_size(size: i32) -> i32 {
-	i32::clamp(size, 0, 255)
-}
-
-impl GameState {
-	pub fn resize_field(&mut self, dir: Compass, additional: i32, terrain: Terrain) {
-		if additional == 0 {
-			return;
-		}
-
-		match dir {
-			Compass::Up => self.field.resize_top(additional, terrain),
-			Compass::Left => self.field.resize_left(additional, terrain),
-			Compass::Down => self.field.resize_bottom(additional, terrain),
-			Compass::Right => self.field.resize_right(additional, terrain),
-		}
-
-		let d = match dir {
-			Compass::Down => Vec2i(0, additional),
-			Compass::Right => Vec2i(additional, 0),
-			_ => Vec2i::ZERO,
-		};
-
-		for conn in &mut self.field.conns {
-			conn.src += d;
-			conn.dest += d;
-		}
-
-		for ehandle in self.ents.handles() {
-			if let Some(mut ent) = self.ents.take(ehandle) {
-				let new_pos = ent.pos + d;
-				self.qt.update(ehandle, ent.pos, new_pos);
-				ent.pos = new_pos;
-				self.events.fire(GameEvent::EntityStep { entity: ehandle });
-				self.ents.put(ent);
-			}
-		}
+	pub fn is_pos_inside(&self, pos: Vec2i) -> bool {
+		pos.x >= 0 && pos.x < self.width && pos.y >= 0 && pos.y < self.height
 	}
 }

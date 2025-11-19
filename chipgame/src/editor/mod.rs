@@ -217,34 +217,58 @@ impl EditorState {
 		}
 	}
 
-	pub fn expand_top(&mut self, pressed: bool) {
+	pub fn resize(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
 		match self {
-			EditorState::Edit(s) => s.expand_top(pressed),
+			EditorState::Edit(s) => s.resize(left, top, right, bottom),
 			EditorState::Play(_) => {},
 		}
 	}
 
+	pub fn expand_top(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.resize(0, 1, 0, 0),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn expand_bottom(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.resize(0, 0, 0, 1),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn expand_left(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.resize(1, 0, 0, 0),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn expand_right(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.resize(0, 0, 1, 0),
+			EditorState::Play(_) => {},
+		}
+	}
 	pub fn crop_top(&mut self) {
 		match self {
-			EditorState::Edit(s) => s.crop_top(),
+			EditorState::Edit(s) => s.resize(0, -1, 0, 0),
 			EditorState::Play(_) => {},
 		}
 	}
 	pub fn crop_bottom(&mut self) {
 		match self {
-			EditorState::Edit(s) => s.crop_bottom(),
+			EditorState::Edit(s) => s.resize(0, 0, 0, -1),
 			EditorState::Play(_) => {},
 		}
 	}
 	pub fn crop_left(&mut self) {
 		match self {
-			EditorState::Edit(s) => s.crop_left(),
+			EditorState::Edit(s) => s.resize(-1, 0, 0, 0),
 			EditorState::Play(_) => {},
 		}
 	}
 	pub fn crop_right(&mut self) {
 		match self {
-			EditorState::Edit(s) => s.crop_right(),
+			EditorState::Edit(s) => s.resize(0, 0, -1, 0),
 			EditorState::Play(_) => {},
 		}
 	}

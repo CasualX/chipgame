@@ -130,6 +130,7 @@ fn main() {
 	let mut file_path = matches.value_of("level").map(PathBuf::from);
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
+	let mut shift_held = false;
 
 	// App state
 	let mut app: Option<AppStuff> = None;
@@ -164,6 +165,9 @@ fn main() {
 				}
 			}
 			Event::WindowEvent { event, .. } => match event {
+				WindowEvent::ModifiersChanged(new_mods) => {
+					shift_held = new_mods.state().shift_key();
+				}
 				WindowEvent::Resized(new_size) => {
 					if let Some(app) = &mut app {
 						let width = NonZeroU32::new(new_size.width.max(1)).unwrap();
@@ -237,22 +241,26 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyE) => editor.tool_entity(pressed),
 						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
 						PhysicalKey::Code(KeyCode::Numpad8) if pressed => {
-							editor.crop_top();
+							if shift_held { editor.expand_top(); }
+							else { editor.crop_top(); }
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
 						PhysicalKey::Code(KeyCode::Numpad2) if pressed => {
-							editor.crop_bottom();
+							if shift_held { editor.expand_bottom(); }
+							else { editor.crop_bottom(); }
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
 						PhysicalKey::Code(KeyCode::Numpad4) if pressed => {
-							editor.crop_left();
+							if shift_held { editor.expand_left(); }
+							else { editor.crop_left(); }
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
 						PhysicalKey::Code(KeyCode::Numpad6) if pressed => {
-							editor.crop_right();
+							if shift_held { editor.expand_right(); }
+							else { editor.crop_right(); }
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
