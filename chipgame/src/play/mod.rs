@@ -178,7 +178,7 @@ impl PlayState {
 				}
 				menu::MenuEvent::EnterPassword { code } => {
 					// Secret code to soft-unlock all levels
-					if code == *b"OPEN" {
+					if code == *b"CHIP" {
 						self.save_data.show_hidden_levels ^= true;
 						self.menu.open_main(true, &self.lvsets.current().title);
 						return;

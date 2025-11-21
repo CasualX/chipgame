@@ -93,8 +93,9 @@ impl GoToLevel {
 				0 => MenuEvent::OpenUnlockLevel,
 				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].level_number },
 			};
-			events.push(evt);
 			events.push(MenuEvent::CursorSelect);
+			events.push(MenuEvent::PreviewExit);
+			events.push(evt);
 		}
 		if input.b.is_pressed() {
 			events.push(MenuEvent::PreviewExit);
