@@ -14,7 +14,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	}
 
 	let handle = s.ents.alloc();
-	s.ps.ehandle = handle;
+	s.ps.master = handle;
 	s.ents.put(Entity {
 		data: &FUNCS,
 		handle,
@@ -32,12 +32,16 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	let terrain = s.field.get_terrain(ent.pos);
-
-	// Freeze player if game over
-	if s.ps.activity.is_game_over() {
+	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
+
+	// Freeze player if game over
+	if s.is_game_over() {
+		return;
+	}
+
+	let terrain = s.field.get_terrain(ent.pos);
 
 	// Clear movement after a delay
 	if s.time >= ent.step_time + IDLE_TIME {
@@ -48,17 +52,17 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 	if s.time >= ent.step_time + ent.step_spd && ent.flags & EF_NEW_POS != 0 {
 		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
-			ps_activity(s, PlayerActivity::Burned);
+			ps_attack(s, ent.handle, GameOverReason::Burned);
 			return;
 		}
 		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
-			ps_activity(s, PlayerActivity::Drowned);
+			ps_attack(s, ent.handle, GameOverReason::Drowned);
 			// s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			return;
 		}
 		if matches!(terrain, Terrain::Exit) {
 			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
-			ps_activity(s, PlayerActivity::Win);
+			ps_attack(s, ent.handle, GameOverReason::LevelComplete);
 			return;
 		}
 	}
@@ -71,16 +75,30 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 
 	let activity = match terrain {
 		Terrain::Water => {
-			if !matches!(s.ps.activity, PlayerActivity::Swimming) {
+			if s.ps.activity != PlayerActivity::Swimming {
 				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			}
 			PlayerActivity::Swimming
 		},
-		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => if s.ps.ice_skates { PlayerActivity::Skating } else { PlayerActivity::Sliding },
-		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => if s.ps.suction_boots { PlayerActivity::Suction } else { PlayerActivity::Sliding },
+		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => {
+			if s.ps.ice_skates {
+				PlayerActivity::IceSkating
+			}
+			else {
+				PlayerActivity::IceSliding
+			}
+		}
+		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => {
+			if s.ps.suction_boots {
+				PlayerActivity::ForceWalking
+			}
+			else {
+				PlayerActivity::ForceSliding
+			}
+		}
 		_ => PlayerActivity::Walking,
 	};
-	ps_activity(s, activity);
+	ps_activity(s, ent.handle, activity);
 
 	// Wait until movement is cleared before accepting new input
 	if s.time >= ent.step_time + ent.step_spd {
@@ -139,7 +157,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 							// Softlocked!
 						}
 						else {
-							s.events.fire(GameEvent::PlayerBump { player: () });
+							s.events.fire(GameEvent::PlayerBump { entity: ent.handle });
 							s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
 						}
 					}
@@ -163,7 +181,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			};
 			if let Some(force_dir) = force_dir {
 				let override_dir = match force_dir {
-					_ if !s.ps.forced_move || ent.flags & EF_TRAPPED != 0 => None,
+					_ if ent.flags & EF_TERRAIN_MOVE == 0 => None,
 					Compass::Left | Compass::Right => if input_dir == Some(Compass::Up) { Some(Compass::Up) } else if input_dir == Some(Compass::Down) { Some(Compass::Down) } else { None },
 					Compass::Up | Compass::Down => if input_dir == Some(Compass::Left) { Some(Compass::Left) } else if input_dir == Some(Compass::Right) { Some(Compass::Right) } else { None },
 				};
@@ -171,23 +189,23 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				// Consider this a forced move if the player did not step in the direction of the force terrain
 				if let Some(override_dir) = override_dir {
 					if try_move(s, ent, override_dir) {
-						s.ps.forced_move = false;
+						ent.flags &= !EF_TERRAIN_MOVE;
 					}
 					else {
 						try_move(s, ent, force_dir);
 						bump(s, ent, override_dir);
-						s.ps.forced_move = true;
+						ent.flags |= EF_TERRAIN_MOVE;
 					}
 				}
 				else {
 					try_move(s, ent, force_dir);
-					s.ps.forced_move = true;
+					ent.flags |= EF_TERRAIN_MOVE;
 				}
 
 				break 'end_move;
 			}
 			else {
-				s.ps.forced_move = false;
+				ent.flags &= !EF_TERRAIN_MOVE;
 			}
 
 			// Handle player input
@@ -207,7 +225,7 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
 	s.ps.bonks += 1;
-	s.events.fire(GameEvent::PlayerBump { player: () });
+	s.events.fire(GameEvent::PlayerBump { entity: ent.handle });
 	s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 }
@@ -225,7 +243,7 @@ const FLAGS: SolidFlags = SolidFlags {
 	boots: false,
 	chips: false,
 	creatures: false,
-	player: false,
+	player: true,
 	thief: false,
 	hint: false,
 };

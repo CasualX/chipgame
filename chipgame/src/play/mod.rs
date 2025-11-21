@@ -346,7 +346,7 @@ impl PlayState {
 					fx::FxEvent::Scout => play_fx_scout(self),
 					fx::FxEvent::Pause => play_fx_pause(self),
 					fx::FxEvent::Unpause => play_fx_unpause(self),
-					fx::FxEvent::GameWin => play_fx_game_win(self),
+					fx::FxEvent::LevelComplete => play_fx_level_complete(self),
 					fx::FxEvent::GameOver => play_fx_game_over(self),
 					// _ => {}
 				}
@@ -428,7 +428,7 @@ fn play_fx_unpause(this: &mut PlayState) {
 	this.menu.close_all();
 }
 
-fn play_fx_game_win(this: &mut PlayState) {
+fn play_fx_level_complete(this: &mut PlayState) {
 	let Some(fx) = &this.fx else {
 		return
 	};
@@ -474,7 +474,7 @@ fn play_fx_game_over(this: &mut PlayState) {
 
 	let menu = menu::GameOverMenu {
 		selected: 0,
-		activity: fx.gs.ps.activity,
+		reason: fx.game_over,
 		level_number: fx.level_number,
 		level_name: fx.gs.field.name.clone(),
 		attempts: fx.gs.ps.attempts,

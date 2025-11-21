@@ -79,7 +79,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let check_pos = ent_pos(&ctx.gs, ent, ent.pos);
 	obj.data.model = if check_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
 
-	if ent.handle == ctx.gs.ps.ehandle {
+	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_src = src;
 		ctx.camera.move_dest = ent.pos;
 		ctx.camera.move_time = ctx.render.time;
@@ -93,8 +93,7 @@ pub fn entity_teleport(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	entity_step(ctx, ehandle);
 
 	// When teleporting the player snap the camera
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
-	if ent.handle == ctx.gs.ps.ehandle {
+	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_teleport = true;
 	}
 }
@@ -107,17 +106,30 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	obj.data.sprite = sprite_for_ent(ent, &ctx.gs.ps);
 }
 
-pub fn player_activity(ctx: &mut FxState, _player: ()) {
-	// Player cheer sprite
-	let ehandle = ctx.gs.ps.ehandle;
-	entity_face_dir(ctx, ehandle);
+pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
+	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
+	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	// Play fireworks effect
-	let Some(player) = ctx.gs.ents.get(ehandle) else { return };
-	match ctx.gs.ps.activity {
-		chipcore::PlayerActivity::Win => handlers::effect(ctx, player.pos, render::EffectType::Fireworks),
-		_ => {}
+	// Update the player sprite
+	obj.data.sprite = match reason {
+		chipcore::GameOverReason::LevelComplete => data::SpriteId::PlayerCheer,
+		chipcore::GameOverReason::Drowned => data::SpriteId::WaterSplash,
+		chipcore::GameOverReason::Burned => data::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::Bombed => data::SpriteId::PlayerDead,
+		chipcore::GameOverReason::Collided => data::SpriteId::PlayerDead,
+		chipcore::GameOverReason::Eaten => data::SpriteId::PlayerDead,
+		chipcore::GameOverReason::TimeOut => data::SpriteId::PlayerDead,
+		chipcore::GameOverReason::NotOkay => data::SpriteId::PlayerDead,
+	};
+
+	if matches!(reason, chipcore::GameOverReason::LevelComplete) {
+		handlers::effect(ctx, ent.pos, render::EffectType::Fireworks);
 	}
+}
+
+pub fn player_activity(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
+	entity_face_dir(ctx, ehandle);
 }
 
 pub fn entity_hidden(ctx: &mut FxState, ehandle: chipcore::EntityHandle, hidden: bool) {
@@ -198,15 +210,6 @@ fn model_for_ent(ent: &chipcore::Entity) -> data::ModelId {
 fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> data::SpriteId {
 	match ent.kind {
 		chipty::EntityKind::Player => match pl.activity {
-			chipcore::PlayerActivity::Walking | chipcore::PlayerActivity::Pushing | chipcore::PlayerActivity::Skating | chipcore::PlayerActivity::Suction | chipcore::PlayerActivity::Sliding =>
-				match ent.face_dir {
-					Some(chipty::Compass::Up) => data::SpriteId::PlayerWalkUp,
-					Some(chipty::Compass::Down) => data::SpriteId::PlayerWalkDown,
-					Some(chipty::Compass::Left) => data::SpriteId::PlayerWalkLeft,
-					Some(chipty::Compass::Right) => data::SpriteId::PlayerWalkRight,
-					_ => data::SpriteId::PlayerWalkNeutral,
-				},
-			chipcore::PlayerActivity::Win => data::SpriteId::PlayerCheer,
 			chipcore::PlayerActivity::Swimming => match ent.face_dir {
 				Some(chipty::Compass::Up) => data::SpriteId::PlayerSwimUp,
 				Some(chipty::Compass::Down) => data::SpriteId::PlayerSwimDown,
@@ -214,9 +217,13 @@ fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> data::S
 				Some(chipty::Compass::Right) => data::SpriteId::PlayerSwimRight,
 				_ => data::SpriteId::PlayerSwimNeutral,
 			},
-			chipcore::PlayerActivity::Drowned => data::SpriteId::WaterSplash,
-			chipcore::PlayerActivity::Burned => data::SpriteId::PlayerBurned,
-			_ => data::SpriteId::PlayerDead,
+			_ => match ent.face_dir {
+				Some(chipty::Compass::Up) => data::SpriteId::PlayerWalkUp,
+				Some(chipty::Compass::Down) => data::SpriteId::PlayerWalkDown,
+				Some(chipty::Compass::Left) => data::SpriteId::PlayerWalkLeft,
+				Some(chipty::Compass::Right) => data::SpriteId::PlayerWalkRight,
+				_ => data::SpriteId::PlayerWalkNeutral,
+			},
 		},
 		chipty::EntityKind::Chip => data::SpriteId::Chip,
 		chipty::EntityKind::Socket => data::SpriteId::Socket,
@@ -416,17 +423,10 @@ pub fn remove_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	ctx.render.objects.remove(obj_handle);
 }
 
-pub fn game_over(ctx: &mut FxState, _player: ()) {
-	if matches!(ctx.gs.ps.activity, chipcore::PlayerActivity::Win) {
-		ctx.game_realtime = ctx.render.time;
-		ctx.next_level_load = ctx.render.time + 2.0;
-		ctx.game_win = true;
-	}
-	else {
-		ctx.game_realtime = ctx.render.time;
-		ctx.next_level_load = ctx.render.time + 2.0;
-		ctx.game_win = false;
-	}
+pub fn game_over(ctx: &mut FxState, reason: chipcore::GameOverReason) {
+	ctx.game_realtime = ctx.render.time;
+	ctx.next_level_load = ctx.render.time + 2.0;
+	ctx.game_over = Some(reason);
 }
 
 pub fn effect(ctx: &mut FxState, pos: Vec2i, ty: render::EffectType) {

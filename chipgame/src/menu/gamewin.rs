@@ -107,7 +107,7 @@ impl GameWinMenu {
 		draw::DrawPlayTitle {
 			level_number: self.level_number,
 			level_name: &self.level_name,
-			subtitle: Some(&"\x1b[color=#f08]Complete!")
+			subtitle: Some(&"\x1b[color=#f08]Level Complete!")
 		}.draw(&mut buf, &top, resx);
 
 		let [_, middle, _] = draw::flexh(middle, None, layout::Justify::Center, &[layout::Unit::Fr(1.0); 3]);

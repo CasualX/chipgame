@@ -14,47 +14,25 @@ pub enum PlayerActivity {
 	/// Swimming in water with flippers.
 	Swimming,
 	/// Sliding on ice without ice skates.
-	Skating,
+	IceSliding,
+	/// Skating on ice with ice skates.
+	IceSkating,
 	/// Sliding on force floor without suction boots.
-	Sliding,
+	ForceSliding,
 	/// Walking on force floor with suction boots.
-	Suction,
-	/// Player drowned in water without flippers.
-	Drowned,
-	/// Player stepped in fire without fire boots.
-	Burned,
-	/// Player stepped on a bomb.
-	Bombed,
-	/// Player is out of time.
-	OutOfTime,
-	/// Player entity collided with a block.
-	Collided,
-	/// Player entity eaten by a creature.
-	Eaten,
-	/// Player entity does not exist.
-	NotOkay,
-	/// Player won the game.
-	Win,
-}
-
-impl PlayerActivity {
-	pub fn is_game_over(self) -> bool {
-		matches!(self, PlayerActivity::Drowned | PlayerActivity::Burned | PlayerActivity::Bombed | PlayerActivity::OutOfTime | PlayerActivity::Collided | PlayerActivity::Eaten | PlayerActivity::NotOkay | PlayerActivity::Win)
-	}
+	ForceWalking,
 }
 
 /// Player state.
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PlayerState {
-	pub ehandle: EntityHandle,
+	pub master: EntityHandle,
 
 	/// Player input manager.
 	pub inbuf: InputBuffer,
 
 	/// Current player activity.
 	pub activity: PlayerActivity,
-	/// True if previous movement was involuntary.
-	pub forced_move: bool,
 	/// Last step direction for block slapping.
 	pub last_step_dir: Option<Compass>,
 	/// Total steps taken (for high score).
@@ -75,28 +53,6 @@ pub struct PlayerState {
 	pub dev_wtw: bool,
 }
 
-impl Default for PlayerState {
-	fn default() -> PlayerState {
-		PlayerState {
-			ehandle: EntityHandle::INVALID,
-			inbuf: InputBuffer::default(),
-			activity: PlayerActivity::Walking,
-			forced_move: false,
-			last_step_dir: None,
-			steps: 0,
-			bonks: 0,
-			attempts: 0,
-			chips: 0,
-			keys: [0; 4],
-			flippers: false,
-			fire_boots: false,
-			ice_skates: false,
-			suction_boots: false,
-			dev_wtw: false,
-		}
-	}
-}
-
 pub(super) fn ps_input(s: &mut GameState, input: &Input) {
 	s.ps.inbuf.handle(Compass::Left,  input.left,  s.input.left);
 	s.ps.inbuf.handle(Compass::Right, input.right, s.input.right);
@@ -104,46 +60,61 @@ pub(super) fn ps_input(s: &mut GameState, input: &Input) {
 	s.ps.inbuf.handle(Compass::Down,  input.down,  s.input.down);
 }
 
-pub(super) fn ps_activity(s: &mut GameState, activity: PlayerActivity) {
+pub(super) fn ps_activity(s: &mut GameState, ehandle: EntityHandle, activity: PlayerActivity) {
 	if s.ps.activity != activity {
 		s.ps.activity = activity;
-		s.events.fire(GameEvent::PlayerActivity { player: () });
+		s.events.fire(GameEvent::PlayerActivity { entity: ehandle });
+	}
+}
 
-		if activity.is_game_over() {
-			s.ts = TimeState::Paused;
-		}
+/// Returns if the player entity is at the given position.
+fn ps_check_pos(s: &GameState, pos: Vec2i) -> bool {
+	s.ents.get(s.ps.master).map(|e| e.pos) == Some(pos)
+}
 
-		match activity {
-			PlayerActivity::Drowned => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
-			}
-			PlayerActivity::Burned => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::FireWalking });
-			}
-			PlayerActivity::Bombed => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				// Already fired by the Bomb entity!
-				// s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
-			}
-			PlayerActivity::OutOfTime => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
-			}
-			PlayerActivity::Collided => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
-			}
-			PlayerActivity::Eaten => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameOver });
-			}
-			PlayerActivity::Win => {
-				s.events.fire(GameEvent::GameOver { player: () });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::GameWin });
-			}
-			_ => (),
+/// Returns if the player entity is at the given position.
+pub fn ps_check_new_pos(s: &GameState, pos: Vec2i) -> bool {
+	if let Some(pl) = s.ents.get(s.ps.master) {
+		if pl.pos == pos && pl.flags & EF_NEW_POS != 0 {
+			return true;
 		}
 	}
+	return false;
+}
+
+pub fn ps_attack(s: &mut GameState, entity: EntityHandle, reason: GameOverReason) {
+	// Play game over jingle
+	let sound = match reason {
+		GameOverReason::LevelComplete => Some(SoundFx::GameWin),
+		GameOverReason::Drowned => Some(SoundFx::WaterSplash),
+		GameOverReason::Burned => Some(SoundFx::FireWalking),
+		GameOverReason::Bombed => None, // Already fired by the Bomb entity!
+		GameOverReason::Collided => Some(SoundFx::GameOver),
+		GameOverReason::Eaten => Some(SoundFx::GameOver),
+		GameOverReason::TimeOut => Some(SoundFx::GameOver),
+		GameOverReason::NotOkay => None,
+	};
+	if let Some(sound) = sound {
+		s.events.fire(GameEvent::SoundFx { sound });
+	}
+
+	s.events.fire(GameEvent::PlayerGameOver { entity, reason });
+	s.game_over(reason);
+}
+
+/// Attacks the given position, harming the player if they are there.
+pub fn ps_attack_pos(s: &mut GameState, pos: Vec2i, reason: GameOverReason) {
+	if ps_check_pos(s, pos) {
+		ps_attack(s, s.ps.master, reason);
+	}
+}
+
+/// Triggers game over for the player.
+pub fn ps_game_over(s: &mut GameState, reason: GameOverReason) {
+	ps_attack(s, s.ps.master, reason);
+}
+
+/// Returns the nearest player entity to the given position.
+pub fn ps_nearest_ent(s: &GameState, _pos: Vec2i) -> Option<&Entity> {
+	s.ents.get(s.ps.master)
 }

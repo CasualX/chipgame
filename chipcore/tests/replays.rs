@@ -1,7 +1,7 @@
 use std::{env, fs};
 use std::path::Path;
 
-fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity) -> bool {
+fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
 
 	let mut game = chipcore::GameState::default();
@@ -14,8 +14,8 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: c
 	}
 
 	let mut success = true;
-	if game.ps.activity != activity {
-		eprintln!(" - activity mismatch: expected {:?}, got {:?}", activity, game.ps.activity);
+	if !game.is_game_over() {
+		eprintln!(" - game over mismatch: expected game over");
 		success = false;
 	}
 	if game.time != replay.ticks {
@@ -36,7 +36,7 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: c
 }
 
 #[allow(dead_code)]
-fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity, mut seed: u64, count: usize) -> bool {
+fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, mut seed: u64, count: usize) -> bool {
 	let mut success = false;
 	for _ in 0..count {
 		seed += 1;
@@ -49,7 +49,7 @@ fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: c
 			game.tick(&input);
 		}
 
-		if game.ps.activity != activity {
+		if !game.is_game_over() {
 			continue;
 		}
 		if game.time != replay.ticks {
@@ -80,7 +80,7 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 			let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
 			eprintln!("Playing: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
-			fail_count += !test_replay(&level, &replay, chipcore::PlayerActivity::Win) as usize;
+			fail_count += !test_replay(&level, &replay) as usize;
 		}
 		else {
 			eprintln!("\x1b[31mSkipped\x1b[m: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
@@ -99,7 +99,7 @@ fn test_level(levels_dir: &Path, replays_dir: &Path, level_name: &str) {
 	if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 		let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
 		eprintln!("Playing {:?}: \x1b[32m{}\x1b[m", level_name, level.name);
-		if !test_replay(&level, &replay, chipcore::PlayerActivity::Win) {
+		if !test_replay(&level, &replay) {
 			panic!("replay failed for {:?}", level_name);
 		}
 	}

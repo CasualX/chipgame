@@ -19,8 +19,8 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	if let Some(pl) = s.ents.get(s.ps.ehandle) {
-		if pl.pos == ent.pos && (s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots) {
+	if ps_check_new_pos(s, ent.pos) {
+		if s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots {
 			s.ps.flippers = false;
 			s.ps.fire_boots = false;
 			s.ps.ice_skates = false;

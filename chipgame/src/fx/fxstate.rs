@@ -12,7 +12,7 @@ pub struct FxState {
 	pub level_number: i32,
 	pub next_level_load: f32,
 	pub game_realtime: f32,
-	pub game_win: bool,
+	pub game_over: Option<chipcore::GameOverReason>,
 	pub hud_enabled: bool,
 	pub darken: bool,
 	pub darken_time: f32,
@@ -53,7 +53,7 @@ impl FxState {
 		self.level_number = level_number;
 		self.next_level_load = 0.0;
 		self.game_realtime = 0.0;
-		self.game_win = false;
+		self.game_over = None;
 		self.hud_enabled = true;
 		self.darken = true;
 		self.darken_time = -1.0;
@@ -82,7 +82,7 @@ impl FxState {
 		}
 	}
 	pub fn think(&mut self, input: &Input) {
-		if !self.gs.ps.activity.is_game_over() {
+		if !self.gs.is_game_over() {
 			if input.start.is_pressed() {
 				self.pause();
 			}
@@ -111,22 +111,28 @@ impl FxState {
 
 		if self.next_level_load != 0.0 && self.render.time > self.next_level_load {
 			self.next_level_load = 0.0;
-			self.events.push(if self.game_win { FxEvent::GameWin } else { FxEvent::GameOver });
+			let event = if matches!(self.game_over, Some(chipcore::GameOverReason::LevelComplete)) {
+				FxEvent::LevelComplete
+			}
+			else {
+				FxEvent::GameOver
+			};
+			self.events.push(event);
 		}
 
 		// Update invisible walls based on player proximity
-		if let Some(player) = self.gs.ents.get(self.gs.ps.ehandle) {
-			for (&pos, &obj_handle) in &self.inviswalls {
-				let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
-				if player.pos.distance_hat(pos) <= 2 {
-					if obj.anim.anims.is_empty() && obj.data.alpha < 1.0 {
-						obj.anim.anims.push(render::AnimState::FadeIn(render::FadeIn { atime: 0.0 }));
-					}
+		for (&pos, &obj_handle) in &self.inviswalls {
+			let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
+
+			let Some(player) = chipcore::ps_nearest_ent(&self.gs, pos) else { continue };
+			if player.pos.distance_hat(pos) <= 2 {
+				if obj.anim.anims.is_empty() && obj.data.alpha < 1.0 {
+					obj.anim.anims.push(render::AnimState::FadeIn(render::FadeIn { atime: 0.0 }));
 				}
-				else {
-					if obj.anim.anims.is_empty() && obj.data.alpha > 0.0 {
-						obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
-					}
+			}
+			else {
+				if obj.anim.anims.is_empty() && obj.data.alpha > 0.0 {
+					obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 				}
 			}
 		}
@@ -142,11 +148,12 @@ impl FxState {
 				&chipcore::GameEvent::EntityTurn { entity } => handlers::entity_face_dir(self, entity),
 				&chipcore::GameEvent::EntityHidden { entity, hidden } => handlers::entity_hidden(self, entity, hidden),
 				&chipcore::GameEvent::EntityTeleport { entity } => handlers::entity_teleport(self, entity),
-				&chipcore::GameEvent::PlayerActivity { player } => handlers::player_activity(self, player),
+				&chipcore::GameEvent::PlayerGameOver { entity, reason } => handlers::player_game_over(self, entity, reason),
+				&chipcore::GameEvent::PlayerActivity { entity } => handlers::player_activity(self, entity),
 				&chipcore::GameEvent::LockOpened { pos, key } => handlers::lock_opened(self, pos, key),
 				&chipcore::GameEvent::FireHidden { pos, hidden } => handlers::fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),
-				&chipcore::GameEvent::GameOver { player } => handlers::game_over(self, player),
+				&chipcore::GameEvent::GameOver { reason } => handlers::game_over(self, reason),
 				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
 				&chipcore::GameEvent::BombExplode { pos } => handlers::effect(self, pos, render::EffectType::Sparkles),
 				&chipcore::GameEvent::WaterSplash { pos } => handlers::effect(self, pos, render::EffectType::Splash),
@@ -158,9 +165,9 @@ impl FxState {
 		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
 			return;
 		}
-		if let Some(obj) = self.objlookup.get(&self.gs.ps.ehandle).and_then(|h| self.render.objects.get(*h)) {
-			self.camera.set_target(obj.data.pos + Vec3(16.0, 16.0, 0.0));
-		}
+		let Some(&obj_handle) = self.objlookup.get(&self.gs.ps.master) else { return };
+		let Some(obj) = self.render.objects.get(obj_handle) else { return };
+		self.camera.set_target(obj.data.pos + Vec3(16.0, 16.0, 0.0));
 	}
 	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
 		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * speed);

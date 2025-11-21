@@ -129,17 +129,18 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 	let new_pos = ent.pos + step_dir.to_vec();
 	let from_terrain = s.field.get_terrain(ent.pos);
+	let mut to_terrain = s.field.get_terrain(new_pos);
 
 	// Set the entity's step speed based on the terrain
 	if matches!(from_terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
 		if is_player {
 			if s.ps.suction_boots {
 				ent.step_spd = ent.base_spd;
-				ps_activity(s, PlayerActivity::Suction);
+				ps_activity(s, ent.handle, PlayerActivity::ForceWalking);
 			}
 			else {
 				ent.step_spd = cmp::max(1, ent.base_spd / 2);
-				ps_activity(s, PlayerActivity::Sliding);
+				ps_activity(s, ent.handle, PlayerActivity::ForceSliding);
 			}
 		}
 		else {
@@ -150,10 +151,11 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		if is_player {
 			if s.ps.ice_skates {
 				ent.step_spd = ent.base_spd;
+				ps_activity(s, ent.handle, PlayerActivity::IceSkating);
 			}
 			else {
 				ent.step_spd = cmp::max(1, ent.base_spd / 2);
-				ps_activity(s, PlayerActivity::Skating);
+				ps_activity(s, ent.handle, PlayerActivity::IceSliding);
 			}
 		}
 		else {
@@ -182,7 +184,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 		// Player specific interactions with the terrain
 		if is_player {
-			let solid = match s.field.get_terrain(new_pos) {
+			let solid = match to_terrain {
 				Terrain::BlueLock => !try_unlock(s, new_pos, KeyColor::Blue),
 				Terrain::RedLock => !try_unlock(s, new_pos, KeyColor::Red),
 				Terrain::GreenLock => !try_unlock(s, new_pos, KeyColor::Green),
@@ -208,7 +210,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 		}
 
-		let to_terrain = s.field.get_terrain(new_pos);
+		// Update the terrain after potential changes
+		to_terrain = s.field.get_terrain(new_pos);
 
 		// Check the solid flags of the next terrain
 		let panel = match step_dir {
@@ -228,7 +231,14 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	for ehandle in s.qt.get(new_pos) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 		let solid = match ent.kind {
-			EntityKind::Player => flags.player,
+			EntityKind::Player => {
+				if is_player {
+					!try_move(s, &mut ent, step_dir)
+				}
+				else {
+					flags.player
+				}
+			}
 			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => {
 				if is_player && s.ps.chips >= s.field.required_chips {
@@ -324,7 +334,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.flags &= !EF_RELEASED;
 
 	// Retain momentum when entity lands on a Trap
-	if !matches!(s.field.get_terrain(new_pos), Terrain::BearTrap) {
+	if !matches!(to_terrain, Terrain::BearTrap) {
 		ent.flags &= !EF_MOMENTUM;
 	}
 

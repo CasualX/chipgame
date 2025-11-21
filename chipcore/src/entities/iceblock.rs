@@ -27,14 +27,12 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		let terrain = s.field.get_terrain(ent.pos);
 		if matches!(terrain, Terrain::Water) {
 			s.set_terrain(ent.pos, Terrain::Ice);
-			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
 			s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
 			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			ent.flags |= EF_REMOVE;
 		}
 		else if matches!(terrain, Terrain::Fire) {
 			s.set_terrain(ent.pos, Terrain::Water);
-			s.events.fire(GameEvent::EntityBurn { entity: ent.handle });
 			s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
 			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			ent.flags |= EF_REMOVE;
@@ -48,9 +46,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		try_terrain_move(s, ent, ent.step_dir);
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Collided);
-	}
+	ps_attack_pos(s, ent.pos, GameOverReason::Collided);
 }
 
 const FLAGS: SolidFlags = SolidFlags {

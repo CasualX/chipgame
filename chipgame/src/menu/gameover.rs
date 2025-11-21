@@ -3,7 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct GameOverMenu {
 	pub selected: u8,
-	pub activity: chipcore::PlayerActivity,
+	pub reason: Option<chipcore::GameOverReason>,
 	pub level_number: i32,
 	pub level_name: String,
 	pub attempts: i32,
@@ -49,16 +49,17 @@ impl GameOverMenu {
 		let [top, middle, bottom] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Fr(1.0); 3]);
 
 		let reason = {
-			use chipcore::PlayerActivity as PA;
-			match self.activity {
-				PA::Drowned => "Ooops! Chip can't swim without flippers!",
-				PA::Burned => "Ooops! Don't step in the fire without fire boots!",
-				PA::Bombed => "Ooops! Don't touch the bombs!",
-				PA::OutOfTime => "Ooops! Out of time!",
-				PA::Collided => "Ooops! Watch out for moving blocks!",
-				PA::Eaten => "Ooops! Look out for creatures!",
-				PA::NotOkay => "Ooops! You're not okay!",
-				_ => "Game Over!",
+			use chipcore::GameOverReason::*;
+			match self.reason {
+				Some(LevelComplete) => "Level Complete!",
+				Some(Drowned) => "Ooops! Chip can't swim without flippers!",
+				Some(Burned) => "Ooops! Don't step in the fire without fire boots!",
+				Some(Bombed) => "Ooops! Don't touch the bombs!",
+				Some(TimeOut) => "Ooops! Out of time!",
+				Some(Collided) => "Ooops! Watch out for moving blocks!",
+				Some(Eaten) => "Ooops! Look out for creatures!",
+				Some(NotOkay) => "Ooops! You're not okay!",
+				None => "Game over!",
 			}
 		};
 

@@ -26,7 +26,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	if ent.flags & EF_NEW_POS != 0 {
 		let terrain = s.field.get_terrain(ent.pos);
 		if matches!(terrain, Terrain::Water) {
-			s.events.fire(GameEvent::EntityDrown { entity: ent.handle });
 			s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			ent.flags |= EF_REMOVE;
 			return;
@@ -39,9 +38,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		else if { let step_dir = s.rand.next(); try_move(s, ent, step_dir) } { }
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Eaten);
-	}
+	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
 const FLAGS: SolidFlags = SolidFlags {

@@ -24,6 +24,27 @@ pub enum KeyColor {
 	Yellow,
 }
 
+/// Reasons for game over.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum GameOverReason {
+	/// Level is completed.
+	LevelComplete,
+	/// Drowned in water without flippers.
+	Drowned,
+	/// Stepped in fire without fire boots.
+	Burned,
+	/// Stepped on a bomb.
+	Bombed,
+	/// Collided with a block.
+	Collided,
+	/// Eaten by a monster.
+	Eaten,
+	/// Ran out of time.
+	TimeOut,
+	/// The player entity does not exist.
+	NotOkay,
+}
+
 /// Game events.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum GameEvent {
@@ -33,11 +54,10 @@ pub enum GameEvent {
 	EntityTurn { entity: EntityHandle },
 	EntityTeleport { entity: EntityHandle },
 	EntityHidden { entity: EntityHandle, hidden: bool },
-	EntityDrown { entity: EntityHandle },
-	EntityBurn { entity: EntityHandle },
 	EntityTrapped { entity: EntityHandle },
-	PlayerActivity { player: PlayerIndex },
-	PlayerBump { player: PlayerIndex },
+	PlayerGameOver { entity: EntityHandle, reason: GameOverReason },
+	PlayerActivity { entity: EntityHandle },
+	PlayerBump { entity: EntityHandle },
 	BlockPush { entity: EntityHandle },
 	ItemPickup { entity: EntityHandle, item: ItemPickup },
 	FireHidden { pos: Vec2i, hidden: bool },
@@ -47,7 +67,7 @@ pub enum GameEvent {
 	ItemsThief { player: PlayerIndex },
 	LockOpened { pos: Vec2i, key: KeyColor },
 	TerrainUpdated { pos: Vec2i, old: Terrain, new: Terrain },
-	GameOver { player: PlayerIndex },
+	GameOver { reason: GameOverReason },
 	SoundFx { sound: SoundFx },
 }
 

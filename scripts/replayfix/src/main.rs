@@ -2,7 +2,7 @@ use std::{fs, path};
 
 use rayon::prelude::*;
 
-fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: chipcore::PlayerActivity, seed: u64, count: usize) -> Option<(usize, u64)> {
+fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, seed: u64, count: usize) -> Option<(usize, u64)> {
 	let inputs = chipty::decode(&replay.replay);
 
 	// Parallel search over the seed range using Rayon.
@@ -20,7 +20,7 @@ fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, activity: c
 			}
 
 			let success =
-				game.ps.activity == activity &&
+				game.is_game_over() &&
 				game.time == replay.ticks &&
 				game.ps.bonks == replay.bonks;
 
@@ -55,7 +55,7 @@ fn main() {
 	let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).expect("Failed to parse replay JSON");
 	let seed = u64::from_str_radix(&replay.seed, 16).expect("Invalid seed in replay");
 
-	if let Some((attempt, found_seed)) = brute_force(&level, &replay, chipcore::PlayerActivity::Win, seed, count) {
+	if let Some((attempt, found_seed)) = brute_force(&level, &replay, seed, count) {
 		if attempt == 0 {
 			println!("Replay already matches the given seed: {found_seed:016x}");
 		}

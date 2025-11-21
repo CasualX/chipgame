@@ -49,3 +49,5 @@ pub const EF_TEMPLATE: u8 = 1 << 4;
 pub const EF_MOMENTUM: u8 = 1 << 5;
 /// Entity has a new position after try_move.
 pub const EF_NEW_POS: u8 = 1 << 6;
+/// Entity was moved by terrain.
+pub const EF_TERRAIN_MOVE: u8 = 1 << 7;

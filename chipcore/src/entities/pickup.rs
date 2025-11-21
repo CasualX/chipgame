@@ -19,10 +19,8 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn think(s: &mut GameState, ent: &mut Entity) {
-	if let Some(pl) = s.ents.get(s.ps.ehandle) {
-		if pl.pos == ent.pos && pl.flags & EF_NEW_POS != 0 {
-			pickup_item(s, ent);
-		}
+	if ps_check_new_pos(s, ent.pos) {
+		pickup_item(s, ent);
 	}
 }
 

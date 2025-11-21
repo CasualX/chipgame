@@ -39,9 +39,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		}
 	}
 
-	if s.ents.get(s.ps.ehandle).map(|e| e.pos) == Some(ent.pos) {
-		ps_activity(s, PlayerActivity::Eaten);
-	}
+	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
 const FLAGS: SolidFlags = SolidFlags {

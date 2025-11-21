@@ -40,7 +40,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 		exploded = true;
 		// Remove non-player entities
 		if matches!(other_ent.kind, EntityKind::Player) {
-			ps_activity(s, PlayerActivity::Bombed);
+			ps_attack(s, ehandle, GameOverReason::Bombed);
 		}
 		else {
 			other_ent.flags |= EF_REMOVE;

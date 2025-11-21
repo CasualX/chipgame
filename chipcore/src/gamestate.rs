@@ -10,6 +10,8 @@ pub enum TimeState {
 	Running,
 	/// Game is paused.
 	Paused,
+	/// Game over.
+	GameOver,
 }
 
 /// Game state.
@@ -69,19 +71,17 @@ impl GameState {
 	/// Advance the game state by one tick.
 	pub fn tick(&mut self, input: &Input) {
 		// Wait for the player to press any direction key to start the game
-		if !match self.ts {
-			TimeState::Paused => false,
-			TimeState::Waiting => input.any_arrows(),
-			TimeState::Running => true,
-		} {
-			return;
+		match self.ts {
+			TimeState::Paused => return,
+			TimeState::Waiting => if !input.any_arrows() { return },
+			TimeState::Running => {},
+			TimeState::GameOver => return,
 		}
 		self.ts = TimeState::Running;
 
 		// Check if the player has run out of time
 		if self.field.time_limit > 0 && self.time >= self.field.time_limit * 60 {
-			ps_activity(self, PlayerActivity::OutOfTime);
-			self.events.fire(GameEvent::GameOver { player: () });
+			ps_game_over(self, GameOverReason::TimeOut);
 			return;
 		}
 
@@ -100,7 +100,7 @@ impl GameState {
 		}
 
 		// Simulate the player last
-		if let Some(mut ent) = self.ents.take(self.ps.ehandle) {
+		if let Some(mut ent) = self.ents.take(self.ps.master) {
 			(ent.data.think)(self, &mut ent);
 			self.ents.put(ent);
 		}
@@ -122,7 +122,10 @@ impl GameState {
 
 		// Remove entities marked for removal
 		for ehandle in self.ents.handles() {
-			if self.ents.get(ehandle).map(|ent| ent.flags & EF_REMOVE != 0).unwrap_or(false) {
+			fn check_remove(ent: &Entity) -> bool {
+				ent.flags & EF_REMOVE != 0
+			}
+			if self.ents.get(ehandle).map(check_remove).unwrap_or(false) {
 				self.entity_remove(ehandle);
 			}
 		}
@@ -181,7 +184,7 @@ impl GameState {
 
 	/// Returns true if the player is standing on a hint tile.
 	pub fn is_show_hint(&self) -> bool {
-		let Some(pl) = self.ents.get(self.ps.ehandle) else { return false };
+		let Some(pl) = self.ents.get(self.ps.master) else { return false };
 		let terrain = self.field.get_terrain(pl.pos);
 		matches!(terrain, Terrain::Hint)
 	}
@@ -234,6 +237,17 @@ impl GameState {
 				}
 			}
 		}
+	}
+
+	/// Trigger game over state.
+	pub fn game_over(&mut self, reason: GameOverReason) {
+		self.events.fire(GameEvent::GameOver { reason });
+		self.ts = TimeState::GameOver;
+	}
+
+	/// Returns true if the game is over.
+	pub fn is_game_over(&self) -> bool {
+		matches!(self.ts, TimeState::GameOver)
 	}
 
 	/// Save replay data.
