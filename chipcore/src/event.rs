@@ -58,7 +58,7 @@ pub enum GameEvent {
 	PlayerGameOver { entity: EntityHandle, reason: GameOverReason },
 	PlayerActivity { entity: EntityHandle },
 	PlayerBump { entity: EntityHandle },
-	BlockPush { entity: EntityHandle },
+	PlayerPush { entity: EntityHandle },
 	ItemPickup { entity: EntityHandle, item: ItemPickup },
 	FireHidden { pos: Vec2i, hidden: bool },
 	BombExplode { pos: Vec2i },

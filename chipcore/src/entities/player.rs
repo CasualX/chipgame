@@ -4,16 +4,8 @@ use super::*;
 const IDLE_TIME: i32 = 20;
 
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
-	// There can only be one player
-	for ehandle in s.ents.handles() {
-		if let Some(ent) = s.ents.get(ehandle) {
-			if matches!(ent.kind, EntityKind::Player) {
-				s.entity_remove(ent.handle);
-			}
-		}
-	}
-
 	let handle = s.ents.alloc();
+	s.ps.ents.push(handle);
 	s.ps.master = handle;
 	s.ents.put(Entity {
 		data: &DATA,
@@ -57,11 +49,9 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 		}
 		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
 			ps_attack(s, ent.handle, GameOverReason::Drowned);
-			// s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 			return;
 		}
 		if matches!(terrain, Terrain::Exit) {
-			s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 			ps_attack(s, ent.handle, GameOverReason::LevelComplete);
 			return;
 		}
@@ -199,9 +189,6 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 	let activity = match s.field.get_terrain(ent.pos) {
 		Terrain::Water => {
-			if s.ps.activity != PlayerActivity::Swimming {
-				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
-			}
 			PlayerActivity::Swimming
 		},
 		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => {
@@ -247,12 +234,21 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 				s.set_terrain(ent.pos, Terrain::Floor);
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 			}
+			Terrain::Water => water_splash(s, ent),
 			Terrain::GreenButton => green_button(s, phase, ent),
 			Terrain::RedButton => red_button(s, phase, ent),
 			Terrain::BrownButton => brown_button(s, phase, ent),
 			Terrain::BlueButton => blue_button(s, phase, ent),
 			_ => {}
 		}
+	}
+}
+
+fn water_splash(s: &mut GameState, ent: &Entity) {
+	let Some(step_dir) = ent.step_dir else { return };
+	let old_pos = ent.pos - step_dir.to_vec();
+	if !matches!(s.field.get_terrain(old_pos), Terrain::Water) {
+		s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 	}
 }
 

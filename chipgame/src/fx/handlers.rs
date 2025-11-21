@@ -13,7 +13,7 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let pos = ent_pos(&ctx.gs, ent, ent.pos);
-	let sprite = sprite_for_ent(ent, &ctx.gs.ps);
+	let sprite = sprite_for_ent(ent, &ctx.gs);
 	let mut obj = render::Object {
 		data: render::ObjectData {
 			pos,
@@ -85,7 +85,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let end_pos = ent_pos(&ctx.gs, ent, ent.pos);
 	obj.data.pos = start_pos;
 
-	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs.ps);
+	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs);
 	obj.data.frame = 0;
 
 	// Ensure the previous step animation is cleared...
@@ -131,7 +131,7 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs.ps);
+	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs);
 }
 
 pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
@@ -157,7 +157,28 @@ pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reas
 }
 
 pub fn player_activity(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
-	entity_face_dir(ctx, ehandle);
+	// PlayerActivity is fired after PlayerGameOver in case of drowning and burning...
+	if !ctx.gs.is_game_over() {
+		entity_face_dir(ctx, ehandle);
+	}
+}
+
+pub fn player_push(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
+	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
+	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+
+	if !matches!(ent.kind, chipty::EntityKind::Player) {
+		return;
+	}
+
+	obj.data.sprite = match ent.step_dir {
+		Some(chipty::Compass::Up) => chipty::SpriteId::PlayerPushNA,
+		Some(chipty::Compass::Down) => chipty::SpriteId::PlayerPushSA,
+		Some(chipty::Compass::Left) => chipty::SpriteId::PlayerPushWA,
+		Some(chipty::Compass::Right) => chipty::SpriteId::PlayerPushEA,
+		_ => chipty::SpriteId::DirtBlock,
+	};
 }
 
 pub fn entity_hidden(ctx: &mut FxState, ehandle: chipcore::EntityHandle, hidden: bool) {
@@ -239,23 +260,25 @@ fn model_for_ent(ent: &chipcore::Entity) -> chipty::ModelId {
 	}
 }
 
-fn animated_sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
+fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => match pl.activity {
-			chipcore::PlayerActivity::Swimming => match ent.face_dir {
+		chipty::EntityKind::Player => if matches!(gs.field.get_terrain(ent.pos), chipty::Terrain::Water) {
+			match ent.face_dir {
 				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
 				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
 				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
 				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
 				_ => chipty::SpriteId::PlayerSwimIdle,
-			},
-			_ => match ent.face_dir {
+			}
+		}
+		else {
+			match ent.face_dir {
 				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
 				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
 				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
 				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
 				_ => chipty::SpriteId::PlayerWalkIdle,
-			},
+			}
 		},
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
@@ -319,23 +342,25 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -
 	}
 }
 
-fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
+fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => match pl.activity {
-			chipcore::PlayerActivity::Swimming => match ent.face_dir {
+		chipty::EntityKind::Player => if matches!(gs.field.get_terrain(ent.pos), chipty::Terrain::Water) {
+			match ent.face_dir {
 				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
 				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
 				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
 				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
 				_ => chipty::SpriteId::PlayerSwimIdle,
-			},
-			_ => match ent.face_dir {
+			}
+		}
+		else {
+			match ent.face_dir {
 				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
 				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
 				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
 				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
 				_ => chipty::SpriteId::PlayerWalkIdle,
-			},
+			}
 		},
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,

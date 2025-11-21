@@ -124,6 +124,7 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 		return false;
 	}
 
+	let mover_entity = ent.handle;
 	let mover_kind = ent.kind;
 	let dev_wtw = matches!(mover_kind, EntityKind::Player) && s.ps.dev_wtw;
 
@@ -245,13 +246,13 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	}
 
 	let flags = &ent.data.flags;
-	let pusher = ent.kind;
+	let mut player_push = false;
 	for ehandle in s.qt.get(new_pos) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 		let solid = match ent.kind {
 			EntityKind::Player => {
-				if matches!(mover_kind, EntityKind::Player) {
-					!try_push_block(s, phase, &mut ent, step_dir)
+				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, phase, &mut ent, step_dir) {
+					false
 				}
 				else {
 					flags.player
@@ -270,8 +271,8 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 				}
 			}
 			EntityKind::Block => {
+				player_push = true;
 				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, phase, &mut ent, step_dir) {
-					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					false
 				}
@@ -280,9 +281,9 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 				}
 			}
 			EntityKind::IceBlock => {
-				let allowed_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
+				player_push = true;
+				let allowed_pusher = matches!(mover_kind, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
 				if allowed_pusher && try_push_block(s, phase, &mut ent, step_dir) {
-					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					if matches!(mover_kind, EntityKind::Player) { // Only play sound if player is pushing the ice block
 						s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					}
@@ -314,6 +315,9 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 		};
 		s.ents.put(ent);
 		if solid {
+			if matches!(mover_kind, EntityKind::Player) && player_push {
+				s.events.fire(GameEvent::PlayerPush { entity: mover_entity });
+			}
 			return false;
 		}
 	}
@@ -371,6 +375,10 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	}
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 	s.events.fire(GameEvent::EntityStep { entity: ent.handle });
+
+	if matches!(mover_kind, EntityKind::Player) && player_push {
+		s.events.fire(GameEvent::PlayerPush { entity: mover_entity });
+	}
 	return true;
 }
 
@@ -420,7 +428,7 @@ fn flick(s: &mut GameState, phase: &mut MovementPhase, pusher: EntityKind, &new_
 
 		if allowed_pusher {
 			if try_move(s, phase, &mut ent, step_dir) {
-				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+				s.events.fire(GameEvent::PlayerPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
 		}
@@ -449,7 +457,7 @@ fn slap(s: &mut GameState, phase: &mut MovementPhase, player_pos: Vec2i, slap_di
 
 		if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
 			if try_move(s, phase, &mut ent, slap_dir) {
-				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
+				s.events.fire(GameEvent::PlayerPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
 		}

@@ -198,9 +198,15 @@ impl GameState {
 
 	/// Returns true if the player is standing on a hint tile.
 	pub fn is_show_hint(&self) -> bool {
-		let Some(pl) = self.ents.get(self.ps.master) else { return false };
-		let terrain = self.field.get_terrain(pl.pos);
-		matches!(terrain, Terrain::Hint)
+		for &ehandle in &self.ps.ents {
+			if let Some(ent) = self.ents.get(ehandle) {
+				let terrain = self.field.get_terrain(ent.pos);
+				if matches!(terrain, Terrain::Hint) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i, hidden: bool) {
@@ -255,6 +261,21 @@ impl GameState {
 
 	/// Trigger game over state.
 	pub fn game_over(&mut self, reason: GameOverReason) {
+		// Play game over jingle
+		let sound = match reason {
+			GameOverReason::LevelComplete => Some(SoundFx::GameWin),
+			GameOverReason::Drowned => Some(SoundFx::WaterSplash),
+			GameOverReason::Burned => Some(SoundFx::FireWalking),
+			GameOverReason::Bombed => None, // Already fired by the Bomb entity!
+			GameOverReason::Collided => Some(SoundFx::GameOver),
+			GameOverReason::Eaten => Some(SoundFx::GameOver),
+			GameOverReason::TimeOut => Some(SoundFx::GameOver),
+			GameOverReason::NotOkay => None,
+		};
+		if let Some(sound) = sound {
+			self.events.fire(GameEvent::SoundFx { sound });
+		}
+
 		self.events.fire(GameEvent::GameOver { reason });
 		self.ts = TimeState::GameOver;
 	}
