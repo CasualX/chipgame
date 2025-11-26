@@ -9,5 +9,5 @@ When a test run ends through death, victory, or user abort, control returns to t
 From a user perspective this should feel like a quick “Play from here” loop, not a separate application.
 
 [x] Initial implementation of editor play mode.\
-[ ] Support controllers in editor play mode.\
-[ ] Add sound effects and music to editor play mode.\
+[x] Support controllers in editor play mode.\
+[x] Add sound effects and music to editor play mode.\

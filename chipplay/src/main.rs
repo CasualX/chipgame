@@ -1,7 +1,6 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 use std::{fs, mem, path, thread, time};
-use std::collections::HashMap;
 use std::ffi::CString;
 use std::num::NonZeroU32;
 
@@ -9,62 +8,8 @@ use glutin::prelude::*;
 
 use chipgame::FileSystem;
 
+mod audio;
 mod gamepad;
-
-struct AudioPlayer {
-	sl: soloud::Soloud,
-	sfx: HashMap<chipty::SoundFx, soloud::Wav>,
-	music: HashMap<chipty::MusicId, soloud::Wav>,
-	cur_music: Option<(chipty::MusicId, soloud::Handle)>,
-}
-impl AudioPlayer {
-	fn load_wav(&mut self, fx: chipty::SoundFx, fs: &FileSystem, path: &str) {
-		use soloud::*;
-		let mut wav = Wav::default();
-		let data = fs.read(path).expect("Failed to read sound file");
-		wav.load_mem(&data).expect("Failed to load sound");
-		self.sfx.insert(fx, wav);
-	}
-	fn load_music(&mut self, music: chipty::MusicId, fs: &FileSystem, path: &str) {
-		use soloud::*;
-		let mut wav = Wav::default();
-		let data = fs.read(path).expect("Failed to read music file");
-		wav.load_mem(&data).expect("Failed to load music");
-		wav.set_looping(true);
-		wav.set_volume(0.375);
-		self.music.insert(music, wav);
-	}
-}
-impl AudioPlayer {
-	fn play(&mut self, sound: chipty::SoundFx) {
-		if let Some(wav) = self.sfx.get(&sound) {
-			self.sl.play(wav);
-		}
-	}
-	fn play_music(&mut self, music: Option<chipty::MusicId>) {
-		if self.cur_music.map(|(music, _)| music) != music {
-			if let Some((_, handle)) = self.cur_music {
-				self.sl.stop(handle);
-			}
-			self.cur_music = None;
-			if let Some(music) = music {
-				if let Some(wav) = self.music.get(&music) {
-					let handle = self.sl.play(wav);
-					self.cur_music = Some((music, handle));
-				}
-			}
-		}
-	}
-}
-
-fn load_audio(fs: &FileSystem, config: &chipgame::config::Config, ap: &mut AudioPlayer) {
-	for (fx, path) in &config.sound_fx {
-		ap.load_wav(*fx, fs, path);
-	}
-	for (id, path) in &config.music {
-		ap.load_music(*id, fs, path);
-	}
-}
 
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
@@ -190,14 +135,13 @@ fn main() {
 
 	let mut gamepads = gamepad::GamepadManager::new();
 
-	let sl = soloud::Soloud::default().expect("Failed to create SoLoud");
-	let mut ap = AudioPlayer { sl, sfx: HashMap::new(), music: HashMap::new(), cur_music: None };
+	let mut ap = audio::AudioPlayer::create();
 
 	let config = {
 		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
 		chipgame::config::Config::parse(config.as_str())
 	};
-	load_audio(&fs, &config, &mut ap);
+	ap.load(&fs, &config);
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
@@ -276,7 +220,7 @@ fn main() {
 
 						for evt in &mem::replace(&mut state.events, Vec::new()) {
 							match evt {
-								&chipgame::play::PlayEvent::PlaySound { sound } => ap.play(sound),
+								&chipgame::play::PlayEvent::PlaySound { sound } => ap.play_sound(sound),
 								&chipgame::play::PlayEvent::PlayMusic { music } => ap.play_music(music),
 								&chipgame::play::PlayEvent::Quit => elwt.exit(),
 								&chipgame::play::PlayEvent::PlayLevel => app.set_title(&state),

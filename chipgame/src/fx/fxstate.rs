@@ -154,7 +154,7 @@ impl FxState {
 				&chipcore::GameEvent::FireHidden { pos, hidden } => handlers::fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),
 				&chipcore::GameEvent::GameOver { reason } => handlers::game_over(self, reason),
-				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound { sound }),
+				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::Sound(sound)),
 				&chipcore::GameEvent::BombExplode { pos } => handlers::effect(self, pos, render::EffectType::Sparkles),
 				&chipcore::GameEvent::WaterSplash { pos } => handlers::effect(self, pos, render::EffectType::Splash),
 				_ => {}

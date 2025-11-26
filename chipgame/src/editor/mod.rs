@@ -1,6 +1,7 @@
 //! Level editor.
 
 use std::collections::HashMap;
+use std::mem;
 use cvmath::*;
 use chipcore::EntityHandle;
 use chipty::{Compass, EntityArgs, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
@@ -133,7 +134,7 @@ impl EditorState {
 	pub fn set_screen_size(&mut self, width: i32, height: i32) {
 		match self {
 			EditorState::Edit(s) => s.set_screen_size(width, height),
-			EditorState::Play(_) => (),
+			EditorState::Play(s) => s.set_screen_size(width, height),
 		}
 	}
 	pub fn mouse_move(&mut self, mouse_x: i32, mouse_y: i32) {
@@ -195,6 +196,13 @@ impl EditorState {
 		match self {
 			EditorState::Edit(s) => s.draw(g, resx),
 			EditorState::Play(s) => s.draw(g, resx),
+		}
+	}
+
+	pub fn take_fx_events(&mut self) -> Vec<fx::FxEvent> {
+		match self {
+			EditorState::Edit(s) => mem::take(&mut s.game.events),
+			EditorState::Play(s) => mem::take(&mut s.game.events),
 		}
 	}
 

@@ -10,6 +10,9 @@ use glutin::prelude::*;
 use chipgame::editor;
 use chipgame::FileSystem;
 
+mod audio;
+mod gamepad;
+
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
 	window: winit::window::Window,
@@ -124,6 +127,12 @@ fn main() {
 		FileSystem::StdFs(PathBuf::from("data"))
 	};
 
+	let mut ap = audio::AudioPlayer::create();
+	ap.load(&fs, &config);
+	let mut music_enabled = true;
+
+	let mut gamepads = gamepad::GamepadManager::new();
+
 	// CLI: optional level path
 	let app = clap::command!("play").arg(clap::arg!([level] "Level file to open"));
 	let matches = app.get_matches();
@@ -137,6 +146,12 @@ fn main() {
 	let mut editor = editor::EditorState::default();
 	editor.init();
 	let mut current_tool = None;
+
+	let mut key_left = false;
+	let mut key_right = false;
+	let mut key_up = false;
+	let mut key_down = false;
+	let mut gamepad_start = false;
 
 	let mut past_now = time::Instant::now();
 
@@ -183,11 +198,11 @@ fn main() {
 					let pressed = matches!(event.state, ElementState::Pressed);
 
 					match event.physical_key {
-						PhysicalKey::Code(KeyCode::ArrowLeft) => editor.key_left(pressed),
-						PhysicalKey::Code(KeyCode::ArrowRight) => editor.key_right(pressed),
-						PhysicalKey::Code(KeyCode::ArrowUp) => editor.key_up(pressed),
-						PhysicalKey::Code(KeyCode::ArrowDown) => editor.key_down(pressed),
-						PhysicalKey::Code(KeyCode::KeyP) if pressed => editor.toggle_play(),
+						PhysicalKey::Code(KeyCode::ArrowLeft) => key_left = pressed,
+						PhysicalKey::Code(KeyCode::ArrowRight) => key_right = pressed,
+						PhysicalKey::Code(KeyCode::ArrowUp) => key_up = pressed,
+						PhysicalKey::Code(KeyCode::ArrowDown) => key_down = pressed,
+						PhysicalKey::Code(KeyCode::Enter) if pressed => editor.toggle_play(),
 						PhysicalKey::Code(KeyCode::Delete) => editor.delete(pressed),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
 							// Open file dialog to load a level
@@ -264,6 +279,9 @@ fn main() {
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
+						PhysicalKey::Code(KeyCode::KeyM) if pressed => {
+							music_enabled = !music_enabled;
+						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
 							if let Some(app) = &mut app {
 								let want_fullscreen = app.window.fullscreen().is_none();
@@ -292,6 +310,18 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = &mut app {
+
+						// Gamepad support
+						let pad_input = gamepads.poll();
+						editor.key_left(key_left || pad_input.left);
+						editor.key_right(key_right || pad_input.right);
+						editor.key_up(key_up || pad_input.up);
+						editor.key_down(key_down || pad_input.down);
+						if !gamepad_start && pad_input.start {
+							editor.toggle_play();
+						}
+						gamepad_start = pad_input.start;
+
 						let edit_tool = editor.get_tool();
 						if current_tool != edit_tool {
 							current_tool = edit_tool;
@@ -307,6 +337,29 @@ fn main() {
 						app.g.begin();
 						editor.draw(&mut app.g, &app.resx);
 						app.g.end();
+
+						let music = if music_enabled {
+							if matches!(editor, editor::EditorState::Play(_)) {
+								Some(chipty::MusicId::GameMusic)
+							}
+							else {
+								Some(chipty::MusicId::MenuMusic)
+							}
+						}
+						else {
+							None
+						};
+						ap.play_music(music);
+
+						let fx_events = editor.take_fx_events();
+						for evt in fx_events {
+							match evt {
+								chipgame::fx::FxEvent::Sound(sound) => ap.play_sound(sound),
+								// Return to edit mode on level complete or game over
+								chipgame::fx::FxEvent::LevelComplete | chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
+								_ => {}
+							}
+						}
 
 						app.surface.swap_buffers(&app.context).unwrap();
 					}

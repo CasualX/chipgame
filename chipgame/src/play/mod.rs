@@ -341,8 +341,7 @@ impl PlayState {
 			for evt in events {
 				// eprintln!("FxEvent: {:?}", evt);
 				match evt {
-					fx::FxEvent::PlaySound { sound } => play_fx_play_sound(self, sound),
-					fx::FxEvent::PlayMusic { music } => play_fx_play_music(self, music),
+					fx::FxEvent::Sound(sound) => play_fx_play_sound(self, sound),
 					fx::FxEvent::Scout => play_fx_scout(self),
 					fx::FxEvent::Pause => play_fx_pause(self),
 					fx::FxEvent::Unpause => play_fx_unpause(self),
@@ -389,13 +388,6 @@ fn play_fx_play_sound(this: &mut PlayState, sound: chipty::SoundFx) {
 	if this.save_data.sound_fx {
 		this.events.push(PlayEvent::PlaySound { sound });
 	}
-}
-
-fn play_fx_play_music(this: &mut PlayState, mut music: Option<chipty::MusicId>) {
-	if !this.save_data.bg_music {
-		music = None;
-	}
-	this.events.push(PlayEvent::PlayMusic { music });
 }
 
 fn play_fx_scout(this: &mut PlayState) {

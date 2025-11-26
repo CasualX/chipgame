@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chipcore = { path = "../chipcore" }
 chipgame = { path = "../chipgame" }
+chipty = { path = "../chipty" }
 
 serde.workspace = true
 serde_json.workspace = true
@@ -21,6 +23,9 @@ glutin = "0.31"
 glutin-winit = "0.4"
 winit = "0.29"
 raw-window-handle = "0.5"
+gilrs = "0.10"
+
+soloud = "1.0"
 
 # Use only synchronous GTK backend (provides FileDialog + MessageDialog) on Linux/BSD; no effect on Win/mac.
 rfd = { version = "0.15", default-features = false, features = ["gtk3"] }

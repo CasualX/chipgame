@@ -46,7 +46,6 @@ impl EditorPlayState {
 			select: menu::KeyState::Up,
 		};
 		self.game.think(&input);
-		self.game.events.clear();
 		self.game.draw(g, resx);
 		return;
 	}
