@@ -29,14 +29,12 @@ impl RenderField {
 }
 
 pub struct UpdateCtx {
-	pub time: f32,
-	pub dt: f32,
+	pub time: f64,
+	pub dt: f64,
 }
 
 #[derive(Default)]
 pub struct RenderState {
-	pub framecnt: i32,
-	pub time: f32,
 	pub objects: ObjectMap,
 	pub field: RenderField,
 	pub effects: Vec<Effect>,
@@ -45,25 +43,17 @@ pub struct RenderState {
 
 impl RenderState {
 	pub fn clear(&mut self) {
-		self.framecnt = 0;
-		self.time = 0.0;
 		self.objects.clear();
 		self.field.width = 0;
 		self.field.height = 0;
 		self.field.terrain.clear();
 		self.effects.clear();
 	}
-	pub fn update(&mut self) {
-		self.framecnt += 1;
-		let time = self.framecnt as f32 / 60.0;
-		self.time = time;
-
-		let ctx = UpdateCtx { time: self.time, dt: 1.0 / 60.0 };
-		self.objects.retain(|_, obj| obj.update(&ctx));
-
-		self.effects.retain(|efx| time < efx.start + 1.0);
+	pub fn update(&mut self, ctx: &UpdateCtx) {
+		self.objects.retain(|_, obj| obj.update(ctx));
+		self.effects.retain(|efx| ctx.time < efx.start + 1.0);
 	}
-	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup) {
+	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup, time: f64) {
 		{
 			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = resx.viewport;
@@ -73,7 +63,7 @@ impl RenderState {
 			cv.uniform.transform = camera.view_proj;
 			cv.uniform.texture = resx.tileset;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
-			render::field(&mut cv, self, self.time, 1.0);
+			render::field(&mut cv, self, time, 1.0);
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 
@@ -90,7 +80,7 @@ impl RenderState {
 			cv.uniform.texture = resx.effects;
 
 			for efx in &self.effects {
-				efx.draw(&mut cv, self.time);
+				efx.draw(&mut cv, time);
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}

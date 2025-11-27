@@ -33,6 +33,9 @@ pub use self::playerstate::*;
 pub use self::quadtree::*;
 pub use self::random::*;
 
+/// Game frames per second.
+pub const FPS: i32 = 60;
+
 #[derive(Copy, Clone, Debug)]
 pub enum TrapState {
 	Closed,
@@ -43,5 +46,3 @@ pub enum RngSeed {
 	System,
 	Manual(u64),
 }
-
-type Time = i32;

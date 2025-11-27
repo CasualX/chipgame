@@ -34,8 +34,8 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	if matches!(kind, chipty::EntityKind::Player) {
 		ctx.camera.move_src = ent.pos;
 		ctx.camera.move_dest = ent.pos;
-		ctx.camera.move_time = ctx.render.time;
-		ctx.camera.move_spd = ent.base_spd as f32 / 60.0;
+		ctx.camera.move_time = ctx.time;
+		ctx.camera.move_spd = ent.base_spd as f32 / chipcore::FPS as f32;
 		ctx.camera.move_teleport = true;
 	}
 }
@@ -69,10 +69,15 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
 	obj.data.pos = ent_pos(&ctx.gs, ent, src);
+
+	// Ensure the previous step animation is cleared...
+	// See [MoveStep::animate] setting obj.pos when the animation completes.
+	obj.anim.anims.clear();
+
 	obj.anim.anims.push(render::AnimState::MoveStep(render::MoveStep {
 		dest: ent.pos,
-		move_time: ctx.render.time,
-		move_spd: ent.step_spd as f32 / 60.0,
+		move_time: ctx.time,
+		move_spd: ent.step_spd as f32 / chipcore::FPS as f32,
 	}));
 
 	// Quick hack to flatten sprites on top of walls
@@ -82,8 +87,8 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_src = src;
 		ctx.camera.move_dest = ent.pos;
-		ctx.camera.move_time = ctx.render.time;
-		ctx.camera.move_spd = ent.step_spd as f32 / 60.0;
+		ctx.camera.move_time = ctx.time;
+		ctx.camera.move_spd = ent.step_spd as f32 / chipcore::FPS as f32;
 		ctx.camera.move_teleport = false;
 	}
 }
@@ -424,13 +429,13 @@ pub fn remove_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 }
 
 pub fn game_over(ctx: &mut FxState, reason: chipcore::GameOverReason) {
-	ctx.game_realtime = ctx.render.time;
-	ctx.next_level_load = ctx.render.time + 2.0;
+	ctx.game_realtime = (ctx.time - ctx.game_start_time) as f32;
+	ctx.next_level_load = ctx.time + 2.0;
 	ctx.game_over = Some(reason);
 }
 
 pub fn effect(ctx: &mut FxState, pos: Vec2i, ty: render::EffectType) {
 	let pos = Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 10.0);
-	let start = ctx.render.time;
+	let start = ctx.time;
 	ctx.render.effects.push(render::Effect { ty, pos, start });
 }

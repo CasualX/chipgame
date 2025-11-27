@@ -1,6 +1,6 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
-use std::{fs, mem, path, thread, time};
+use std::{fs, mem, path, time};
 use std::ffi::CString;
 use std::num::NonZeroU32;
 
@@ -10,6 +10,10 @@ use chipgame::FileSystem;
 
 mod audio;
 mod gamepad;
+
+const NANOS_PER_SECOND: f64 = 1_000_000_000.0;
+const FRAME_TIME: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / chipcore::FPS as f64) as u64);
+const SLOW_THRESHOLD: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / (chipcore::FPS + 1) as f64) as u64);
 
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
@@ -152,7 +156,8 @@ fn main() {
 	state.lvsets.load();
 
 	let mut key_input = chipcore::Input::default();
-	let mut past_now = time_base;
+	let mut last_frame_start = time::Instant::now();
+	let mut tick_budget = time::Duration::ZERO;
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
@@ -166,6 +171,8 @@ fn main() {
 					let mut built = AppStuff::new(elwt, &fs, &config);
 					state.launch(&mut built.g);
 					app = Some(built);
+					last_frame_start = time::Instant::now() - FRAME_TIME;
+					tick_budget = time::Duration::ZERO;
 				}
 			}
 			Event::WindowEvent { event, .. } => match event {
@@ -175,6 +182,7 @@ fn main() {
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
 						app.surface.resize(&app.context, width, height);
+						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 					}
 				}
 				WindowEvent::CloseRequested => elwt.exit(),
@@ -209,15 +217,25 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = app.as_deref_mut() {
+						let frame_start = time::Instant::now();
+						let frame_dt = frame_start - last_frame_start;
+						last_frame_start = frame_start;
+
+						// Gamepad support
 						let pad_input = gamepads.poll();
 						let input = key_input | pad_input;
-						state.think(&input);
 
-						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
-						app.g.begin();
-						let time = time_base.elapsed().as_secs_f64();
-						state.draw(&mut app.g, &mut app.resx, time);
-						app.g.end();
+						if frame_dt >= SLOW_THRESHOLD {
+							state.think(&input);
+							tick_budget = time::Duration::ZERO;
+						}
+						else {
+							tick_budget += frame_dt;
+							while tick_budget >= FRAME_TIME {
+								state.think(&input);
+								tick_budget -= FRAME_TIME;
+							}
+						}
 
 						for evt in &mem::replace(&mut state.events, Vec::new()) {
 							match evt {
@@ -228,20 +246,18 @@ fn main() {
 							}
 						}
 
-						app.surface.swap_buffers(&app.context).unwrap();
-					}
+						app.g.begin();
+						let time = time_base.elapsed().as_secs_f64();
+						state.draw(&mut app.g, &mut app.resx, time);
+						app.g.end();
 
-					let now = time::Instant::now();
-					let sleep_dur = time::Duration::from_millis(24).saturating_sub(now - past_now);
-					past_now = now;
-					if sleep_dur > time::Duration::ZERO {
-						thread::sleep(sleep_dur);
+						app.surface.swap_buffers(&app.context).unwrap();
 					}
 				}
 				_ => {}
 			},
 			Event::AboutToWait => {
-				if let Some(app) = app.as_ref() {
+				if let Some(app) = app.as_deref() {
 					app.window.request_redraw();
 				}
 			}

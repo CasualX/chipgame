@@ -19,10 +19,10 @@ impl Fireworks {
 			self.pos.y = rng.range(rc.top()..rc.bottom()).round();
 		}
 
-		let atime = time - self.time_start;
+		let atime = (time - self.time_start) as f32;
 		if atime < 1.0 {
 			// 12 frames of animation
-			let t = f64::clamp(atime, 0.0, 1.0) as f32;
+			let t = f32::clamp(atime, 0.0, 1.0);
 			let aindex = f32::floor(t * 13.0).min(12.0);
 
 			let d_size = 96.0;

@@ -4,18 +4,21 @@ use super::*;
 pub struct FxState {
 	pub gs: chipcore::GameState,
 	pub camera: PlayCamera,
+	pub time: f64,
+	pub dt: f64,
 	pub render: render::RenderState,
 	pub objlookup: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
 	pub firesprites: HashMap<Vec2i, render::ObjectHandle>,
 	pub togglewalls: HashMap<Vec2i, render::ObjectHandle>,
 	pub inviswalls: HashMap<Vec2i, render::ObjectHandle>,
 	pub level_number: i32,
-	pub next_level_load: f32,
+	pub next_level_load: f64,
+	pub game_start_time: f64,
 	pub game_realtime: f32,
 	pub game_over: Option<chipcore::GameOverReason>,
 	pub hud_enabled: bool,
 	pub darken: bool,
-	pub darken_time: f32,
+	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
 	pub replay: Option<Vec<u8>>,
 }
@@ -52,6 +55,7 @@ impl FxState {
 
 		self.level_number = level_number;
 		self.next_level_load = 0.0;
+		self.game_start_time = 0.0;
 		self.game_realtime = 0.0;
 		self.game_over = None;
 		self.hud_enabled = true;
@@ -109,7 +113,11 @@ impl FxState {
 		self.gs.tick(&replay_input.unwrap_or(player_input));
 		self.sync();
 
-		if self.next_level_load != 0.0 && self.render.time > self.next_level_load {
+		if self.game_start_time == 0.0 && self.gs.time > 0 {
+			self.game_start_time = self.time;
+		}
+
+		if self.next_level_load != 0.0 && self.time > self.next_level_load {
 			self.next_level_load = 0.0;
 			let event = if matches!(self.game_over, Some(chipcore::GameOverReason::LevelComplete)) {
 				FxEvent::LevelComplete
@@ -172,21 +180,26 @@ impl FxState {
 	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
 		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * speed);
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
+		let dt = time - self.time;
+		self.time = time;
+		self.dt = dt;
+		let ctx = render::UpdateCtx { time: self.time, dt: self.dt };
+
 		if self.gs.time != 0 {
 			self.camera.animate_blend();
 		}
 		if !matches!(self.gs.ts, chipcore::TimeState::Paused) {
-			self.camera.animate_move(self.render.time);
+			self.camera.animate_move(ctx.time);
 		}
-		self.camera.animate_position();
-		self.render.update();
+		self.camera.animate_position(ctx.dt);
+		self.render.update(&ctx);
 
 		let camera = self.camera.setup(resx.viewport.size());
-		self.render.draw(g, resx, &camera);
+		self.render.draw(g, resx, &camera, time);
 
 		if self.hud_enabled {
-			self.render_ui(g, resx);
+			self.render_ui(g, resx, time);
 		}
 	}
 }

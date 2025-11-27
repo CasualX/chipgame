@@ -23,9 +23,9 @@ impl DrawScoreCard {
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, "Attempts:\nTime:\nSteps:\nBonks:");
 
 		scribe.color = Vec4(0, 255, 128, 255);
-		let frames = self.time % 60;
-		let seconds = (self.time / 60) % 60;
-		let minutes = self.time / 3600;
+		let frames = self.time % chipcore::FPS;
+		let seconds = (self.time / chipcore::FPS) % 60;
+		let minutes = self.time / (chipcore::FPS * 60);
 		if minutes > 0 {
 			buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, &format!("{}\n{}:{:02}.{:02}\n{}\n{}", self.attempts, minutes, seconds, frames, self.steps, self.bonks));
 		}

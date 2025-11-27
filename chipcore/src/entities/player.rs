@@ -1,7 +1,7 @@
 use super::*;
 
 /// Time after which Chip returns to idle animation
-const IDLE_TIME: Time = 20;
+const IDLE_TIME: i32 = 20;
 
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	// There can only be one player

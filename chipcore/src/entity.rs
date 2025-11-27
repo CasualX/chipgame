@@ -16,11 +16,11 @@ pub struct Entity {
 	pub handle: EntityHandle,
 	pub kind: EntityKind,
 	pub pos: Vec2i,
-	pub base_spd: Time,
+	pub base_spd: i32,
 	pub face_dir: Option<Compass>,
 	pub step_dir: Option<Compass>,
-	pub step_spd: Time,
-	pub step_time: Time,
+	pub step_spd: i32,
+	pub step_time: i32,
 	pub flags: u8,
 }
 

@@ -1,6 +1,6 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
-use std::{fs, path, thread, time};
+use std::{fs, path, time};
 use std::ffi::CString;
 use std::num::NonZeroU32;
 
@@ -11,6 +11,10 @@ use chipgame::FileSystem;
 
 mod audio;
 mod gamepad;
+
+const NANOS_PER_SECOND: f64 = 1_000_000_000.0;
+const FRAME_TIME: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / chipcore::FPS as f64) as u64);
+const SLOW_THRESHOLD: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / (chipcore::FPS + 1) as f64) as u64);
 
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
@@ -128,6 +132,8 @@ fn load_level(editor: &mut editor::EditorState, file_path: &Option<path::PathBuf
 }
 
 fn main() {
+	let time_base = time::Instant::now();
+
 	// CLI: optional level path
 	let matches = clap::command!()
 		.arg(clap::arg!([level] "Level file to open").value_parser(clap::value_parser!(path::PathBuf)))
@@ -168,7 +174,8 @@ fn main() {
 	let mut key_down = false;
 	let mut gamepad_start = false;
 	let mut music_enabled = true;
-	let mut past_now = time::Instant::now();
+	let mut last_frame_start = time::Instant::now();
+	let mut tick_budget = time::Duration::ZERO;
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
@@ -187,6 +194,8 @@ fn main() {
 					app = Some(built);
 
 					load_level(&mut editor, &file_path, app.as_deref());
+					last_frame_start = time::Instant::now() - FRAME_TIME;
+					tick_budget = time::Duration::ZERO;
 				}
 			}
 			Event::WindowEvent { event, .. } => match event {
@@ -314,6 +323,9 @@ fn main() {
 				}
 				WindowEvent::RedrawRequested => {
 					if let Some(app) = app.as_deref_mut() {
+						let frame_start = time::Instant::now();
+						let frame_dt = frame_start - last_frame_start;
+						last_frame_start = frame_start;
 
 						// Gamepad support
 						let pad_input = gamepads.poll();
@@ -338,9 +350,27 @@ fn main() {
 							app.window.set_cursor_icon(cursor_icon);
 						}
 
-						app.g.begin();
-						editor.draw(&mut app.g, &app.resx);
-						app.g.end();
+						if frame_dt >= SLOW_THRESHOLD {
+							editor.think();
+							tick_budget = time::Duration::ZERO;
+						}
+						else {
+							tick_budget += frame_dt;
+							while tick_budget >= FRAME_TIME {
+								editor.think();
+								tick_budget -= FRAME_TIME;
+							}
+						}
+
+						let fx_events = editor.take_fx_events();
+						for evt in fx_events {
+							match evt {
+								chipgame::fx::FxEvent::Sound(sound) => ap.play_sound(sound),
+								// Return to edit mode on level complete or game over
+								chipgame::fx::FxEvent::LevelComplete | chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
+								_ => {}
+							}
+						}
 
 						let music = if music_enabled {
 							if matches!(editor, editor::EditorState::Play(_)) {
@@ -355,28 +385,18 @@ fn main() {
 						};
 						ap.play_music(music);
 
-						let fx_events = editor.take_fx_events();
-						for evt in fx_events {
-							match evt {
-								chipgame::fx::FxEvent::Sound(sound) => ap.play_sound(sound),
-								// Return to edit mode on level complete or game over
-								chipgame::fx::FxEvent::LevelComplete | chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
-								_ => {}
-							}
-						}
+						app.g.begin();
+						let time = time_base.elapsed().as_secs_f64();
+						editor.draw(&mut app.g, &app.resx, time);
+						app.g.end();
 
 						app.surface.swap_buffers(&app.context).unwrap();
 					}
-
-					let now = time::Instant::now();
-					let sleep_dur = time::Duration::from_millis(24).saturating_sub(now - past_now);
-					past_now = now;
-					thread::sleep(sleep_dur);
 				}
 				_ => {}
 			},
 			Event::AboutToWait => {
-				if let Some(app) = app.as_ref() {
+				if let Some(app) = app.as_deref() {
 					app.window.request_redraw();
 				}
 			}

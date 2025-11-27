@@ -11,9 +11,9 @@ impl fmt::Display for FmtTicks {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let &FmtTicks(ticks) = self;
 
-		let frames = ticks % 60;
-		let seconds = (ticks / 60) % 60;
-		let minutes = ticks / 3600;
+		let frames = ticks % chipcore::FPS;
+		let seconds = (ticks / chipcore::FPS) % 60;
+		let minutes = ticks / (chipcore::FPS * 60);
 
 		if minutes > 0 {
 			write!(f, "{}:{:02}.{:02}", minutes, seconds, frames)

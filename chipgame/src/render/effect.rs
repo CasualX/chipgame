@@ -9,13 +9,13 @@ pub enum EffectType {
 pub struct Effect {
 	pub ty: EffectType,
 	pub pos: Vec3f,
-	pub start: f32,
+	pub start: f64,
 }
 
 impl Effect {
-	pub fn draw(&self, cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, time: f32) {
+	pub fn draw(&self, cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, time: f64) {
 		let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
-		let t = f32::clamp(time - self.start, 0.0, 1.0);
+		let t = f32::clamp((time - self.start) as f32, 0.0, 1.0);
 		// 12 frames of animation
 		let aindex = f32::floor(t * 13.0).min(12.0);
 		let d_size = 96.0;

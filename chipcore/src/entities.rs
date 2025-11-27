@@ -1,6 +1,6 @@
 use super::*;
 
-const BASE_SPD: Time = 12;
+const BASE_SPD: i32 = 12;
 
 mod blob;
 mod block;

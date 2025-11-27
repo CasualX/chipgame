@@ -17,7 +17,7 @@ pub enum TimeState {
 /// Game state.
 #[derive(Default)]
 pub struct GameState {
-	pub time: Time,
+	pub time: i32,
 	pub ts: TimeState,
 	pub ps: PlayerState,
 	pub field: Field,
@@ -80,7 +80,7 @@ impl GameState {
 		self.ts = TimeState::Running;
 
 		// Check if the player has run out of time
-		if self.field.time_limit > 0 && self.time >= self.field.time_limit * 60 {
+		if self.field.time_limit > 0 && self.time >= self.field.time_limit * FPS {
 			ps_game_over(self, GameOverReason::TimeOut);
 			return;
 		}

@@ -26,15 +26,7 @@ impl EditorPlayState {
 	pub fn set_screen_size(&mut self, width: i32, height: i32) {
 		self.screen_size = Vec2::new(width, height);
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
-		// Clear the screen
-		g.clear(&shade::ClearArgs {
-			surface: shade::Surface::BACK_BUFFER,
-			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
-			depth: Some(1.0),
-			..Default::default()
-		});
-
+	pub fn think(&mut self) {
 		let input = menu::Input {
 			a: menu::KeyState::Up,
 			b: menu::KeyState::Up,
@@ -46,7 +38,14 @@ impl EditorPlayState {
 			select: menu::KeyState::Up,
 		};
 		self.game.think(&input);
-		self.game.draw(g, resx);
-		return;
+	}
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
+		g.clear(&shade::ClearArgs {
+			surface: shade::Surface::BACK_BUFFER,
+			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
+			depth: Some(1.0),
+			..Default::default()
+		});
+		self.game.draw(g, resx, time);
 	}
 }

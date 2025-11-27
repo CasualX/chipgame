@@ -22,7 +22,7 @@ pub struct PlayCamera {
 
 	pub move_src: Vec2<i32>,
 	pub move_dest: Vec2<i32>,
-	pub move_time: f32,
+	pub move_time: f64,
 	pub move_spd: f32,
 	pub move_teleport: bool,
 }
@@ -95,13 +95,13 @@ impl PlayCamera {
 		}
 	}
 
-	pub fn animate_position(&mut self) {
+	pub fn animate_position(&mut self, dt: f64) {
 		let position_target = self.target + self.get_offset();
-		self.position = self.position.exp_decay(position_target, 15.0, 1.0 / 60.0).set_x(position_target.x);
+		self.position = self.position.exp_decay(position_target, 15.0, dt as f32).set_x(position_target.x);
 	}
 
-	pub fn animate_move(&mut self, time: f32) {
-		let t = f32::min(1.0, (time - self.move_time) / self.move_spd);
+	pub fn animate_move(&mut self, time: f64) {
+		let t = f32::min(1.0, (time - self.move_time) as f32 / self.move_spd);
 		let src = self.move_src.map(|c| c as f32 * 32.0).vec3(0.0);
 		let dest = self.move_dest.map(|c| c as f32 * 32.0).vec3(0.0);
 		let new_target = src.lerp(dest, t);

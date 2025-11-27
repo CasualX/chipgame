@@ -192,10 +192,16 @@ impl EditorState {
 			},
 		}
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
+	pub fn think(&mut self) {
 		match self {
-			EditorState::Edit(s) => s.draw(g, resx),
-			EditorState::Play(s) => s.draw(g, resx),
+			EditorState::Edit(s) => s.think(),
+			EditorState::Play(s) => s.think(),
+		}
+	}
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
+		match self {
+			EditorState::Edit(s) => s.draw(g, resx, time),
+			EditorState::Play(s) => s.draw(g, resx, time),
 		}
 	}
 

@@ -108,8 +108,9 @@ impl EditorEditState {
 	pub fn key_down(&mut self, pressed: bool) {
 		self.input.key_down = pressed;
 	}
-	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources) {
-		// Clear the screen
+	pub fn think(&mut self) {
+	}
+	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
 		g.clear(&shade::ClearArgs {
 			surface: shade::Surface::BACK_BUFFER,
 			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
@@ -130,7 +131,7 @@ impl EditorEditState {
 			self.game.camera.target.y += 5.0;
 		}
 
-		self.game.camera.animate_position();
+		self.game.camera.animate_position(self.game.dt);
 
 		if let Some(tool_pos) = self.tool_pos {
 			if tool_pos != self.cursor_pos {
@@ -144,7 +145,7 @@ impl EditorEditState {
 		}
 
 		render::drawbg(g, resx);
-		self.game.draw(g, resx);
+		self.game.draw(g, resx, time);
 
 		let cam = self.game.camera.setup(self.screen_size);
 
