@@ -1,23 +1,26 @@
 
+/// Gamepad input handling using the gilrs crate.
 pub struct GamepadManager {
-	gilrs: Option<gilrs::Gilrs>,
+	instance: Option<Box<gilrs::Gilrs>>,
 }
 
 impl GamepadManager {
+	/// Creates a new GamepadManager instance.
 	pub fn new() -> GamepadManager {
-		let gilrs = match gilrs::Gilrs::new() {
-			Ok(g) => Some(g),
+		let instance = match gilrs::Gilrs::new() {
+			Ok(g) => Some(Box::new(g)),
 			Err(err) => {
 				eprintln!("[gamepad] failed to initialize gilrs: {err}");
 				None
 			}
 		};
-		GamepadManager { gilrs }
+		GamepadManager { instance }
 	}
 
+	/// Polls the current state of connected gamepads and aggregates their inputs.
 	pub fn poll(&mut self) -> chipcore::Input {
 		let mut aggregated = chipcore::Input::default();
-		let Some(gilrs) = self.gilrs.as_mut() else {
+		let Some(gilrs) = self.instance.as_mut() else {
 			return aggregated;
 		};
 

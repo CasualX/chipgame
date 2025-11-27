@@ -1,10 +1,15 @@
+use std::path;
 
 fn main() {
-	let app = clap::command!("spritec")
-		.arg(clap::arg!([files] "Paths to .ini files describing the sprite").multiple_occurrences(true));
-	let matches = app.get_matches();
+	let matches = clap::command!()
+		.arg(clap::arg!([files] "Paths to .ini files describing the sprite").num_args(1..).value_parser(clap::value_parser!(path::PathBuf)))
+		.get_matches();
 
-	let files: Vec<_> = matches.values_of("files").unwrap().map(parse_sprite).collect();
+	let files: Vec<_> = matches
+		.get_many::<path::PathBuf>("files")
+		.expect("Expected at least one sprite file")
+		.map(|path| parse_sprite(path))
+		.collect();
 
 	eprintln!("{:#?}", files);
 }
@@ -21,7 +26,7 @@ struct SpriteIni {
 	frames: Vec<FrameIni>,
 }
 
-fn parse_sprite(path: &str) -> SpriteIni {
+fn parse_sprite(path: &path::Path) -> SpriteIni {
 	use ini_core as minip;
 
 	let contents = std::fs::read_to_string(path).unwrap();

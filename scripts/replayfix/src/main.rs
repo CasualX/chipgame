@@ -34,19 +34,16 @@ fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, seed: u64, 
 }
 
 fn main() {
-	let app = clap::Command::new("replayfix")
+	let matches = clap::command!()
 		.about("Bruteforce a matching RNG seed for a replay")
-		.arg(clap::arg!(<LEVEL> "Path to the level JSON").allow_invalid_utf8(true))
-		.arg(clap::arg!(<REPLAY> "Path to the replay JSON").allow_invalid_utf8(true))
-		.arg(clap::arg!(--count [COUNT] "Number of seeds to try (default: 1000)").required(false).takes_value(true))
+		.arg(clap::arg!(<LEVEL> "Path to the level JSON").value_parser(clap::value_parser!(path::PathBuf)))
+		.arg(clap::arg!(<REPLAY> "Path to the replay JSON").value_parser(clap::value_parser!(path::PathBuf)))
+		.arg(clap::arg!(--count [COUNT] "Number of seeds to try (default: 1000)").value_parser(clap::value_parser!(usize)))
 		.get_matches();
 
-	let level_path = path::PathBuf::from(app.value_of_os("LEVEL").unwrap());
-	let replay_path = path::PathBuf::from(app.value_of_os("REPLAY").unwrap());
-	let count: usize = app
-		.value_of("count")
-		.map(|s| s.parse().expect("Invalid count"))
-		.unwrap_or(1000);
+	let level_path = matches.get_one::<path::PathBuf>("LEVEL").unwrap();
+	let replay_path = matches.get_one::<path::PathBuf>("REPLAY").unwrap();
+	let count = matches.get_one::<usize>("count").cloned().unwrap_or(1000);
 
 	let level_content = fs::read_to_string(&level_path).expect("Failed to read level file");
 	let replay_content = fs::read_to_string(&replay_path).expect("Failed to read replay file");

@@ -1,16 +1,17 @@
 use std::fs;
+use std::path::PathBuf;
 
 fn main() {
-	let app = clap::command!("colorkey")
-		.arg(clap::arg!(-i <input> "Input image file"))
-		.arg(clap::arg!(-o <output> "Output image file"));
-	let matches = app.get_matches();
+	let matches = clap::command!()
+		.arg(clap::arg!(-i <input> "Input image file").value_parser(clap::value_parser!(PathBuf)))
+		.arg(clap::arg!(-o <output> "Output image file").value_parser(clap::value_parser!(PathBuf)))
+		.get_matches();
 
-	let input_file = matches.value_of("input").unwrap();
-	let output_file = matches.value_of("output").unwrap();
+	let input_file = matches.get_one::<PathBuf>("input").expect("Missing input file argument").clone();
+	let output_file = matches.get_one::<PathBuf>("output").expect("Missing output file argument").clone();
 
 	// Load the image file and replace pink with transparent color
-	let mut decoder = png::Decoder::new(fs::File::open(input_file).unwrap());
+	let mut decoder = png::Decoder::new(fs::File::open(&input_file).unwrap());
 	decoder.set_transformations(png::Transformations::normalize_to_color8());
 	let mut reader = decoder.read_info().unwrap();
 	let mut pixels = vec![0; reader.output_buffer_size()];
@@ -48,13 +49,13 @@ fn main() {
 	let mut buffer = vec![0; image.len()];
 	recover_alpha_colors(&image, &mut buffer, width as i32, height as i32);
 
-	let mut encoder = png::Encoder::new(fs::File::create(output_file).unwrap(), width as u32, height as u32);
+	let mut encoder = png::Encoder::new(fs::File::create(&output_file).unwrap(), width as u32, height as u32);
 	encoder.set_color(png::ColorType::Rgba);
 	encoder.set_depth(png::BitDepth::Eight);
 	encoder.set_compression(png::Compression::Best);
 	let mut writer = encoder.write_header().unwrap();
 	writer.write_image_data(&buffer).unwrap();
-	println!("Converted {} to {}", input_file, output_file);
+	println!("Converted {} to {}", input_file.display(), output_file.display());
 }
 
 fn copy_pixels(

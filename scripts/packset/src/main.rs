@@ -1,22 +1,23 @@
-use std::fs;
+use std::{fs, path};
 
 use chipty::*;
 
 fn main() {
-	let app = clap::command!("packset")
-		.arg(clap::arg!(<LEVELSET_PATH> "Path to levelset directory"))
-		.arg(clap::arg!(-k --key [KEY] "Encryption key").required(false).takes_value(true))
-		.arg(clap::arg!(<OUTPUT_FILE> "Path to output packed levelset file"));
+	let app = clap::command!()
+		.arg(clap::arg!(<LEVELSET_PATH> "Path to levelset directory").value_parser(clap::value_parser!(path::PathBuf)))
+		.arg(clap::arg!(-k --key [KEY] "Encryption key"))
+		.arg(clap::arg!(<OUTPUT_FILE> "Path to output packed levelset file").value_parser(clap::value_parser!(path::PathBuf)));
+
 	let matches = app.get_matches();
-	let base_path = matches.get_one::<String>("LEVELSET_PATH").expect("LEVELSET_PATH argument missing");
-	let output_file = matches.get_one::<String>("OUTPUT_FILE").expect("OUTPUT_FILE argument missing");
+	let base_path = matches.get_one::<path::PathBuf>("LEVELSET_PATH").expect("LEVELSET_PATH argument missing");
+	let output_file = matches.get_one::<path::PathBuf>("OUTPUT_FILE").expect("OUTPUT_FILE argument missing");
 	let ref key = matches.get_one::<String>("key").map(|s| paks::parse_key(&s).expect("Invalid key format")).unwrap_or(paks::Key::default());
 
-	println!("Packing levelset {base_path} into {output_file}");
+	println!("Packing levelset {} into {}", base_path.display(), output_file.display());
 
 	// Load levelset at index.json
-	let index_path = format!("{}/index.json", base_path);
-	let mut levelset: LevelSetDto = match serde_json::from_reader(fs::File::open(index_path).expect("Failed to open levelset file")) {
+	let index_path = base_path.join("index.json");
+	let mut levelset: LevelSetDto = match serde_json::from_reader(fs::File::open(&index_path).expect("Failed to open levelset file")) {
 		Ok(ls) => ls,
 		Err(e) => {
 			eprintln!("Error loading levelset: {}", e);
@@ -28,8 +29,8 @@ fn main() {
 	for entry in &mut levelset.levels {
 		if let LevelRef::Indirect(ref path) = entry {
 			// Load level file
-			let level_path = format!("{}/{}", base_path, path);
-			let level: LevelDto = match serde_json::from_reader(fs::File::open(level_path).expect("Failed to open level file")) {
+			let level_path = base_path.join(path);
+			let level: LevelDto = match serde_json::from_reader(fs::File::open(&level_path).expect("Failed to open level file")) {
 				Ok(level) => level,
 				Err(e) => {
 					eprintln!("Error loading level {}: {}", path, e);
@@ -51,10 +52,10 @@ fn main() {
 	);
 
 	// Create paks file
-	let mut paks = paks::FileEditor::create_new(output_file, key).expect("Failed to create output paks file");
+	let mut paks = paks::FileEditor::create_new(&output_file, key).expect("Failed to create output paks file");
 	paks.create_file(b"index.json", &compressed, key).expect("Failed to add index.json to paks");
 	if let Some(splash) = &levelset.splash {
-		let splash_path = format!("{}/{}", base_path, splash);
+		let splash_path = base_path.join(splash);
 		let splash_data = fs::read(&splash_path).expect("Failed to read splash image");
 		paks.create_file(splash.as_bytes(), &splash_data, key).expect("Failed to add splash image to paks");
 	}

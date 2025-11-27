@@ -4,25 +4,26 @@ use std::{fs, path};
 use chipty::*;
 
 fn main() {
-	let matches = clap::App::new("chipdat")
+	let matches = clap::command!()
 		.about("Extract a Chip's Challenge DAT file into a JSON levelset structure")
 		.arg(clap::Arg::new("INPUT")
 			.help("Path to the input .dat file (MS/Steam style DAT)")
-			.required(true))
+			.required(true)
+			.value_parser(clap::value_parser!(path::PathBuf)))
 		.arg(clap::Arg::new("OUT_DIR")
 			.help("Directory to write the extracted levelset (created if missing)")
-			.required(true))
+			.required(true)
+			.value_parser(clap::value_parser!(path::PathBuf)))
 		.arg(clap::Arg::new("ENCODING")
 			.short('e')
 			.long("encoding")
-			.takes_value(true)
-			.possible_values(&["utf8", "latin1", "windows1252"])
+			.value_parser(["utf8", "latin1", "windows1252"])
 			.help("Text encoding (ascii|utf8|latin1|windows1252) [default: windows1252]"))
 		.get_matches();
 
-	let input = path::PathBuf::from(matches.value_of("INPUT").unwrap());
-	let out_dir = path::PathBuf::from(matches.value_of("OUT_DIR").unwrap());
-	let encoding = match matches.value_of("ENCODING").unwrap_or("windows1252") {
+	let input = matches.get_one::<path::PathBuf>("INPUT").unwrap().clone();
+	let out_dir = matches.get_one::<path::PathBuf>("OUT_DIR").unwrap().clone();
+	let encoding = match matches.get_one::<String>("ENCODING").map(|s| s.as_str()).unwrap_or("windows1252") {
 		"utf8" => chipdat::Encoding::Utf8,
 		"latin1" => chipdat::Encoding::Latin1,
 		"windows1252" => chipdat::Encoding::Windows1252,
@@ -34,9 +35,9 @@ fn main() {
 	let dat = chipdat::read(&input, &opts).expect("Failed to read DAT file");
 
 	let dat_name = input.file_stem().unwrap().to_str().unwrap();
-	let levelset_path = format!("{}/{}", out_dir.display(), dat_name);
+	let levelset_path = out_dir.join(dat_name);
 	let _ = fs::create_dir(&levelset_path);
-	let levelset_index = format!("{}/index.json", levelset_path);
+	let levelset_index = levelset_path.join("index.json");
 
 	let levelset = LevelSetDto {
 		title: dat_name.to_string(),
@@ -46,7 +47,10 @@ fn main() {
 		levels: (0..dat.levels.len()).map(|i| LevelRef::Indirect(format!("lv/level{}.json", i + 1))).collect(),
 	};
 	fs::write(&levelset_index, serde_json::to_string_pretty(&levelset).unwrap()).expect("Failed to write levelset index");
-	eprintln!("Wrote levelset {}", levelset_index);
+	eprintln!("Wrote levelset {}", levelset_index.display());
+
+	let levels_path = levelset_path.join("lv");
+	let _ = fs::create_dir(&levels_path);
 
 	for (i, level) in dat.levels.iter().enumerate() {
 		let (map, ents, mut conns) = parse_content(&level.top_layer, &level.bottom_layer);
@@ -86,11 +90,9 @@ fn main() {
 		post_process(&mut level);
 
 		let json = serde_json::to_string(&level).unwrap();
-		let levels_path = format!("{}/{}/lv", out_dir.display(), dat_name);
-		let _ = fs::create_dir(&levels_path);
-		let level_path = format!("{}/{}/lv/level{}.json", out_dir.display(), dat_name, i + 1);
+		let level_path = levels_path.join(format!("level{}.json", i + 1));
 		fs::write(&level_path, json).expect("Failed to write level file");
-		eprintln!("Wrote level {}", level_path);
+		eprintln!("Wrote level {}", level_path.display());
 	}
 }
 

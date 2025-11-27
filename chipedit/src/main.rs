@@ -1,9 +1,8 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
-use std::{fs, thread, time};
+use std::{fs, path, thread, time};
 use std::ffi::CString;
 use std::num::NonZeroU32;
-use std::path::PathBuf;
 
 use glutin::prelude::*;
 
@@ -27,7 +26,7 @@ impl AppStuff {
 		elwt: &winit::event_loop::EventLoopWindowTarget<()>,
 		fs: &FileSystem,
 		config: &chipgame::config::Config,
-	) -> AppStuff {
+	) -> Box<AppStuff> {
 		use glutin::config::ConfigTemplateBuilder;
 		use glutin::context::{ContextApi, ContextAttributesBuilder, Version};
 		use glutin::display::GetGlDisplay;
@@ -96,7 +95,7 @@ impl AppStuff {
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
 
-		AppStuff { size, window, surface, context, g, resx }
+		Box::new(AppStuff { size, window, surface, context, g, resx })
 	}
 
 	fn set_fullscreen(&self, fullscreen: bool) {
@@ -112,7 +111,30 @@ impl AppStuff {
 	}
 }
 
+fn load_level(editor: &mut editor::EditorState, file_path: &Option<path::PathBuf>, app: Option<&AppStuff>) {
+	if let Some(fp) = file_path {
+		match fs::read_to_string(fp) {
+			Ok(contents) => {
+				editor.load_level(&contents);
+				if let Some(app) = app {
+					app.window.set_title(&format!("ChipEdit - {}", fp.display()));
+				}
+			}
+			Err(err) => {
+				eprintln!("Failed to load level {}: {err}", fp.display());
+			}
+		}
+	}
+}
+
 fn main() {
+	// CLI: optional level path
+	let matches = clap::command!()
+		.arg(clap::arg!([level] "Level file to open").value_parser(clap::value_parser!(path::PathBuf)))
+		.get_matches();
+
+	let mut file_path = matches.get_one::<path::PathBuf>("level").cloned();
+
 	let config = {
 		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
 		chipgame::config::Config::parse(config.as_str())
@@ -124,40 +146,36 @@ fn main() {
 		FileSystem::Paks(paks, key)
 	}
 	else {
-		FileSystem::StdFs(PathBuf::from("data"))
+		FileSystem::StdFs(path::PathBuf::from("data"))
 	};
-
-	let mut ap = audio::AudioPlayer::create();
-	ap.load(&fs, &config);
-	let mut music_enabled = true;
 
 	let mut gamepads = gamepad::GamepadManager::new();
 
-	// CLI: optional level path
-	let app = clap::command!("play").arg(clap::arg!([level] "Level file to open"));
-	let matches = app.get_matches();
-	let mut file_path = matches.value_of("level").map(PathBuf::from);
-
-	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
-	let mut shift_held = false;
+	let mut ap = audio::AudioPlayer::create();
+	ap.load(&fs, &config);
 
 	// App state
-	let mut app: Option<AppStuff> = None;
+	let mut app: Option<Box<AppStuff>> = None;
 	let mut editor = editor::EditorState::default();
 	editor.init();
-	let mut current_tool = None;
+	editor.load_level(include_str!("template.json"));
 
+	let mut current_tool = None;
+	let mut shift_held = false;
 	let mut key_left = false;
 	let mut key_right = false;
 	let mut key_up = false;
 	let mut key_down = false;
 	let mut gamepad_start = false;
-
+	let mut music_enabled = true;
 	let mut past_now = time::Instant::now();
+
+	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
 	let _ = event_loop.run(move |event, elwt| {
 		use winit::event::{ElementState, Event, MouseButton, WindowEvent};
 		use winit::keyboard::{KeyCode, PhysicalKey};
+		use winit::window::CursorIcon;
 
 		match event {
 			Event::Resumed => {
@@ -166,17 +184,9 @@ fn main() {
 
 					// Window title and initial level
 					built.window.set_title("ChipEdit - (unsaved)");
-					if let Some(fp) = &file_path {
-						if let Ok(contents) = fs::read_to_string(fp) {
-							editor.load_level(&contents);
-							built.window.set_title(&format!("ChipEdit - {}", fp.display()));
-						}
-					}
-					else {
-						editor.load_level(include_str!("template.json"));
-					}
-
 					app = Some(built);
+
+					load_level(&mut editor, &file_path, app.as_deref());
 				}
 			}
 			Event::WindowEvent { event, .. } => match event {
@@ -184,7 +194,7 @@ fn main() {
 					shift_held = new_mods.state().shift_key();
 				}
 				WindowEvent::Resized(new_size) => {
-					if let Some(app) = &mut app {
+					if let Some(app) = app.as_deref_mut() {
 						let width = NonZeroU32::new(new_size.width.max(1)).unwrap();
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
@@ -209,30 +219,21 @@ fn main() {
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
 								.set_title("Open Level");
-							if let Some(ref existing) = file_path {
+							if let Some(existing) = &file_path {
 								if let Some(parent) = existing.parent() {
 									dialog = dialog.set_directory(parent);
 								}
 							}
 							if let Some(path) = dialog.pick_file() {
-								match fs::read_to_string(&path) {
-									Ok(contents) => {
-										editor.load_level(&contents);
-										file_path = Some(path.clone());
-										if let Some(app) = &app {
-											app.window.set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap().display()));
-										}
-									}
-									Err(e) => eprintln!("Failed to open level: {e}"),
-								}
+								file_path = Some(path);
+								load_level(&mut editor, &file_path, app.as_deref());
 							}
 						}
 						PhysicalKey::Code(KeyCode::F5) if pressed => {
-							let contents = editor.save_level();
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
 								.set_title("Save Level");
-							if let Some(ref existing) = file_path {
+							if let Some(existing) = &file_path {
 								if let Some(parent) = existing.parent() {
 									dialog = dialog.set_directory(parent);
 								}
@@ -241,13 +242,16 @@ fn main() {
 								}
 							}
 							if let Some(path) = dialog.save_file() {
-								if let Err(e) = fs::write(&path, contents) {
-									eprintln!("Failed to save level: {e}");
-								}
-								else {
-									file_path = Some(path.clone());
-									if let Some(app) = &app {
-										app.window.set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap().display()));
+								let contents = editor.save_level();
+								match fs::write(&path, contents) {
+									Ok(_) => {
+										file_path = Some(path);
+										if let Some(app) = &app {
+											app.window.set_title(&format!("ChipEdit - {}", file_path.as_ref().unwrap().display()));
+										}
+									}
+									Err(err) => {
+										eprintln!("Failed to save level: {err}");
 									}
 								}
 							}
@@ -283,13 +287,13 @@ fn main() {
 							music_enabled = !music_enabled;
 						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
-							if let Some(app) = &mut app {
+							if let Some(app) = app.as_deref_mut() {
 								let want_fullscreen = app.window.fullscreen().is_none();
 								app.set_fullscreen(want_fullscreen);
 							}
 						}
 						PhysicalKey::Code(KeyCode::Escape) if pressed => {
-							if let Some(app) = &mut app {
+							if let Some(app) = app.as_deref_mut() {
 								app.set_fullscreen(false);
 							}
 						}
@@ -309,7 +313,7 @@ fn main() {
 					editor.mouse_move(position.x as i32, position.y as i32);
 				}
 				WindowEvent::RedrawRequested => {
-					if let Some(app) = &mut app {
+					if let Some(app) = app.as_deref_mut() {
 
 						// Gamepad support
 						let pad_input = gamepads.poll();
@@ -326,10 +330,10 @@ fn main() {
 						if current_tool != edit_tool {
 							current_tool = edit_tool;
 							let cursor_icon = match edit_tool {
-								Some(editor::Tool::Terrain) => winit::window::CursorIcon::Crosshair,
-								Some(editor::Tool::Entity) => winit::window::CursorIcon::Pointer,
-								Some(editor::Tool::Connection) => winit::window::CursorIcon::Alias,
-								None => winit::window::CursorIcon::Default,
+								Some(editor::Tool::Terrain) => CursorIcon::Crosshair,
+								Some(editor::Tool::Entity) => CursorIcon::Pointer,
+								Some(editor::Tool::Connection) => CursorIcon::Alias,
+								None => CursorIcon::Default,
 							};
 							app.window.set_cursor_icon(cursor_icon);
 						}
@@ -372,7 +376,7 @@ fn main() {
 				_ => {}
 			},
 			Event::AboutToWait => {
-				if let Some(app) = &app {
+				if let Some(app) = app.as_ref() {
 					app.window.request_redraw();
 				}
 			}

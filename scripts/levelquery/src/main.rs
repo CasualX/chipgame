@@ -7,18 +7,19 @@ struct LevelStats {
 }
 
 fn main() {
-	let app = clap::Command::new("levelquery")
+	let matches = clap::command!()
 		.about("Find levels with certain properties")
-		.arg(clap::arg!(<PATH> "Path to the levelpack").allow_invalid_utf8(true))
-		// .arg(clap::arg!(-k --key [KEY] "Encryption key").required(false).takes_value(true))
-		.arg(clap::arg!(--terrain [TERRAIN] "Terrain type to filter by").required(false).takes_value(true))
-		.arg(clap::arg!(--entity [ENTITY] "Entity type to filter by").required(false).takes_value(true))
-		.arg(clap::arg!(--asc "Sort results in ascending order").required(false).takes_value(false))
+		.arg(clap::arg!(<PATH> "Path to the levelpack").value_parser(clap::value_parser!(path::PathBuf)))
+		// .arg(clap::arg!(-k --key [KEY] "Encryption key").required(false))
+		.arg(clap::arg!(--terrain [TERRAIN] "Terrain type to filter by"))
+		.arg(clap::arg!(--entity [ENTITY] "Entity type to filter by"))
+		.arg(clap::arg!(--asc "Sort results in ascending order").required(false).action(clap::ArgAction::SetTrue))
 		.get_matches();
-	let path = path::PathBuf::from(app.value_of_os("PATH").unwrap());
-	let terrain: Option<chipty::Terrain> = app.value_of("terrain").map(|s| s.parse().expect("Invalid terrain type"));
-	let entity: Option<chipty::EntityKind> = app.value_of("entity").map(|s| s.parse().expect("Invalid entity type"));
-	let asc = app.is_present("asc");
+
+	let path = matches.get_one::<path::PathBuf>("PATH").unwrap().clone();
+	let terrain: Option<chipty::Terrain> = matches.get_one::<String>("terrain").map(|s| s.parse().expect("Invalid terrain type"));
+	let entity: Option<chipty::EntityKind> = matches.get_one::<String>("entity").map(|s| s.parse().expect("Invalid entity type"));
+	let asc = matches.get_flag("asc");
 	if terrain.is_some() && entity.is_some() {
 		panic!("Cannot filter by both terrain and entity at the same time");
 	}

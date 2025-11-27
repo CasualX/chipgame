@@ -25,7 +25,7 @@ impl AppStuff {
 		elwt: &winit::event_loop::EventLoopWindowTarget<()>,
 		fs: &FileSystem,
 		config: &chipgame::config::Config,
-	) -> AppStuff {
+	) -> Box<AppStuff> {
 		use glutin::config::ConfigTemplateBuilder;
 		use glutin::context::{ContextApi, ContextAttributesBuilder, Version};
 		use glutin::display::GetGlDisplay;
@@ -95,7 +95,7 @@ impl AppStuff {
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
 
-		AppStuff { size, window, surface, context, g, resx }
+		Box::new(AppStuff { size, window, surface, context, g, resx })
 	}
 
 	fn set_title(&self, state: &chipgame::play::PlayState) {
@@ -125,6 +125,14 @@ impl AppStuff {
 }
 
 fn main() {
+	let time_base = time::Instant::now();
+
+	let config = {
+		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
+		chipgame::config::Config::parse(config.as_str())
+	};
+
+	// VFS
 	let key = paks::Key::default();
 	let fs = if let Ok(paks) = paks::FileReader::open("data.paks", &key) {
 		FileSystem::Paks(paks, key)
@@ -136,29 +144,22 @@ fn main() {
 	let mut gamepads = gamepad::GamepadManager::new();
 
 	let mut ap = audio::AudioPlayer::create();
-
-	let config = {
-		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
-		chipgame::config::Config::parse(config.as_str())
-	};
 	ap.load(&fs, &config);
+
+	// App state
+	let mut app: Option<Box<AppStuff>> = None;
+	let mut state = Box::new(chipgame::play::PlayState::default());
+	state.lvsets.load();
+
+	let mut key_input = chipcore::Input::default();
+	let mut past_now = time_base;
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
-	// App state to be initialized on Event::Resumed
-	let mut app: Option<AppStuff> = None;
-
-	let mut kbd_input = chipcore::Input::default();
-	let time_base = time::Instant::now();
-	let mut past_now = time::Instant::now();
-
-	let mut state = chipgame::play::PlayState::default();
-	state.lvsets.load();
-
-	use winit::event::{ElementState, Event, WindowEvent};
-	use winit::keyboard::{KeyCode, PhysicalKey};
-
 	let _ = event_loop.run(move |event, elwt| {
+		use winit::event::{ElementState, Event, WindowEvent};
+		use winit::keyboard::{KeyCode, PhysicalKey};
+
 		match event {
 			Event::Resumed => {
 				if app.is_none() {
@@ -169,7 +170,7 @@ fn main() {
 			}
 			Event::WindowEvent { event, .. } => match event {
 				WindowEvent::Resized(new_size) => {
-					if let Some(app) = &mut app {
+					if let Some(app) = app.as_deref_mut() {
 						let width = NonZeroU32::new(new_size.width.max(1)).unwrap();
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
@@ -181,25 +182,25 @@ fn main() {
 					let pressed = matches!(event.state, ElementState::Pressed);
 
 					match event.physical_key {
-						PhysicalKey::Code(KeyCode::ArrowLeft) => kbd_input.left = pressed,
-						PhysicalKey::Code(KeyCode::ArrowRight) => kbd_input.right = pressed,
-						PhysicalKey::Code(KeyCode::ArrowUp) => kbd_input.up = pressed,
-						PhysicalKey::Code(KeyCode::ArrowDown) => kbd_input.down = pressed,
-						PhysicalKey::Code(KeyCode::Space) => kbd_input.a = pressed,
-						PhysicalKey::Code(KeyCode::Backspace) => kbd_input.b = pressed,
-						PhysicalKey::Code(KeyCode::Enter) => kbd_input.start = pressed,
-						PhysicalKey::Code(KeyCode::ShiftLeft | KeyCode::ShiftRight) => kbd_input.select = pressed,
+						PhysicalKey::Code(KeyCode::ArrowLeft) => key_input.left = pressed,
+						PhysicalKey::Code(KeyCode::ArrowRight) => key_input.right = pressed,
+						PhysicalKey::Code(KeyCode::ArrowUp) => key_input.up = pressed,
+						PhysicalKey::Code(KeyCode::ArrowDown) => key_input.down = pressed,
+						PhysicalKey::Code(KeyCode::Space) => key_input.a = pressed,
+						PhysicalKey::Code(KeyCode::Backspace) => key_input.b = pressed,
+						PhysicalKey::Code(KeyCode::Enter) => key_input.start = pressed,
+						PhysicalKey::Code(KeyCode::ShiftLeft | KeyCode::ShiftRight) => key_input.select = pressed,
 						PhysicalKey::Code(KeyCode::KeyM) if pressed => {
 							state.toggle_music();
 						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
-							if let Some(app) = &mut app {
+							if let Some(app) = app.as_deref_mut() {
 								let want_fullscreen = app.window.fullscreen().is_none();
 								app.set_fullscreen(want_fullscreen);
 							}
 						}
 						PhysicalKey::Code(KeyCode::Escape) if pressed => {
-							if let Some(app) = &mut app {
+							if let Some(app) = app.as_deref_mut() {
 								app.set_fullscreen(false);
 							}
 						}
@@ -207,9 +208,9 @@ fn main() {
 					}
 				}
 				WindowEvent::RedrawRequested => {
-					if let Some(app) = &mut app {
+					if let Some(app) = app.as_deref_mut() {
 						let pad_input = gamepads.poll();
-						let input = kbd_input | pad_input;
+						let input = key_input | pad_input;
 						state.think(&input);
 
 						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
