@@ -1,0 +1,90 @@
+use super::*;
+
+#[derive(Default)]
+pub struct InteractTerrainState {
+	pub toggle_walls: u32,
+	pub turn_around_tanks: u32,
+	pub spawns: Vec<EntityArgs>,
+}
+
+pub fn bear_trap(s: &mut GameState, ent: &mut Entity, _result: &mut InteractTerrainState) {
+	let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
+	if trapped && ent.flags & EF_TRAPPED == 0 {
+		s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
+		// Avoid audio spam when the level is initially loaded
+		if s.time != 0 {
+			s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+		}
+	}
+	ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
+}
+
+fn is_button_press_audible(ent: &Entity) -> bool {
+	matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock)
+}
+
+pub fn green_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
+	result.toggle_walls += 1;
+	if is_button_press_audible(ent) {
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+	}
+}
+
+pub fn red_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
+	let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
+
+	// Handle CloneBlock tiles separately
+	let clone_block_dir = match s.field.get_terrain(conn.dest) {
+		Terrain::CloneBlockN => Some(Compass::Up),
+		Terrain::CloneBlockW => Some(Compass::Left),
+		Terrain::CloneBlockS => Some(Compass::Down),
+		Terrain::CloneBlockE => Some(Compass::Right),
+		_ => None,
+	};
+
+	// Spawn a new entity
+	let args = if let Some(clone_block_dir) = clone_block_dir {
+		EntityArgs {
+			kind: EntityKind::Block,
+			pos: conn.dest,
+			face_dir: Some(clone_block_dir),
+		}
+	}
+	else {
+		// Find the template entity connected to the red button
+		let template = s.qt.get(conn.dest)[0];
+		let Some(template_ent) = s.ents.get(template) else { return };
+		if template_ent.flags & EF_TEMPLATE == 0 {
+			return;
+		}
+		template_ent.to_entity_args()
+	};
+	result.spawns.push(args);
+
+	if is_button_press_audible(ent) {
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+	}
+}
+
+pub fn brown_button(s: &mut GameState, ent: &mut Entity, _result: &mut InteractTerrainState) {
+	if is_button_press_audible(ent) {
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+	}
+	for conn in &s.field.conns {
+		if conn.src == ent.pos {
+			// Release trapped entities at the destination
+			for ehandle in s.qt.get(conn.dest) {
+				let Some(mut ent) = s.ents.take(ehandle) else { continue };
+				ent.flags |= EF_RELEASED;
+				s.ents.put(ent);
+			}
+		}
+	}
+}
+
+pub fn blue_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
+	result.turn_around_tanks += 1;
+	if is_button_press_audible(ent) {
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
+	}
+}

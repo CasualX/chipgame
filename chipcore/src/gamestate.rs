@@ -70,10 +70,21 @@ impl GameState {
 impl GameState {
 	/// Advance the game state by one tick.
 	pub fn tick(&mut self, input: &Input) {
-		// Wait for the player to press any direction key to start the game
+		// Remove entities marked for removal at the start of the tick
+		// This allows observers to see entities for the tick they are removed
+		for ehandle in self.ents.handles() {
+			fn check_remove(ent: &Entity) -> bool {
+				ent.flags & EF_REMOVE != 0
+			}
+			if self.ents.get(ehandle).map(check_remove).unwrap_or(false) {
+				self.entity_remove(ehandle);
+			}
+		}
+
+		// Wait for the player to press any direction input to start the game
 		match self.ts {
 			TimeState::Paused => return,
-			TimeState::Waiting => if !input.any_arrows() { return },
+			TimeState::Waiting => if !input.has_directional_input() { return },
 			TimeState::Running => {},
 			TimeState::GameOver => return,
 		}
@@ -86,57 +97,55 @@ impl GameState {
 		}
 
 		// Handle player input
-		input.encode(&mut self.inputs);
 		ps_input(self, input);
 
-		// Let entities think
+		// Movement phase
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
 				if !matches!(ent.kind, EntityKind::Player) {
-					(ent.data.think)(self, &mut ent);
+					(ent.data.movement_phase)(self, &mut ent);
 				}
 				self.ents.put(ent);
 			}
 		}
 
-		// Simulate the player last
+		// Move the player last
 		if let Some(mut ent) = self.ents.take(self.ps.master) {
-			(ent.data.think)(self, &mut ent);
+			(ent.data.movement_phase)(self, &mut ent);
 			self.ents.put(ent);
 		}
 
-		// Handle entity-terrain interactions
-		let mut it_state = InteractTerrainState::default();
+		// Action phase
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
-				it_state.check(self, &mut ent);
+				(ent.data.action_phase)(self, &mut ent);
 				self.ents.put(ent);
 			}
 		}
-		if it_state.toggle_walls & 1 != 0 {
+
+		// Terrain phase
+		let mut its = InteractTerrainState::default();
+		for ehandle in self.ents.handles() {
+			if let Some(mut ent) = self.ents.take(ehandle) {
+				(ent.data.terrain_phase)(self, &mut ent, &mut its);
+				self.ents.put(ent);
+			}
+		}
+		if its.toggle_walls & 1 != 0 {
 			self.toggle_walls();
 		}
-		if it_state.turn_around_tanks & 1 != 0 {
+		if its.turn_around_tanks & 1 != 0 {
 			self.turn_around_tanks();
-		}
-
-		// Remove entities marked for removal
-		for ehandle in self.ents.handles() {
-			fn check_remove(ent: &Entity) -> bool {
-				ent.flags & EF_REMOVE != 0
-			}
-			if self.ents.get(ehandle).map(check_remove).unwrap_or(false) {
-				self.entity_remove(ehandle);
-			}
 		}
 
 		self.input = *input;
 		self.time += 1;
 
 		// HACK: Spawn the cloned entities on the 'next' tick
-		// Otherwise the clones won't move out of the spawner correctly
-		// Try it yourself: move this code above the increment of time
-		self.spawn_clones(&it_state.spawns);
+		// Otherwise the clones won't behave correctly...
+		// * Collides with the entity triggering the button one tile away
+		// * Does not trigger buttons as they are spawned
+		self.spawn_clones(&its.spawns);
 	}
 
 	/// Returns the trap state at the given position.

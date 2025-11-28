@@ -76,6 +76,13 @@ pub struct Events {
 	events: Vec<GameEvent>,
 }
 
+impl Into<Vec<GameEvent>> for Events {
+	#[inline]
+	fn into(self) -> Vec<GameEvent> {
+		self.events
+	}
+}
+
 impl Events {
 	#[inline]
 	pub fn clear(&mut self) {

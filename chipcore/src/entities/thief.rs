@@ -3,7 +3,7 @@ use super::*;
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	let handle = s.ents.alloc();
 	s.ents.put(Entity {
-		data: &FUNCS,
+		data: &DATA,
 		handle,
 		kind: args.kind,
 		pos: args.pos,
@@ -18,7 +18,10 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn think(s: &mut GameState, ent: &mut Entity) {
+fn movement_phase(_s: &mut GameState, _ent: &mut Entity) {
+}
+
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
 	if ps_check_new_pos(s, ent.pos) {
 		if s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots {
 			s.ps.flippers = false;
@@ -31,22 +34,28 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 }
 
-const FLAGS: SolidFlags = SolidFlags {
-	gravel: true,
-	fire: true,
-	dirt: true,
-	water: false,
-	exit: true,
-	blue_fake: true,
-	recessed_wall: true,
-	keys: true,
-	solid_key: true,
-	boots: true,
-	chips: true,
-	creatures: true,
-	player: false,
-	thief: true,
-	hint: false,
-};
+fn terrain_phase(_s: &mut GameState, _ent: &mut Entity, _state: &mut InteractTerrainState) {
+}
 
-static FUNCS: EntityData = EntityData { think, flags: FLAGS };
+static DATA: EntityData = EntityData {
+	movement_phase,
+	action_phase,
+	terrain_phase,
+	flags: SolidFlags {
+		gravel: true,
+		fire: true,
+		dirt: true,
+		water: false,
+		exit: true,
+		blue_fake: true,
+		recessed_wall: true,
+		keys: true,
+		solid_key: true,
+		boots: true,
+		chips: true,
+		creatures: true,
+		player: false,
+		thief: true,
+		hint: false,
+	},
+};

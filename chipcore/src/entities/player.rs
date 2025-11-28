@@ -16,7 +16,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	let handle = s.ents.alloc();
 	s.ps.master = handle;
 	s.ents.put(Entity {
-		data: &FUNCS,
+		data: &DATA,
 		handle,
 		kind: args.kind,
 		pos: args.pos,
@@ -31,8 +31,8 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn think(s: &mut GameState, ent: &mut Entity) {
-	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
+fn movement_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
 
@@ -66,39 +66,6 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			return;
 		}
 	}
-
-	// Turn dirt to floor after stepping on it
-	if ent.flags & EF_NEW_POS != 0 && matches!(terrain, Terrain::Dirt) {
-		s.set_terrain(ent.pos, Terrain::Floor);
-		s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
-	}
-
-	let activity = match terrain {
-		Terrain::Water => {
-			if s.ps.activity != PlayerActivity::Swimming {
-				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
-			}
-			PlayerActivity::Swimming
-		},
-		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => {
-			if s.ps.ice_skates {
-				PlayerActivity::IceSkating
-			}
-			else {
-				PlayerActivity::IceSliding
-			}
-		}
-		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => {
-			if s.ps.suction_boots {
-				PlayerActivity::ForceWalking
-			}
-			else {
-				PlayerActivity::ForceSliding
-			}
-		}
-		_ => PlayerActivity::Walking,
-	};
-	ps_activity(s, ent.handle, activity);
 
 	// Wait until movement is cleared before accepting new input
 	if s.time >= ent.step_time + ent.step_spd {
@@ -165,7 +132,7 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 				}
 			}
 
-			if ent.flags & EF_TRAPPED != 0 {
+			if ent.is_trapped() {
 				break 'end_move;
 			}
 
@@ -209,10 +176,9 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 			}
 
 			// Handle player input
-			if ent.flags & EF_TRAPPED != 0 { }
-			else if let Some(dir) = input_dir {
-				if !try_move(s, ent, dir) {
-					bump(s, ent, dir);
+			if let Some(step_dir) = input_dir {
+				if !try_move(s, ent, step_dir) {
+					bump(s, ent, step_dir);
 				}
 			}
 		}
@@ -230,22 +196,85 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 }
 
-const FLAGS: SolidFlags = SolidFlags {
-	gravel: false,
-	fire: false,
-	dirt: false,
-	water: false,
-	exit: false,
-	blue_fake: false,
-	recessed_wall: false,
-	keys: false,
-	solid_key: false,
-	boots: false,
-	chips: false,
-	creatures: false,
-	player: true,
-	thief: false,
-	hint: false,
-};
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
+	let activity = match s.field.get_terrain(ent.pos) {
+		Terrain::Water => {
+			if s.ps.activity != PlayerActivity::Swimming {
+				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
+			}
+			PlayerActivity::Swimming
+		},
+		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => {
+			if s.ps.ice_skates {
+				PlayerActivity::IceSkating
+			}
+			else {
+				PlayerActivity::IceSliding
+			}
+		}
+		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => {
+			if s.ps.suction_boots {
+				PlayerActivity::ForceWalking
+			}
+			else {
+				PlayerActivity::ForceSliding
+			}
+		}
+		_ => PlayerActivity::Walking,
+	};
+	ps_activity(s, ent.handle, activity);
+}
 
-static FUNCS: EntityData = EntityData { think, flags: FLAGS };
+fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {
+	if let Some(step_dir) = ent.step_dir {
+		let from_pos = ent.pos - step_dir.to_vec();
+		// HACK: Avoid triggering the recessed wall on the first step
+		if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) && s.ps.steps > 1 {
+			s.set_terrain(from_pos, Terrain::Wall);
+			s.events.fire(GameEvent::SoundFx { sound: SoundFx::WallPopup });
+		}
+	}
+
+	let terrain = s.field.get_terrain(ent.pos);
+
+	if matches!(terrain, Terrain::BearTrap) {
+		return bear_trap(s, ent, state);
+	}
+
+	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+		match terrain {
+			Terrain::Dirt => {
+				s.set_terrain(ent.pos, Terrain::Floor);
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
+			}
+			Terrain::GreenButton => green_button(s, ent, state),
+			Terrain::RedButton => red_button(s, ent, state),
+			Terrain::BrownButton => brown_button(s, ent, state),
+			Terrain::BlueButton => blue_button(s, ent, state),
+			_ => {}
+		}
+	}
+}
+
+static DATA: EntityData = EntityData {
+	movement_phase,
+	action_phase,
+	terrain_phase,
+	flags: SolidFlags {
+		gravel: false,
+		fire: false,
+		dirt: false,
+		water: false,
+		exit: false,
+		blue_fake: false,
+		recessed_wall: false,
+		keys: false,
+		solid_key: false,
+		boots: false,
+		chips: false,
+		creatures: false,
+		player: true,
+		thief: false,
+		hint: false,
+	},
+};

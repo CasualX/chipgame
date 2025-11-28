@@ -6,6 +6,7 @@ use std::{cmp, mem, ops};
 use cvmath::Vec2i;
 use chipty::*;
 
+mod edit;
 mod entities;
 mod entity;
 mod entitymap;
@@ -14,11 +15,11 @@ mod field;
 mod gamestate;
 mod inbuf;
 mod input;
-mod physics;
+mod movement;
 mod playerstate;
 mod quadtree;
 mod random;
-mod edit;
+mod terrain;
 
 pub use self::entities::*;
 pub use self::entity::*;
@@ -28,10 +29,11 @@ pub use self::field::*;
 pub use self::gamestate::*;
 pub use self::inbuf::*;
 pub use self::input::*;
-pub use self::physics::*;
+pub use self::movement::*;
 pub use self::playerstate::*;
 pub use self::quadtree::*;
 pub use self::random::*;
+use self::terrain::*;
 
 /// Game frames per second.
 pub const FPS: i32 = 60;

@@ -139,18 +139,22 @@ impl EntityMap {
 		*slot = Slot::Occupied { ent };
 	}
 	/// Iterates over all entity handles.
-	pub fn handles(&self) -> impl Iterator<Item = EntityHandle> + Clone {
+	#[inline]
+	pub fn handles(&self) -> impl Iterator<Item = EntityHandle> + DoubleEndedIterator + Clone {
 		(0..self.slots.len()).map(|index| EntityHandle((index + 1) as u32))
 	}
 	/// Iterates over all entities.
-	pub fn iter(&self) -> impl Iterator<Item = &Entity> {
+	#[inline]
+	pub fn iter(&self) -> impl Iterator<Item = &Entity> + DoubleEndedIterator + Clone {
 		self.slots.iter().filter_map(Slot::as_ent)
 	}
 	/// Iterates over all entities mutably.
-	pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Entity> {
+	#[inline]
+	pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Entity> + DoubleEndedIterator {
 		self.slots.iter_mut().filter_map(Slot::as_mut_ent)
 	}
 	/// Removes all entities.
+	#[inline]
 	pub fn clear(&mut self) {
 		self.slots.clear();
 		self.next = 0;

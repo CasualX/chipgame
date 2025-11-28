@@ -7,7 +7,7 @@ fn put(s: &mut EditorEditState) {
 		let cursor_pos = s.cursor_pos;
 		loop {
 			let Some(ehandle) = s.game.gs.ents.iter().find_map(|ent| {
-				if ent.pos == cursor_pos && matches!(ent.kind, chipcore::EntityKind::Block) {
+				if ent.pos == cursor_pos && matches!(ent.kind, chipty::EntityKind::Block) {
 					return Some(ent.handle);
 				}
 				None

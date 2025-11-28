@@ -3,7 +3,7 @@ use super::*;
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	let handle = s.ents.alloc();
 	s.ents.put(Entity {
-		data: &FUNCS,
+		data: &DATA,
 		handle,
 		kind: args.kind,
 		pos: args.pos,
@@ -18,8 +18,18 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn think(s: &mut GameState, ent: &mut Entity) {
-	if ent.flags & (EF_REMOVE | EF_HIDDEN | EF_TEMPLATE) != 0 {
+fn movement_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
+	}
+
+	if s.time >= ent.step_time + ent.step_spd {
+		try_terrain_move(s, ent, ent.step_dir);
+	}
+}
+
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
 
@@ -54,22 +64,28 @@ fn think(s: &mut GameState, ent: &mut Entity) {
 	}
 }
 
-const FLAGS: SolidFlags = SolidFlags {
-	gravel: false,
-	fire: false,
-	dirt: false,
-	water: false,
-	exit: false,
-	blue_fake: false,
-	recessed_wall: false,
-	keys: false,
-	solid_key: true,
-	boots: true,
-	chips: true,
-	creatures: false,
-	player: false,
-	thief: false,
-	hint: false,
-};
+fn terrain_phase(_s: &mut GameState, _ent: &mut Entity, _state: &mut InteractTerrainState) {
+}
 
-static FUNCS: EntityData = EntityData { think, flags: FLAGS };
+static DATA: EntityData = EntityData {
+	movement_phase,
+	action_phase,
+	terrain_phase,
+	flags: SolidFlags {
+		gravel: false,
+		fire: false,
+		dirt: false,
+		water: false,
+		exit: false,
+		blue_fake: false,
+		recessed_wall: false,
+		keys: false,
+		solid_key: true,
+		boots: true,
+		chips: true,
+		creatures: false,
+		player: false,
+		thief: false,
+		hint: false,
+	},
+};

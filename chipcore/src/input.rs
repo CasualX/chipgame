@@ -1,8 +1,5 @@
 use std::ops;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Button { Up, Down, Left, Right, A, B, Start, Select }
-
 /// Input data.
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Input {
@@ -17,11 +14,30 @@ pub struct Input {
 }
 
 impl Input {
-	pub fn any_arrows(&self) -> bool {
+	pub const NEUTRAL: Input = Input {
+		up: false,
+		left: false,
+		down: false,
+		right: false,
+		a: false,
+		b: false,
+		start: false,
+		select: false,
+	};
+
+	pub const LEFT: Input = Input { left: true, ..Input::NEUTRAL };
+	pub const RIGHT: Input = Input { right: true, ..Input::NEUTRAL };
+	pub const UP: Input = Input { up: true, ..Input::NEUTRAL };
+	pub const DOWN: Input = Input { down: true, ..Input::NEUTRAL };
+
+	/// Returns true if any directional input is pressed.
+	pub const fn has_directional_input(&self) -> bool {
 		self.up | self.left | self.down | self.right
 	}
 
-	pub fn encode(&self, buf: &mut Vec<u8>) {
+	/// Encodes the input state into a single byte.
+	#[inline]
+	pub const fn encode(&self) -> u8 {
 		let mut bits = 0;
 		if self.up {
 			bits |= INPUT_UP;
@@ -47,10 +63,12 @@ impl Input {
 		if self.select {
 			bits |= INPUT_SELECT;
 		}
-		buf.push(bits);
+		bits
 	}
 
-	pub fn decode(byte: u8) -> Input {
+	/// Decodes an input state from a single byte.
+	#[inline]
+	pub const fn decode(byte: u8) -> Input {
 		Input {
 			up: byte & INPUT_UP != 0,
 			left: byte & INPUT_LEFT != 0,

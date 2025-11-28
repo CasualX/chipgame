@@ -54,6 +54,7 @@ pub struct PlayerState {
 }
 
 pub(super) fn ps_input(s: &mut GameState, input: &Input) {
+	s.inputs.push(input.encode());
 	s.ps.inbuf.handle(Compass::Left,  input.left,  s.input.left);
 	s.ps.inbuf.handle(Compass::Right, input.right, s.input.right);
 	s.ps.inbuf.handle(Compass::Up,    input.up,    s.input.up);

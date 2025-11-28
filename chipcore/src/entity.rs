@@ -5,7 +5,9 @@ pub use chipty::EntityKind;
 /// Static entity data.
 #[derive(Debug)]
 pub struct EntityData {
-	pub think: fn(&mut GameState, &mut Entity),
+	pub movement_phase: fn(&mut GameState, &mut Entity),
+	pub action_phase: fn(&mut GameState, &mut Entity),
+	pub terrain_phase: fn(&mut GameState, &mut Entity, &mut InteractTerrainState),
 	pub flags: SolidFlags,
 }
 
@@ -32,6 +34,11 @@ impl Entity {
 			pos: self.pos,
 			face_dir: self.face_dir,
 		}
+	}
+
+	#[inline]
+	pub fn is_trapped(&self) -> bool {
+		self.flags & (EF_TRAPPED | EF_RELEASED) == EF_TRAPPED
 	}
 }
 

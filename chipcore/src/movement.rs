@@ -123,7 +123,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	let dev_wtw = is_player && s.ps.dev_wtw;
 
 	// Kinda tricky workaround: Trapped entities can move if they have been released from the trap
-	if ent.base_spd == 0 || (ent.flags & EF_TRAPPED != 0 && ent.flags & EF_RELEASED == 0) {
+	if ent.base_spd == 0 || ent.is_trapped() {
 		return false;
 	}
 
@@ -233,7 +233,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		let solid = match ent.kind {
 			EntityKind::Player => {
 				if is_player {
-					!try_move(s, &mut ent, step_dir)
+					!try_push_block(s, &mut ent, step_dir)
 				}
 				else {
 					flags.player
@@ -252,7 +252,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				}
 			}
 			EntityKind::Block => {
-				if is_player && try_move(s, &mut ent, step_dir) {
+				if is_player && try_push_block(s, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -265,7 +265,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 			EntityKind::IceBlock => {
 				let allowed_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
-				if allowed_pusher && try_move(s, &mut ent, step_dir) {
+				if allowed_pusher && try_push_block(s, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -331,7 +331,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	ent.step_time = s.time;
 	ent.pos = new_pos;
 	ent.flags |= EF_NEW_POS;
-	ent.flags &= !EF_RELEASED;
+	ent.flags &= !(EF_RELEASED | EF_TRAPPED);
 
 	// Retain momentum when entity lands on a Trap
 	if !matches!(to_terrain, Terrain::BearTrap) {
@@ -346,7 +346,35 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	return true;
 }
 
-/// To flick a block is to push it off of a tile that Chip cannot enter.
+/// Tries to push a Block in the given push direction.
+fn try_push_block(s: &mut GameState, ent: &mut Entity, push_dir: Compass) -> bool {
+	// The Player movement happens before the Block's movement code
+	// So preemptively move the Block by terrain if possible
+
+	// This fixes bumping blocks in the following scenarios:
+	// Player -> Block -> Ice corner
+	// Player -> Block -> ForceN -> Wall
+	// The Block should slide on the ice corner (getting out of the player's way)
+	// instead of blocking the player because it hit a wall
+
+	// Oh and hardcode fast terrain speed for checking terrain movement
+	// Otherwise the following scenario causes a bump on the 2nd ice corner:
+	// Player -> Block -> Ice corner -> Floor -> Ice corner
+	// When the Block is moved from the Floor tile it has its base speed while on the Ice corner
+
+	if s.time >= ent.step_time + ent.base_spd / 2 && try_terrain_move(s, ent, ent.step_dir) {
+		// Returns true if the Block was actually moved out of the way
+		if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+			return true;
+		}
+	}
+
+	// Otherwise, try to push the Block manually
+	// Note that we ignore the Block's step timer here to allow pushing off of ice or force floors
+	try_move(s, ent, push_dir)
+}
+
+/// To flick a Block is to push it off a tile that Chip cannot enter.
 fn flick(s: &mut GameState, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Compass) {
 	let allowed_block_pusher = matches!(pusher, EntityKind::Player);
 	let allowed_iceblock_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
@@ -406,9 +434,11 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 	}
 }
 
+/// Tries to move the entity according to the terrain effects.
+/// Returns true if the entity is under the influence of terrain movement (not necessarily moved).
 pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
 	// Entity is trapped, cannot move or turn
-	if ent.flags & EF_TRAPPED != 0 {
+	if ent.is_trapped() {
 		return true;
 	}
 
@@ -507,125 +537,6 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::Teleporting });
 	}
 	return true;
-}
-
-#[derive(Default)]
-pub struct InteractTerrainState {
-	pub toggle_walls: u32,
-	pub turn_around_tanks: u32,
-	pub spawns: Vec<EntityArgs>,
-}
-
-impl InteractTerrainState {
-	#[inline]
-	pub fn check(&mut self, s: &mut GameState, ent: &mut Entity) {
-		interact_terrain(s, ent, self);
-	}
-}
-
-fn interact_terrain(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
-	// Play sound only for player and blocks to avoid a cacophony
-	let play_sound = matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock);
-
-	if matches!(ent.kind, EntityKind::Player) {
-		if let Some(step_dir) = ent.step_dir {
-			let from_pos = ent.pos - step_dir.to_vec();
-			// HACK: Avoid triggering the recessed wall on the first step
-			if matches!(s.field.get_terrain(from_pos), Terrain::RecessedWall) && s.ps.steps > 1 {
-				s.set_terrain(from_pos, Terrain::Wall);
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WallPopup });
-			}
-		}
-	}
-
-	#[inline]
-	fn press_once(s: &GameState, ent: &Entity) -> bool {
-		s.time == ent.step_time && ent.flags & EF_NEW_POS != 0
-	}
-
-	match s.field.get_terrain(ent.pos) {
-		Terrain::BearTrap => {
-			let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
-			if trapped && ent.flags & EF_TRAPPED == 0 {
-				s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
-				// Avoid audio spam when the level is initially loaded
-				if s.time != 0 {
-					s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
-				}
-			}
-			ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
-		}
-		Terrain::GreenButton => {
-			if press_once(s, ent) {
-				result.toggle_walls += 1;
-				if play_sound {
-					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
-			}
-		}
-		Terrain::RedButton => {
-			if press_once(s, ent) {
-				let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
-
-				// Handle CloneBlock tiles separately
-				let clone_block_dir = match s.field.get_terrain(conn.dest) {
-					Terrain::CloneBlockN => Some(Compass::Up),
-					Terrain::CloneBlockW => Some(Compass::Left),
-					Terrain::CloneBlockS => Some(Compass::Down),
-					Terrain::CloneBlockE => Some(Compass::Right),
-					_ => None,
-				};
-
-				// Spawn a new entity
-				let args = if let Some(clone_block_dir) = clone_block_dir {
-					EntityArgs {
-						kind: EntityKind::Block,
-						pos: conn.dest,
-						face_dir: Some(clone_block_dir),
-					}
-				}
-				else {
-					// Find the template entity connected to the red button
-					let template = s.qt.get(conn.dest)[0];
-					let Some(template_ent) = s.ents.get(template) else { return };
-					if template_ent.flags & EF_TEMPLATE == 0 {
-						return;
-					}
-					template_ent.to_entity_args()
-				};
-				result.spawns.push(args);
-
-				if play_sound {
-					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
-			}
-		}
-		Terrain::BrownButton => {
-			if press_once(s, ent) && play_sound {
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-			}
-			for conn in &s.field.conns {
-				if conn.src == ent.pos {
-					// Release trapped entities at the destination
-					for ehandle in s.qt.get(conn.dest) {
-						let Some(mut ent) = s.ents.take(ehandle) else { continue };
-						// ent.flags &= !EF_TRAPPED;
-						ent.flags |= EF_RELEASED;
-						s.ents.put(ent);
-					}
-				}
-			}
-		}
-		Terrain::BlueButton => {
-			if press_once(s, ent) {
-				result.turn_around_tanks += 1;
-				if play_sound {
-					s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
-				}
-			}
-		}
-		_ => {}
-	}
 }
 
 const SOLID_WALL: u8 = 0xf;
