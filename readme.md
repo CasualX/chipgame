@@ -48,50 +48,65 @@ Getting Started
 Controls
 --------
 
-### Keyboard Controls
-
-* Arrow keys, WASD: Move Chip
-* Space: Select menu item
-* Backspace: Close the current menu
-* Enter: Open the Pause menu
-* Shift: Open scouting mode
-* M: Toggle music
-* F: Toggle fullscreen
-* ESC: Exit fullscreen
-
-### Controller Bindings
-
-* D-pad: Move Chip
-* A: Select menu item
-* B: Close the current menu
-* Start: Open the Pause menu
-* Select: Open scouting mode
+| Action | Keyboard | Gamepad |
+| --- | --- | --- |
+| Navigate menus / Move Chip | Arrow keys / WASD | D-pad / Left stick |
+| Confirm / Interact | Space | A |
+| Back / Close menu | Backspace | B |
+| Pause menu | Enter | Start |
+| Scouting mode (hold) | Shift | Select |
+| Toggle music | M | - |
+| Toggle fullscreen | F | - |
+| Exit fullscreen | Esc | - |
 
 Level Editor
 ------------
 
-The game includes a very bare-bones level editor that can be used to create custom levels. Launch it by dragging a level onto the `chipedit.exe` executable.
+The game includes a level editor that can be used to create and play custom levels.
 
-### Keyboard Controls
+### Editor Mode
 
-* F2: Load level
-* F5: Save level
-* Arrow keys, WASD: Pan camera/ Move Chip
-* Enter: Toggle Play/ Edit mode
-* Left click: Select Tile or Entity, Place tile, Select Entity, Place Connection
-* Right click: Rotate Entity
-* Delete: Remove Entity
-* T: Select Terrain Tool
-* E: Select Entity Tool
-* C: Select Connection Tool
-* M: Toggle music
-* F: Toggle fullscreen
-* ESC: Exit fullscreen
+| Action | Keyboard |
+| --- | --- |
+| Load level | F2 |
+| Save level | F5 |
+| Pan camera | Arrow keys / WASD |
+| Select Terrain Tool | T |
+| Select Entity Tool | E |
+| Select Connection Tool | C |
+| Toggle Play ↔ Edit | Enter |
+| Toggle music | M |
+| Toggle fullscreen | F |
+| Exit fullscreen | Esc |
 
-### Controller Bindings during Play Mode
+#### Terrain Tool
 
-* D-pad: Move Chip
-* Start: Toggle Play/ Edit mode
+| Action | Keyboard |
+| --- | --- |
+| Place terrain | Left click |
+| Sample terrain | Right click |
+
+#### Entity Tool
+
+| Action | Keyboard |
+| --- | --- |
+| Select entity | Left click |
+| Place entity | Left click |
+| Rotate entity | Right click |
+| Remove entity | Delete |
+
+#### Connection Tool
+
+| Action | Keyboard |
+| --- | --- |
+| Place connection | Left click |
+
+### Play Mode
+
+| Action | Keyboard | Gamepad |
+| --- | --- | --- |
+| Move Chip | Arrow keys / WASD | D-pad / Left stick |
+| Toggle Play ↔ Edit | Enter | Start |
 
 Community Resources
 -------------------

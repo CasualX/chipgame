@@ -7,8 +7,28 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug",
-			"program": "${workspaceFolder}/<executable file>",
+			"name": "Run chipplay",
+			"cargo": {
+				"args": ["run", "--bin", "chipplay"],
+				"filter": {
+					"name": "chipplay",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Run chipedit",
+			"cargo": {
+				"args": ["run", "--bin", "chipedit"],
+				"filter": {
+					"name": "chipedit",
+					"kind": "bin"
+				}
+			},
 			"args": [],
 			"cwd": "${workspaceFolder}"
 		}
