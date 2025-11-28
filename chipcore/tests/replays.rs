@@ -9,6 +9,9 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 
 	let inputs = chipty::decode(&replay.replay);
 	for &byte in &inputs {
+		if game.is_game_over() {
+			break;
+		}
 		let input = chipcore::Input::decode(byte);
 		game.tick(&input);
 	}

@@ -37,8 +37,6 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 			}
 		}
 	}
-
-	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
 fn chase_dirs(s: &GameState, ent: &Entity) -> Option<(Compass, Compass)> {
@@ -101,7 +99,12 @@ fn chase_dirs(s: &GameState, ent: &Entity) -> Option<(Compass, Compass)> {
 	}
 }
 
-fn action_phase(_s: &mut GameState, _ent: &mut Entity) {
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
+	}
+
+	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
 fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {

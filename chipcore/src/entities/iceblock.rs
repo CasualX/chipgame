@@ -26,11 +26,14 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 	if s.time >= ent.step_time + ent.step_spd {
 		try_terrain_move(s, ent, ent.step_dir);
 	}
-
-	ps_attack_pos(s, ent.pos, GameOverReason::Collided);
 }
 
-fn action_phase(_s: &mut GameState, _ent: &mut Entity) {
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
+	}
+
+	ps_attack_pos(s, ent.pos, GameOverReason::Collided);
 }
 
 fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {

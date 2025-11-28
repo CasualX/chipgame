@@ -28,11 +28,14 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 		// The direction of the blob means nothing, it is completely random
 		else if { let step_dir = s.rand.next(); try_move(s, ent, step_dir) } { }
 	}
-
-	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
-fn action_phase(_s: &mut GameState, _ent: &mut Entity) {
+fn action_phase(s: &mut GameState, ent: &mut Entity) {
+	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+		return;
+	}
+
+	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
 fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {

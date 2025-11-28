@@ -102,17 +102,9 @@ impl GameState {
 		// Movement phase
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
-				if !matches!(ent.kind, EntityKind::Player) {
-					(ent.data.movement_phase)(self, &mut ent);
-				}
+				(ent.data.movement_phase)(self, &mut ent);
 				self.ents.put(ent);
 			}
-		}
-
-		// Move the player last
-		if let Some(mut ent) = self.ents.take(self.ps.master) {
-			(ent.data.movement_phase)(self, &mut ent);
-			self.ents.put(ent);
 		}
 
 		// Action phase
@@ -173,6 +165,11 @@ impl GameState {
 			if let Some(mut ent) = self.ents.take(ehandle) {
 				// Force the new entity to move out of the spawner
 				let success = try_move(self, &mut ent, face_dir);
+				// Speed up the entity if spawned onto ice or force floors
+				let terrain = self.field.get_terrain(ent.pos);
+				if matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW | Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
+					ent.step_spd = ent.base_spd / 2;
+				}
 				self.ents.put(ent);
 				// If the entity movement out of the spawner fails, remove it
 				// This indicates that there's a lot of entities being spawned
