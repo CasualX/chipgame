@@ -2,21 +2,28 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub struct MoveStep {
-	pub dest: Vec2<i32>,
+	pub start_pos: Vec3f,
+	pub end_pos: Vec3f,
 	pub move_time: f64,
-	pub move_spd: f32,
+	pub duration: f32,
 }
 
 impl MoveStep {
+	#[inline]
+	fn ease_snap(t: f32) -> f32 {
+		1.0 - (1.0 - t).powf(4.0)
+	}
+
 	pub fn animate(&self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
-		let t = f32::min(1.0, (ctx.time - self.move_time) as f32 / self.move_spd);
-		let dest = self.dest.map(|c| c as f32 * 32.0).vec3(0.0);
-		obj.pos = obj.pos.exp_decay(dest, 100.0 * self.move_spd, ctx.dt as f32);
-		if t == 1.0 {
-			obj.pos = dest;
+		if self.duration <= 0.0 {
+			obj.pos = self.end_pos;
 			return false;
 		}
-		return true;
+		let elapsed = (ctx.time - self.move_time) as f32;
+		let fraction = (elapsed / self.duration).clamp(0.0, 1.0);
+		let eased = Self::ease_snap(fraction);
+		obj.pos = self.start_pos.lerp(self.end_pos, eased);
+		return fraction < 1.0;
 	}
 }
 

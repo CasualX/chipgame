@@ -58,10 +58,10 @@ impl Field {
 	pub fn get_terrain(&self, pos: Vec2i) -> Terrain {
 		let Vec2i { x, y } = pos;
 		if x < 0 || y < 0 || x >= self.width || y >= self.height {
-			return Terrain::Blank;
+			return Terrain::Wall;
 		}
 		let index = (y * self.width + x) as usize;
-		self.terrain.get(index).cloned().unwrap_or(Terrain::Blank)
+		self.terrain.get(index).cloned().unwrap_or(Terrain::Wall)
 	}
 	pub(super) fn set_terrain(&mut self, pos: Vec2i, terrain: Terrain) -> Option<Terrain> {
 		let Vec2i { x, y } = pos;

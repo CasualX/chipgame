@@ -8,15 +8,20 @@ pub struct InteractTerrainState {
 }
 
 pub fn bear_trap(s: &mut GameState, ent: &mut Entity, _result: &mut InteractTerrainState) {
-	let trapped = matches!(s.get_trap_state(ent.pos), TrapState::Closed);
-	if trapped && ent.flags & EF_TRAPPED == 0 {
-		s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
-		// Avoid audio spam when the level is initially loaded
-		if s.time != 0 {
-			s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+	if matches!(s.get_trap_state(ent.pos), TrapState::Closed) {
+		// Notify only if the entity is newly trapped
+		if ent.flags & (EF_TRAPPED | EF_RELEASED) == 0 {
+			s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });
+			// Avoid audio spam when the level is initially loaded
+			if s.time != 0 || ent.flags & EF_NEW_POS != 0 {
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TrapEntered });
+			}
 		}
+		ent.flags |= EF_TRAPPED;
 	}
-	ent.flags = if trapped { ent.flags | EF_TRAPPED } else { ent.flags & !EF_TRAPPED };
+	else {
+		ent.flags &= !EF_TRAPPED;
+	}
 }
 
 fn is_button_press_audible(ent: &Entity) -> bool {

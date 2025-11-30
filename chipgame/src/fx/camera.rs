@@ -102,8 +102,8 @@ impl PlayCamera {
 
 	pub fn animate_move(&mut self, time: f64) {
 		let t = f32::min(1.0, (time - self.move_time) as f32 / self.move_spd);
-		let src = self.move_src.map(|c| c as f32 * 32.0).vec3(0.0);
-		let dest = self.move_dest.map(|c| c as f32 * 32.0).vec3(0.0);
+		let src = self.move_src.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0);
+		let dest = self.move_dest.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0);
 		let new_target = src.lerp(dest, t);
 		self.target = new_target;
 		if self.move_teleport {

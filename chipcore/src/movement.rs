@@ -547,7 +547,7 @@ const THIN_WALL_W: u8 = 0x8;
 
 fn terrain_solid_flags(terrain: Terrain, flags: &SolidFlags) -> u8 {
 	match terrain {
-		Terrain::Blank => SOLID_WALL,
+		Terrain::Blank => 0,
 		Terrain::Floor => 0,
 		Terrain::Wall => SOLID_WALL,
 		Terrain::Socket => SOLID_WALL,

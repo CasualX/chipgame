@@ -169,14 +169,6 @@ impl FxState {
 			}
 		}
 	}
-	pub fn follow_player(&mut self) {
-		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
-			return;
-		}
-		let Some(&obj_handle) = self.objlookup.get(&self.gs.ps.master) else { return };
-		let Some(obj) = self.render.objects.get(obj_handle) else { return };
-		self.camera.set_target(obj.data.pos + Vec3(16.0, 16.0, 0.0));
-	}
 	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
 		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * speed);
 	}

@@ -68,21 +68,23 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
-	obj.data.pos = ent_pos(&ctx.gs, ent, src);
+	let start_pos = ent_pos(&ctx.gs, ent, src);
+	let end_pos = ent_pos(&ctx.gs, ent, ent.pos);
+	obj.data.pos = start_pos;
 
 	// Ensure the previous step animation is cleared...
 	// See [MoveStep::animate] setting obj.pos when the animation completes.
 	obj.anim.anims.clear();
 
 	obj.anim.anims.push(render::AnimState::MoveStep(render::MoveStep {
-		dest: ent.pos,
+		start_pos,
+		end_pos,
 		move_time: ctx.time,
-		move_spd: ent.step_spd as f32 / chipcore::FPS as f32,
+		duration: ent.step_spd as f32 / chipcore::FPS as f32,
 	}));
 
 	// Quick hack to flatten sprites on top of walls
-	let check_pos = ent_pos(&ctx.gs, ent, ent.pos);
-	obj.data.model = if check_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
+	obj.data.model = if end_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
 
 	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_src = src;

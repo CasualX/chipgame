@@ -358,7 +358,6 @@ impl PlayState {
 
 		if let Some(fx) = &mut self.fx {
 			fx.hud_enabled = self.menu.stack.is_empty();
-			fx.follow_player();
 			fx.draw(g, resx, time);
 		}
 		if self.fx.is_some() && !self.menu.stack.is_empty() {
