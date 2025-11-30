@@ -366,23 +366,13 @@ fn main() {
 						for evt in fx_events {
 							match evt {
 								chipgame::fx::FxEvent::Sound(sound) => ap.play_sound(sound),
-								// Return to edit mode on level complete or game over
-								chipgame::fx::FxEvent::LevelComplete | chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
+								chipgame::fx::FxEvent::LevelComplete => level_complete(&mut editor),
+								chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
 								_ => {}
 							}
 						}
 
-						let music = if music_enabled {
-							if matches!(editor, editor::EditorState::Play(_)) {
-								Some(chipty::MusicId::GameMusic)
-							}
-							else {
-								Some(chipty::MusicId::MenuMusic)
-							}
-						}
-						else {
-							None
-						};
+						let music = editor.get_music(music_enabled);
 						ap.play_music(music);
 
 						app.g.begin();
@@ -403,4 +393,30 @@ fn main() {
 			_ => {}
 		}
 	});
+}
+
+fn level_complete(editor: &mut editor::EditorState) {
+	let string;
+	let description = if let Some(run_stats) = editor.play_stats() {
+		string = format!(
+			"RealTime: {:.2} sec\nTime: {} ticks\nTime: {}\nSteps: {}\nBonks: {}\n\nEmbed this run into the level file for future reference?",
+			run_stats.realtime, run_stats.ticks,
+			chipcore::FmtTime::new(&run_stats.ticks),
+			run_stats.steps, run_stats.bonks,
+		);
+		&string
+	}
+	else {
+		"Embed this run into the level file for future reference?"
+	};
+	let save_replay = rfd::MessageDialog::new()
+		.set_title("Save replay?")
+		.set_description(description)
+		.set_buttons(rfd::MessageButtons::YesNo)
+		.set_level(rfd::MessageLevel::Info)
+		.show();
+	if matches!(save_replay, rfd::MessageDialogResult::Yes) {
+		editor.save_replay();
+	}
+	editor.toggle_play();
 }

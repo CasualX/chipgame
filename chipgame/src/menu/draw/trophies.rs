@@ -1,30 +1,6 @@
 use super::*;
 
 #[repr(transparent)]
-struct FmtTicks(i32);
-impl FmtTicks {
-	fn new(ticks: &i32) -> &FmtTicks {
-		unsafe { mem::transmute(ticks) }
-	}
-}
-impl fmt::Display for FmtTicks {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let &FmtTicks(ticks) = self;
-
-		let frames = ticks % chipcore::FPS;
-		let seconds = (ticks / chipcore::FPS) % 60;
-		let minutes = ticks / (chipcore::FPS * 60);
-
-		if minutes > 0 {
-			write!(f, "{}:{:02}.{:02}", minutes, seconds, frames)
-		}
-		else {
-			write!(f, "{}.{:02}", seconds, frames)
-		}
-	}
-}
-
-#[repr(transparent)]
 struct FmtTrophyLine(Option<chipty::Trophy>);
 impl fmt::Display for FmtTrophyLine {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -81,14 +57,14 @@ impl fmt::Display for FmtTrophiesRight {
 
 		write!(f, "\n\n\n{}\n", this.attempts)?;
 		if this.tick.high_score >= 0 {
-			write!(f, "{}\n", FmtTicks::new(&this.tick.high_score))?;
+			write!(f, "{}\n", chipcore::FmtTime::new(&this.tick.high_score))?;
 		}
 		if this.steps.high_score >= 0 {
 			write!(f, "{}\n", this.steps.high_score)?;
 		}
 		f.write_str("\n")?;
 		if let Some((_, next_value)) = &this.tick.next {
-			write!(f, "{}\n", FmtTicks::new(next_value))?;
+			write!(f, "{}\n", chipcore::FmtTime::new(next_value))?;
 		}
 		if let Some((_, next_value)) = &this.steps.next {
 			write!(f, "{}\n", *next_value)?;

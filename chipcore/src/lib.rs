@@ -2,7 +2,7 @@
 Core chipgame gameplay code.
 */
 
-use std::{cmp, mem, ops};
+use std::{cmp, fmt, mem, ops};
 use cvmath::Vec2i;
 use chipty::*;
 
@@ -35,7 +35,7 @@ pub use self::quadtree::*;
 pub use self::random::*;
 use self::terrain::*;
 
-/// Game frames per second.
+/// Game ticks per second.
 pub const FPS: i32 = 60;
 
 #[derive(Copy, Clone, Debug)]
@@ -47,4 +47,32 @@ pub enum TrapState {
 pub enum RngSeed {
 	System,
 	Manual(u64),
+}
+
+#[repr(transparent)]
+pub struct FmtTime(pub i32);
+
+impl FmtTime {
+	#[inline]
+	pub fn new(ticks: &i32) -> &FmtTime {
+		unsafe { mem::transmute(ticks) }
+	}
+}
+
+impl fmt::Display for FmtTime {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let &FmtTime(ticks) = self;
+
+		let frames = ticks % FPS;
+		let total_seconds = ticks / FPS;
+		let seconds = total_seconds % 60;
+		let minutes = total_seconds / 60;
+
+		if minutes > 0 {
+			write!(f, "{}:{:02}.{:02}", minutes, seconds, frames)
+		}
+		else {
+			write!(f, "{}.{:02}", seconds, frames)
+		}
+	}
 }

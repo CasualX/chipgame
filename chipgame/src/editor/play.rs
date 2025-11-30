@@ -48,4 +48,18 @@ impl EditorPlayState {
 		});
 		self.game.draw(g, resx, time);
 	}
+	pub fn save_replay(&mut self) {
+		let replay_dto: chipty::ReplayDto = self.game.gs.save_replay(self.game.game_realtime);
+		let mut level_dto: chipty::LevelDto = serde_json::from_str(&self.level).unwrap();
+		level_dto.replays = Some(vec![replay_dto]);
+		self.level = serde_json::to_string(&level_dto).unwrap();
+	}
+	pub fn play_stats(&self) -> EditorPlayStats {
+		EditorPlayStats {
+			realtime: self.game.game_realtime,
+			ticks: self.game.gs.time,
+			steps: self.game.gs.ps.steps,
+			bonks: self.game.gs.ps.bonks,
+		}
+	}
 }

@@ -31,6 +31,14 @@ impl Default for Tool {
 	}
 }
 
+#[derive(Clone, Debug)]
+pub struct EditorPlayStats {
+	pub realtime: f32,
+	pub ticks: i32,
+	pub steps: i32,
+	pub bonks: i32,
+}
+
 static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
 	[Terrain::Blank, Terrain::Floor],
 	[Terrain::Dirt, Terrain::Gravel],
@@ -192,6 +200,11 @@ impl EditorState {
 			},
 		}
 	}
+	pub fn save_replay(&mut self) {
+		if let EditorState::Play(s) = self {
+			s.save_replay();
+		}
+	}
 	pub fn think(&mut self) {
 		match self {
 			EditorState::Edit(s) => s.think(),
@@ -202,6 +215,13 @@ impl EditorState {
 		match self {
 			EditorState::Edit(s) => s.draw(g, resx, time),
 			EditorState::Play(s) => s.draw(g, resx, time),
+		}
+	}
+
+	pub fn play_stats(&self) -> Option<EditorPlayStats> {
+		match self {
+			EditorState::Play(s) => Some(s.play_stats()),
+			EditorState::Edit(_) => None,
 		}
 	}
 
@@ -317,6 +337,18 @@ impl EditorState {
 		match self {
 			EditorState::Edit(s) => Some(s.tool),
 			EditorState::Play(_) => None,
+		}
+	}
+
+	pub fn get_music(&self, music_enabled: bool) -> Option<chipty::MusicId> {
+		if music_enabled {
+			match self {
+				EditorState::Edit(_) => Some(chipty::MusicId::MenuMusic),
+				EditorState::Play(_) => Some(chipty::MusicId::GameMusic),
+			}
+		}
+		else {
+			None
 		}
 	}
 }
