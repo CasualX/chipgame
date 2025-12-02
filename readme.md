@@ -5,6 +5,12 @@ A passion project born from nostalgia of the classic puzzle game *Chip’s Chall
 
 https://github.com/user-attachments/assets/56e8d731-c48c-4b1c-aff3-c182bce03abc
 
+<p align="center">
+	<a href="https://github.com/CasualX/chipgame/releases/latest">
+		<img src="docs/download-button.svg" alt="Download ChipGame" width="360" />
+	</a>
+</p>
+
 Features
 --------
 
