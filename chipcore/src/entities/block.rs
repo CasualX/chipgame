@@ -79,6 +79,6 @@ static DATA: EntityData = EntityData {
 		creatures: true,
 		player: false,
 		thief: true,
-		hint: true,
+		hint: false,
 	},
 };

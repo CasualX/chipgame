@@ -8,7 +8,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		kind: args.kind,
 		pos: args.pos,
 		base_spd: 0,
-		face_dir: None,
+		face_dir: args.face_dir,
 		step_dir: None,
 		step_spd: 0,
 		step_time: 0,
@@ -42,7 +42,7 @@ static DATA: EntityData = EntityData {
 	action_phase,
 	terrain_phase,
 	flags: SolidFlags {
-		gravel: true,
+		gravel: false,
 		fire: true,
 		dirt: true,
 		water: false,

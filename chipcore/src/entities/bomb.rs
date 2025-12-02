@@ -8,7 +8,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		kind: args.kind,
 		pos: args.pos,
 		base_spd: BASE_SPD,
-		face_dir: None,
+		face_dir: args.face_dir,
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
@@ -39,12 +39,8 @@ fn action_phase(s: &mut GameState, ent: &mut Entity) {
 			continue;
 		}
 		let Some(other_ent) = s.ents.get_mut(ehandle) else { continue };
-		// HACK! Delay expolosion by 1 tick to work around animation bug
-		if other_ent.step_time >= s.time {
-			return;
-		}
 		// Only explode when an entity moved into the bomb
-		if other_ent.flags & EF_NEW_POS == 0 {
+		if !(ent.flags & EF_NEW_POS != 0 || other_ent.flags & EF_NEW_POS != 0) {
 			continue;
 		}
 		exploded = true;
@@ -64,7 +60,32 @@ fn action_phase(s: &mut GameState, ent: &mut Entity) {
 	}
 }
 
-fn terrain_phase(_s: &mut GameState, _ent: &mut Entity, _state: &mut InteractTerrainState) {
+fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {
+	let terrain = s.field.get_terrain(ent.pos);
+
+	if matches!(terrain, Terrain::BearTrap) {
+		return bear_trap(s, ent, state);
+	}
+
+	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+		match terrain {
+			Terrain::Water => {
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
+				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
+				ent.flags |= EF_REMOVE;
+			}
+			Terrain::Fire => {
+				s.events.fire(GameEvent::BombExplode { pos: ent.pos });
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BombExplosion });
+				ent.flags |= EF_REMOVE;
+			}
+			Terrain::GreenButton => green_button(s, ent, state),
+			Terrain::RedButton => red_button(s, ent, state),
+			Terrain::BrownButton => brown_button(s, ent, state),
+			Terrain::BlueButton => blue_button(s, ent, state),
+			_ => {}
+		}
+	}
 }
 
 static DATA: EntityData = EntityData {
@@ -74,15 +95,15 @@ static DATA: EntityData = EntityData {
 	flags: SolidFlags {
 		gravel: false,
 		fire: false,
-		dirt: false,
+		dirt: true,
 		water: false,
-		exit: false,
-		blue_fake: false,
-		recessed_wall: false,
+		exit: true,
+		blue_fake: true,
+		recessed_wall: true,
 		keys: false,
 		solid_key: true,
-		boots: true,
-		chips: true,
+		boots: false,
+		chips: false,
 		creatures: false,
 		player: false,
 		thief: false,

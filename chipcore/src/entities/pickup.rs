@@ -8,7 +8,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		kind: args.kind,
 		pos: args.pos,
 		base_spd: BASE_SPD,
-		face_dir: None,
+		face_dir: args.face_dir,
 		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: 0,
@@ -85,7 +85,27 @@ fn pickup_item(s: &mut GameState, ent: &mut Entity) {
 	s.events.fire(GameEvent::SoundFx { sound });
 }
 
-fn terrain_phase(_s: &mut GameState, _ent: &mut Entity, _state: &mut InteractTerrainState) {
+fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {
+	let terrain = s.field.get_terrain(ent.pos);
+
+	if matches!(terrain, Terrain::BearTrap) {
+		return bear_trap(s, ent, state);
+	}
+
+	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+		match terrain {
+			Terrain::Water => {
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
+				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
+				ent.flags |= EF_REMOVE;
+			}
+			Terrain::GreenButton => green_button(s, ent, state),
+			Terrain::RedButton => red_button(s, ent, state),
+			Terrain::BrownButton => brown_button(s, ent, state),
+			Terrain::BlueButton => blue_button(s, ent, state),
+			_ => {}
+		}
+	}
 }
 
 static DATA: EntityData = EntityData {
@@ -93,10 +113,10 @@ static DATA: EntityData = EntityData {
 	action_phase,
 	terrain_phase,
 	flags: SolidFlags {
-		gravel: true,
-		fire: true,
+		gravel: false,
+		fire: false,
 		dirt: true,
-		water: true,
+		water: false,
 		exit: true,
 		blue_fake: true,
 		recessed_wall: true,
@@ -107,6 +127,6 @@ static DATA: EntityData = EntityData {
 		creatures: true,
 		player: false,
 		thief: true,
-		hint: true,
+		hint: false,
 	},
 };

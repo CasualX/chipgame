@@ -119,8 +119,8 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		return false;
 	}
 
-	let is_player = matches!(ent.kind, EntityKind::Player);
-	let dev_wtw = is_player && s.ps.dev_wtw;
+	let mover_kind = ent.kind;
+	let dev_wtw = matches!(mover_kind, EntityKind::Player) && s.ps.dev_wtw;
 
 	// Kinda tricky workaround: Trapped entities can move if they have been released from the trap
 	if ent.base_spd == 0 || ent.is_trapped() {
@@ -133,7 +133,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 
 	// Set the entity's step speed based on the terrain
 	if matches!(from_terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
-		if is_player {
+		if matches!(mover_kind, EntityKind::Player) {
 			if s.ps.suction_boots {
 				ent.step_spd = ent.base_spd;
 				ps_activity(s, ent.handle, PlayerActivity::ForceWalking);
@@ -148,7 +148,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		}
 	}
 	else if matches!(from_terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
-		if is_player {
+		if matches!(mover_kind, EntityKind::Player) {
 			if s.ps.ice_skates {
 				ent.step_spd = ent.base_spd;
 				ps_activity(s, ent.handle, PlayerActivity::IceSkating);
@@ -183,7 +183,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		}
 
 		// Player specific interactions with the terrain
-		if is_player {
+		if matches!(mover_kind, EntityKind::Player) {
 			let solid = match to_terrain {
 				Terrain::BlueLock => !try_unlock(s, new_pos, KeyColor::Blue),
 				Terrain::RedLock => !try_unlock(s, new_pos, KeyColor::Red),
@@ -232,7 +232,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 		let solid = match ent.kind {
 			EntityKind::Player => {
-				if is_player {
+				if matches!(mover_kind, EntityKind::Player) {
 					!try_push_block(s, &mut ent, step_dir)
 				}
 				else {
@@ -241,18 +241,18 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 			EntityKind::Chip => flags.chips,
 			EntityKind::Socket => {
-				if is_player && s.ps.chips >= s.field.required_chips {
+				if matches!(mover_kind, EntityKind::Player) && s.ps.chips >= s.field.required_chips {
 					ent.flags |= EF_REMOVE;
 					s.events.fire(GameEvent::SocketFilled { pos: ent.pos });
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::SocketOpened });
 					false
 				}
 				else {
-					true
+					!matches!(mover_kind, EntityKind::Bomb)
 				}
 			}
 			EntityKind::Block => {
-				if is_player && try_push_block(s, &mut ent, step_dir) {
+				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -260,7 +260,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 					false
 				}
 				else {
-					true
+					!matches!(mover_kind, EntityKind::Bomb)
 				}
 			}
 			EntityKind::IceBlock => {
@@ -269,13 +269,13 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
-					if is_player { // Only play sound if player is pushing the ice block
+					if matches!(mover_kind, EntityKind::Player) { // Only play sound if player is pushing the ice block
 						s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					}
 					false
 				}
 				else {
-					true
+					!matches!(mover_kind, EntityKind::Bomb)
 				}
 			}
 			EntityKind::Flippers => flags.boots,
@@ -305,7 +305,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	}
 
 	// Slap code
-	if is_player && s.ps.last_step_dir == Some(step_dir) {
+	if matches!(mover_kind, EntityKind::Player) && s.ps.last_step_dir == Some(step_dir) {
 		if matches!(step_dir, Compass::Up | Compass::Down) {
 			if s.ps.inbuf.is_any_dir(Compass::Left) {
 				slap(s, ent.pos, Compass::Left);
@@ -338,7 +338,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		ent.flags &= !EF_MOMENTUM;
 	}
 
-	if is_player {
+	if matches!(mover_kind, EntityKind::Player) {
 		s.ps.steps += 1;
 	}
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
