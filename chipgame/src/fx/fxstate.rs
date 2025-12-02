@@ -1,5 +1,7 @@
 use super::*;
 
+const SCOUT_INPUT_HOLD: f64 = 1.5 / chipcore::FPS as f64;
+
 #[derive(Default)]
 pub struct FxState {
 	pub gs: chipcore::GameState,
@@ -21,6 +23,9 @@ pub struct FxState {
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
 	pub replay: Option<Vec<u8>>,
+	pub scout_active: bool,
+	pub scout_dir_until: [f64; 4],
+	pub scout_speed: f32,
 }
 
 impl FxState {
@@ -63,23 +68,27 @@ impl FxState {
 		self.darken_time = -1.0;
 
 		self.events.clear();
+		self.scout_init(false);
 		self.sync();
 	}
 	pub fn scout(&mut self) {
 		self.gs.ts = chipcore::TimeState::Paused;
 		self.events.push(FxEvent::Scout);
 		self.hud_enabled = true;
+		self.scout_init(true);
 	}
 	pub fn pause(&mut self) {
 		self.gs.ts = chipcore::TimeState::Paused;
 		self.events.push(FxEvent::Pause);
 		self.hud_enabled = false;
+		self.scout_init(false);
 	}
 	pub fn unpause(&mut self) {
 		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
 			self.gs.ts = chipcore::TimeState::Running;
 			self.events.push(FxEvent::Unpause);
 			self.hud_enabled = true;
+			self.scout_init(false);
 
 			// Center camera on player again
 			self.camera.move_teleport = true;
@@ -169,9 +178,6 @@ impl FxState {
 			}
 		}
 	}
-	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
-		self.camera.set_target(self.camera.target + dir.to_vec().vec3(0).cast::<f32>() * speed);
-	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
 		let dt = time - self.time;
 		self.time = time;
@@ -184,6 +190,7 @@ impl FxState {
 		if !matches!(self.gs.ts, chipcore::TimeState::Paused) {
 			self.camera.animate_move(ctx.time);
 		}
+		self.scout_camera(ctx.dt);
 		self.camera.animate_position(ctx.dt);
 		self.render.update(&ctx);
 
@@ -193,5 +200,39 @@ impl FxState {
 		if self.hud_enabled {
 			self.render_ui(g, resx, time);
 		}
+	}
+
+	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
+		if !self.scout_active {
+			return;
+		}
+		self.scout_speed = speed;
+		self.scout_dir_until[dir as usize] = self.time + SCOUT_INPUT_HOLD;
+	}
+	fn scout_camera(&mut self, dt: f64) {
+		if !self.scout_active || dt <= 0.0 {
+			return;
+		}
+		let now = self.time;
+		let north = if now <= self.scout_dir_until[chipty::Compass::Up as usize] { 1 } else { 0 };
+		let south = if now <= self.scout_dir_until[chipty::Compass::Down as usize] { 1 } else { 0 };
+		let east = if now <= self.scout_dir_until[chipty::Compass::Right as usize] { 1 } else { 0 };
+		let west = if now <= self.scout_dir_until[chipty::Compass::Left as usize] { 1 } else { 0 };
+		let dir = Vec2(east - west, south - north);
+		if dir == Vec2::ZERO {
+			return;
+		}
+		let speed = self.scout_speed;
+		if speed <= 0.0 {
+			return;
+		}
+		let pixels_per_second = speed * chipcore::FPS as f32;
+		let delta = dir.cast::<f32>().vec3(0.0) * (pixels_per_second * dt as f32);
+		self.camera.set_target(self.camera.target + delta);
+	}
+	fn scout_init(&mut self, scout_active: bool) {
+		self.scout_active = scout_active;
+		self.scout_dir_until = [0.0; 4];
+		self.scout_speed = 0.0;
 	}
 }
