@@ -34,7 +34,7 @@ impl AppStuff {
 		use glutin::config::ConfigTemplateBuilder;
 		use glutin::context::{ContextApi, ContextAttributesBuilder, Version};
 		use glutin::display::GetGlDisplay;
-		use glutin::surface::{SurfaceAttributesBuilder, WindowSurface};
+		use glutin::surface::{SurfaceAttributesBuilder, SwapInterval, WindowSurface};
 		use raw_window_handle::HasRawWindowHandle;
 
 		let template = ConfigTemplateBuilder::new()
@@ -87,6 +87,12 @@ impl AppStuff {
 		let context = not_current
 			.make_current(&surface)
 			.expect("Failed to make GL context current");
+
+		if config.vsync {
+			if let Err(err) = surface.set_swap_interval(&context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
+				eprintln!("Failed to enable vsync: {err}");
+			}
+		}
 
 		// Load GL functions for shaders/textures
 		shade::gl::capi::load_with(|s| {
