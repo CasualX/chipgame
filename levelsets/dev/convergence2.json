@@ -1,1 +1,0 @@
-{"name":"Convergence Glitch 2","seed":1970629177,"required_chips":0,"time_limit":0,"map":{"width":3,"height":4,"data":[2,1,1,3,1,3,4,1,1,3,1,5],"legend":["Blank","Floor","Wall","Teleport","ThinWallS","Exit"]},"entities":[{"kind":"Player","pos":[2,2]},{"kind":"Block","pos":[0,2]}],"connections":[{"src":[0,3],"dest":[2,1]},{"src":[2,1],"dest":[0,1]},{"src":[0,1],"dest":[0,3]}]}

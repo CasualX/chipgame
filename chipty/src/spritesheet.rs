@@ -22,16 +22,12 @@ pub struct SpriteFrame {
 	/// `[x, y, width, height]` in pixels.
 	pub rect: [i32; 4],
 	/// The origin of the sprite in pixels, relative to the top-left corner of the rect.
-	#[serde(default)]
-	#[serde(skip_serializing_if = "is_default")]
+	#[serde(default, skip_serializing_if = "is_default")]
 	pub origin: Vec2<i32>,
 	/// Frame duration in seconds.
-	#[serde(default)]
-	#[serde(skip_serializing_if = "is_default")]
+	#[serde(default, skip_serializing_if = "is_default")]
 	pub duration: f32,
 }
-
-fn is_default<T: Default + PartialEq>(v: &T) -> bool { *v == T::default() }
 
 /// A collection of sprites in a spritesheet image.
 #[derive(serde::Serialize, serde::Deserialize)]

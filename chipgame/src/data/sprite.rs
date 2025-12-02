@@ -214,7 +214,7 @@ impl SpriteId {
 	}
 }
 
-pub fn create_spritesheet() -> SpriteSheet<SpriteId> {
+pub fn create_spritesheet() -> chipty::SpriteSheet<SpriteId> {
 	let ids = [
 	SpriteId::Blank,
 	SpriteId::Floor,
@@ -320,17 +320,17 @@ pub fn create_spritesheet() -> SpriteSheet<SpriteId> {
 	let mut sprites = HashMap::new();
 	let mut frames = Vec::new();
 	for &id in &ids {
-		sprites.insert(id, SpriteEntry {
+		sprites.insert(id, chipty::SpriteEntry {
 			index: frames.len() as u16,
 			len: 1,
 			duration: 0.0,
 		});
 		let index = id.index();
-		frames.push(SpriteFrame {
+		frames.push(chipty::SpriteFrame {
 			rect: [index.x * 34 + 1, index.y * 34 + 1, 32, 32],
 			origin: Vec2(0, 0),
 			duration: 0.0,
 		});
 	}
-	SpriteSheet { width: 224, height: 512, sprites, frames }
+	chipty::SpriteSheet { width: 224, height: 512, sprites, frames }
 }

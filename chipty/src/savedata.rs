@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug, Default)]
 pub struct SaveFileDto {
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub current_level: Option<String>,
 	pub unlocked_levels: BTreeSet<String>,
 	#[serde(default)]

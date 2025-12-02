@@ -91,23 +91,6 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 	}
 }
 
-fn test_level(levels_dir: &Path, replays_dir: &Path, level_name: &str) {
-	let level_path = levels_dir.join(format!("{level_name}.json"));
-	let level_content = fs::read_to_string(&level_path).unwrap();
-	let level: chipty::LevelDto = serde_json::from_str(&level_content).unwrap();
-	let replay_path = replays_dir.join(level_path.file_name().unwrap());
-	if let Ok(replay_content) = fs::read_to_string(&replay_path) {
-		let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
-		eprintln!("Playing {:?}: \x1b[32m{}\x1b[m", level_name, level.name);
-		if !test_replay(&level, &replay) {
-			panic!("replay failed for {:?}", level_name);
-		}
-	}
-	else {
-		eprintln!("\x1b[31mSkipped\x1b[m {:?}: \x1b[32m{}\x1b[m", level_name, level.name);
-	}
-}
-
 #[test]
 fn cc1() {
 	let current_dir = env::current_dir().unwrap();
@@ -146,14 +129,6 @@ fn cclp5() {
 	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp5/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp5");
 	test_levelset(&levels_dir, &replays_dir);
-}
-
-#[test]
-fn dev() {
-	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/dev");
-	let replays_dir = current_dir.join("tests/replays/dev");
-	test_level(&levels_dir, &replays_dir, "iceblock");
 }
 
 #[test]

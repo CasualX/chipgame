@@ -70,6 +70,6 @@ impl str::FromStr for EntityKind {
 pub struct EntityArgs {
 	pub kind: EntityKind,
 	pub pos: Vec2i,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub face_dir: Option<Compass>,
 }

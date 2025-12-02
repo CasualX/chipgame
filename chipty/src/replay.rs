@@ -2,7 +2,7 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug, Default)]
 pub struct ReplayDto {
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub date: Option<String>,
 	pub ticks: i32,
 	pub realtime: f32,

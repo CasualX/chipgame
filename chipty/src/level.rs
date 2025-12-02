@@ -55,18 +55,21 @@ pub struct Trophies {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct LevelDto {
 	pub name: String,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub author: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub hint: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub password: Option<String>,
 	pub required_chips: i32,
+	#[serde(default, skip_serializing_if = "is_default")]
 	pub time_limit: i32,
 	pub map: FieldDto,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub entities: Vec<EntityArgs>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub connections: Vec<FieldConn>,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub replays: Option<Vec<ReplayDto>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub trophies: Option<Trophies>,

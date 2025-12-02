@@ -1,1 +1,0 @@
-{"name":"Flick","seed":3238195111,"required_chips":0,"time_limit":0,"map":{"width":5,"height":4,"data":[2,3,3,4,5,3,2,3,6,7,3,8,3,3,1,8,3,3,9,1],"legend":["Blank","Floor","IceNW","Ice","IceNE","Exit","IceSE","Water","IceSW","ThinWallE"]},"entities":[{"kind":"Player","pos":[4,3]},{"kind":"Block","pos":[3,3]}],"connections":[]}

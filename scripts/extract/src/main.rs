@@ -39,13 +39,10 @@ fn main() {
 	let _ = fs::create_dir(&levelset_path);
 	let levelset_index = levelset_path.join("index.json");
 
-	let levelset = LevelSetDto {
-		title: dat_name.to_string(),
-		about: None,
-		splash: None,
-		unlock_all_levels: false,
-		levels: (0..dat.levels.len()).map(|i| LevelRef::Indirect(format!("lv/level{}.json", i + 1))).collect(),
-	};
+	let title = dat_name.to_string();
+	let levels = (0..dat.levels.len()).map(|i| LevelRef::Indirect(format!("lv/level{}.json", i + 1))).collect();
+	let levelset = LevelSetDto { title, about: None, splash: None, levels };
+
 	fs::write(&levelset_index, serde_json::to_string_pretty(&levelset).unwrap()).expect("Failed to write levelset index");
 	eprintln!("Wrote levelset {}", levelset_index.display());
 

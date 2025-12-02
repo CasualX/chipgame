@@ -189,7 +189,7 @@ impl SaveData {
 
 		let mut this = SaveData {
 			current_level: 0,
-			unlocked_levels: vec![level_set.unlock_all_levels; level_set.levels.len()],
+			unlocked_levels: vec![false; level_set.levels.len()],
 			completed_levels: vec![false; level_set.levels.len()],
 			high_scores: HighScores {
 				ticks: vec![-1; level_set.levels.len()],
