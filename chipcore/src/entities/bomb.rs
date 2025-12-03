@@ -101,7 +101,6 @@ static DATA: EntityData = EntityData {
 		blue_fake: true,
 		recessed_wall: true,
 		keys: false,
-		solid_key: true,
 		boots: false,
 		chips: false,
 		creatures: false,
