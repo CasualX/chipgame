@@ -5,9 +5,9 @@ pub use chipty::EntityKind;
 /// Static entity data.
 #[derive(Debug)]
 pub struct EntityData {
-	pub movement_phase: fn(&mut GameState, &mut Entity),
-	pub action_phase: fn(&mut GameState, &mut Entity),
-	pub terrain_phase: fn(&mut GameState, &mut Entity, &mut InteractTerrainState),
+	pub movement_phase: fn(&mut GameState, &mut MovementPhase, &mut Entity),
+	pub action_phase: fn(&mut GameState, &mut ActionPhase, &mut Entity),
+	pub terrain_phase: fn(&mut GameState, &mut TerrainPhase, &mut Entity),
 	pub flags: SolidFlags,
 }
 

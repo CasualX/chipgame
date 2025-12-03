@@ -100,33 +100,39 @@ impl GameState {
 		ps_input(self, input);
 
 		// Movement phase
-		for ehandle in self.ents.handles() {
-			if let Some(mut ent) = self.ents.take(ehandle) {
-				(ent.data.movement_phase)(self, &mut ent);
-				self.ents.put(ent);
+		{
+			let mut phase = MovementPhase::default();
+			for ehandle in self.ents.handles() {
+				if let Some(mut ent) = self.ents.take(ehandle) {
+					(ent.data.movement_phase)(self, &mut phase, &mut ent);
+					self.ents.put(ent);
+				}
 			}
 		}
 
 		// Action phase
-		for ehandle in self.ents.handles() {
-			if let Some(mut ent) = self.ents.take(ehandle) {
-				(ent.data.action_phase)(self, &mut ent);
-				self.ents.put(ent);
+		{
+			let mut phase = ActionPhase::default();
+			for ehandle in self.ents.handles() {
+				if let Some(mut ent) = self.ents.take(ehandle) {
+					(ent.data.action_phase)(self, &mut phase, &mut ent);
+					self.ents.put(ent);
+				}
 			}
 		}
 
 		// Terrain phase
-		let mut its = InteractTerrainState::default();
+		let mut phase = TerrainPhase::default();
 		for ehandle in self.ents.handles() {
 			if let Some(mut ent) = self.ents.take(ehandle) {
-				(ent.data.terrain_phase)(self, &mut ent, &mut its);
+				(ent.data.terrain_phase)(self, &mut phase, &mut ent);
 				self.ents.put(ent);
 			}
 		}
-		if its.toggle_walls & 1 != 0 {
+		if phase.toggle_walls & 1 != 0 {
 			self.toggle_walls();
 		}
-		if its.turn_around_tanks & 1 != 0 {
+		if phase.turn_around_tanks & 1 != 0 {
 			self.turn_around_tanks();
 		}
 
@@ -137,7 +143,7 @@ impl GameState {
 		// Otherwise the clones won't behave correctly...
 		// * Collides with the entity triggering the button one tile away
 		// * Does not trigger buttons as they are spawned
-		self.spawn_clones(&its.spawns);
+		self.spawn_clones(&phase.spawns);
 	}
 
 	/// Returns the trap state at the given position.
@@ -157,6 +163,8 @@ impl GameState {
 
 	/// Spawn cloned entities from spawners.
 	pub fn spawn_clones(&mut self, spawns: &[EntityArgs]) {
+		let mut phase = &mut MovementPhase::default();
+
 		for args in spawns {
 			// Clones are forced out of the spawner, so they must have a direction
 			let Some(face_dir) = args.face_dir else { continue };
@@ -164,7 +172,7 @@ impl GameState {
 			let ehandle = self.entity_create(args);
 			if let Some(mut ent) = self.ents.take(ehandle) {
 				// Force the new entity to move out of the spawner
-				let success = try_move(self, &mut ent, face_dir);
+				let success = try_move(self, &mut phase, &mut ent, face_dir);
 				// Speed up the entity if spawned onto ice or force floors
 				let terrain = self.field.get_terrain(ent.pos);
 				if matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW | Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {

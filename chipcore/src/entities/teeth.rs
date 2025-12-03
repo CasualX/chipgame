@@ -18,16 +18,16 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn movement_phase(s: &mut GameState, ent: &mut Entity) {
+fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity) {
 	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if try_terrain_move(s, ent, ent.step_dir) { }
+		if try_terrain_move(s, phase, ent, ent.step_dir) { }
 		else if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
-			if try_move(s, ent, first_dir) { }
-			else if try_move(s, ent, second_dir) { }
+			if try_move(s, phase, ent, first_dir) { }
+			else if try_move(s, phase, ent, second_dir) { }
 			// If no legal move, stay put and face in the first direction
 			else {
 				if ent.face_dir != Some(first_dir) {
@@ -99,7 +99,7 @@ fn chase_dirs(s: &GameState, ent: &Entity) -> Option<(Compass, Compass)> {
 	}
 }
 
-fn action_phase(s: &mut GameState, ent: &mut Entity) {
+fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
@@ -107,11 +107,11 @@ fn action_phase(s: &mut GameState, ent: &mut Entity) {
 	ps_attack_pos(s, ent.pos, GameOverReason::Eaten);
 }
 
-fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {
+fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, ent, state);
+		return bear_trap(s, phase, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
@@ -123,10 +123,10 @@ fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrai
 			Terrain::Fire => {
 				ent.flags |= EF_REMOVE;
 			}
-			Terrain::GreenButton => green_button(s, ent, state),
-			Terrain::RedButton => red_button(s, ent, state),
-			Terrain::BrownButton => brown_button(s, ent, state),
-			Terrain::BlueButton => blue_button(s, ent, state),
+			Terrain::GreenButton => green_button(s, phase, ent),
+			Terrain::RedButton => red_button(s, phase, ent),
+			Terrain::BrownButton => brown_button(s, phase, ent),
+			Terrain::BlueButton => blue_button(s, phase, ent),
 			_ => {}
 		}
 	}

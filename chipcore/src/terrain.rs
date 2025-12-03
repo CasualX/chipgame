@@ -1,13 +1,13 @@
 use super::*;
 
 #[derive(Default)]
-pub struct InteractTerrainState {
+pub struct TerrainPhase {
 	pub toggle_walls: u32,
 	pub turn_around_tanks: u32,
 	pub spawns: Vec<EntityArgs>,
 }
 
-pub fn bear_trap(s: &mut GameState, ent: &mut Entity, _result: &mut InteractTerrainState) {
+pub fn bear_trap(s: &mut GameState, _phase: &mut TerrainPhase, ent: &mut Entity) {
 	if matches!(s.get_trap_state(ent.pos), TrapState::Closed) {
 		// Notify only if the entity is newly trapped
 		if ent.flags & (EF_TRAPPED | EF_RELEASED) == 0 {
@@ -28,14 +28,14 @@ fn is_button_press_audible(ent: &Entity) -> bool {
 	matches!(ent.kind, EntityKind::Player | EntityKind::Block | EntityKind::IceBlock)
 }
 
-pub fn green_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
-	result.toggle_walls += 1;
+pub fn green_button(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
+	phase.toggle_walls += 1;
 	if is_button_press_audible(ent) {
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 	}
 }
 
-pub fn red_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
+pub fn red_button(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
 	let Some(conn) = s.field.find_conn_by_src(ent.pos) else { return };
 
 	// Handle CloneBlock tiles separately
@@ -64,14 +64,14 @@ pub fn red_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerr
 		}
 		template_ent.to_entity_args()
 	};
-	result.spawns.push(args);
+	phase.spawns.push(args);
 
 	if is_button_press_audible(ent) {
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 	}
 }
 
-pub fn brown_button(s: &mut GameState, ent: &mut Entity, _result: &mut InteractTerrainState) {
+pub fn brown_button(s: &mut GameState, _phase: &mut TerrainPhase, ent: &mut Entity) {
 	if is_button_press_audible(ent) {
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 	}
@@ -87,8 +87,8 @@ pub fn brown_button(s: &mut GameState, ent: &mut Entity, _result: &mut InteractT
 	}
 }
 
-pub fn blue_button(s: &mut GameState, ent: &mut Entity, result: &mut InteractTerrainState) {
-	result.turn_around_tanks += 1;
+pub fn blue_button(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
+	phase.turn_around_tanks += 1;
 	if is_button_press_audible(ent) {
 		s.events.fire(GameEvent::SoundFx { sound: SoundFx::ButtonPressed });
 	}

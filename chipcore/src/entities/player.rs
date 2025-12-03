@@ -31,7 +31,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn movement_phase(s: &mut GameState, ent: &mut Entity) {
+fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity) {
 	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
 		return;
 	}
@@ -73,7 +73,7 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 
 		if s.ps.dev_wtw {
 			if let Some(input_dir) = input_dir {
-				try_move(s, ent, input_dir);
+				try_move(s, phase, ent, input_dir);
 				return;
 			}
 		}
@@ -81,7 +81,7 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 		'end_move: {
 			if let Some(step_dir) = ent.step_dir {
 				if matches!(terrain, Terrain::Teleport) {
-					if teleport(s, ent, step_dir) {
+					if teleport(s, phase, ent, step_dir) {
 						break 'end_move;
 					}
 				}
@@ -119,8 +119,8 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 						},
 					};
 					// If the player is blocked, try to turn around
-					if !try_move(s, ent, ice_dir) {
-						if !try_move(s, ent, back_dir) {
+					if !try_move(s, phase, ent, ice_dir) {
+						if !try_move(s, phase, ent, back_dir) {
 							// Softlocked!
 						}
 						else {
@@ -155,17 +155,17 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 
 				// Consider this a forced move if the player did not step in the direction of the force terrain
 				if let Some(override_dir) = override_dir {
-					if try_move(s, ent, override_dir) {
+					if try_move(s, phase, ent, override_dir) {
 						ent.flags &= !EF_TERRAIN_MOVE;
 					}
 					else {
-						try_move(s, ent, force_dir);
+						try_move(s, phase, ent, force_dir);
 						bump(s, ent, override_dir);
 						ent.flags |= EF_TERRAIN_MOVE;
 					}
 				}
 				else {
-					try_move(s, ent, force_dir);
+					try_move(s, phase, ent, force_dir);
 					ent.flags |= EF_TERRAIN_MOVE;
 				}
 
@@ -177,7 +177,7 @@ fn movement_phase(s: &mut GameState, ent: &mut Entity) {
 
 			// Handle player input
 			if let Some(step_dir) = input_dir {
-				if !try_move(s, ent, step_dir) {
+				if !try_move(s, phase, ent, step_dir) {
 					bump(s, ent, step_dir);
 				}
 			}
@@ -196,7 +196,7 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 }
 
-fn action_phase(s: &mut GameState, ent: &mut Entity) {
+fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 	let activity = match s.field.get_terrain(ent.pos) {
 		Terrain::Water => {
 			if s.ps.activity != PlayerActivity::Swimming {
@@ -225,7 +225,7 @@ fn action_phase(s: &mut GameState, ent: &mut Entity) {
 	ps_activity(s, ent.handle, activity);
 }
 
-fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrainState) {
+fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
 	if let Some(step_dir) = ent.step_dir {
 		let from_pos = ent.pos - step_dir.to_vec();
 		// HACK: Avoid triggering the recessed wall on the first step
@@ -238,7 +238,7 @@ fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrai
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, ent, state);
+		return bear_trap(s, phase, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
@@ -247,10 +247,10 @@ fn terrain_phase(s: &mut GameState, ent: &mut Entity, state: &mut InteractTerrai
 				s.set_terrain(ent.pos, Terrain::Floor);
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 			}
-			Terrain::GreenButton => green_button(s, ent, state),
-			Terrain::RedButton => red_button(s, ent, state),
-			Terrain::BrownButton => brown_button(s, ent, state),
-			Terrain::BlueButton => blue_button(s, ent, state),
+			Terrain::GreenButton => green_button(s, phase, ent),
+			Terrain::RedButton => red_button(s, phase, ent),
+			Terrain::BrownButton => brown_button(s, phase, ent),
+			Terrain::BlueButton => blue_button(s, phase, ent),
 			_ => {}
 		}
 	}

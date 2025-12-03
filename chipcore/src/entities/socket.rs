@@ -18,13 +18,13 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	return handle;
 }
 
-fn movement_phase(_s: &mut GameState, _ent: &mut Entity) {
+fn movement_phase(_s: &mut GameState, _phase: &mut MovementPhase, _ent: &mut Entity) {
 }
 
-fn action_phase(_s: &mut GameState, _ent: &mut Entity) {
+fn action_phase(_s: &mut GameState, _phase: &mut ActionPhase, _ent: &mut Entity) {
 }
 
-fn terrain_phase(_s: &mut GameState, _ent: &mut Entity, _state: &mut InteractTerrainState) {
+fn terrain_phase(_s: &mut GameState, _phase: &mut TerrainPhase, _ent: &mut Entity) {
 }
 
 static DATA: EntityData = EntityData {

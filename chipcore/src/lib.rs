@@ -44,6 +44,11 @@ pub enum TrapState {
 	Open,
 }
 
+#[derive(Default)]
+pub struct ActionPhase {
+	// Placeholder for future use
+}
+
 pub enum RngSeed {
 	System,
 	Manual(u64),

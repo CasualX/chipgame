@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use super::*;
 
 /// Solid flags.
@@ -109,8 +110,13 @@ fn try_unlock(s: &mut GameState, pos: Vec2i, key: KeyColor) -> bool {
 	return true;
 }
 
+#[derive(Default)]
+pub struct MovementPhase {
+	steps: HashSet<(Vec2i, Vec2i)>,
+}
+
 /// Tries to move the entity in the given step direction.
-pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
+pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Compass) -> bool {
 	ent.flags &= !EF_NEW_POS;
 
 	// Template entities cannot be moved
@@ -211,7 +217,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				_ => false,
 			};
 			if solid {
-				flick(s, ent.kind, &new_pos, step_dir);
+				flick(s, phase, ent.kind, &new_pos, step_dir);
 				return false;
 			}
 		}
@@ -233,7 +239,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			Compass::Right => THIN_WALL_W,
 		};
 		if terrain_solid_flags(to_terrain, &ent.data.flags) & panel != 0 {
-			flick(s, ent.kind, &new_pos, step_dir);
+			flick(s, phase, ent.kind, &new_pos, step_dir);
 			return false;
 		}
 	}
@@ -245,7 +251,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		let solid = match ent.kind {
 			EntityKind::Player => {
 				if matches!(mover_kind, EntityKind::Player) {
-					!try_push_block(s, &mut ent, step_dir)
+					!try_push_block(s, phase, &mut ent, step_dir)
 				}
 				else {
 					flags.player
@@ -264,7 +270,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 				}
 			}
 			EntityKind::Block => {
-				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, &mut ent, step_dir) {
+				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, phase, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -277,7 +283,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 			}
 			EntityKind::IceBlock => {
 				let allowed_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
-				if allowed_pusher && try_push_block(s, &mut ent, step_dir) {
+				if allowed_pusher && try_push_block(s, phase, &mut ent, step_dir) {
 					s.update_hidden_flag(ent.pos, true);
 					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -320,21 +326,28 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 	if matches!(mover_kind, EntityKind::Player) && s.ps.last_step_dir == Some(step_dir) {
 		if matches!(step_dir, Compass::Up | Compass::Down) {
 			if s.ps.inbuf.is_any_dir(Compass::Left) {
-				slap(s, ent.pos, Compass::Left);
+				slap(s, phase, ent.pos, Compass::Left);
 			}
 			if s.ps.inbuf.is_any_dir(Compass::Right) {
-				slap(s, ent.pos, Compass::Right);
+				slap(s, phase, ent.pos, Compass::Right);
 			}
 		}
 		if matches!(step_dir, Compass::Left | Compass::Right) {
 			if s.ps.inbuf.is_any_dir(Compass::Up) {
-				slap(s, ent.pos, Compass::Up);
+				slap(s, phase, ent.pos, Compass::Up);
 			}
 			if s.ps.inbuf.is_any_dir(Compass::Down) {
-				slap(s, ent.pos, Compass::Down);
+				slap(s, phase, ent.pos, Compass::Down);
 			}
 		}
 	}
+
+	// Check entities from swapping places in the same movement phase
+	if phase.steps.contains(&(new_pos, ent.pos)) {
+		return true;
+	}
+
+	phase.steps.insert((ent.pos, new_pos));
 
 	s.qt.update(ent.handle, ent.pos, new_pos);
 
@@ -359,7 +372,7 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 }
 
 /// Tries to push a Block in the given push direction.
-fn try_push_block(s: &mut GameState, ent: &mut Entity, push_dir: Compass) -> bool {
+fn try_push_block(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, push_dir: Compass) -> bool {
 	// The Player movement happens before the Block's movement code
 	// So preemptively move the Block by terrain if possible
 
@@ -374,7 +387,7 @@ fn try_push_block(s: &mut GameState, ent: &mut Entity, push_dir: Compass) -> boo
 	// Player -> Block -> Ice corner -> Floor -> Ice corner
 	// When the Block is moved from the Floor tile it has its base speed while on the Ice corner
 
-	if s.time >= ent.step_time + ent.base_spd / 2 && try_terrain_move(s, ent, ent.step_dir) {
+	if s.time >= ent.step_time + ent.base_spd / 2 && try_terrain_move(s, phase, ent, ent.step_dir) {
 		// Returns true if the Block was actually moved out of the way
 		if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
 			return true;
@@ -383,11 +396,11 @@ fn try_push_block(s: &mut GameState, ent: &mut Entity, push_dir: Compass) -> boo
 
 	// Otherwise, try to push the Block manually
 	// Note that we ignore the Block's step timer here to allow pushing off of ice or force floors
-	try_move(s, ent, push_dir)
+	try_move(s, phase, ent, push_dir)
 }
 
 /// To flick a Block is to push it off a tile that Chip cannot enter.
-fn flick(s: &mut GameState, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Compass) {
+fn flick(s: &mut GameState, phase: &mut MovementPhase, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Compass) {
 	let allowed_block_pusher = matches!(pusher, EntityKind::Player);
 	let allowed_iceblock_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
 
@@ -403,7 +416,7 @@ fn flick(s: &mut GameState, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Comp
 			matches!(ent.kind, EntityKind::IceBlock) && allowed_iceblock_pusher;
 
 		if allowed_pusher {
-			if try_move(s, &mut ent, step_dir) {
+			if try_move(s, phase, &mut ent, step_dir) {
 				s.update_hidden_flag(ent.pos, true);
 				s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -415,7 +428,7 @@ fn flick(s: &mut GameState, pusher: EntityKind, &new_pos: &Vec2i, step_dir: Comp
 	}
 }
 
-fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
+fn slap(s: &mut GameState, phase: &mut MovementPhase, player_pos: Vec2i, slap_dir: Compass) {
 	let pos = player_pos + slap_dir.to_vec();
 
 	// Slap the terrain
@@ -434,7 +447,7 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 		let Some(mut ent) = s.ents.take(ehandle) else { continue };
 
 		if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
-			if try_move(s, &mut ent, slap_dir) {
+			if try_move(s, phase, &mut ent, slap_dir) {
 				s.update_hidden_flag(ent.pos, true);
 				s.update_hidden_flag(ent.pos - slap_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
@@ -448,7 +461,7 @@ fn slap(s: &mut GameState, player_pos: Vec2i, slap_dir: Compass) {
 
 /// Tries to move the entity according to the terrain effects.
 /// Returns true if the entity is under the influence of terrain movement (not necessarily moved).
-pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
+pub fn try_terrain_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Option<Compass>) -> bool {
 	// Entity is trapped, cannot move or turn
 	if ent.is_trapped() {
 		return true;
@@ -460,7 +473,7 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 		Terrain::BearTrap => {
 			if ent.flags & EF_MOMENTUM != 0 {
 				if let Some(step_dir) = ent.step_dir {
-					if try_move(s, ent, step_dir) {
+					if try_move(s, phase, ent, step_dir) {
 						return true;
 					}
 				}
@@ -468,44 +481,44 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 			return false;
 		}
 		Terrain::Ice => match step_dir {
-			Some(dir) => !try_move(s, ent, dir) && try_move(s, ent, dir.turn_around()),
+			Some(dir) => !try_move(s, phase, ent, dir) && try_move(s, phase, ent, dir.turn_around()),
 			None => return false,
 		}
 		Terrain::IceNW => match step_dir {
-			Some(Compass::Up) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Down),
-			Some(Compass::Left) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Right),
-			Some(Compass::Down) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Right),
-			Some(Compass::Right) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Down),
+			Some(Compass::Up) => !try_move(s, phase, ent, Compass::Right) && try_move(s, phase, ent, Compass::Down),
+			Some(Compass::Left) => !try_move(s, phase, ent, Compass::Down) && try_move(s, phase, ent, Compass::Right),
+			Some(Compass::Down) => !try_move(s, phase, ent, Compass::Down) && try_move(s, phase, ent, Compass::Right),
+			Some(Compass::Right) => !try_move(s, phase, ent, Compass::Right) && try_move(s, phase, ent, Compass::Down),
 			_ => return false,
 		}
 		Terrain::IceNE => match step_dir {
-			Some(Compass::Up) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Down),
-			Some(Compass::Left) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Down),
-			Some(Compass::Down) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Left),
-			Some(Compass::Right) => !try_move(s, ent, Compass::Down) && try_move(s, ent, Compass::Left),
+			Some(Compass::Up) => !try_move(s, phase, ent, Compass::Left) && try_move(s, phase, ent, Compass::Down),
+			Some(Compass::Left) => !try_move(s, phase, ent, Compass::Left) && try_move(s, phase, ent, Compass::Down),
+			Some(Compass::Down) => !try_move(s, phase, ent, Compass::Down) && try_move(s, phase, ent, Compass::Left),
+			Some(Compass::Right) => !try_move(s, phase, ent, Compass::Down) && try_move(s, phase, ent, Compass::Left),
 			_ => return false,
 		}
 		Terrain::IceSE => match step_dir {
-			Some(Compass::Up) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Left),
-			Some(Compass::Left) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Up),
-			Some(Compass::Down) => !try_move(s, ent, Compass::Left) && try_move(s, ent, Compass::Up),
-			Some(Compass::Right) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Left),
+			Some(Compass::Up) => !try_move(s, phase, ent, Compass::Up) && try_move(s, phase, ent, Compass::Left),
+			Some(Compass::Left) => !try_move(s, phase, ent, Compass::Left) && try_move(s, phase, ent, Compass::Up),
+			Some(Compass::Down) => !try_move(s, phase, ent, Compass::Left) && try_move(s, phase, ent, Compass::Up),
+			Some(Compass::Right) => !try_move(s, phase, ent, Compass::Up) && try_move(s, phase, ent, Compass::Left),
 			_ => return false,
 		}
 		Terrain::IceSW => match step_dir {
-			Some(Compass::Up) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Right),
-			Some(Compass::Left) => !try_move(s, ent, Compass::Up) && try_move(s, ent, Compass::Right),
-			Some(Compass::Down) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Up),
-			Some(Compass::Right) => !try_move(s, ent, Compass::Right) && try_move(s, ent, Compass::Up),
+			Some(Compass::Up) => !try_move(s, phase, ent, Compass::Up) && try_move(s, phase, ent, Compass::Right),
+			Some(Compass::Left) => !try_move(s, phase, ent, Compass::Up) && try_move(s, phase, ent, Compass::Right),
+			Some(Compass::Down) => !try_move(s, phase, ent, Compass::Right) && try_move(s, phase, ent, Compass::Up),
+			Some(Compass::Right) => !try_move(s, phase, ent, Compass::Right) && try_move(s, phase, ent, Compass::Up),
 			_ => return false,
 		}
-		Terrain::ForceN => try_move(s, ent, Compass::Up),
-		Terrain::ForceW => try_move(s, ent, Compass::Left),
-		Terrain::ForceS => try_move(s, ent, Compass::Down),
-		Terrain::ForceE => try_move(s, ent, Compass::Right),
-		Terrain::ForceRandom => { let dir = s.rand.next(); try_move(s, ent, dir) },
+		Terrain::ForceN => try_move(s, phase, ent, Compass::Up),
+		Terrain::ForceW => try_move(s, phase, ent, Compass::Left),
+		Terrain::ForceS => try_move(s, phase, ent, Compass::Down),
+		Terrain::ForceE => try_move(s, phase, ent, Compass::Right),
+		Terrain::ForceRandom => { let dir = s.rand.next(); try_move(s, phase, ent, dir) },
 		Terrain::Teleport => match step_dir {
-			Some(step_dir) => teleport(s, ent, step_dir), // If this fails the entity gets softlocked, player is not affected
+			Some(step_dir) => teleport(s, phase, ent, step_dir), // If this fails the entity gets softlocked, player is not affected
 			None => false,
 		},
 		_ => return false,
@@ -515,7 +528,7 @@ pub fn try_terrain_move(s: &mut GameState, ent: &mut Entity, step_dir: Option<Co
 }
 
 /// Teleports the entity to the destination of a teleporter.
-pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool {
+pub fn teleport(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Compass) -> bool {
 	let old_pos = ent.pos;
 	let mut teleported;
 	loop {
@@ -526,14 +539,14 @@ pub fn teleport(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 		ent.pos = conn.dest;
 		teleported = ent.pos != old_pos;
 		// Force the entity to move out of the teleporter
-		if try_move(s, ent, step_dir) {
+		if try_move(s, phase, ent, step_dir) {
 			break;
 		}
 		// Reflect the entity back if they're softlocked
 		// This happens when all destinations are blocked (including the source)
 		if old_pos == ent.pos {
 			// CCLP3: level 50 bug fix - only reflect player entities, requires a block to be softlocked on the teleporter
-			if matches!(ent.kind, EntityKind::Player) && !try_move(s, ent, step_dir.turn_around()) {
+			if matches!(ent.kind, EntityKind::Player) && !try_move(s, phase, ent, step_dir.turn_around()) {
 				return false;
 			}
 			break;
