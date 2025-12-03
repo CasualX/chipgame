@@ -101,6 +101,7 @@ pub struct Input {
 	pub key_right: bool,
 	pub key_up: bool,
 	pub key_down: bool,
+	pub key_shift: bool,
 }
 
 pub enum EditorState {
@@ -173,6 +174,12 @@ impl EditorState {
 		match self {
 			EditorState::Edit(s) => s.key_down(pressed),
 			EditorState::Play(s) => s.key_down(pressed),
+		}
+	}
+	pub fn key_shift(&mut self, pressed: bool) {
+		match self {
+			EditorState::Edit(s) => s.key_shift(pressed),
+			EditorState::Play(_) => (),
 		}
 	}
 	pub fn toggle_play(&mut self) {

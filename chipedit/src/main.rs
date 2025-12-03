@@ -274,6 +274,7 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
 						PhysicalKey::Code(KeyCode::KeyE) => editor.tool_entity(pressed),
 						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
+						PhysicalKey::Code(KeyCode::ShiftLeft | KeyCode::ShiftRight) => editor.key_shift(pressed),
 						PhysicalKey::Code(KeyCode::Numpad8) if pressed => {
 							if shift_held { editor.expand_top(); }
 							else { editor.crop_top(); }

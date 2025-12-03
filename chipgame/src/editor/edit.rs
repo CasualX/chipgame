@@ -108,6 +108,9 @@ impl EditorEditState {
 	pub fn key_down(&mut self, pressed: bool) {
 		self.input.key_down = pressed;
 	}
+	pub fn key_shift(&mut self, pressed: bool) {
+		self.input.key_shift = pressed;
+	}
 	pub fn think(&mut self) {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
