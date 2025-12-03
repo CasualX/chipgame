@@ -201,12 +201,25 @@ pub fn try_move(s: &mut GameState, ent: &mut Entity, step_dir: Compass) -> bool 
 					s.set_terrain(new_pos, Terrain::Wall);
 					true
 				}
+				Terrain::DirtBlock => {
+					// Replace DirtBlock with a Block entity on Floor
+					s.set_terrain(new_pos, Terrain::Floor);
+					let args = EntityArgs { kind: EntityKind::Block, pos: new_pos, face_dir: None };
+					s.entity_create(&args);
+					false
+				}
 				_ => false,
 			};
 			if solid {
 				flick(s, ent.kind, &new_pos, step_dir);
 				return false;
 			}
+		}
+		else if matches!(to_terrain, Terrain::DirtBlock) {
+			// Replace DirtBlock with a Block entity on Floor
+			s.set_terrain(new_pos, Terrain::Floor);
+			let args = EntityArgs { kind: EntityKind::Block, pos: new_pos, face_dir: None };
+			s.entity_create(&args);
 		}
 
 		// Update the terrain after potential changes

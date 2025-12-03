@@ -362,6 +362,16 @@ mod dat {
 			}
 		}
 
+		// Replace Block entites on Floor with DirtBlock terrain
+		entities.retain_mut(|ent| {
+			let index = (ent.pos.y * 32 + ent.pos.x) as usize;
+			if matches!(ent.kind, EntityKind::Block) && matches!(terrain[index], Terrain::Floor) {
+				terrain[index] = Terrain::DirtBlock;
+				return false;
+			}
+			true
+		});
+
 		let mut conns = Vec::new();
 		let mut last_teleport = None;
 		let mut prev_teleport = None;
