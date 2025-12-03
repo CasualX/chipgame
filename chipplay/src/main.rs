@@ -112,11 +112,11 @@ impl AppStuff {
 		if let Some(fx) = &state.fx {
 			self.window.set_title(&format!("{} - Level {} - {}", state.lvsets.current().title, fx.level_number, fx.gs.field.name));
 		}
-		else if let Some(level_set) = state.lvsets.collection.get(state.lvsets.selected) {
+		else if let Some(level_set) = state.lvsets.collection.get(state.lvsets.selected as usize) {
 			self.window.set_title(&level_set.title);
 		}
 		else {
-			self.window.set_title("Play ChipGame");
+			self.window.set_title("Choose LevelSet");
 		}
 	}
 
@@ -176,6 +176,7 @@ fn main() {
 				if app.is_none() {
 					let mut built = AppStuff::new(elwt, &fs, &config);
 					state.launch(&mut built.g);
+					built.set_title(&state);
 					app = Some(built);
 					last_frame_start = time::Instant::now() - FRAME_TIME;
 					tick_budget = time::Duration::ZERO;
@@ -247,8 +248,9 @@ fn main() {
 							match evt {
 								&chipgame::play::PlayEvent::PlaySound { sound } => ap.play_sound(sound),
 								&chipgame::play::PlayEvent::PlayMusic { music } => ap.play_music(music),
+								&chipgame::play::PlayEvent::SetTitle => app.set_title(&state),
+								&chipgame::play::PlayEvent::Restart => state.launch(&mut app.g),
 								&chipgame::play::PlayEvent::Quit => elwt.exit(),
-								&chipgame::play::PlayEvent::PlayLevel => app.set_title(&state),
 							}
 						}
 

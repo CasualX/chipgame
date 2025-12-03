@@ -5,7 +5,8 @@ pub enum MenuEvent {
 	CursorSelect,
 	CloseMenu,
 
-	LoadLevelPack { index: usize },
+	LoadLevelSet { index: usize },
+	SwitchLevelSet,
 	OpenMainMenu,
 
 	// MainMenu Events

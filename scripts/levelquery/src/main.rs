@@ -9,7 +9,7 @@ struct LevelStats {
 fn main() {
 	let matches = clap::command!()
 		.about("Find levels with certain properties")
-		.arg(clap::arg!(<PATH> "Path to the levelpack").value_parser(clap::value_parser!(path::PathBuf)))
+		.arg(clap::arg!(<PATH> "Path to the levelset").value_parser(clap::value_parser!(path::PathBuf)))
 		// .arg(clap::arg!(-k --key [KEY] "Encryption key").required(false))
 		.arg(clap::arg!(--terrain [TERRAIN] "Terrain type to filter by"))
 		.arg(clap::arg!(--entity [ENTITY] "Entity type to filter by"))

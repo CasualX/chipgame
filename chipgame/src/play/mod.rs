@@ -47,8 +47,8 @@ impl PlayState {
 				splash.push(Some(texs));
 			}
 		}
-		self.menu.stack.push(menu::Menu::PackSelect(menu::PackSelectMenu {
-			selected: self.lvsets.selected,
+		self.menu.stack.push(menu::Menu::LevelSet(menu::LevelSetMenu {
+			selected: i32::max(0, self.lvsets.selected) as usize,
 			items: self.lvsets.collection.iter().map(|level_set| level_set.title.clone()).collect(),
 			splash,
 			ntime: 0,
@@ -109,7 +109,7 @@ impl PlayState {
 		fx.camera.set_perspective(self.save_data.perspective);
 
 		self.menu.close_all();
-		self.events.push(PlayEvent::PlayLevel);
+		self.events.push(PlayEvent::SetTitle);
 		self.play_music();
 	}
 
@@ -142,8 +142,9 @@ impl PlayState {
 		for evt in events {
 			// eprintln!("MenuEvent: {:?}", evt);
 			match evt {
-				menu::MenuEvent::LoadLevelPack { index } => {
-					self.lvsets.selected = index;
+				menu::MenuEvent::LoadLevelSet { index } => {
+					self.events.push(PlayEvent::SetTitle);
+					self.lvsets.selected = index as i32;
 					self.save_data.load(&self.lvsets.current());
 					self.save_data.save(&self.lvsets.current());
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
@@ -154,9 +155,17 @@ impl PlayState {
 				}
 				menu::MenuEvent::OpenMainMenu => {
 					self.fx = None;
-					self.events.push(PlayEvent::PlayLevel);
+					self.events.push(PlayEvent::SetTitle);
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
 					self.play_music();
+				}
+				menu::MenuEvent::SwitchLevelSet => {
+					self.fx = None;
+					self.is_preview = false;
+					self.lvsets.selected = -1;
+					self.menu.close_all();
+					self.events.push(PlayEvent::Restart);
+					self.events.push(PlayEvent::SetTitle);
 				}
 				menu::MenuEvent::PreviewLevel { level_number } => {
 					// Reuse PlayState.fx to show a preview of the requested level

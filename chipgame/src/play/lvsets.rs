@@ -21,21 +21,28 @@ impl LevelSet {
 	}
 }
 
-#[derive(Default)]
 pub struct LevelSets {
-	pub selected: usize,
+	pub selected: i32,
 	pub collection: Vec<LevelSet>,
+}
+impl Default for LevelSets {
+	fn default() -> Self {
+		Self {
+			selected: -1,
+			collection: Vec::new(),
+		}
+	}
 }
 impl LevelSets {
 	pub fn current(&self) -> &LevelSet {
-		&self.collection[self.selected]
+		&self.collection[self.selected as usize]
 	}
 	pub fn load(&mut self) {
 		load_levelsets(&mut self.collection);
 	}
 }
 
-fn load_levelsets(packs: &mut Vec<LevelSet>) {
+fn load_levelsets(sets: &mut Vec<LevelSet>) {
 	let dir = match fs::read_dir("levelsets") {
 		Ok(dir) => dir,
 		Err(err) => {
@@ -50,7 +57,7 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 				if path.is_dir() {
 					let fs = FileSystem::StdFs(path.clone());
 					let name = path.file_name().unwrap().to_string_lossy().into_owned();
-					load_levelset(&fs, name, packs);
+					load_levelset(&fs, name, sets);
 				}
 				// Check for packed files if no directory by that name exist
 				else if path.is_file() && !path.with_extension("").exists() {
@@ -72,7 +79,7 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 							Ok(paks) => {
 								let fs = FileSystem::Paks(paks, key);
 								let name = path.file_stem().unwrap().to_string_lossy().into_owned();
-								load_levelset(&fs, name, packs);
+								load_levelset(&fs, name, sets);
 							},
 							Err(err) => {
 								eprintln!("Error reading {}: {}", path.display(), err);
@@ -80,7 +87,7 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 						};
 					}
 					else if ext == "dat" {
-						load_dat(&path, packs);
+						load_dat(&path, sets);
 					}
 				}
 			}
@@ -89,10 +96,10 @@ fn load_levelsets(packs: &mut Vec<LevelSet>) {
 			}
 		}
 	}
-	packs.sort_by(|a, b| a.name.cmp(&b.name));
+	sets.sort_by(|a, b| a.name.cmp(&b.name));
 }
 
-fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
+fn load_levelset(fs: &FileSystem, name: String, sets: &mut Vec<LevelSet>) {
 	let index: LevelSetDto = {
 		let index = match fs.read_compressed("index.json") {
 			Ok(data) => data,
@@ -141,10 +148,10 @@ fn load_levelset(fs: &FileSystem, name: String, packs: &mut Vec<LevelSet>) {
 
 	let title = index.title;
 	let about = index.about.map(|lines| lines.join("\n"));
-	packs.push(LevelSet { name, title, about, splash, levels });
+	sets.push(LevelSet { name, title, about, splash, levels });
 }
 
-fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
+fn load_dat(path: &PathBuf, sets: &mut Vec<LevelSet>) {
 	let opts = chipdat::Options {
 		encoding: chipdat::Encoding::Windows1252,
 	};
@@ -200,7 +207,7 @@ fn load_dat(path: &PathBuf, packs: &mut Vec<LevelSet>) {
 		levels.push(level);
 	}
 
-	packs.push(LevelSet { name, title, about: None, splash: None, levels });
+	sets.push(LevelSet { name, title, about: None, splash: None, levels });
 }
 
 mod dat {

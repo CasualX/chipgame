@@ -1,14 +1,14 @@
 use super::*;
 
 #[derive(Default)]
-pub struct PackSelectMenu {
+pub struct LevelSetMenu {
 	pub selected: usize,
 	pub items: Vec<String>,
 	pub splash: Vec<Option<shade::image::AnimatedImage>>,
 	pub ntime: i32,
 }
 
-impl PackSelectMenu {
+impl LevelSetMenu {
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -23,7 +23,7 @@ impl PackSelectMenu {
 			}
 		}
 		if input.a.is_pressed() || input.start.is_pressed() {
-			events.push(MenuEvent::LoadLevelPack { index: self.selected });
+			events.push(MenuEvent::LoadLevelSet { index: self.selected });
 			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() {
@@ -84,7 +84,7 @@ impl PackSelectMenu {
 				..Default::default()
 			};
 
-			buf.text_box(&resx.font, &scribe, &top, shade::d2::TextAlign::MiddleCenter, "Choose a Level Pack");
+			buf.text_box(&resx.font, &scribe, &top, shade::d2::TextAlign::MiddleCenter, "Choose LevelSet");
 		}
 
 		let items = self.items.iter().map(|s| s as &dyn fmt::Display).collect::<Vec<_>>();

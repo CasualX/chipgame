@@ -3,6 +3,7 @@
 pub enum PlayEvent {
 	PlaySound { sound: chipty::SoundFx },
 	PlayMusic { music: Option<chipty::MusicId> },
-	PlayLevel,
+	SetTitle,
+	Restart,
 	Quit,
 }

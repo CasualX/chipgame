@@ -1,11 +1,11 @@
 use std::fs;
 use chipty::*;
 
-const LEVEL_PACK: &str = "levelsets/cclp1";
+const LEVEL_SET: &str = "levelsets/cclp1";
 
 fn main() {
 	for number in 1..150 {
-		let path = format!("{}/lv/level{}.json", LEVEL_PACK, number);
+		let path = format!("{}/lv/level{}.json", LEVEL_SET, number);
 		// dbg!(&path);
 		let Ok(content) = fs::read_to_string(&path)
 		else {
