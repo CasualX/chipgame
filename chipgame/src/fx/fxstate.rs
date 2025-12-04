@@ -10,9 +10,9 @@ pub struct FxState {
 	pub dt: f64,
 	pub render: render::RenderState,
 	pub objlookup: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
-	pub firesprites: HashMap<Vec2i, render::ObjectHandle>,
-	pub togglewalls: HashMap<Vec2i, render::ObjectHandle>,
-	pub inviswalls: HashMap<Vec2i, render::ObjectHandle>,
+	pub fire_sprites: HashMap<Vec2i, render::ObjectHandle>,
+	pub toggle_walls: HashMap<Vec2i, render::ObjectHandle>,
+	pub mirage_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub level_number: i32,
 	pub next_level_load: f64,
 	pub game_start_time: f64,
@@ -37,22 +37,24 @@ impl FxState {
 
 		self.render.clear();
 		self.objlookup.clear();
-		self.firesprites.clear();
-		self.togglewalls.clear();
-		self.inviswalls.clear();
+		self.fire_sprites.clear();
+		self.toggle_walls.clear();
+		self.mirage_walls.clear();
 
 		self.render.field.width = self.gs.field.width;
 		self.render.field.height = self.gs.field.height;
 		self.render.field.terrain.extend_from_slice(&self.gs.field.terrain);
 		for y in 0..self.gs.field.height {
 			for x in 0..self.gs.field.width {
+				let pos = Vec2(x, y);
 				let index = (y * self.gs.field.width + x) as usize;
 				let terrain = self.gs.field.terrain[index];
 				match terrain {
-					chipty::Terrain::Fire => handlers::create_fire(self, Vec2::new(x, y)),
-					chipty::Terrain::ToggleFloor => handlers::create_toggle_wall(self, Vec2(x, y), false),
-					chipty::Terrain::ToggleWall => handlers::create_toggle_wall(self, Vec2(x, y), true),
-					chipty::Terrain::HiddenWall | chipty::Terrain::InvisibleWall => handlers::create_invis_wall(self, Vec2(x, y)),
+					chipty::Terrain::Fire => handlers::create_fire(self, pos),
+					chipty::Terrain::ToggleFloor => handlers::create_toggle_wall(self, pos, false),
+					chipty::Terrain::ToggleWall => handlers::create_toggle_wall(self, pos, true),
+					chipty::Terrain::HiddenWall => handlers::create_wall_mirage(self, pos),
+					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(self, pos),
 					_ => {}
 				}
 			}
@@ -138,7 +140,7 @@ impl FxState {
 		}
 
 		// Update invisible walls based on player proximity
-		for (&pos, &obj_handle) in &self.inviswalls {
+		for (&pos, &obj_handle) in &self.mirage_walls {
 			let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
 
 			let Some(player) = chipcore::ps_nearest_ent(&self.gs, pos) else { continue };

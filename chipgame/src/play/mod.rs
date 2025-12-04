@@ -257,22 +257,12 @@ impl PlayState {
 				}
 				menu::MenuEvent::OpenPauseMenu => {
 					if let Some(fx) = &mut self.fx {
-						let menu = menu::PauseMenu {
-							selected: 0,
-							level_number: fx.level_number,
-							level_name: fx.gs.field.name.clone(),
-							attempts: fx.gs.ps.attempts,
-							time: fx.gs.time,
-							steps: fx.gs.ps.steps,
-							bonks: fx.gs.ps.bonks,
-						};
-						self.menu.stack.push(menu::Menu::Pause(menu));
+						fx.pause();
 					}
 				}
 				menu::MenuEvent::OpenScoutMode => {
-					if let Some(_) = &self.fx {
-						let menu = menu::ScoutMode::default();
-						self.menu.stack.push(menu::Menu::Scout(menu));
+					if let Some(fx) = &mut self.fx {
+						fx.scout();
 					}
 				}
 				menu::MenuEvent::ScoutN => {

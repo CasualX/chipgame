@@ -162,14 +162,14 @@ pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new:
 
 		(chipty::Terrain::InvisibleWall, chipty::Terrain::HiddenWall) => {},
 		(chipty::Terrain::HiddenWall, chipty::Terrain::InvisibleWall) => {},
-		(chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall, _) => handlers::remove_invis_wall(ctx, pos),
-		(_, chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall) => handlers::create_invis_wall(ctx, pos),
+		(chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall, _) => handlers::remove_wall_mirage(ctx, pos),
+		(_, chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall) => handlers::create_wall_mirage(ctx, pos),
 		_ => {}
 	}
 }
 
 pub fn fire_hidden(ctx: &mut FxState, pos: Vec2i, hidden: bool) {
-	let Some(&obj_handle) = ctx.firesprites.get(&pos) else { return };
+	let Some(&obj_handle) = ctx.fire_sprites.get(&pos) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
 	obj.data.visible = !hidden;
@@ -192,10 +192,10 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	};
 	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
-	ctx.firesprites.insert(pos, handle);
+	ctx.fire_sprites.insert(pos, handle);
 }
 pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.firesprites.remove(&pos) else { return };
+	let Some(obj_handle) = ctx.fire_sprites.remove(&pos) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
 	obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
@@ -384,16 +384,16 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 	};
 	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
-	ctx.togglewalls.insert(pos, handle);
+	ctx.toggle_walls.insert(pos, handle);
 }
 
 pub fn remove_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.togglewalls.remove(&pos) else { return };
+	let Some(obj_handle) = ctx.toggle_walls.remove(&pos) else { return };
 	ctx.render.objects.remove(obj_handle);
 }
 
 pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
-	let Some(&obj_handle) = ctx.togglewalls.get(&pos) else { return };
+	let Some(&obj_handle) = ctx.toggle_walls.get(&pos) else { return };
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 
 	let terrain = ctx.gs.field.get_terrain(pos);
@@ -404,7 +404,7 @@ pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
 	}));
 }
 
-pub fn create_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -421,11 +421,11 @@ pub fn create_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
 	};
 	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
-	ctx.inviswalls.insert(pos, handle);
+	ctx.mirage_walls.insert(pos, handle);
 }
 
-pub fn remove_invis_wall(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.inviswalls.remove(&pos) else { return };
+pub fn remove_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = ctx.mirage_walls.remove(&pos) else { return };
 
 	ctx.render.objects.remove(obj_handle);
 }
