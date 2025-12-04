@@ -1,55 +1,10 @@
 use std::collections::HashMap;
-use std::{fs, path};
 
 use chipty::*;
 
-fn main() {
-	let matches = clap::command!()
-		.about("Extract a Chip's Challenge DAT file into a JSON levelset structure")
-		.arg(clap::Arg::new("INPUT")
-			.help("Path to the input .dat file (MS/Steam style DAT)")
-			.required(true)
-			.value_parser(clap::value_parser!(path::PathBuf)))
-		.arg(clap::Arg::new("OUT_DIR")
-			.help("Directory to write the extracted levelset (created if missing)")
-			.required(true)
-			.value_parser(clap::value_parser!(path::PathBuf)))
-		.arg(clap::Arg::new("ENCODING")
-			.short('e')
-			.long("encoding")
-			.value_parser(["utf8", "latin1", "windows1252"])
-			.help("Text encoding (ascii|utf8|latin1|windows1252) [default: windows1252]"))
-		.get_matches();
-
-	let input = matches.get_one::<path::PathBuf>("INPUT").unwrap().clone();
-	let out_dir = matches.get_one::<path::PathBuf>("OUT_DIR").unwrap().clone();
-	let encoding = match matches.get_one::<String>("ENCODING").map(|s| s.as_str()).unwrap_or("windows1252") {
-		"utf8" => chipdat::Encoding::Utf8,
-		"latin1" => chipdat::Encoding::Latin1,
-		"windows1252" => chipdat::Encoding::Windows1252,
-		_ => chipdat::Encoding::Windows1252,
-	};
-
-	let opts = chipdat::Options { encoding };
-
-	let dat = chipdat::read(&input, &opts).expect("Failed to read DAT file");
-
-	let dat_name = input.file_stem().unwrap().to_str().unwrap();
-	let levelset_path = out_dir.join(dat_name);
-	let _ = fs::create_dir(&levelset_path);
-	let levelset_index = levelset_path.join("index.json");
-
-	let title = dat_name.to_string();
-	let levels = (0..dat.levels.len()).map(|i| LevelRef::Indirect(format!("lv/level{}.json", i + 1))).collect();
-	let levelset = LevelSetDto { title, about: None, splash: None, levels };
-
-	fs::write(&levelset_index, serde_json::to_string_pretty(&levelset).unwrap()).expect("Failed to write levelset index");
-	eprintln!("Wrote levelset {}", levelset_index.display());
-
-	let levels_path = levelset_path.join("lv");
-	let _ = fs::create_dir(&levels_path);
-
-	for (i, level) in dat.levels.iter().enumerate() {
+pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
+	let mut levels = Vec::new();
+	for level in &dat.levels {
 		let (map, ents, mut conns) = parse_content(&level.top_layer, &level.bottom_layer);
 
 		if let Some(traps) = &level.metadata.traps {
@@ -86,10 +41,14 @@ fn main() {
 
 		post_process(&mut level);
 
-		let json = serde_json::to_string(&level).unwrap();
-		let level_path = levels_path.join(format!("level{}.json", i + 1));
-		fs::write(&level_path, json).expect("Failed to write level file");
-		eprintln!("Wrote level {}", level_path.display());
+		levels.push(LevelRef::Direct(level));
+	}
+
+	chipty::LevelSetDto {
+		title,
+		about: None,
+		splash: None,
+		levels,
 	}
 }
 

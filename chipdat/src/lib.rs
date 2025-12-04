@@ -1,5 +1,8 @@
 use std::{fs, path};
 
+mod convert;
+pub use self::convert::convert;
+
 #[derive(Copy, Clone, Debug, Default)]
 pub enum Encoding {
 	Utf8,

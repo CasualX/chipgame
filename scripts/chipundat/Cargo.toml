@@ -1,12 +1,10 @@
 [package]
-name = "extract"
+name = "chipundat"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chipty = { path = "../../chipty" }
 chipdat = { path = "../../chipdat" }
 clap.workspace = true
-dataview.workspace = true
-chipty = { path = "../../chipty" }
-cvmath.workspace = true
 serde_json.workspace = true
