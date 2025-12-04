@@ -54,30 +54,30 @@ impl FxState {
 		}
 
 		// Draw the inventory items
-		cv.uniform.texture = resx.tileset;
+		cv.uniform.texture = resx.spritesheet_texture;
 		if gs.ps.keys[0] > 0 {
-			draw_sprite(cv, data::SpriteId::BlueKey, resx.tileset_size, Vec2(keys_x1 + a * 0.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::BlueKey, Vec2(keys_x1 + a * 0.5, y), a);
 		}
 		if gs.ps.keys[1] > 0 {
-			draw_sprite(cv, data::SpriteId::RedKey, resx.tileset_size, Vec2(keys_x1 + a * 1.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::RedKey, Vec2(keys_x1 + a * 1.5, y), a);
 		}
 		if gs.ps.keys[2] > 0 {
-			draw_sprite(cv, data::SpriteId::GreenKey, resx.tileset_size, Vec2(keys_x1 + a * 2.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::GreenKey, Vec2(keys_x1 + a * 2.5, y), a);
 		}
 		if gs.ps.keys[3] > 0 {
-			draw_sprite(cv, data::SpriteId::YellowKey, resx.tileset_size, Vec2(keys_x1 + a * 3.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::YellowKey, Vec2(keys_x1 + a * 3.5, y), a);
 		}
 		if gs.ps.flippers {
-			draw_sprite(cv, data::SpriteId::Flippers, resx.tileset_size, Vec2(items_x1 + a * 0.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::Flippers, Vec2(items_x1 + a * 0.5, y), a);
 		}
 		if gs.ps.fire_boots {
-			draw_sprite(cv, data::SpriteId::FireBoots, resx.tileset_size, Vec2(items_x1 + a * 1.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::FireBoots, Vec2(items_x1 + a * 1.5, y), a);
 		}
 		if gs.ps.ice_skates {
-			draw_sprite(cv, data::SpriteId::IceSkates, resx.tileset_size, Vec2(items_x1 + a * 2.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::IceSkates, Vec2(items_x1 + a * 2.5, y), a);
 		}
 		if gs.ps.suction_boots {
-			draw_sprite(cv, data::SpriteId::SuctionBoots, resx.tileset_size, Vec2(items_x1 + a * 3.5, y), a);
+			draw_sprite(cv, resx, chipty::SpriteId::SuctionBoots, Vec2(items_x1 + a * 3.5, y), a);
 		}
 
 		// Draw the CHIPS and TIME counters
@@ -222,13 +222,22 @@ impl FxState {
 	}
 }
 
-fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, sprite: data::SpriteId, tex_size: Vec2<i32>, pos: Vec2<f32>, size: f32) {
-	let uv = sprite.uv(tex_size);
-	let tex_size = tex_size.map(|c| c as f32);
+fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, resx: &Resources, sprite: chipty::SpriteId, pos: Vec2<f32>, size: f32) {
+	let uv = sprite_uv(&resx.spritesheet_meta, sprite, 0);
+	let tex_size = Vec2(resx.spritesheet_meta.width, resx.spritesheet_meta.height).map(|c| c as f32);
 	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };
 	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(0.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 0.0) / tex_size, color: [255, 255, 255, 255] };
 	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
 	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
 	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(size, size)));
+}
+
+fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: usize) -> Vec2f {
+	let entry = sheet.sprites.get(&sprite).unwrap();
+	assert!(frame < entry.len as usize, "frame index in bounds");
+	let f = &sheet.frames[(entry.index as usize) + frame];
+	let x = f.rect[0] as f32 / sheet.width as f32;
+	let y = f.rect[1] as f32 / sheet.height as f32;
+	Vec2(x, y)
 }

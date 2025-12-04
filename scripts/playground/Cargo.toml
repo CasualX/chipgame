@@ -1,0 +1,12 @@
+[package]
+name = "playground"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chipty = { path = "../../chipty" }
+clap.workspace = true
+dataview.workspace = true
+cvmath.workspace = true
+serde_json.workspace = true
+ini_core.workspace = true

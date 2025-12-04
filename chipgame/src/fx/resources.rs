@@ -3,8 +3,9 @@ use super::*;
 #[derive(Default)]
 pub struct Resources {
 	pub effects: shade::Texture2D,
-	pub tileset: shade::Texture2D,
-	pub tileset_size: Vec2<i32>,
+	pub spritesheet_texture: shade::Texture2D,
+	pub spritesheet_meta: chipty::SpriteSheet<chipty::SpriteId>,
+
 	pub shader: shade::Shader,
 	pub pixel_art_bias: f32,
 	pub viewport: Bounds2i,
@@ -61,11 +62,10 @@ impl Resources {
 		}
 
 		resx.effects = g.texture2d_find("Effects");
-		resx.tileset = g.texture2d_find("Tileset");
-		resx.tileset_size = {
-			let info = g.texture2d_get_info(resx.tileset);
-			[info.width, info.height].into()
-		};
+		resx.spritesheet_texture = g.texture2d_find("SpriteSheet");
+		let spritesheet_meta = fs.read_to_string("spritesheet.json").expect("Failed to read spritesheet metadata");
+		resx.spritesheet_meta = serde_json::from_str(&spritesheet_meta).expect("Failed to parse spritesheet metadata");
+
 		resx.shader = g.shader_find("PixelArt");
 		resx.pixel_art_bias = config.pixel_art_bias;
 		resx.colorshader = g.shader_find("Color");

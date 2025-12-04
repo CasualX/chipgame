@@ -158,26 +158,26 @@ impl EditorEditState {
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;
 			cv.uniform.transform = cam.view_proj;
-			cv.uniform.texture = resx.tileset;
+			cv.uniform.texture = resx.spritesheet_texture;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
 					let terrain = TERRAIN_SAMPLES[y as usize][x as usize];
 					let pos = Vec3::new((x - 3) as f32 * 32.0, y as f32 * 32.0, 0.0);
-					render::draw_tile(&mut cv, terrain, pos, &self.game.render.tiles);
+					render::draw_tile(&mut cv, resx, terrain, pos, &self.game.render.tiles);
 				}
 			}
 
 			for i in 0..ENTITY_SAMPLES.len() as i32 {
 				let (_, sprite) = ENTITY_SAMPLES[i as usize];
 				let pos = Vec3::new(i as f32 * 32.0, -2.0 * 32.0, 0.0);
-				render::draw(&mut cv, pos, sprite, data::ModelId::ReallyFlatSprite, 1.0);
+				render::draw(&mut cv, resx, pos, sprite, chipty::ModelId::ReallyFlatSprite, 0, 1.0);
 			}
 
 			match self.tool {
 				Tool::Terrain => {
-					render::draw_tile(&mut cv, self.selected_terrain, p, &self.game.render.tiles);
+					render::draw_tile(&mut cv, resx, self.selected_terrain, p, &self.game.render.tiles);
 				}
 				_ => (),
 			}
@@ -195,7 +195,7 @@ impl EditorEditState {
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;
 			cv.uniform.transform = cam.view_proj;
-			cv.uniform.texture = resx.tileset;
+			cv.uniform.texture = resx.spritesheet_texture;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
 
 			struct ToVertex {

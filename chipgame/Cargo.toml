@@ -7,7 +7,7 @@ edition = "2021"
 chipdat = { path = "../chipdat" }
 chipcore = { path = "../chipcore" }
 chipty = { path = "../chipty" }
-dataview = "1.0"
+dataview.workspace = true
 ini_core.workspace = true
 urandom.workspace = true
 cvmath.workspace = true

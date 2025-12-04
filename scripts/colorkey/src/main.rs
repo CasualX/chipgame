@@ -4,11 +4,11 @@ use std::path::PathBuf;
 fn main() {
 	let matches = clap::command!()
 		.arg(clap::arg!(-i <input> "Input image file").value_parser(clap::value_parser!(PathBuf)))
-		.arg(clap::arg!(-o <output> "Output image file").value_parser(clap::value_parser!(PathBuf)))
+		.arg(clap::arg!(-o [output] "Output image file").value_parser(clap::value_parser!(PathBuf)))
 		.get_matches();
 
 	let input_file = matches.get_one::<PathBuf>("input").expect("Missing input file argument").clone();
-	let output_file = matches.get_one::<PathBuf>("output").expect("Missing output file argument").clone();
+	let output_file = matches.get_one::<PathBuf>("output").cloned().unwrap_or_else(|| input_file.clone());
 
 	// Load the image file and replace pink with transparent color
 	let mut decoder = png::Decoder::new(fs::File::open(&input_file).unwrap());
@@ -19,35 +19,43 @@ fn main() {
 
 	// Only support 8-bit Rgba images
 	assert_eq!(info.bit_depth, png::BitDepth::Eight);
-	assert_eq!(info.color_type, png::ColorType::Rgba);
 
-	let width = 96 * 12;
-	let height = 96 * 3;
-	let mut image = vec![0; width * height * 4];
+	if info.color_type == png::ColorType::Rgb {
+		// Convert Rgb to Rgba by adding an opaque alpha channel
+		let mut rgba_pixels = vec![0; (info.width * info.height * 4) as usize];
+		for i in 0..(info.width * info.height) as usize {
+			rgba_pixels[i * 4] = pixels[i * 3];
+			rgba_pixels[i * 4 + 1] = pixels[i * 3 + 1];
+			rgba_pixels[i * 4 + 2] = pixels[i * 3 + 2];
+			rgba_pixels[i * 4 + 3] = 255; // Opaque alpha
+		}
+		pixels = rgba_pixels;
+	}
+	else {
+		assert_eq!(info.color_type, png::ColorType::Rgba);
+	}
+
+	let width = info.width as i32;
+	let height = info.height as i32;
+	let mut image = vec![0; (width * height * 4) as usize];
 
 	copy_pixels(
 		&pixels, info.width as i32, info.height as i32,
-		&mut image, width as i32, height as i32,
-		0, 586 - (96 + 1) * 3,
-		0, 0,
-		96 * 12, 96);
+		&mut image, width, height,
+		0, 0, 0, 0, width, height);
 
 	copy_pixels(
 		&pixels, info.width as i32, info.height as i32,
-		&mut image, width as i32, height as i32,
-		0, 586 - (96 + 1) * 2,
-		0, 96,
-		96 * 12, 96);
+		&mut image, width, height,
+		0, 0, 0, 0, width, height);
 
 	copy_pixels(
 		&pixels, info.width as i32, info.height as i32,
-		&mut image, width as i32, height as i32,
-		0, 586 - (96 + 1) * 1,
-		0, 96 * 2,
-		96 * 12, 96);
+		&mut image, width, height,
+		0, 0, 0, 0, width, height);
 
 	let mut buffer = vec![0; image.len()];
-	recover_alpha_colors(&image, &mut buffer, width as i32, height as i32);
+	recover_alpha_colors(&image, &mut buffer, width, height);
 
 	let mut encoder = png::Encoder::new(fs::File::create(&output_file).unwrap(), width as u32, height as u32);
 	encoder.set_color(png::ColorType::Rgba);

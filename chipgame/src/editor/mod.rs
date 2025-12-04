@@ -7,7 +7,6 @@ use chipcore::EntityHandle;
 use chipty::{Compass, EntityArgs, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
 
 use crate::fx;
-use crate::data;
 use crate::render;
 use crate::menu;
 
@@ -66,31 +65,31 @@ static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
 	[Terrain::CloneBlockN, Terrain::CloneBlockW],
 ];
 
-static ENTITY_SAMPLES: [(EntityKind, data::SpriteId); 24] = [
-	(EntityKind::Player, data::SpriteId::PlayerWalkNeutral),
-	(EntityKind::Chip, data::SpriteId::Chip),
-	(EntityKind::Socket, data::SpriteId::Socket),
-	(EntityKind::Block, data::SpriteId::DirtBlock),
-	(EntityKind::IceBlock, data::SpriteId::IceBlock),
-	(EntityKind::Flippers, data::SpriteId::Flippers),
-	(EntityKind::FireBoots, data::SpriteId::FireBoots),
-	(EntityKind::IceSkates, data::SpriteId::IceSkates),
-	(EntityKind::SuctionBoots, data::SpriteId::SuctionBoots),
-	(EntityKind::BlueKey, data::SpriteId::BlueKey),
-	(EntityKind::RedKey, data::SpriteId::RedKey),
-	(EntityKind::GreenKey, data::SpriteId::GreenKey),
-	(EntityKind::YellowKey, data::SpriteId::YellowKey),
-	(EntityKind::Thief, data::SpriteId::Thief),
-	(EntityKind::Bomb, data::SpriteId::Bomb),
-	(EntityKind::Bug, data::SpriteId::BugUp),
-	(EntityKind::FireBall, data::SpriteId::FireBall),
-	(EntityKind::PinkBall, data::SpriteId::PinkBall),
-	(EntityKind::Tank, data::SpriteId::TankUp),
-	(EntityKind::Glider, data::SpriteId::GliderUp),
-	(EntityKind::Teeth, data::SpriteId::TeethUp),
-	(EntityKind::Walker, data::SpriteId::WalkerUpDown),
-	(EntityKind::Blob, data::SpriteId::Blob),
-	(EntityKind::Paramecium, data::SpriteId::ParameciumUpDown),
+static ENTITY_SAMPLES: [(EntityKind, chipty::SpriteId); 24] = [
+	(EntityKind::Player, chipty::SpriteId::PlayerWalkIdle),
+	(EntityKind::Chip, chipty::SpriteId::Chip),
+	(EntityKind::Socket, chipty::SpriteId::Socket),
+	(EntityKind::Block, chipty::SpriteId::DirtBlock),
+	(EntityKind::IceBlock, chipty::SpriteId::IceBlock),
+	(EntityKind::Flippers, chipty::SpriteId::Flippers),
+	(EntityKind::FireBoots, chipty::SpriteId::FireBoots),
+	(EntityKind::IceSkates, chipty::SpriteId::IceSkates),
+	(EntityKind::SuctionBoots, chipty::SpriteId::SuctionBoots),
+	(EntityKind::BlueKey, chipty::SpriteId::BlueKey),
+	(EntityKind::RedKey, chipty::SpriteId::RedKey),
+	(EntityKind::GreenKey, chipty::SpriteId::GreenKey),
+	(EntityKind::YellowKey, chipty::SpriteId::YellowKey),
+	(EntityKind::Thief, chipty::SpriteId::Thief),
+	(EntityKind::Bomb, chipty::SpriteId::Bomb),
+	(EntityKind::Bug, chipty::SpriteId::BugN),
+	(EntityKind::FireBall, chipty::SpriteId::Fireball),
+	(EntityKind::PinkBall, chipty::SpriteId::PinkBall),
+	(EntityKind::Tank, chipty::SpriteId::TankN),
+	(EntityKind::Glider, chipty::SpriteId::GliderN),
+	(EntityKind::Teeth, chipty::SpriteId::TeethN),
+	(EntityKind::Walker, chipty::SpriteId::WalkerV),
+	(EntityKind::Blob, chipty::SpriteId::Blob),
+	(EntityKind::Paramecium, chipty::SpriteId::ParameciumV),
 ];
 
 #[derive(Default)]

@@ -3,7 +3,6 @@
 use std::collections::HashMap;
 use cvmath::*;
 
-use crate::data;
 use crate::fx::Resources;
 
 mod animation;
@@ -23,8 +22,8 @@ pub use self::renderstate::*;
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct TileGfx {
-	pub sprite: data::SpriteId,
-	pub model: data::ModelId,
+	pub sprite: chipty::SpriteId,
+	pub model: chipty::ModelId,
 }
 
 pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
@@ -59,4 +58,21 @@ pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
 	}
 	cv.draw(g, shade::Surface::BACK_BUFFER);
 	g.clear(&shade::ClearArgs { surface: shade::Surface::BACK_BUFFER, depth: Some(1.0), ..Default::default() });
+}
+
+pub fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: usize) -> Vec2f {
+	let Some(entry) = sheet.sprites.get(&sprite) else {
+		panic!("sprite {:?} not found in sheet", sprite);
+	};
+	let index = entry.index as usize + if entry.len == 0 {
+		panic!("sprite entry has zero frames");
+	}
+	else if entry.len == 1 {
+		0
+	}
+	else {
+		frame % (entry.len as usize)
+	};
+	let f = &sheet.frames[index];
+	Vec2(f.rect[0] as f32, f.rect[1] as f32)
 }

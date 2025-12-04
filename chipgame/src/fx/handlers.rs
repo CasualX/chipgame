@@ -17,7 +17,7 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 		data: render::ObjectData {
 			pos,
 			sprite: sprite_for_ent(ent, &ctx.gs.ps),
-			model: if pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) },
+			model: if pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) },
 			alpha: 1.0,
 			visible: true,
 			greyscale: ent.flags & chipcore::EF_TEMPLATE != 0,
@@ -84,7 +84,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	}));
 
 	// Quick hack to flatten sprites on top of walls
-	obj.data.model = if end_pos.z >= 20.0 { data::ModelId::FloorSprite } else { model_for_ent(ent) };
+	obj.data.model = if end_pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
 
 	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_src = src;
@@ -120,14 +120,14 @@ pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reas
 
 	// Update the player sprite
 	obj.data.sprite = match reason {
-		chipcore::GameOverReason::LevelComplete => data::SpriteId::PlayerCheer,
-		chipcore::GameOverReason::Drowned => data::SpriteId::WaterSplash,
-		chipcore::GameOverReason::Burned => data::SpriteId::PlayerBurned,
-		chipcore::GameOverReason::Bombed => data::SpriteId::PlayerDead,
-		chipcore::GameOverReason::Collided => data::SpriteId::PlayerDead,
-		chipcore::GameOverReason::Eaten => data::SpriteId::PlayerDead,
-		chipcore::GameOverReason::TimeOut => data::SpriteId::PlayerDead,
-		chipcore::GameOverReason::NotOkay => data::SpriteId::PlayerDead,
+		chipcore::GameOverReason::LevelComplete => chipty::SpriteId::PlayerCheer,
+		chipcore::GameOverReason::Drowned => chipty::SpriteId::WaterSplash,
+		chipcore::GameOverReason::Burned => chipty::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::Bombed => chipty::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::Collided => chipty::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::Eaten => chipty::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::TimeOut => chipty::SpriteId::PlayerBurned,
+		chipcore::GameOverReason::NotOkay => chipty::SpriteId::PlayerBurned,
 	};
 
 	if matches!(reason, chipcore::GameOverReason::LevelComplete) {
@@ -179,8 +179,8 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
-			sprite: data::SpriteId::Fire,
-			model: data::ModelId::Sprite,
+			sprite: chipty::SpriteId::FireA,
+			model: chipty::ModelId::Sprite,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
@@ -202,91 +202,95 @@ pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 	obj.anim.unalive_after_anim = true;
 }
 
-fn model_for_ent(ent: &chipcore::Entity) -> data::ModelId {
+fn model_for_ent(ent: &chipcore::Entity) -> chipty::ModelId {
 	match ent.kind {
-		chipty::EntityKind::Block => data::ModelId::Wall,
-		chipty::EntityKind::IceBlock => data::ModelId::Wall,
-		chipty::EntityKind::Tank => data::ModelId::ReallyFlatSprite,
-		chipty::EntityKind::Bug => data::ModelId::FlatSprite,
-		chipty::EntityKind::Blob => data::ModelId::ReallyFlatSprite,
-		chipty::EntityKind::Paramecium => data::ModelId::ReallyFlatSprite,
-		_ => data::ModelId::Sprite,
+		chipty::EntityKind::Block => chipty::ModelId::Wall,
+		chipty::EntityKind::IceBlock => chipty::ModelId::Wall,
+		chipty::EntityKind::Tank => chipty::ModelId::ReallyFlatSprite,
+		chipty::EntityKind::Bug => chipty::ModelId::FlatSprite,
+		chipty::EntityKind::Blob => chipty::ModelId::ReallyFlatSprite,
+		chipty::EntityKind::Paramecium => chipty::ModelId::ReallyFlatSprite,
+		_ => chipty::ModelId::Sprite,
 	}
 }
 
-fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> data::SpriteId {
+fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
 	match ent.kind {
 		chipty::EntityKind::Player => match pl.activity {
 			chipcore::PlayerActivity::Swimming => match ent.face_dir {
-				Some(chipty::Compass::Up) => data::SpriteId::PlayerSwimUp,
-				Some(chipty::Compass::Down) => data::SpriteId::PlayerSwimDown,
-				Some(chipty::Compass::Left) => data::SpriteId::PlayerSwimLeft,
-				Some(chipty::Compass::Right) => data::SpriteId::PlayerSwimRight,
-				_ => data::SpriteId::PlayerSwimNeutral,
+				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
+				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
+				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
+				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
+				_ => chipty::SpriteId::PlayerSwimIdle,
 			},
 			_ => match ent.face_dir {
-				Some(chipty::Compass::Up) => data::SpriteId::PlayerWalkUp,
-				Some(chipty::Compass::Down) => data::SpriteId::PlayerWalkDown,
-				Some(chipty::Compass::Left) => data::SpriteId::PlayerWalkLeft,
-				Some(chipty::Compass::Right) => data::SpriteId::PlayerWalkRight,
-				_ => data::SpriteId::PlayerWalkNeutral,
+				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
+				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
+				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
+				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
+				_ => chipty::SpriteId::PlayerWalkIdle,
 			},
 		},
-		chipty::EntityKind::Chip => data::SpriteId::Chip,
-		chipty::EntityKind::Socket => data::SpriteId::Socket,
-		chipty::EntityKind::Block => data::SpriteId::DirtBlock,
-		chipty::EntityKind::IceBlock => data::SpriteId::IceBlock,
-		chipty::EntityKind::Flippers => data::SpriteId::Flippers,
-		chipty::EntityKind::FireBoots => data::SpriteId::FireBoots,
-		chipty::EntityKind::IceSkates => data::SpriteId::IceSkates,
-		chipty::EntityKind::SuctionBoots => data::SpriteId::SuctionBoots,
-		chipty::EntityKind::BlueKey => data::SpriteId::BlueKey,
-		chipty::EntityKind::RedKey => data::SpriteId::RedKey,
-		chipty::EntityKind::GreenKey => data::SpriteId::GreenKey,
-		chipty::EntityKind::YellowKey => data::SpriteId::YellowKey,
-		chipty::EntityKind::Thief => data::SpriteId::Thief,
+		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
+		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
+		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,
+		chipty::EntityKind::IceBlock => chipty::SpriteId::IceBlock,
+		chipty::EntityKind::Flippers => chipty::SpriteId::Flippers,
+		chipty::EntityKind::FireBoots => chipty::SpriteId::FireBoots,
+		chipty::EntityKind::IceSkates => chipty::SpriteId::IceSkates,
+		chipty::EntityKind::SuctionBoots => chipty::SpriteId::SuctionBoots,
+		chipty::EntityKind::BlueKey => chipty::SpriteId::BlueKey,
+		chipty::EntityKind::RedKey => chipty::SpriteId::RedKey,
+		chipty::EntityKind::GreenKey => chipty::SpriteId::GreenKey,
+		chipty::EntityKind::YellowKey => chipty::SpriteId::YellowKey,
+		chipty::EntityKind::Thief => chipty::SpriteId::Thief,
 		chipty::EntityKind::Bug => match ent.face_dir {
-			Some(chipty::Compass::Up) => data::SpriteId::BugUp,
-			Some(chipty::Compass::Down) => data::SpriteId::BugDown,
-			Some(chipty::Compass::Left) => data::SpriteId::BugLeft,
-			Some(chipty::Compass::Right) => data::SpriteId::BugRight,
-			_ => data::SpriteId::BugUp,
+			Some(chipty::Compass::Up) => chipty::SpriteId::BugNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::BugSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::BugWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::BugEA,
+			_ => chipty::SpriteId::BugN,
 		},
 		chipty::EntityKind::Tank => match ent.face_dir {
-			Some(chipty::Compass::Up) => data::SpriteId::TankUp,
-			Some(chipty::Compass::Down) => data::SpriteId::TankDown,
-			Some(chipty::Compass::Left) => data::SpriteId::TankLeft,
-			Some(chipty::Compass::Right) => data::SpriteId::TankRight,
-			_ => data::SpriteId::TankUp,
+			Some(chipty::Compass::Up) => chipty::SpriteId::TankN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::TankS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::TankW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::TankE,
+			_ => chipty::SpriteId::TankN,
 		},
-		chipty::EntityKind::PinkBall => data::SpriteId::PinkBall,
-		chipty::EntityKind::FireBall => data::SpriteId::FireBall,
+		chipty::EntityKind::PinkBall => chipty::SpriteId::PinkBall,
+		chipty::EntityKind::FireBall => chipty::SpriteId::FireballA,
 		chipty::EntityKind::Glider => match ent.face_dir {
-			Some(chipty::Compass::Up) => data::SpriteId::GliderUp,
-			Some(chipty::Compass::Down) => data::SpriteId::GliderDown,
-			Some(chipty::Compass::Left) => data::SpriteId::GliderLeft,
-			Some(chipty::Compass::Right) => data::SpriteId::GliderRight,
-			_ => data::SpriteId::GliderUp,
+			Some(chipty::Compass::Up) => chipty::SpriteId::GliderNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::GliderSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::GliderWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::GliderEA,
+			_ => chipty::SpriteId::GliderN,
 		},
 		chipty::EntityKind::Walker => match ent.face_dir {
-			Some(chipty::Compass::Up) | Some(chipty::Compass::Down) => data::SpriteId::WalkerUpDown,
-			Some(chipty::Compass::Left) | Some(chipty::Compass::Right) => data::SpriteId::WalkerLeftRight,
-			_ => data::SpriteId::WalkerUpDown,
+			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerH,
+			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerH,
+			_ => chipty::SpriteId::WalkerV,
 		},
 		chipty::EntityKind::Teeth => match ent.face_dir {
-			Some(chipty::Compass::Up) => data::SpriteId::TeethUp,
-			Some(chipty::Compass::Down) => data::SpriteId::TeethDown,
-			Some(chipty::Compass::Left) => data::SpriteId::TeethLeft,
-			Some(chipty::Compass::Right) => data::SpriteId::TeethRight,
-			_ => data::SpriteId::TeethUp,
+			Some(chipty::Compass::Up) => chipty::SpriteId::TeethNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::TeethSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::TeethWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::TeethEA,
+			_ => chipty::SpriteId::TeethN,
 		},
-		chipty::EntityKind::Blob => data::SpriteId::Blob,
+		chipty::EntityKind::Blob => chipty::SpriteId::Blob,
 		chipty::EntityKind::Paramecium => match ent.face_dir {
-			Some(chipty::Compass::Up) | Some(chipty::Compass::Down) => data::SpriteId::ParameciumUpDown,
-			Some(chipty::Compass::Left) | Some(chipty::Compass::Right) => data::SpriteId::ParameciumLeftRight,
-			_ => data::SpriteId::ParameciumUpDown,
+			Some(chipty::Compass::Up) => chipty::SpriteId::ParameciumNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::ParameciumSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::ParameciumWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::ParameciumEA,
+			_ => chipty::SpriteId::ParameciumV,
 		}
-		chipty::EntityKind::Bomb => data::SpriteId::Bomb,
+		chipty::EntityKind::Bomb => chipty::SpriteId::BombA,
 	}
 }
 
@@ -295,12 +299,12 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 			sprite: match key {
-				chipcore::KeyColor::Red => data::SpriteId::RedLock,
-				chipcore::KeyColor::Green => data::SpriteId::GreenLock,
-				chipcore::KeyColor::Blue => data::SpriteId::BlueLock,
-				chipcore::KeyColor::Yellow => data::SpriteId::YellowLock,
+				chipcore::KeyColor::Red => chipty::SpriteId::RedLock,
+				chipcore::KeyColor::Green => chipty::SpriteId::GreenLock,
+				chipcore::KeyColor::Blue => chipty::SpriteId::BlueLock,
+				chipcore::KeyColor::Yellow => chipty::SpriteId::YellowLock,
 			},
-			model: data::ModelId::Wall,
+			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
@@ -321,8 +325,8 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-			sprite: data::SpriteId::BlueWall,
-			model: data::ModelId::Wall,
+			sprite: chipty::SpriteId::RealBlueWall,
+			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
@@ -340,8 +344,8 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-			sprite: data::SpriteId::Wall,
-			model: data::ModelId::Wall,
+			sprite: chipty::SpriteId::Wall,
+			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
@@ -366,8 +370,8 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, z),
-			sprite: data::SpriteId::Wall,
-			model: data::ModelId::ThinWall,
+			sprite: chipty::SpriteId::Wall,
+			model: chipty::ModelId::ToggleWall,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
@@ -408,8 +412,8 @@ pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-			sprite: data::SpriteId::Wall,
-			model: data::ModelId::Wall,
+			sprite: chipty::SpriteId::Wall,
+			model: chipty::ModelId::Wall,
 			alpha: 0.0,
 			visible: true,
 			greyscale: false,

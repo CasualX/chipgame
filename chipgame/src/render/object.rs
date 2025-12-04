@@ -16,8 +16,8 @@ impl Animation {
 #[derive(Clone, Debug)]
 pub struct ObjectData {
 	pub pos: Vec3<f32>,
-	pub sprite: data::SpriteId,
-	pub model: data::ModelId,
+	pub sprite: chipty::SpriteId,
+	pub model: chipty::ModelId,
 	pub alpha: f32,
 	pub visible: bool,
 	pub greyscale: bool,

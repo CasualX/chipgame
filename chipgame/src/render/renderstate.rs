@@ -61,9 +61,9 @@ impl RenderState {
 			cv.cull_mode = Some(shade::CullMode::CW);
 			cv.shader = resx.shader;
 			cv.uniform.transform = camera.view_proj;
-			cv.uniform.texture = resx.tileset;
+			cv.uniform.texture = resx.spritesheet_texture;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
-			render::field(&mut cv, self, time, 1.0);
+			render::field(&mut cv, self, resx, time, 1.0);
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 

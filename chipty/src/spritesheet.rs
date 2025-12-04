@@ -1,5 +1,8 @@
 use super::*;
 
+fn default_len() -> u16 { 1 }
+fn is_default_len(len: &u16) -> bool { *len == default_len() }
+
 /// An animated sprite description.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
@@ -7,6 +10,7 @@ pub struct SpriteEntry {
 	/// The index of the first frame.
 	pub index: u16,
 	/// The number of frames in the animation.
+	#[serde(default = "default_len", skip_serializing_if = "is_default_len")]
 	pub len: u16,
 	/// The duration of the animation in seconds.
 	#[serde(skip)] // Set to the sum of the durations of the frames when loaded.
@@ -38,8 +42,8 @@ pub struct SpriteSheet<T> {
 	/// The height of the sheet in pixels.
 	pub height: i32,
 	/// The sprites in the sheet.
-	#[serde(bound(deserialize = "HashMap<T, SpriteEntry>: serde::Deserialize<'de>"))]
-	pub sprites: HashMap<T, SpriteEntry>,
+	#[serde(bound(deserialize = "BTreeMap<T, SpriteEntry>: serde::Deserialize<'de>"))]
+	pub sprites: BTreeMap<T, SpriteEntry>,
 	/// The frame data referenced by the sprites.
 	pub frames: Vec<SpriteFrame>,
 }

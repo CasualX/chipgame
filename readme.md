@@ -141,6 +141,10 @@ Default tileset: *Kayu's Enhanced Interface*
 
 - Sourced from [https://tilde.town/~magical/chip/#kayu](https://tilde.town/~magical/chip/#kayu)
 
+Animated tileset: The Architect's brother created an animated version of this tileset for Tile World.
+
+- Sourced from [Animated MSCC Tileset](https://bitbusters.club/yahoo/Architecture/Animated%20MSCC%20Tileset/)
+
 Additional graphics: *tileworld*
 
 - Sourced from [retrofw/tileworld](https://github.com/retrofw/tileworld)
