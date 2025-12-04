@@ -36,7 +36,7 @@ Build/run/test
 Assets/filesystem
 -----------------
 - `chipgame::FileSystem` reads from `data/` (dev) or `data.paks` (packed)
-- Shaders: `pixelart.*`, `ui.*`, `color.*`; textures: `tileset/*.png`, `effects.png`, `digits.png`, `font.png` (+ `data/font.json`); audio in `data/sfx*` and `data/music/`
+- Shaders: `pixelart.*`, `ui.*`, `color.*`; textures: `tileset/*.png`, `effects.png`; audio in `data/sfx*` and `data/music/`
 - Tiles are 32×32; world rendering in `chipgame/src/render/`; camera in `chipgame/src/fx/camera/`
 
 Conventions and gotchas
