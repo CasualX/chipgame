@@ -10,6 +10,7 @@ members = [
 	"./scripts/chipundat",
 	"./scripts/colorkey",
 	"./scripts/copyrecords",
+	"./scripts/fixauthor",
 	"./scripts/fixer",
 	"./scripts/levelquery",
 	"./scripts/packset",

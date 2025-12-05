@@ -26,7 +26,11 @@ impl fmt::Display for FmtTrophiesLeft {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let FmtTrophiesLeft(this) = self;
 
-		write!(f, "Level {}:\n\x1b[color=#ff0]{}\x1b[color=#fff]\n\nAttempts:\n", this.level_number, this.level_name)?;
+		write!(f, "Level {}:\n\x1b[color=#ff0]{}\x1b[color=#fff]\n", this.level_number, this.level_name)?;
+		if let Some(author) = &this.level_author {
+			write!(f, "By \x1b[color=#00FFD1]{}\x1b[color=#fff]\n", author)?;
+		}
+		f.write_str("\nAttempts:\n")?;
 		if this.tick.high_score >= 0 {
 			f.write_str("Best time:\n")?;
 		}
@@ -55,6 +59,9 @@ impl fmt::Display for FmtTrophiesRight {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let FmtTrophiesRight(this) = self;
 
+		if this.level_author.is_some() {
+			f.write_str("\n")?;
+		}
 		write!(f, "\n\n\n{}\n", this.attempts)?;
 		if this.tick.high_score >= 0 {
 			write!(f, "{}\n", chipcore::FmtTime::new(&this.tick.high_score))?;
@@ -85,6 +92,9 @@ impl fmt::Display for FmtTrophiesTrophies {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let FmtTrophiesTrophies(this) = self;
 
+		if this.level_author.is_some() {
+			f.write_str("\n")?;
+		}
 		write!(f, "\n\n\n\n{}{}\n{}{}",
 			FmtTrophyLine(this.tick.trophy),
 			FmtTrophyLine(this.steps.trophy),
@@ -133,6 +143,7 @@ impl DrawTrophyValues {
 pub struct DrawTrophies {
 	level_number: i32,
 	level_name: String,
+	level_author: Option<String>,
 	attempts: i32,
 	tick: DrawTrophyValues,
 	steps: DrawTrophyValues,
@@ -147,6 +158,7 @@ impl DrawTrophies {
 		DrawTrophies {
 			level_number,
 			level_name: level.name.clone(),
+			level_author: level.author.clone(),
 			attempts,
 			tick: DrawTrophyValues::new(tick_high_score, tick_values),
 			steps: DrawTrophyValues::new(steps_high_score, steps_values),
