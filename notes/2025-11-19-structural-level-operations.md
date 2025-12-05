@@ -22,3 +22,4 @@ On top of selection, support moving and copying blocks of terrain and entities, 
 Add a terrain flood-fill tool to quickly change connected regions, making large-scale terrain adjustments practical.
 
 [x] Introduce `LevelBrush` to paste level chunks.\
+[x] Flood fill terrain tool.\

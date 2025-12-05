@@ -11,3 +11,4 @@ From a user perspective this should feel like a quick “Play from here” loop,
 [x] Initial implementation of editor play mode.\
 [x] Support controllers in editor play mode.\
 [x] Add sound effects and music to editor play mode.\
+[ ] Implement Scout and Pause functionality in editor play mode.\

@@ -14,5 +14,5 @@ When such an entity is released from the trap, it can move out in any valid dire
 
 It all seems to work but is hacked together, Ideally the trap code should run independently of the other terrain interaction code.
 
-[ ] Refactor trap logic so released entities are never trapped.\
-[ ] Fix replays broken by this change.\
+[x] Refactor trap logic so released entities are never trapped.\
+[x] Fix replays broken by this change.\

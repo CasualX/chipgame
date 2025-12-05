@@ -8,3 +8,7 @@ Players should be allowed to finish the level, but record and trophy updates sho
 
 Checkpoints should be easy to manage during play, with clear UI for creating and resuming.
 The system should feel like a quality-of-life improvement that encourages experimentation without trivializing the challenge of completing levels.
+
+[x] Initial checkpoint save and load system implemented.\
+[x] Disable records and trophies for checkpoint-assisted runs.\
+[ ] Improve the UX when a level is completed with checkpoints used.\

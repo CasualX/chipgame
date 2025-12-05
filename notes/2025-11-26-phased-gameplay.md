@@ -9,10 +9,10 @@ Implement gameplay in three distinct phases:
 2. Process all entity actions (killing player, pickup items)
 3. Process all terrain effects (traps, buttons; water, fire hazards for monsters)
 
-[ ] Refactor game loop to have explicit phases for movement, actions, terrain effects.\
-[ ] Split physics code into separate movement and terrain effect functions.\
+[x] Refactor game loop to have explicit phases for movement, actions, terrain effects.\
+[x] Split physics code into separate movement and terrain effect functions.\
 
-[ ] Fix broken replays after this change.\
+[x] Fix broken replays after this change.\
 
 This doesn't resolve all issues, but it should help a lot.
 In particular, movement order and collisions can still interact in an order-dependent way, so also:
