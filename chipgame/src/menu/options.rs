@@ -10,7 +10,7 @@ pub struct OptionsMenu {
 }
 
 impl OptionsMenu {
-	const ITEMS: [&'static str; 4] = ["Background music: ", "Sound effects: ", "Perspective: ", "Back"];
+	const ITEMS: [&'static str; 4] = ["Background Music: ", "Sound Effects: ", "Perspective: ", "Back"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -24,7 +24,7 @@ impl OptionsMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => {
 					self.bg_music = !self.bg_music;

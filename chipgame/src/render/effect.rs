@@ -1,11 +1,13 @@
 use super::*;
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum EffectType {
 	Splash,
 	Sparkles,
 	Fireworks,
 }
 
+#[derive(Clone)]
 pub struct Effect {
 	pub ty: EffectType,
 	pub pos: Vec3f,

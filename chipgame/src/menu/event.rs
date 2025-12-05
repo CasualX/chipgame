@@ -39,6 +39,8 @@ pub enum MenuEvent {
 	RetryLevel,
 	SaveReplay,
 	ResumePlay,
+	SaveState,
+	LoadState,
 
 	// ScoutMode Events
 	OpenScoutMode,

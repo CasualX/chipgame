@@ -2,15 +2,12 @@ use super::*;
 
 pub struct EditorPlayState {
 	pub level: String,
-	pub game: fx::FxState,
+	pub game: Box<fx::FxState>,
 	pub input: Input,
 	pub screen_size: Vec2i,
 }
 
 impl EditorPlayState {
-	pub fn init(&mut self) {
-		self.game.render.tiles = &crate::play::tiles::TILES_PLAY;
-	}
 	pub fn key_left(&mut self, pressed: bool) {
 		self.input.key_left = pressed;
 	}

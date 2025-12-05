@@ -2,7 +2,7 @@ use super::*;
 
 const SCOUT_INPUT_HOLD: f64 = 1.5 / chipcore::FPS as f64;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct FxState {
 	pub gs: chipcore::GameState,
 	pub camera: PlayCamera,
@@ -19,60 +19,56 @@ pub struct FxState {
 	pub game_realtime: f32,
 	pub game_over: Option<chipcore::GameOverReason>,
 	pub hud_enabled: bool,
+	pub is_preview: bool,
 	pub darken: bool,
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
 	pub replay: Option<Vec<u8>>,
+	pub warps_set: i32,
+	pub warps_used: i32,
 	pub scout_active: bool,
 	pub scout_dir_until: [f64; 4],
 	pub scout_speed: f32,
 }
 
 impl FxState {
-	pub fn parse_level(&mut self, level_number: i32, level_dto: &chipty::LevelDto, rng_seed: chipcore::RngSeed) {
-		self.gs.parse(level_dto, rng_seed);
+	/// Creates a new FxState initialized for the given level.
+	pub fn new(level_number: i32, level_dto: &chipty::LevelDto, rng_seed: chipcore::RngSeed, tiles: &'static [render::TileGfx]) -> Box<FxState> {
+		let mut fx = Box::new(FxState::default());
+		fx.level_number = level_number;
+		fx.render.tiles = tiles;
+		fx.hud_enabled = true;
+		fx.darken = true;
+		fx.darken_time = -1.0;
 
-		// Reset the camera, adjusted when a player entity is created
-		self.camera = PlayCamera::default();
+		// Parse the level data into the game state
+		fx.gs.parse(level_dto, rng_seed);
 
-		self.render.clear();
-		self.objlookup.clear();
-		self.fire_sprites.clear();
-		self.toggle_walls.clear();
-		self.mirage_walls.clear();
-
-		self.render.field.width = self.gs.field.width;
-		self.render.field.height = self.gs.field.height;
-		self.render.field.terrain.extend_from_slice(&self.gs.field.terrain);
-		for y in 0..self.gs.field.height {
-			for x in 0..self.gs.field.width {
+		// Initialize the render field based on the game state
+		fx.render.field.width = fx.gs.field.width;
+		fx.render.field.height = fx.gs.field.height;
+		fx.render.field.terrain.extend_from_slice(&fx.gs.field.terrain);
+		for y in 0..fx.gs.field.height {
+			for x in 0..fx.gs.field.width {
 				let pos = Vec2(x, y);
-				let index = (y * self.gs.field.width + x) as usize;
-				let terrain = self.gs.field.terrain[index];
+				let index = (y * fx.gs.field.width + x) as usize;
+				let terrain = fx.gs.field.terrain[index];
 				match terrain {
-					chipty::Terrain::Fire => handlers::create_fire(self, pos),
-					chipty::Terrain::ToggleFloor => handlers::create_toggle_wall(self, pos, false),
-					chipty::Terrain::ToggleWall => handlers::create_toggle_wall(self, pos, true),
-					chipty::Terrain::HiddenWall => handlers::create_wall_mirage(self, pos),
-					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(self, pos),
+					chipty::Terrain::Fire => handlers::create_fire(&mut fx, pos),
+					chipty::Terrain::ToggleFloor => handlers::create_toggle_wall(&mut fx, pos, false),
+					chipty::Terrain::ToggleWall => handlers::create_toggle_wall(&mut fx, pos, true),
+					chipty::Terrain::HiddenWall => handlers::create_wall_mirage(&mut fx, pos),
+					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(&mut fx, pos),
 					_ => {}
 				}
 			}
 		}
 
-		self.level_number = level_number;
-		self.next_level_load = 0.0;
-		self.game_start_time = 0.0;
-		self.game_realtime = 0.0;
-		self.game_over = None;
-		self.hud_enabled = true;
-		self.darken = true;
-		self.darken_time = -1.0;
-
-		self.events.clear();
-		self.scout_init(false);
-		self.sync();
+		// Sync initial game state
+		fx.sync();
+		return fx;
 	}
+
 	pub fn scout(&mut self) {
 		self.gs.ts = chipcore::TimeState::Paused;
 		self.events.push(FxEvent::Scout);

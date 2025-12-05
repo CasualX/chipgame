@@ -29,7 +29,7 @@ impl MainMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::NewGame,
 				1 => MenuEvent::Continue,

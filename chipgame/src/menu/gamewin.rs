@@ -67,7 +67,7 @@ pub struct GameWinMenu {
 }
 
 impl GameWinMenu {
-	const ITEMS: [&'static str; 4] = ["Onward!", "Retry", "Save replay", "Main menu"];
+	const ITEMS: [&'static str; 4] = ["Onward!", "Retry", "Save Replay", "Main Menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -81,7 +81,7 @@ impl GameWinMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::PlayNextLevel,
 				1 => MenuEvent::RetryLevel,

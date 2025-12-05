@@ -6,7 +6,7 @@ use super::*;
 pub struct ObjectHandle(u32);
 
 /// Collection of objects.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct ObjectMap {
 	map: HashMap<ObjectHandle, Object>,
 	next: u32,

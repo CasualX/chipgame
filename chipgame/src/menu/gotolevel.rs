@@ -22,7 +22,7 @@ pub struct GoToLevel {
 }
 
 impl GoToLevel {
-	pub fn load_items(&mut self, level_set: &crate::play::LevelSet, save_data: &crate::play::SaveData) {
+	pub fn load_items(&mut self, level_set: &play::LevelSet, save_data: &play::SaveData) {
 		self.items.clear();
 		// Dummy entry for "Unlock level"
 		self.items.push(LevelEntry {
@@ -88,7 +88,7 @@ impl GoToLevel {
 		if input.right.is_pressed() {
 			self.jump(10, events);
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::OpenUnlockLevel,
 				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].level_number },

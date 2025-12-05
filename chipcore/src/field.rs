@@ -1,7 +1,7 @@
 use super::*;
 
 /// Game playfield.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Field {
 	pub name: String,
 	pub author: Option<String>,

@@ -13,7 +13,7 @@ pub struct GameOverMenu {
 }
 
 impl GameOverMenu {
-	const ITEMS: [&'static str; 2] = ["Retry", "Main menu"];
+	const ITEMS: [&'static str; 3] = ["Warp Back", "Start Over", "Main Menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -27,9 +27,10 @@ impl GameOverMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			let evt = match self.selected {
-				0 => MenuEvent::RetryLevel,
+				0 => MenuEvent::LoadState,
+				1 => MenuEvent::RetryLevel,
 				_ => MenuEvent::OpenMainMenu,
 			};
 			events.push(evt);

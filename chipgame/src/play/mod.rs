@@ -15,14 +15,13 @@ pub use self::lvsets::*;
 
 #[derive(Default)]
 pub struct PlayState {
-	pub fx: Option<fx::FxState>,
+	pub fx: Option<Box<fx::FxState>>,
+	pub warp: Option<Box<fx::FxState>>,
 	pub menu: menu::MenuState,
 	pub events: Vec<PlayEvent>,
 	pub input: chipcore::Input,
 	pub lvsets: LevelSets,
 	pub save_data: SaveData,
-	// Tracks that the current `fx` holds a preview (not an active run).
-	is_preview: bool,
 }
 
 impl PlayState {
@@ -83,12 +82,10 @@ impl PlayState {
 		// If loading a level fails just... do nothing
 		let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
 
-		self.is_preview = false;
+		self.warp = None;
 
-		let attempts = self.save_data.update_level_attempts(level_number);
-		self.fx = Some(fx::FxState::default());
-		let fx = self.fx.as_mut().unwrap();
 		self.save_data.current_level = level_number;
+		let attempts = self.save_data.increase_level_attempts();
 		self.save_data.save(&self.lvsets.current());
 
 		let seed = chipcore::RngSeed::System;
@@ -103,14 +100,26 @@ impl PlayState {
 		// 	chipcore::RngSeed::System
 		// };
 
-		fx.render.tiles = &tiles::TILES_PLAY;
-		fx.parse_level(level_number, level, seed);
+		let mut fx = fx::FxState::new(level_number, level, seed, &tiles::TILES_PLAY);
 		fx.gs.ps.attempts = attempts;
 		fx.camera.set_perspective(self.save_data.perspective);
+		self.fx = Some(fx);
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::SetTitle);
 		self.play_music();
+	}
+
+	fn preview_level(&mut self, level_number: i32) {
+		if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
+			let mut fx = fx::FxState::new(level_number, level, chipcore::RngSeed::System, &tiles::TILES_PLAY);
+			fx.is_preview = true;
+			fx.camera.set_perspective(self.save_data.perspective);
+			self.fx = Some(fx);
+		}
+		else {
+			self.fx = None;
+		}
 	}
 
 	pub fn toggle_music(&mut self) {
@@ -123,8 +132,8 @@ impl PlayState {
 		let music = if !self.save_data.bg_music {
 			None
 		}
-		else if let Some(_) = &self.fx {
-			if self.is_preview {
+		else if let Some(fx) = &self.fx {
+			if fx.is_preview {
 				Some(chipty::MusicId::MenuMusic)
 			}
 			else {
@@ -161,21 +170,20 @@ impl PlayState {
 				}
 				menu::MenuEvent::SwitchLevelSet => {
 					self.fx = None;
-					self.is_preview = false;
 					self.lvsets.selected = -1;
 					self.menu.close_all();
 					self.events.push(PlayEvent::Restart);
 					self.events.push(PlayEvent::SetTitle);
 				}
 				menu::MenuEvent::PreviewLevel { level_number } => {
-					// Reuse PlayState.fx to show a preview of the requested level
-					self.load_preview_level(level_number);
+					self.preview_level(level_number);
 				}
 				menu::MenuEvent::OpenGoToLevel => {
+					// Start previewing at the current level
+					self.preview_level(self.save_data.current_level);
+
 					let mut menu = menu::GoToLevel::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);
-					// Start previewing at the current level
-					self.load_preview_level(self.save_data.current_level);
 					self.menu.stack.push(menu::Menu::GoToLevel(menu));
 				}
 				menu::MenuEvent::OpenUnlockLevel => {
@@ -327,9 +335,24 @@ impl PlayState {
 					self.menu.close_menu(self.fx.is_some());
 				}
 				menu::MenuEvent::PreviewExit => {
-					if self.is_preview && self.fx.is_some() {
-						self.fx = None;
-						self.is_preview = false;
+					self.fx = None;
+				}
+				menu::MenuEvent::SaveState => {
+					if let Some(fx) = &mut self.fx {
+						fx.warps_set += 1;
+						self.warp = Some(fx.clone());
+					}
+				}
+				menu::MenuEvent::LoadState => {
+					if let Some(warp) = &mut self.warp {
+						// Update progression state
+						warp.warps_used += 1;
+						warp.gs.ps.attempts = self.save_data.increase_level_attempts();
+
+						// Restore FX state
+						let mut warp = warp.clone();
+						warp.unpause();
+						self.fx = Some(warp);
 					}
 				}
 			}
@@ -364,22 +387,6 @@ impl PlayState {
 		}
 		self.menu.draw(g, resx, time);
 	}
-
-	fn load_preview_level(&mut self, level_number: i32) {
-		// Only parse if the level exists in the current set
-		if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
-			let mut preview = fx::FxState::default();
-			preview.render.tiles = &tiles::TILES_PLAY;
-			preview.parse_level(level_number, level, chipcore::RngSeed::System);
-			preview.camera.set_perspective(self.save_data.perspective);
-			// HUD hidden when any menu is open; leave runtime flags at defaults
-			self.fx = Some(preview);
-			self.is_preview = true;
-		}
-		else {
-			self.fx = None;
-		}
-	}
 }
 
 fn play_fx_play_sound(this: &mut PlayState, sound: chipty::SoundFx) {
@@ -406,10 +413,6 @@ fn play_fx_pause(this: &mut PlayState) {
 		selected: 0,
 		level_number: fx.level_number,
 		level_name: fx.gs.field.name.clone(),
-		attempts: fx.gs.ps.attempts,
-		time: fx.gs.time,
-		steps: fx.gs.ps.steps,
-		bonks: fx.gs.ps.bonks,
 	};
 	this.menu.stack.push(menu::Menu::Pause(menu));
 }
@@ -423,6 +426,7 @@ fn play_fx_level_complete(this: &mut PlayState) {
 		return
 	};
 
+	// Check for high scores
 	let scores = savedata::Scores {
 		ticks: fx.gs.time,
 		steps: fx.gs.ps.steps,
@@ -435,13 +439,19 @@ fn play_fx_level_complete(this: &mut PlayState) {
 	if high_score {
 		this.events.push(PlayEvent::PlaySound { sound: chipty::SoundFx::GameWin });
 	}
+
+	// Update save data
+	let enable_records = fx.warps_used == 0;
+	let scores = if enable_records { Some(scores) } else { None };
 	this.save_data.complete_level(fx.level_number, scores);
 	this.save_data.save(&this.lvsets.current());
+
 	// Auto-save replay if enabled or if a new high score was achieved
 	if this.save_data.auto_save_replay || high_score {
 		save_replay(this.lvsets.current(), fx);
 	}
 
+	// Show game win menu
 	let menu = menu::GameWinMenu {
 		selected: 0,
 		level_number: fx.level_number,
@@ -479,10 +489,7 @@ fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	let replay = fx.gs.save_replay(fx.game_realtime);
 	let record = serde_json::to_string_pretty(&replay).unwrap();
 	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.gs.ps.attempts);
-	write_replay(path::Path::new(&path), &record);
-}
-
-fn write_replay(path: &path::Path, record: &str) {
+	let path = path::Path::new(&path);
 	let _ = fs::create_dir(path.parent().unwrap_or(path));
 	if let Err(err) = fs::write(path, record) {
 		eprintln!("Error saving replay: {}", err);

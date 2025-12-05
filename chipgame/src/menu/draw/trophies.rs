@@ -138,7 +138,7 @@ pub struct DrawTrophies {
 	steps: DrawTrophyValues,
 }
 impl DrawTrophies {
-	pub fn new(level_number: i32, level: &chipty::LevelDto, save_data: &crate::play::SaveData) -> DrawTrophies {
+	pub fn new(level_number: i32, level: &chipty::LevelDto, save_data: &play::SaveData) -> DrawTrophies {
 		let tick_high_score = save_data.get_time_high_score(level_number);
 		let steps_high_score = save_data.get_steps_high_score(level_number);
 		let tick_values = level.trophies.as_ref().map(|m| &m.ticks);

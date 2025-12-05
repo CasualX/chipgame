@@ -115,12 +115,6 @@ impl Default for EditorState {
 }
 
 impl EditorState {
-	pub fn init(&mut self) {
-		match self {
-			EditorState::Edit(s) => s.init(),
-			EditorState::Play(s) => s.init(),
-		}
-	}
 	pub fn load_level(&mut self, json: &str) {
 		match self {
 			EditorState::Edit(s) => s.load_level(json),
@@ -186,9 +180,7 @@ impl EditorState {
 			EditorState::Edit(s) => {
 				let level = s.save_level();
 				let level_dto = serde_json::from_str(&level).unwrap();
-				let mut game = fx::FxState::default();
-				game.render.tiles = &crate::play::tiles::TILES_PLAY;
-				game.parse_level(0, &level_dto, chipcore::RngSeed::System);
+				let mut game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &crate::play::tiles::TILES_PLAY);
 				game.camera.set_perspective(true);
 				*self = EditorState::Play(Box::new(EditorPlayState {
 					level,
@@ -199,7 +191,6 @@ impl EditorState {
 			}
 			EditorState::Play(s) => {
 				let mut state = EditorEditState::default();
-				state.init();
 				state.load_level(&s.level);
 				state.screen_size = s.screen_size;
 				*self = EditorState::Edit(Box::new(state));

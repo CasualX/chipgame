@@ -1,6 +1,7 @@
 use super::*;
 
 /// Source of game randomness.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Random {
 	rand: urandom::Random<urandom::rng::Xoshiro256>,

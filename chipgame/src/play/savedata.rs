@@ -72,7 +72,7 @@ impl SaveData {
 	}
 
 	/// Completes the level, unlocks the next level and saves the scores.
-	pub fn complete_level(&mut self, level_number: i32, scores: Scores) {
+	pub fn complete_level(&mut self, level_number: i32, scores: Option<Scores>) {
 		let level_index = (level_number - 1) as usize;
 		if let Some(lock) = self.completed_levels.get_mut(level_index) {
 			*lock = true;
@@ -82,26 +82,26 @@ impl SaveData {
 		self.unlock_level(level_number + 2);
 		self.unlock_level(level_number + 1);
 
-		let level_index = (level_number - 1) as usize;
-		if let Some(ticks_entry) = self.high_scores.ticks.get_mut(level_index) {
-			if *ticks_entry < 0 || *ticks_entry > scores.ticks {
-				*ticks_entry = scores.ticks;
+		// Save high scores if enabled
+		if let Some(scores) = scores {
+			let level_index = (level_number - 1) as usize;
+			if let Some(ticks_entry) = self.high_scores.ticks.get_mut(level_index) {
+				if *ticks_entry < 0 || *ticks_entry > scores.ticks {
+					*ticks_entry = scores.ticks;
+				}
 			}
-		}
-		if let Some(steps_entry) = self.high_scores.steps.get_mut(level_index) {
-			if *steps_entry < 0 || *steps_entry > scores.steps {
-				*steps_entry = scores.steps;
+			if let Some(steps_entry) = self.high_scores.steps.get_mut(level_index) {
+				if *steps_entry < 0 || *steps_entry > scores.steps {
+					*steps_entry = scores.steps;
+				}
 			}
 		}
 	}
 
-	/// Updates and returns the current attempt for this level.
-	pub fn update_level_attempts(&mut self, level_number: i32) -> i32 {
-		let level_index = (level_number - 1) as usize;
-		let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index)
-		else {
-			return 0;
-		};
+	/// Increases and returns the current attempt for this level.
+	pub fn increase_level_attempts(&mut self) -> i32 {
+		let level_index = (self.current_level - 1) as usize;
+		let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index) else { return 0 };
 		*attempts_entry += 1;
 		*attempts_entry
 	}

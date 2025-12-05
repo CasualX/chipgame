@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct RenderField {
 	pub width: i32,
 	pub height: i32,
@@ -33,7 +33,7 @@ pub struct UpdateCtx {
 	pub dt: f64,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct RenderState {
 	pub objects: ObjectMap,
 	pub field: RenderField,

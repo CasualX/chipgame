@@ -71,7 +71,7 @@ pub enum GameEvent {
 	SoundFx { sound: SoundFx },
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Events {
 	events: Vec<GameEvent>,
 }

@@ -22,7 +22,7 @@ impl LevelSetMenu {
 				events.push(MenuEvent::CursorMove);
 			}
 		}
-		if input.a.is_pressed() || input.start.is_pressed() {
+		if input.a.is_pressed() {
 			events.push(MenuEvent::LoadLevelSet { index: self.selected });
 			events.push(MenuEvent::CursorSelect);
 		}

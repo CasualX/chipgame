@@ -4,7 +4,7 @@ use super::*;
 ///
 /// Not really a QuadTree but it serves the same purpose ;)  
 /// This is a simple 2D grid of entity handles to quickly find entities at a given position.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct QuadTree {
 	width: i32,
 	height: i32,

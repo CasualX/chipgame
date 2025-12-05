@@ -1,7 +1,7 @@
 use super::*;
 
 /// Time state.
-#[derive(Default)]
+#[derive(Copy, Clone, Default)]
 pub enum TimeState {
 	/// Wait for player input to start the game.
 	#[default]
@@ -15,7 +15,7 @@ pub enum TimeState {
 }
 
 /// Game state.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct GameState {
 	pub time: i32,
 	pub ts: TimeState,

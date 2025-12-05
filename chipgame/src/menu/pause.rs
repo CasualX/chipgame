@@ -5,14 +5,10 @@ pub struct PauseMenu {
 	pub selected: u8,
 	pub level_number: i32,
 	pub level_name: String,
-	pub attempts: i32,
-	pub time: i32,
-	pub steps: i32,
-	pub bonks: i32,
 }
 
 impl PauseMenu {
-	const ITEMS: [&'static str; 4] = ["Resume", "Restart", "Options", "Main menu"];
+	const ITEMS: [&'static str; 6] = ["Resume", "Set Warp Point", "Warp Back", "Restart", "Options", "Main Menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -29,8 +25,10 @@ impl PauseMenu {
 		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::ResumePlay,
-				1 => MenuEvent::RestartLevel,
-				2 => MenuEvent::OpenOptions,
+				1 => MenuEvent::SaveState,
+				2 => MenuEvent::LoadState,
+				3 => MenuEvent::RestartLevel,
+				4 => MenuEvent::OpenOptions,
 				_ => MenuEvent::OpenMainMenu,
 			};
 			events.push(evt);
@@ -54,24 +52,13 @@ impl PauseMenu {
 		buf.uniform.transform = Transform2f::ortho(rect);
 		buf.uniform.texture = resx.font.texture;
 
-		let [top, middle, bottom] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Fr(1.0); 3]);
+		let [top, bottom] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Fr(1.0), layout::Unit::Fr(2.0)]);
 
 		draw::DrawPlayTitle {
 			level_number: self.level_number,
 			level_name: &self.level_name,
 			subtitle: Some(&"\x1b[color=#0f0]Paused!"),
 		}.draw(&mut buf, &top, resx);
-
-		let [_, middle, _] = draw::flexh(middle, None, layout::Justify::Center, &[layout::Unit::Fr(1.0); 3]);
-
-		draw::DrawScoreCard {
-			attempts: self.attempts,
-			time: self.time,
-			steps: self.steps,
-			bonks: self.bonks,
-			time_high_score: -2,
-			steps_high_score: -2,
-		}.draw(&mut buf, &middle, resx);
 
 		draw::DrawMenuItems {
 			items_text: &wrap_items(&Self::ITEMS),

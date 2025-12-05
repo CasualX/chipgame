@@ -169,7 +169,6 @@ fn main() {
 	// App state
 	let mut app: Option<Box<AppStuff>> = None;
 	let mut editor = editor::EditorState::default();
-	editor.init();
 	editor.load_level(include_str!("template.json"));
 
 	let mut current_tool = None;
