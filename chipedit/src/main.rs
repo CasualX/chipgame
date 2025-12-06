@@ -14,7 +14,6 @@ mod gamepad;
 
 const NANOS_PER_SECOND: f64 = 1_000_000_000.0;
 const FRAME_TIME: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / chipcore::FPS as f64) as u64);
-const SLOW_THRESHOLD: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND / (chipcore::FPS + 1) as f64) as u64);
 
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
@@ -37,9 +36,10 @@ impl AppStuff {
 		use glutin::surface::{SurfaceAttributesBuilder, SwapInterval, WindowSurface};
 		use raw_window_handle::HasRawWindowHandle;
 
-		let template = ConfigTemplateBuilder::new()
-			.with_alpha_size(8)
-			.with_multisampling(4);
+		let mut template = ConfigTemplateBuilder::new().with_alpha_size(8);
+		if config.multisampling > 0 {
+			template = template.with_multisampling(config.multisampling);
+		}
 
 		let size = winit::dpi::PhysicalSize::new(800, 600);
 
@@ -200,7 +200,7 @@ fn main() {
 
 					load_level(&mut editor, &file_path, app.as_deref());
 					last_frame_start = time::Instant::now() - FRAME_TIME;
-					tick_budget = time::Duration::ZERO;
+					tick_budget = FRAME_TIME / 2; // Start biased to avoid jitter-induced double ticks
 				}
 			}
 			Event::WindowEvent { event, .. } => match event {
@@ -356,16 +356,10 @@ fn main() {
 							app.window.set_cursor_icon(cursor_icon);
 						}
 
-						if frame_dt >= SLOW_THRESHOLD {
+						tick_budget += frame_dt;
+						while tick_budget >= FRAME_TIME {
 							editor.think();
-							tick_budget = time::Duration::ZERO;
-						}
-						else {
-							tick_budget += frame_dt;
-							while tick_budget >= FRAME_TIME {
-								editor.think();
-								tick_budget -= FRAME_TIME;
-							}
+							tick_budget -= FRAME_TIME;
 						}
 
 						let fx_events = editor.take_fx_events();

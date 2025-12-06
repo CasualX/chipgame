@@ -42,6 +42,7 @@ pub struct FontConfig {
 pub struct Config {
 	pub pixel_art_bias: f32,
 	pub vsync: bool,
+	pub multisampling: u8,
 	pub sound_fx: HashMap<chipty::SoundFx, String>,
 	pub music: HashMap<chipty::MusicId, String>,
 	pub shaders: HashMap<String, ShaderConfig>,
@@ -63,7 +64,8 @@ impl Config {
 
 		let mut section = Section::General;
 		let mut pixel_art_bias = 0.5f32;
-		let mut vsync = true;
+		let mut vsync = false;
+		let mut multisampling = 0;
 		let mut sound_fx: HashMap<chipty::SoundFx, String> = HashMap::new();
 		let mut music: HashMap<chipty::MusicId, String> = HashMap::new();
 		let mut shaders: HashMap<String, ShaderConfig> = HashMap::new();
@@ -77,6 +79,7 @@ impl Config {
 					Section::General => match key {
 						"PixelArtBias" => { if let Ok(v) = value.parse::<f32>() { pixel_art_bias = v; } }
 						"VSync" => { if let Ok(v) = value.parse::<bool>() { vsync = v; } }
+						"Multisampling" => { if let Ok(v) = value.parse::<u8>() { multisampling = v; } }
 						_ => {}
 					},
 					Section::SoundFx => {
@@ -164,6 +167,7 @@ impl Config {
 
 		Config {
 			pixel_art_bias,
+			multisampling,
 			vsync,
 			sound_fx,
 			music,
