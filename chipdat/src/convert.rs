@@ -1,13 +1,13 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use chipty::*;
 
 pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 	let mut levels = Vec::new();
-	for level in &dat.levels {
-		let (map, ents, mut conns) = parse_content(&level.top_layer, &level.bottom_layer);
+	for lvdat in dat.levels.iter() {
+		let (map, ents, mut conns) = parse_content(&lvdat.top_layer, &lvdat.bottom_layer);
 
-		if let Some(traps) = &level.metadata.traps {
+		if let Some(traps) = &lvdat.metadata.traps {
 			for lnk in traps {
 				conns.push(FieldConn {
 					src: cvmath::Vec2i(lnk.brown_button_x as i32, lnk.brown_button_y as i32),
@@ -16,7 +16,7 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 			}
 		}
 
-		if let Some(cloners) = &level.metadata.cloners {
+		if let Some(cloners) = &lvdat.metadata.cloners {
 			for lnk in cloners {
 				conns.push(FieldConn {
 					src: cvmath::Vec2i(lnk.red_button_x as i32, lnk.red_button_y as i32),
@@ -26,12 +26,12 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 		}
 
 		let mut level = LevelDto {
-			name: level.metadata.title.clone().unwrap(),
-			author: level.metadata.author.clone(),
-			hint: level.metadata.hint.clone(),
-			password: level.metadata.password.clone(),
-			time_limit: level.time_limit as i32,
-			required_chips: level.required_chips as i32,
+			name: lvdat.metadata.title.clone().unwrap(),
+			author: lvdat.metadata.author.clone(),
+			hint: lvdat.metadata.hint.clone(),
+			password: lvdat.metadata.password.clone(),
+			time_limit: lvdat.time_limit as i32,
+			required_chips: lvdat.required_chips as i32,
 			map,
 			entities: ents,
 			connections: conns,
@@ -39,7 +39,8 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 			trophies: None,
 		};
 
-		post_process(&mut level);
+		replace_block_cloners(&mut level);
+		level.entities = monster_order(&lvdat.metadata.monsters, level.entities);
 
 		levels.push(LevelRef::Direct(level));
 	}
@@ -259,7 +260,7 @@ fn ent_args(kind: EntityKind, pos: cvmath::Vec2i, face_dir: Option<Compass>) -> 
 	EntityArgs { kind, pos, face_dir }
 }
 
-fn post_process(level: &mut LevelDto) -> bool {
+fn replace_block_cloners(level: &mut LevelDto) -> bool {
 	let mut fixed = false;
 
 	let mut ents_to_remove = Vec::new();
@@ -313,4 +314,87 @@ fn post_process(level: &mut LevelDto) -> bool {
 	}
 
 	return fixed;
+}
+
+fn monster_order(monsters: &Option<Vec<crate::Monster>>, entities: Vec<EntityArgs>) -> Vec<EntityArgs> {
+	let Some(monsters) = monsters else { return entities };
+	if monsters.is_empty() {
+		return entities;
+	}
+
+	let original_entities_len = entities.len();
+
+	let mut others = Vec::with_capacity(entities.len());
+	let mut monster_map: HashMap<(i32, i32), VecDeque<EntityArgs>> = HashMap::new();
+	let mut monster_order = Vec::new();
+
+	// First, separate monsters from other entities.
+	for ent in entities {
+		let is_monster = matches!(ent.kind,
+			| EntityKind::Bug
+			| EntityKind::FireBall
+			| EntityKind::PinkBall
+			| EntityKind::Tank
+			| EntityKind::Glider
+			| EntityKind::Teeth
+			| EntityKind::Walker
+			| EntityKind::Blob
+			| EntityKind::Paramecium
+		);
+		if is_monster {
+			let key = (ent.pos.x, ent.pos.y);
+			monster_map
+				.entry(key)
+				.or_insert_with(VecDeque::new)
+				.push_back(ent);
+			monster_order.push(key);
+		}
+		else {
+			others.push(ent);
+		}
+	}
+
+	if monster_map.is_empty() {
+		return others;
+	}
+
+	let mut ordered = Vec::new();
+
+	// Next, order monsters according to the specified order in metadata.
+	for monster in monsters {
+		let key = (monster.x as i32, monster.y as i32);
+		let mut remove_bucket = false;
+		if let Some(queue) = monster_map.get_mut(&key) {
+			if let Some(ent) = queue.pop_front() {
+				ordered.push(ent);
+			}
+			if queue.is_empty() {
+				remove_bucket = true;
+			}
+		}
+		if remove_bucket {
+			monster_map.remove(&key);
+		}
+	}
+
+	// Finally, append any remaining monsters in the order they were found.
+	for key in monster_order {
+		let mut remove_bucket = false;
+		if let Some(queue) = monster_map.get_mut(&key) {
+			if let Some(ent) = queue.pop_front() {
+				ordered.push(ent);
+			}
+			if queue.is_empty() {
+				remove_bucket = true;
+			}
+		}
+		if remove_bucket {
+			monster_map.remove(&key);
+		}
+	}
+
+	others.extend(ordered);
+
+	assert_eq!(others.len(), original_entities_len);
+	return others;
 }

@@ -48,14 +48,7 @@ impl EditorEditState {
 			}
 		}
 		let data = self.game.gs.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
-
-		let mut entities: Vec<_> = self.game.gs.ents.iter().map(|ent| EntityArgs {
-			kind: ent.kind,
-			pos: ent.pos,
-			face_dir: ent.face_dir,
-		}).collect();
-		entities.sort_unstable_by_key(|ent| (ent.kind as i32, ent.pos.y, ent.pos.x));
-
+		let entities = self.game.gs.ents.iter().map(chipcore::Entity::to_entity_args).collect();
 		let dto = LevelDto {
 			name: self.game.gs.field.name.clone(),
 			author: self.game.gs.field.author.clone(),
