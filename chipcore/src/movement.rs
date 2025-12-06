@@ -271,8 +271,6 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 			}
 			EntityKind::Block => {
 				if matches!(mover_kind, EntityKind::Player) && try_push_block(s, phase, &mut ent, step_dir) {
-					s.update_hidden_flag(ent.pos, true);
-					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 					false
@@ -284,8 +282,6 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 			EntityKind::IceBlock => {
 				let allowed_pusher = matches!(pusher, EntityKind::Player | EntityKind::IceBlock | EntityKind::Teeth | EntityKind::Tank);
 				if allowed_pusher && try_push_block(s, phase, &mut ent, step_dir) {
-					s.update_hidden_flag(ent.pos, true);
-					s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 					s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 					if matches!(mover_kind, EntityKind::Player) { // Only play sound if player is pushing the ice block
 						s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
@@ -351,12 +347,19 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 
 	s.qt.update(ent.handle, ent.pos, new_pos);
 
+	let old_pos = ent.pos;
+
 	ent.face_dir = Some(step_dir);
 	ent.step_dir = Some(step_dir);
 	ent.step_time = s.time;
 	ent.pos = new_pos;
 	ent.flags |= EF_NEW_POS;
 	ent.flags &= !(EF_RELEASED | EF_TRAPPED);
+
+	if matches!(mover_kind, EntityKind::Block | EntityKind::IceBlock) {
+		s.update_hidden_flag(new_pos, true);
+		s.update_hidden_flag(old_pos, false);
+	}
 
 	// Retain momentum when entity lands on a Trap
 	if !matches!(to_terrain, Terrain::BearTrap) {
@@ -417,8 +420,6 @@ fn flick(s: &mut GameState, phase: &mut MovementPhase, pusher: EntityKind, &new_
 
 		if allowed_pusher {
 			if try_move(s, phase, &mut ent, step_dir) {
-				s.update_hidden_flag(ent.pos, true);
-				s.update_hidden_flag(ent.pos - step_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}
@@ -448,8 +449,6 @@ fn slap(s: &mut GameState, phase: &mut MovementPhase, player_pos: Vec2i, slap_di
 
 		if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
 			if try_move(s, phase, &mut ent, slap_dir) {
-				s.update_hidden_flag(ent.pos, true);
-				s.update_hidden_flag(ent.pos - slap_dir.to_vec(), false);
 				s.events.fire(GameEvent::BlockPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}

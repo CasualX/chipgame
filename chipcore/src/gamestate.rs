@@ -206,7 +206,7 @@ impl GameState {
 	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i, hidden: bool) {
 		for ehandle in self.qt.get(pos) {
 			if let Some(ent) = self.ents.get_mut(ehandle) {
-				if matches!(ent.kind, EntityKind::Block | EntityKind::Bomb) {
+				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock | EntityKind::Bomb) {
 					continue;
 				}
 				if (ent.flags & EF_HIDDEN != 0) != hidden {
