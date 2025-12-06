@@ -13,7 +13,6 @@ from urllib.request import urlopen
 
 EXE_NAME = "msdf-atlas-gen.exe"
 DOWNLOAD_URL = "https://github.com/Chlumsky/msdf-atlas-gen/releases/download/v1.3/msdf-atlas-gen-1.3-win64.zip"
-CHARSET_SYMBOLS = "⁓∿≈↑↓←→↔↕★☆✓✗●○▴▾◂▸▲▼◀▶△▽◁▷☐☑☒🗹🗷⏰💎🔹⚡⛔🏁🎮🏆🚀💥🔥⚖💤❌🌟💯📈🌈🎯📊🚩🌍👑🥇🏅🕹"
 
 
 def download_file(url: str, dest: Path) -> None:
@@ -96,10 +95,10 @@ def main() -> int:
 
 	subprocess.run(["wine", str(exe_path),
 		"-font", str(script_dir / "tmp/adventure/Adventure.otf"),
-		"-chars", "[0x20, 0x7E]",
+		"-charset", str(script_dir / "charset.txt"),
 		"-and",
 		"-font", str(script_dir / "tmp/segoe-ui-symbol_freefontdownload_org/segoe-ui-symbol.ttf"),
-		"-chars", utf8_to_codepoints(CHARSET_SYMBOLS),
+		"-charset", str(script_dir / "symbols.txt"),
 		"-type", "mtsdf",
 		"-format", "png",
 		"-potr",
