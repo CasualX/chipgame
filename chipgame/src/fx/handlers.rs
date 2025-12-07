@@ -13,10 +13,11 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let pos = ent_pos(&ctx.gs, ent, ent.pos);
+	let sprite = (if ent.flags & chipcore::EF_TEMPLATE != 0 { sprite_for_ent } else { animated_sprite_for_ent })(ent, &ctx.gs.ps);
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos,
-			sprite: sprite_for_ent(ent, &ctx.gs.ps),
+			sprite,
 			model: if pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) },
 			alpha: 1.0,
 			visible: true,
@@ -110,7 +111,7 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	obj.data.sprite = sprite_for_ent(ent, &ctx.gs.ps);
+	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs.ps);
 }
 
 pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
@@ -214,7 +215,7 @@ fn model_for_ent(ent: &chipcore::Entity) -> chipty::ModelId {
 	}
 }
 
-fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
+fn animated_sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
 	match ent.kind {
 		chipty::EntityKind::Player => match pl.activity {
 			chipcore::PlayerActivity::Swimming => match ent.face_dir {
@@ -291,6 +292,86 @@ fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty:
 			_ => chipty::SpriteId::ParameciumV,
 		}
 		chipty::EntityKind::Bomb => chipty::SpriteId::BombA,
+	}
+}
+
+fn sprite_for_ent(ent: &chipcore::Entity, pl: &chipcore::PlayerState) -> chipty::SpriteId {
+	match ent.kind {
+		chipty::EntityKind::Player => match pl.activity {
+			chipcore::PlayerActivity::Swimming => match ent.face_dir {
+				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
+				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
+				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
+				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
+				_ => chipty::SpriteId::PlayerSwimIdle,
+			},
+			_ => match ent.face_dir {
+				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
+				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
+				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
+				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
+				_ => chipty::SpriteId::PlayerWalkIdle,
+			},
+		},
+		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
+		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
+		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,
+		chipty::EntityKind::IceBlock => chipty::SpriteId::IceBlock,
+		chipty::EntityKind::Flippers => chipty::SpriteId::Flippers,
+		chipty::EntityKind::FireBoots => chipty::SpriteId::FireBoots,
+		chipty::EntityKind::IceSkates => chipty::SpriteId::IceSkates,
+		chipty::EntityKind::SuctionBoots => chipty::SpriteId::SuctionBoots,
+		chipty::EntityKind::BlueKey => chipty::SpriteId::BlueKey,
+		chipty::EntityKind::RedKey => chipty::SpriteId::RedKey,
+		chipty::EntityKind::GreenKey => chipty::SpriteId::GreenKey,
+		chipty::EntityKind::YellowKey => chipty::SpriteId::YellowKey,
+		chipty::EntityKind::Thief => chipty::SpriteId::Thief,
+		chipty::EntityKind::Bug => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::BugN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::BugS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::BugW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::BugE,
+			_ => chipty::SpriteId::BugN,
+		},
+		chipty::EntityKind::Tank => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::TankN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::TankS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::TankW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::TankE,
+			_ => chipty::SpriteId::TankN,
+		},
+		chipty::EntityKind::PinkBall => chipty::SpriteId::PinkBall,
+		chipty::EntityKind::FireBall => chipty::SpriteId::Fireball,
+		chipty::EntityKind::Glider => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::GliderN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::GliderS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::GliderW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::GliderE,
+			_ => chipty::SpriteId::GliderN,
+		},
+		chipty::EntityKind::Walker => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerH,
+			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerH,
+			_ => chipty::SpriteId::WalkerV,
+		},
+		chipty::EntityKind::Teeth => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::TeethN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::TeethS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::TeethW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::TeethE,
+			_ => chipty::SpriteId::TeethN,
+		},
+		chipty::EntityKind::Blob => chipty::SpriteId::Blob,
+		chipty::EntityKind::Paramecium => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::ParameciumV,
+			Some(chipty::Compass::Down) => chipty::SpriteId::ParameciumV,
+			Some(chipty::Compass::Left) => chipty::SpriteId::ParameciumH,
+			Some(chipty::Compass::Right) => chipty::SpriteId::ParameciumH,
+			_ => chipty::SpriteId::ParameciumV,
+		}
+		chipty::EntityKind::Bomb => chipty::SpriteId::Bomb,
 	}
 }
 
