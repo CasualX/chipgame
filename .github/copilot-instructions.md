@@ -1,54 +1,46 @@
 ChipGame – AI coding guide
 ==========================
 
-Purpose: Give AI agents the minimum, project-specific context to be productive in this Rust monorepo.
+Purpose: Crisp, project-specific breadcrumbs so GPT-style agents can contribute immediately without re-deriving architecture.
 
-Architecture (crates)
----------------------
-- chipcore: deterministic simulation only (`chipcore/src/*`: entities, physics, input, gamestate). Emits `GameEvent` from `GameState::tick`.
-- chipgame: rendering/UI layer (OpenGL). `fx/` mirrors `GameState` and consumes `GameEvent` → emits `FxEvent`; `menu/` (stack menus) → `MenuEvent`; `play/` wires menus+fx, persists saves, emits `PlayEvent`.
-- chipplay: the app. Translates OS input → `chipcore::Input`, loads assets, plays audio, manages window (`chipplay/src/main.rs`).
-- chipedit: editor UI using same rendering stack (`chipedit/src/main.rs`, `chipgame/src/editor/mod.rs`).
-- chipty: shared DTOs/contracts (level, replay, terrain, savedata, soundfx).
-- chipdat: DAT parsing/utilities for CC1 levelsets.
+Crate map (who owns what)
+-------------------------
+- chipcore: deterministic sim only (`gamestate`, `entities`, `movement`, `terrain`). `GameState::tick` emits `GameEvent` and must stay pure/portable.
+- chipgame: presentation stack. `fx/` mirrors `GameState` + consumes `GameEvent` → `FxEvent`; `menu/` implements stack-driven UI → `MenuEvent`; `play/PlayState` glues menus+fx, persists saves, emits `PlayEvent`.
+- chipplay: desktop app wrapper. Translates OS input to `chipcore::Input`, owns `AudioPlayer`, window, and data loading.
+- chipedit: level editor binary that reuses chipgame’s renderer/editor widgets (see `chipgame/src/editor`).
+- chipty: shared DTOs for tiles, entities, saves, sound ids; use when data crosses crate boundaries.
+- chipdat: DAT/packfile helpers for legacy CC1 assets.
 
-Data/event flow
----------------
-- Input → `chipcore::Input` bits
-- Sim: `GameState::tick` mutates state, pushes `GameEvent`
-- Fx: `FxState::sync` consumes `GameEvent` → updates visuals/effects; emits `FxEvent::{PlaySound,PlayMusic,GameWin,GameOver,...}`
-- Menus: `menu::*` emits `MenuEvent` via `KeyState::w(prev,cur)` transitions
-- Orchestration: `PlayState::sync` consumes `MenuEvent` + `FxEvent`, updates saves, (re)loads level, pushes `PlayEvent`
-- App: `chipplay` consumes `PlayEvent` and actually plays sfx/music or quits
-
-FxState vs RenderState
-----------------------
-- FxState (`chipgame/src/fx/fxstate.rs`) knows about the game. It holds `GameState`, drives the `PlayCamera`, consumes `GameEvent`s via `sync()`, and translates them into renderable state by creating/updating entries in `render::ObjectMap`, tweaking animations, and enqueuing transient VFX. It also emits `FxEvent` for audio and high-level play-state changes.
-- RenderState (`chipgame/src/render/renderstate.rs`) is generic. It has no game rules; it stores draw-time data only: `RenderField {width,height,terrain}`, an `ObjectMap<Object>` with sprites/models/anim, a clock (`time, dt, framecnt`), and a list of simple `Effect`s. Its `update()` advances object animations and prunes effects; its `draw()` issues draw calls with shaders/textures. Implement new visual effects here without introducing game logic.
-- Handlers (`chipgame/src/fx/handlers.rs`) are the glue: per-`GameEvent` functions that mutate `FxState` and its `render::RenderState` (e.g., spawn/remove objects, change terrain tiles, trigger effects).
-
-Build/run/test
---------------
-- Play: `cargo run --bin chipplay`
-- Edit: `cargo run --bin chipedit`
-- Tests (replays): `cargo test -p chipcore` (see `chipcore/tests/replays.rs`; expects `levelsets/*/lv/` and `chipcore/tests/replays/**`)
-
-Assets/filesystem
+Data + event loop
 -----------------
-- `chipgame::FileSystem` reads from `data/` (dev) or `data.paks` (packed)
-- Shaders: `pixelart.*`, `ui.*`, `color.*`; textures: `tileset/*.png`, `effects.png`; audio in `data/sfx*` and `data/music/`
-- Tiles are 32×32; world rendering in `chipgame/src/render/`; camera in `chipgame/src/fx/camera/`
+- OS input → `chipcore::Input` → `GameState::tick` (mutates sim, queues `GameEvent`).
+- `FxState::sync` (in `chipgame/src/fx/fxstate.rs`) consumes those events, updates render objects/camera, and pushes `FxEvent::{PlaySound,PlayMusic,GameWin,...}`.
+- Menu stack (`chipgame/src/menu`) watches `KeyState::w(prev,cur)` to emit `MenuEvent` for focus/selection.
+- `PlayState::sync` (render/play layer) ingests `MenuEvent + FxEvent`, reloads levels, updates saves, posts `PlayEvent` to `chipplay`.
+- `chipplay` reacts to `PlayEvent` (actual audio playback, quitting, switching levelsets).
 
-Conventions and gotchas
------------------------
-- Strict layering: core (no gfx/audio) → fx/menu/play (no sim mutation except via `tick`/parse) → app (IO only)
-- Input transitions via `menu::KeyState::w(prev,cur)`; `PlayState` caches previous input
-- Levels are 1-based in UI; saves/replays live under `save/<Levelset>/`
-- Music alternates per level number; persisted options live in `PlayState::save_data`
-- Use `eprintln!` to trace `GameEvent`/`FxEvent`/`MenuEvent`
+Render layering contract
+------------------------
+- `FxState` knows gameplay and can mutate `render::ObjectMap` plus queue transient VFX; never talk to OS/audio here.
+- `render::RenderState` (`chipgame/src/render/renderstate.rs`) is dumb draw-time data (`RenderField`, `Object`s, time). Keep visual tech (animations, shaders) here without mixing rules.
+- Handlers live in `chipgame/src/fx/handlers.rs`: each `GameEvent` spawns/despawns objects, swaps terrain tiles, and enqueues `Effect`s. Add new visuals by extending these handlers plus relevant sprite/animation ids from `chipty`.
 
-Common changes (where)
-----------------------
+Developer workflow
+------------------
+- Run game: `cargo run --bin chipplay`. Editor: `cargo run --bin chipedit`.
+- Determinism tests: `cargo test -p chipcore` (exercises `chipcore/tests/replays.rs`; expects `levelsets/*/lv/` + `chipcore/tests/replays/**`).
+- Assets resolve via `chipgame::FileSystem` (prefers `data/` during dev, `data.paks` when packed). `tileset/*.png`, `effects.png`, shaders in `data/shaders`, audio under `data/sfx*` + `data/music`.
+
+Conventions + gotchas
+---------------------
+- Strict layering: chipcore (no gfx/audio), chipgame fx/menu/play (no direct sim mutation except via `GameState`/parsers), chipplay (IO only). Respect to keep tests deterministic.
+- Terrain + entities expect 32×32 tiles; render camera helpers live in `chipgame/src/fx/camera`.
+- Level numbers are 1-based; saves/replays live in `save/<Levelset>/replay`. `PlayState::save_data` persists options and music options.
+- Use `eprintln!` tracing hooks already sprinkled through Fx/Menu/Play when debugging event flow.
+
+Common modifications
+--------------------
 - New gameplay features: go in `chipcore` first (simulation and rules). Emit `GameEvent` as needed from `GameState::tick`; do not couple to rendering/audio.
 - New graphics techniques: implement in `chipgame/src/render/*` (generic draw-time only). Add draw-time data/structures and shader usage without introducing game logic.
 - New visual effects derived from game state: add in `chipgame/src/fx/*`. Consume `GameEvent` in handlers to update `RenderState` (spawn objects, animations, transient `Effect`s) and push `FxEvent` for audio/gameflow.
@@ -58,7 +50,7 @@ Common changes (where)
 - New sound/music: add ids in `chipty`, load in `chipplay/src/main.rs` (`AudioPlayer::load_*`), and trigger via `GameEvent::SoundFx` (consumed in `FxState` → `FxEvent::PlaySound`). Music selection remains orchestrated by play-state logic.
 - New menu/screen: add under `chipgame/src/menu/*`, wire into the `Menu` enum and dispatch; menus produce `MenuEvent` on input transitions via `KeyState::w(prev,cur)`.
 
-Quick examples
---------------
-- Start level: `PlayState::play_level(n)` → parses JSON → `FxState::parse_level` → posts `PlayEvent::PlayLevel`
-- Save replay: `fx.gs.save_replay` → JSON; tests decode with `chipty::decode` in `chipcore/tests/replays.rs`
+Quick reference flows
+---------------------
+- Level boot: `PlayState::play_level(n)` → parses JSON (level + save) → `FxState::new` primes render objects → posts `PlayEvent::SetTitle` for chipplay to switch.
+- Replay/save: `fx.gs.save_replay` dumps JSON; deterministic tests reload via `chipty::decode` inside `chipcore/tests/replays.rs`.

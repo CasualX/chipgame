@@ -69,10 +69,10 @@ fn main() {
 fn copy_pixels(
 	input_pixels: &[u8],
 	input_width: i32,
-	input_height: i32,
+	_input_height: i32,
 	output_pixels: &mut [u8],
 	output_width: i32,
-	output_height: i32,
+	_output_height: i32,
 	src_x: i32,
 	src_y: i32,
 	dst_x: i32,

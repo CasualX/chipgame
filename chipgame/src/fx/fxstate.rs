@@ -114,6 +114,11 @@ impl FxState {
 			select: input.select.is_held(),
 		};
 
+		if let Some(_) = &mut self.replay {
+			if player_input.has_directional_input() {
+				self.replay = None;
+			}
+		}
 		let replay_input = self.replay.as_ref().and_then(|replay| {
 			replay.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
 		});
