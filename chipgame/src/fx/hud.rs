@@ -11,7 +11,7 @@ impl FxState {
 			crate::menu::darken(g, resx, alpha);
 		}
 
-		let mut pool = shade::d2::DrawPool::new();
+		let mut pool = shade::im::DrawPool::new();
 
 		let cv = pool.get::<UiVertex, UiUniform>();
 		cv.viewport = resx.viewport;
@@ -222,7 +222,7 @@ impl FxState {
 	}
 }
 
-fn draw_sprite(cv: &mut shade::d2::DrawBuilder<UiVertex, UiUniform>, resx: &Resources, sprite: chipty::SpriteId, pos: Vec2<f32>, size: f32) {
+fn draw_sprite(cv: &mut shade::im::DrawBuilder<UiVertex, UiUniform>, resx: &Resources, sprite: chipty::SpriteId, pos: Vec2<f32>, size: f32) {
 	let uv = sprite_uv(&resx.spritesheet_meta, sprite, 0);
 	let tex_size = Vec2(resx.spritesheet_meta.width, resx.spritesheet_meta.height).map(|c| c as f32);
 	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };

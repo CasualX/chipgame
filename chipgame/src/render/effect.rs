@@ -15,7 +15,7 @@ pub struct Effect {
 }
 
 impl Effect {
-	pub fn draw(&self, cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, time: f64) {
+	pub fn draw(&self, cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, time: f64) {
 		let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
 		let t = f32::clamp((time - self.start) as f32, 0.0, 1.0);
 		// 12 frames of animation

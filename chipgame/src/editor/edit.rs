@@ -143,7 +143,7 @@ impl EditorEditState {
 		let cam = self.game.camera.setup(self.screen_size);
 
 		let p = self.mouse_pos; {
-			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;
@@ -180,7 +180,7 @@ impl EditorEditState {
 		}
 
 		{
-			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
 			cv.depth_test = Some(shade::DepthTest::Less);
 			cv.shader = resx.shader;

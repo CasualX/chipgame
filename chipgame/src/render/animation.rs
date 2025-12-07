@@ -105,6 +105,43 @@ impl MoveZ {
 	}
 }
 
+/// Infinite sprite animation loop.
+#[derive(Clone, Debug)]
+pub struct SpriteAnimLoop {
+	pub start_time: f64,
+	pub frame_rate: f32,
+}
+
+impl SpriteAnimLoop {
+	pub fn animate(&self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
+		let elapsed = (ctx.time - self.start_time) as f32;
+		obj.frame = (elapsed * self.frame_rate) as i32 as u16;
+		true
+	}
+}
+
+/// Finite sprite animation sequence.
+#[derive(Clone, Debug)]
+pub struct SpriteAnimSeq {
+	pub start_time: f64,
+	pub frame_count: u16,
+	pub frame_rate: f32,
+}
+
+impl SpriteAnimSeq {
+	pub fn animate(&self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
+		let elapsed = (ctx.time - self.start_time) as f32;
+		let total_duration = self.frame_count as f32 / self.frame_rate;
+		if elapsed >= total_duration {
+			obj.frame = self.frame_count - 1;
+			return false;
+		}
+		let frame = (elapsed * self.frame_rate) as i32 as u16;
+		obj.frame = frame.min(self.frame_count - 1);
+		return true;
+	}
+}
+
 #[derive(Clone, Debug)]
 pub enum AnimState {
 	MoveStep(MoveStep),
@@ -113,6 +150,8 @@ pub enum AnimState {
 	FadeOut(FadeOut),
 	FadeIn(FadeIn),
 	FadeTo(FadeTo),
+	AnimLoop(SpriteAnimLoop),
+	AnimSeq(SpriteAnimSeq),
 }
 
 impl AnimState {
@@ -124,6 +163,8 @@ impl AnimState {
 			AnimState::FadeOut(fade) => fade.animate(obj, ctx),
 			AnimState::FadeIn(fade) => fade.animate(obj, ctx),
 			AnimState::FadeTo(fade) => fade.animate(obj, ctx),
+			AnimState::AnimSeq(anim) => anim.animate(obj, ctx),
+			AnimState::AnimLoop(anim) => anim.animate(obj, ctx),
 		}
 	}
 }

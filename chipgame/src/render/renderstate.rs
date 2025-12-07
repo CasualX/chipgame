@@ -55,7 +55,7 @@ impl RenderState {
 	}
 	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup, time: f64) {
 		{
-			let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
 			cv.viewport = resx.viewport;
 			cv.depth_test = Some(shade::DepthTest::LessEqual);
 			cv.cull_mode = Some(shade::CullMode::CW);
@@ -69,7 +69,7 @@ impl RenderState {
 
 		// Render the effects
 		{
-			let mut cv = shade::d2::DrawBuilder::<Vertex, Uniform>::new();
+			let mut cv = shade::im::DrawBuilder::<Vertex, Uniform>::new();
 			cv.viewport = resx.viewport;
 			cv.blend_mode = shade::BlendMode::Solid;
 			cv.depth_test = Some(shade::DepthTest::Always);

@@ -30,7 +30,7 @@ impl Fireworks {
 			let v = d_size * 2.0;
 			let texsize = Vec2f(1152.0, 288.0);
 
-			let mut buf = shade::d2::DrawBuilder::<UiVertex, UiUniform>::new();
+			let mut buf = shade::im::DrawBuilder::<UiVertex, UiUniform>::new();
 			buf.blend_mode = shade::BlendMode::Alpha;
 			buf.viewport = resx.viewport;
 			buf.shader = resx.uishader;

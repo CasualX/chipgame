@@ -147,7 +147,7 @@ impl MenuState {
 }
 
 pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
-	let mut cv = shade::d2::DrawBuilder::<UiVertex, UiUniform>::new();
+	let mut cv = shade::im::DrawBuilder::<UiVertex, UiUniform>::new();
 
 	cv.blend_mode = shade::BlendMode::Alpha;
 	cv.shader = resx.colorshader;

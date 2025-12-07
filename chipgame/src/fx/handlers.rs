@@ -13,11 +13,12 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let pos = ent_pos(&ctx.gs, ent, ent.pos);
-	let sprite = (if ent.flags & chipcore::EF_TEMPLATE != 0 { sprite_for_ent } else { animated_sprite_for_ent })(ent, &ctx.gs.ps);
-	let obj = render::Object {
+	let sprite = sprite_for_ent(ent, &ctx.gs.ps);
+	let mut obj = render::Object {
 		data: render::ObjectData {
 			pos,
 			sprite,
+			frame: 0,
 			model: if pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) },
 			alpha: 1.0,
 			visible: true,
@@ -28,6 +29,14 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 			unalive_after_anim: false,
 		},
 	};
+	if matches!(kind, chipty::EntityKind::Bomb) {
+		obj.data.sprite = chipty::SpriteId::BombA;
+		obj.anim.anims.push(render::AnimState::AnimLoop(render::SpriteAnimLoop {
+			start_time: ctx.time + ctx.random.next_f64() * 10.0,
+			frame_rate: 16.0,
+		}));
+	}
+
 	let handle = ctx.render.objects.alloc();
 	ctx.render.objects.insert(handle, obj);
 	ctx.objlookup.insert(ehandle, handle);
@@ -60,6 +69,9 @@ pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	else if faded {
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 	}
+	else if matches!(kind, chipty::EntityKind::Bomb) {
+		obj.anim.anims.clear();
+	}
 	obj.anim.unalive_after_anim = true;
 }
 
@@ -73,6 +85,9 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let end_pos = ent_pos(&ctx.gs, ent, ent.pos);
 	obj.data.pos = start_pos;
 
+	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs.ps);
+	obj.data.frame = 0;
+
 	// Ensure the previous step animation is cleared...
 	// See [MoveStep::animate] setting obj.pos when the animation completes.
 	obj.anim.anims.clear();
@@ -82,6 +97,11 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 		end_pos,
 		move_time: ctx.time,
 		duration: ent.step_spd as f32 / chipcore::FPS as f32,
+	}));
+	obj.anim.anims.push(render::AnimState::AnimSeq(render::SpriteAnimSeq {
+		start_time: ctx.time,
+		frame_count: 4, //render::sprite_frames(&resx.spritesheet_meta, obj.data.sprite),
+		frame_rate: 16.0,
 	}));
 
 	// Quick hack to flatten sprites on top of walls
@@ -181,13 +201,17 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
 			sprite: chipty::SpriteId::FireA,
+			frame: 0,
 			model: chipty::ModelId::Sprite,
 			alpha: 1.0,
 			visible: true,
 			greyscale: false,
 		},
 		anim: render::Animation {
-			anims: Vec::new(),
+			anims: vec![render::AnimState::AnimLoop(render::SpriteAnimLoop {
+				start_time: ctx.time + ctx.random.next_f64() * 10.0,
+				frame_rate: 8.0,
+			})],
 			unalive_after_anim: false,
 		},
 	};
@@ -385,6 +409,7 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 				chipcore::KeyColor::Blue => chipty::SpriteId::BlueLock,
 				chipcore::KeyColor::Yellow => chipty::SpriteId::YellowLock,
 			},
+			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
@@ -407,6 +432,7 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 			sprite: chipty::SpriteId::RealBlueWall,
+			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
@@ -426,6 +452,7 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 			sprite: chipty::SpriteId::Wall,
+			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 1.0,
 			visible: true,
@@ -452,6 +479,7 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, z),
 			sprite: chipty::SpriteId::Wall,
+			frame: 0,
 			model: chipty::ModelId::ToggleWall,
 			alpha: 1.0,
 			visible: true,
@@ -494,6 +522,7 @@ pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
 			sprite: chipty::SpriteId::Wall,
+			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 0.0,
 			visible: true,

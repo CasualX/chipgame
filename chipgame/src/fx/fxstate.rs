@@ -8,6 +8,7 @@ pub struct FxState {
 	pub camera: PlayCamera,
 	pub time: f64,
 	pub dt: f64,
+	pub random: Random,
 	pub render: render::RenderState,
 	pub objlookup: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
 	pub fire_sprites: HashMap<Vec2i, render::ObjectHandle>,

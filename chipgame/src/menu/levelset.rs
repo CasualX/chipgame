@@ -33,7 +33,7 @@ impl LevelSetMenu {
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		self.ntime += 1;
 
-		let mut pool = shade::d2::DrawPool::new();
+		let mut pool = shade::im::DrawPool::new();
 
 		if let Some(Some(splash)) = self.splash.get(self.selected) {
 			let cv = pool.get::<UiVertex, UiUniform>();

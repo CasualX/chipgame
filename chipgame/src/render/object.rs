@@ -17,6 +17,7 @@ impl Animation {
 pub struct ObjectData {
 	pub pos: Vec3<f32>,
 	pub sprite: chipty::SpriteId,
+	pub frame: u16,
 	pub model: chipty::ModelId,
 	pub alpha: f32,
 	pub visible: bool,

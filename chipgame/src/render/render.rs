@@ -127,7 +127,7 @@ impl ModelData {
 
 const TILE_SIZE: f32 = 32.0;
 
-fn draw_floor(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, z1: f32, z2: f32, frame: usize, alpha: f32) {
+fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, z1: f32, z2: f32, frame: u16, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
 	p.add_indices_quad();
 
@@ -163,7 +163,7 @@ fn draw_floor(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources
 	});
 }
 
-fn draw_shadow(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, skew: f32, frame: usize, a: f32) {
+fn draw_shadow(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, skew: f32, frame: u16, a: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
 	p.add_indices_quad();
 
@@ -198,7 +198,7 @@ fn draw_shadow(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resource
 	});
 }
 
-fn draw_wall(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, w: f32, sprite: chipty::SpriteId, frame: usize, alpha: f32) {
+fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, w: f32, sprite: chipty::SpriteId, frame: u16, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
 
 	p.add_indices(&[
@@ -265,7 +265,7 @@ fn draw_wall(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources,
 	});
 }
 
-fn draw_portal(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, frame: usize, sprite: chipty::SpriteId) {
+fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, frame: u16, sprite: chipty::SpriteId) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 5, 4);
 	p.add_indices(&[0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1]);
 
@@ -309,7 +309,7 @@ fn draw_portal(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resource
 	});
 }
 
-pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, model: chipty::ModelId, frame: usize, alpha: f32) {
+pub fn draw(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, model: chipty::ModelId, frame: u16, alpha: f32) {
 	if alpha <= 0.0 {
 		return;
 	}
@@ -326,15 +326,15 @@ pub fn draw(cv: &mut shade::d2::DrawBuilder<Vertex, Uniform>, resx: &Resources, 
 	}
 }
 
-pub fn draw_tile(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, resx: &Resources, terrain: chipty::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
+pub fn draw_tile(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, resx: &Resources, terrain: chipty::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
 	let tile = tiles[terrain as usize];
 	draw(cv, resx, pos, tile.sprite, tile.model, 0, 1.0);
 }
 
-pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, resx: &Resources, time: f64, shadow: f32) {
-	let frame = (time * 8.0) as i32 as usize;
+pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, resx: &Resources, time: f64, shadow: f32) {
 	// Render the level geometry
 	cv.blend_mode = shade::BlendMode::Solid;
+	let frame = (time * 8.0) as i32 as u16;
 	let field = &fx.field;
 	for y in 0..field.height {
 		for x in 0..field.width {
@@ -351,10 +351,10 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 	cv.blend_mode = shade::BlendMode::Alpha;
 	for obj in fx.objects.values().map(|obj| &obj.data) {
 		if matches!(obj.model, chipty::ModelId::Sprite | chipty::ModelId::FlatSprite) {
-			draw_shadow(cv, resx, obj.pos, obj.sprite, 10.0, frame, obj.alpha * shadow);
+			draw_shadow(cv, resx, obj.pos, obj.sprite, 10.0, obj.frame, obj.alpha * shadow);
 		}
 		if matches!(obj.model, chipty::ModelId::ReallyFlatSprite) {
-			draw_shadow(cv, resx, obj.pos, obj.sprite, 2.0, frame, obj.alpha * shadow);
+			draw_shadow(cv, resx, obj.pos, obj.sprite, 2.0, obj.frame, obj.alpha * shadow);
 		}
 	}
 	// Render the objects
@@ -362,6 +362,6 @@ pub fn field(cv: &mut shade::d2::DrawBuilder::<render::Vertex, render::Uniform>,
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Draw the object
-		draw(cv, resx, obj.pos, obj.sprite, obj.model, frame, obj.alpha);
+		draw(cv, resx, obj.pos, obj.sprite, obj.model, obj.frame, obj.alpha);
 	}
 }

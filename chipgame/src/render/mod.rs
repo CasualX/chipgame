@@ -27,7 +27,7 @@ pub struct TileGfx {
 }
 
 pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
-	let mut cv = shade::d2::DrawBuilder::<render::Vertex, render::Uniform>::new();
+	let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
 	cv.viewport = resx.viewport;
 	cv.depth_test = None;
 	cv.cull_mode = None;
@@ -60,7 +60,7 @@ pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
 	g.clear(&shade::ClearArgs { surface: shade::Surface::BACK_BUFFER, depth: Some(1.0), ..Default::default() });
 }
 
-pub fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: usize) -> Vec2f {
+fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: u16) -> Vec2f {
 	let Some(entry) = sheet.sprites.get(&sprite) else {
 		panic!("sprite {:?} not found in sheet", sprite);
 	};
@@ -71,8 +71,15 @@ pub fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::
 		0
 	}
 	else {
-		frame % (entry.len as usize)
+		(frame as usize) % (entry.len as usize)
 	};
 	let f = &sheet.frames[index];
 	Vec2(f.rect[0] as f32, f.rect[1] as f32)
+}
+
+fn _sprite_frames(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId) -> u16 {
+	let Some(entry) = sheet.sprites.get(&sprite) else {
+		panic!("sprite {:?} not found in sheet", sprite);
+	};
+	entry.len
 }
