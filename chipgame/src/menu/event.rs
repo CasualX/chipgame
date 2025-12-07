@@ -1,5 +1,5 @@
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum MenuEvent {
 	CursorMove,
 	CursorSelect,

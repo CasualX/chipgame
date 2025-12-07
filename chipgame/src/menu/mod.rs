@@ -164,3 +164,8 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 fn wrap_items<'a, const N: usize>(items: &'a [&'a str; N]) -> [&'a (dyn fmt::Display + 'a); N] {
 	items.each_ref().map(|item| item as &dyn fmt::Display)
 }
+
+struct MenuItems<'a> {
+	labels: &'a [&'a (dyn fmt::Display + 'a)],
+	events: &'a [MenuEvent],
+}

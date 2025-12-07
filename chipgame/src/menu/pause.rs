@@ -3,13 +3,23 @@ use super::*;
 #[derive(Default)]
 pub struct PauseMenu {
 	pub selected: u8,
+	pub has_warp: bool,
 	pub level_number: i32,
 	pub level_name: String,
 }
 
+const MENU_WITH_WARPS: MenuItems = MenuItems {
+	labels: &[&"Resume", &"Set Warp Point", &"Warp Back", &"Restart", &"Options", &"Main Menu"],
+	events: &[MenuEvent::ResumePlay, MenuEvent::SaveState, MenuEvent::LoadState, MenuEvent::RestartLevel, MenuEvent::OpenOptions, MenuEvent::OpenMainMenu],
+};
+const MENU_WO_WARPS: MenuItems = MenuItems {
+	labels: &[&"Resume", &"Set Warp Point", &"Restart", &"Options", &"Main Menu"],
+	events: &[MenuEvent::ResumePlay, MenuEvent::SaveState, MenuEvent::RestartLevel, MenuEvent::OpenOptions, MenuEvent::OpenMainMenu],
+};
+
 impl PauseMenu {
-	const ITEMS: [&'static str; 6] = ["Resume", "Set Warp Point", "Warp Back", "Restart", "Options", "Main Menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
 		if input.up.is_pressed() {
 			if self.selected > 0 {
 				self.selected -= 1;
@@ -17,21 +27,15 @@ impl PauseMenu {
 			}
 		}
 		if input.down.is_pressed() {
-			if self.selected < Self::ITEMS.len() as u8 - 1 {
+			if self.selected < items.events.len() as u8 - 1 {
 				self.selected += 1;
 				events.push(MenuEvent::CursorMove);
 			}
 		}
 		if input.a.is_pressed() {
-			let evt = match self.selected {
-				0 => MenuEvent::ResumePlay,
-				1 => MenuEvent::SaveState,
-				2 => MenuEvent::LoadState,
-				3 => MenuEvent::RestartLevel,
-				4 => MenuEvent::OpenOptions,
-				_ => MenuEvent::OpenMainMenu,
-			};
-			events.push(evt);
+			if let Some(&event) = items.events.get(self.selected as usize) {
+				events.push(event);
+			}
 			events.push(MenuEvent::CursorSelect);
 		}
 		if input.b.is_pressed() || input.start.is_pressed() {
@@ -60,8 +64,10 @@ impl PauseMenu {
 			subtitle: Some(&"\x1b[color=#0f0]Paused!"),
 		}.draw(&mut buf, &top, resx);
 
+		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
+
 		draw::DrawMenuItems {
-			items_text: &wrap_items(&Self::ITEMS),
+			items_text: items.labels,
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &bottom, resx);
 

@@ -139,7 +139,7 @@ impl FxState {
 
 		// Draw the level title or hint text
 		let mut darken = false;
-		if matches!(self.gs.ts, chipcore::TimeState::Waiting) {
+		if self.gs.time == 0 {
 			darken = true;
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;

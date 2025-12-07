@@ -352,6 +352,7 @@ impl PlayState {
 						// Restore FX state
 						let mut warp = warp.clone();
 						warp.unpause();
+						warp.gs.ts = chipcore::TimeState::Waiting;
 						self.fx = Some(warp);
 					}
 				}
@@ -411,6 +412,7 @@ fn play_fx_pause(this: &mut PlayState) {
 
 	let menu = menu::PauseMenu {
 		selected: 0,
+		has_warp: this.warp.is_some(),
 		level_number: fx.level_number,
 		level_name: fx.gs.field.name.clone(),
 	};
@@ -475,6 +477,7 @@ fn play_fx_game_over(this: &mut PlayState) {
 	let menu = menu::GameOverMenu {
 		selected: 0,
 		reason: fx.game_over,
+		has_warp: this.warp.is_some(),
 		level_number: fx.level_number,
 		level_name: fx.gs.field.name.clone(),
 		attempts: fx.gs.ps.attempts,

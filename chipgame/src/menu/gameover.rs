@@ -4,6 +4,7 @@ use super::*;
 pub struct GameOverMenu {
 	pub selected: u8,
 	pub reason: Option<chipcore::GameOverReason>,
+	pub has_warp: bool,
 	pub level_number: i32,
 	pub level_name: String,
 	pub attempts: i32,
@@ -12,9 +13,18 @@ pub struct GameOverMenu {
 	pub bonks: i32,
 }
 
+const MENU_WITH_WARPS: MenuItems = MenuItems {
+	labels: &[&"Warp Back", &"Start Over", &"Main Menu"],
+	events: &[MenuEvent::LoadState, MenuEvent::RetryLevel, MenuEvent::OpenMainMenu],
+};
+const MENU_WO_WARPS: MenuItems = MenuItems {
+	labels: &[&"Start Over", &"Main Menu"],
+	events: &[MenuEvent::RetryLevel, MenuEvent::OpenMainMenu],
+};
+
 impl GameOverMenu {
-	const ITEMS: [&'static str; 3] = ["Warp Back", "Start Over", "Main Menu"];
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
+		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
 		if input.up.is_pressed() {
 			if self.selected > 0 {
 				self.selected -= 1;
@@ -22,18 +32,15 @@ impl GameOverMenu {
 			}
 		}
 		if input.down.is_pressed() {
-			if self.selected < Self::ITEMS.len() as u8 - 1 {
+			if self.selected < items.events.len() as u8 - 1 {
 				self.selected += 1;
 				events.push(MenuEvent::CursorMove);
 			}
 		}
 		if input.a.is_pressed() {
-			let evt = match self.selected {
-				0 => MenuEvent::LoadState,
-				1 => MenuEvent::RetryLevel,
-				_ => MenuEvent::OpenMainMenu,
-			};
-			events.push(evt);
+			if let Some(&event) = items.events.get(self.selected as usize) {
+				events.push(event);
+			}
 			events.push(MenuEvent::CursorSelect);
 		}
 	}
@@ -81,8 +88,10 @@ impl GameOverMenu {
 			steps_high_score: -2,
 		}.draw(&mut buf, &middle, resx);
 
+		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
+
 		draw::DrawMenuItems {
-			items_text: &wrap_items(&Self::ITEMS),
+			items_text: items.labels,
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &bottom, resx);
 
