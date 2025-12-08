@@ -6,6 +6,7 @@ use std::{cmp, fmt, mem, ops};
 use cvmath::Vec2i;
 use chipty::*;
 
+mod cheats;
 mod edit;
 mod entities;
 mod entity;

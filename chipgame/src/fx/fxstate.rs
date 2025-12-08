@@ -32,6 +32,12 @@ pub struct FxState {
 	pub scout_speed: f32,
 }
 
+impl cvar::IVisit for FxState {
+	fn visit(&mut self, f: &mut dyn FnMut(&mut dyn cvar::INode)) {
+		self.gs.visit(f);
+	}
+}
+
 impl FxState {
 	/// Creates a new FxState initialized for the given level.
 	pub fn new(level_number: i32, level_dto: &chipty::LevelDto, rng_seed: chipcore::RngSeed, tiles: &'static [render::TileGfx]) -> Box<FxState> {

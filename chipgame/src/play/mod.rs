@@ -24,6 +24,14 @@ pub struct PlayState {
 	pub save_data: SaveData,
 }
 
+impl cvar::IVisit for PlayState {
+	fn visit(&mut self, f: &mut dyn FnMut(&mut dyn cvar::INode)) {
+		if let Some(fx) = &mut self.fx {
+			fx.visit(f);
+		}
+	}
+}
+
 impl PlayState {
 	pub fn launch(&mut self, g: &mut shade::Graphics) {
 		if self.lvsets.collection.is_empty() {

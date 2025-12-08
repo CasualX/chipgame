@@ -7,7 +7,7 @@ edition = "2021"
 chipty = { path = "../chipty" }
 urandom.workspace = true
 cvmath.workspace = true
-obfstr = "0.4"
+cvar.workspace = true
 flate2.workspace = true
 basenc.workspace = true
 

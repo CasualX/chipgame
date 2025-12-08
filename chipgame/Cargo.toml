@@ -8,6 +8,7 @@ chipdat = { path = "../chipdat" }
 chipcore = { path = "../chipcore" }
 chipty = { path = "../chipty" }
 dataview.workspace = true
+cvar.workspace = true
 ini_core.workspace = true
 urandom.workspace = true
 cvmath.workspace = true
