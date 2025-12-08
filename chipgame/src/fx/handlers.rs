@@ -317,11 +317,11 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> 
 			_ => chipty::SpriteId::GliderN,
 		},
 		chipty::EntityKind::Walker => match ent.face_dir {
-			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerV,
-			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerV,
-			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerH,
-			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerH,
-			_ => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerEA,
+			_ => chipty::SpriteId::WalkerN,
 		},
 		chipty::EntityKind::Teeth => match ent.face_dir {
 			Some(chipty::Compass::Up) => chipty::SpriteId::TeethNA,
@@ -330,14 +330,20 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> 
 			Some(chipty::Compass::Right) => chipty::SpriteId::TeethEA,
 			_ => chipty::SpriteId::TeethN,
 		},
-		chipty::EntityKind::Blob => chipty::SpriteId::Blob,
+		chipty::EntityKind::Blob => match ent.face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::Blob,
+			Some(chipty::Compass::Down) => chipty::SpriteId::Blob,
+			Some(chipty::Compass::Left) => chipty::SpriteId::Blob,
+			Some(chipty::Compass::Right) => chipty::SpriteId::Blob,
+			_ => chipty::SpriteId::Blob,
+		},
 		chipty::EntityKind::Paramecium => match ent.face_dir {
 			Some(chipty::Compass::Up) => chipty::SpriteId::ParameciumNA,
 			Some(chipty::Compass::Down) => chipty::SpriteId::ParameciumSA,
 			Some(chipty::Compass::Left) => chipty::SpriteId::ParameciumWA,
 			Some(chipty::Compass::Right) => chipty::SpriteId::ParameciumEA,
-			_ => chipty::SpriteId::ParameciumV,
-		}
+			_ => chipty::SpriteId::ParameciumN,
+		},
 		chipty::EntityKind::Bomb => chipty::SpriteId::BombA,
 	}
 }
@@ -399,11 +405,11 @@ fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::S
 			_ => chipty::SpriteId::GliderN,
 		},
 		chipty::EntityKind::Walker => match ent.face_dir {
-			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerV,
-			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerV,
-			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerH,
-			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerH,
-			_ => chipty::SpriteId::WalkerV,
+			Some(chipty::Compass::Up) => chipty::SpriteId::WalkerN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::WalkerS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::WalkerW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::WalkerE,
+			_ => chipty::SpriteId::WalkerN,
 		},
 		chipty::EntityKind::Teeth => match ent.face_dir {
 			Some(chipty::Compass::Up) => chipty::SpriteId::TeethN,
@@ -414,11 +420,11 @@ fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::S
 		},
 		chipty::EntityKind::Blob => chipty::SpriteId::Blob,
 		chipty::EntityKind::Paramecium => match ent.face_dir {
-			Some(chipty::Compass::Up) => chipty::SpriteId::ParameciumV,
-			Some(chipty::Compass::Down) => chipty::SpriteId::ParameciumV,
-			Some(chipty::Compass::Left) => chipty::SpriteId::ParameciumH,
-			Some(chipty::Compass::Right) => chipty::SpriteId::ParameciumH,
-			_ => chipty::SpriteId::ParameciumV,
+			Some(chipty::Compass::Up) => chipty::SpriteId::ParameciumN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::ParameciumS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::ParameciumW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::ParameciumE,
+			_ => chipty::SpriteId::ParameciumN,
 		}
 		chipty::EntityKind::Bomb => chipty::SpriteId::Bomb,
 	}

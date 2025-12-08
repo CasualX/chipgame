@@ -1,19 +1,20 @@
 use std::cmp::Reverse;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::{fs, io, path};
 
 use chipty::{SpriteEntry, SpriteFrame, SpriteSheet};
 use cvmath::Vec2;
 
 mod binpack;
+mod config;
 mod image;
 
 use binpack::GridBinPacker;
 use image::Image;
 
-struct Sprite {
-	name: String,
-	frames: Vec<Image>,
+struct FrameAsset {
+	file: String,
+	image: Image,
 }
 
 const SPRITE_FRAME_TIME: f32 = 0.0; // FIXME: set proper frame time
@@ -44,27 +45,25 @@ fn sprite_size(image: &Image) -> Option<SpriteSize> {
 	}
 }
 
-fn sprite_area(sprite: &Sprite) -> i32 {
-	sprite.frames.iter().map(|frame| frame.area(GUTTER)).sum()
-}
-
 fn main() {
-	let sprites = load_sprites(path::Path::new("gfx/MS/"));
-	println!("Compiled {} sprites", sprites.len());
+	let root = path::Path::new("gfx/MS/");
+	let sprite_config = config::File::load(root).sprites;
+	let frame_assets = load_unique_frames(root, &sprite_config);
+	println!(
+		"Loaded {} sprite definitions referencing {} unique files",
+		sprite_config.len(),
+		frame_assets.len()
+	);
 	let mut total_area = 0;
-	for sprite in &sprites {
-		total_area += sprite_area(sprite);
-		if let Some(first) = sprite.frames.first() {
-			let total_bytes: usize = sprite.frames.iter().map(|frame| frame.data.len()).sum();
-			println!(
-				"{} -> {} frame(s), {}x{}, {} bytes",
-				sprite.name,
-				sprite.frames.len(),
-				first.width,
-				first.height,
-				total_bytes
-			);
-		}
+	for frame in &frame_assets {
+		total_area += frame.image.area(GUTTER);
+		println!(
+			"{} -> {}x{}, {} bytes",
+			frame.file,
+			frame.image.width,
+			frame.image.height,
+			frame.image.data.len()
+		);
 	}
 	println!("Total sprite area: {} pixels", total_area);
 	let sheet_width = 1024;
@@ -74,30 +73,39 @@ fn main() {
 	let mut sheet = Image::empty(sheet_width, sheet_height);
 
 	let mut packer = GridBinPacker::new(sheet_width, sheet_height, 1);
-	let mut packing_order: Vec<usize> = (0..sprites.len()).collect();
-	packing_order.sort_by_key(|&idx| Reverse(sprite_area(&sprites[idx])));
+	let mut packing_order: Vec<usize> = (0..frame_assets.len()).collect();
+	packing_order.sort_by_key(|&idx| Reverse(frame_assets[idx].image.area(GUTTER)));
 	let mut packed_frames = 0;
+	let mut frame_lookup: HashMap<String, SpriteFrame> = HashMap::new();
+	for idx in packing_order {
+		let frame = &frame_assets[idx];
+		sprite_size(&frame.image).expect("sprites fit expected tile sizes");
+		let padded_width = frame.image.width + GUTTER * 2;
+		let padded_height = frame.image.height + GUTTER * 2;
+		let (x, y) = packer
+			.insert(padded_width, padded_height)
+			.unwrap_or_else(|| panic!("sheet too small for {}", frame.file));
+		let draw_x = x + GUTTER;
+		let draw_y = y + GUTTER;
+		sheet.copy_image(&frame.image, draw_x, draw_y, GUTTER);
+		let entry = SpriteFrame {
+			rect: [draw_x, draw_y, frame.image.width, frame.image.height],
+			origin: Vec2::new(0, 0),
+			duration: SPRITE_FRAME_TIME,
+		};
+		frame_lookup.insert(frame.file.clone(), entry);
+		packed_frames += 1;
+	}
+
 	let mut frames_meta: Vec<SpriteFrame> = Vec::new();
 	let mut sprite_entries: BTreeMap<String, SpriteEntry> = BTreeMap::new();
-	for idx in packing_order {
-		let sprite = &sprites[idx];
+	for sprite in &sprite_config {
 		let sprite_start = frames_meta.len();
-		for (frame_idx, frame) in sprite.frames.iter().enumerate() {
-			sprite_size(frame).expect("sprites fit expected tile sizes");
-			let padded_width = frame.width + GUTTER * 2;
-			let padded_height = frame.height + GUTTER * 2;
-			let (x, y) = packer
-				.insert(padded_width, padded_height)
-				.unwrap_or_else(|| panic!("sheet too small for {} frame {}", sprite.name, frame_idx));
-			let draw_x = x + GUTTER;
-			let draw_y = y + GUTTER;
-			sheet.copy_image(frame, draw_x, draw_y, GUTTER);
-			frames_meta.push(SpriteFrame {
-				rect: [draw_x, draw_y, frame.width, frame.height],
-				origin: Vec2::new(0, 0),
-				duration: SPRITE_FRAME_TIME,
-			});
-			packed_frames += 1;
+		for path in &sprite.frames {
+			let meta = frame_lookup
+				.get(path)
+				.unwrap_or_else(|| panic!("frame {} missing from packed sheet", path));
+			frames_meta.push(*meta);
 		}
 		let sprite_len = frames_meta.len() - sprite_start;
 		let entry = SpriteEntry {
@@ -114,6 +122,7 @@ fn main() {
 
 	sheet.recover_alpha_colors();
 	sheet.save(path::Path::new("data/spritesheet.png"));
+	let emitted_frames = frames_meta.len();
 	let sheet_meta = SpriteSheet {
 		width: sheet_width,
 		height: sheet_height,
@@ -122,69 +131,29 @@ fn main() {
 	};
 	save_metadata(&sheet_meta, path::Path::new("data/spritesheet.json"));
 	println!(
-		"Packed {} frames from {} sprites",
+		"Packed {} unique images, emitted {} sprite frames across {} sprites",
 		packed_frames,
-		sprites.len()
+		emitted_frames,
+		sprite_config.len()
 	);
 }
 
-fn load_sprites(root: &path::Path) -> Vec<Sprite> {
-	let mut grouped: BTreeMap<(String, bool), Vec<(usize, Image)>> = BTreeMap::new();
 
-	for entry in fs::read_dir(root).expect("sprites directory accessible") {
-		let entry = entry.expect("valid dir entry");
-		let path = entry.path();
-		if !path.is_file() {
-			continue;
-		}
-		if !is_png(&path) {
-			continue;
-		}
-
-		let stem = path
-			.file_stem()
-			.and_then(|s| s.to_str())
-			.expect("sprite filename has valid stem");
-		let (base_name, frame_idx) = parse_sprite_name(stem);
-		let frame = Image::load_file(&path);
-		let key = (base_name, frame_idx.is_some());
-		grouped
-			.entry(key)
-			.or_default()
-			.push((frame_idx.unwrap_or(1), frame));
-	}
-
-	let mut sprites: Vec<Sprite> = grouped
-		.into_iter()
-		.map(|((mut name, animated), mut frames)| {
-			frames.sort_by_key(|(idx, _)| *idx);
-			let frames = frames.into_iter().map(|(_, frame)| frame).collect();
-			if animated {
-				name.push('A');
+fn load_unique_frames(root: &path::Path, sprites: &[config::Sprite]) -> Vec<FrameAsset> {
+	let mut seen: HashSet<String> = HashSet::new();
+	let mut frames = Vec::new();
+	for sprite in sprites {
+		for rel in &sprite.frames {
+			if seen.insert(rel.clone()) {
+				let frame_path = root.join(rel);
+				frames.push(FrameAsset {
+					file: rel.clone(),
+					image: Image::load_file(&frame_path),
+				});
 			}
-			Sprite { name, frames }
-		})
-		.collect();
-
-	sprites.sort_by(|a, b| a.name.cmp(&b.name));
-	sprites
-}
-
-fn is_png(path: &path::Path) -> bool {
-	path
-		.extension()
-		.and_then(|ext| ext.to_str())
-		.map(|ext| ext.eq_ignore_ascii_case("png"))
-		.unwrap_or(false)
-}
-
-fn parse_sprite_name(stem: &str) -> (String, Option<usize>) {
-	if let Some((base, suffix)) = stem.rsplit_once('_') {
-		if suffix.chars().all(|c| c.is_ascii_digit()) {
-			return (base.to_string(), Some(suffix.parse().expect("numeric frame index")));
 		}
 	}
-	(stem.to_string(), None)
+	frames
 }
 
 fn save_metadata(sheet: &SpriteSheet<String>, path: &path::Path) {

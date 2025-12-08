@@ -87,9 +87,9 @@ static ENTITY_SAMPLES: [(EntityKind, chipty::SpriteId); 24] = [
 	(EntityKind::Tank, chipty::SpriteId::TankN),
 	(EntityKind::Glider, chipty::SpriteId::GliderN),
 	(EntityKind::Teeth, chipty::SpriteId::TeethN),
-	(EntityKind::Walker, chipty::SpriteId::WalkerV),
+	(EntityKind::Walker, chipty::SpriteId::WalkerN),
 	(EntityKind::Blob, chipty::SpriteId::Blob),
-	(EntityKind::Paramecium, chipty::SpriteId::ParameciumV),
+	(EntityKind::Paramecium, chipty::SpriteId::ParameciumN),
 ];
 
 #[derive(Default)]
