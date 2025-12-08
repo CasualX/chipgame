@@ -90,18 +90,19 @@ impl PlayState {
 
 		let seed = chipcore::RngSeed::System;
 		// let set_name = &self.lvsets.current().name;
-		// let seed = if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{set_name}/level{level_number}.json")) {
+		// let (seed, replay) = if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{set_name}/level{level_number}.json")) {
 		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
-		// 	fx.replay = Some(chipty::decode(&replay.replay));
 		// 	let seed = u64::from_str_radix(&replay.seed, 16).unwrap();
-		// 	chipcore::RngSeed::Manual(seed)
+		// 	let inputs = chipty::decode(&replay.replay);
+		// 	(chipcore::RngSeed::Manual(seed), Some(inputs))
 		// }
 		// else {
-		// 	chipcore::RngSeed::System
+		// 	(chipcore::RngSeed::System, None)
 		// };
 
 		let mut fx = fx::FxState::new(level_number, level, seed, &tiles::TILES_PLAY);
 		fx.gs.ps.attempts = attempts;
+		// fx.replay = replay;
 		fx.camera.set_perspective(self.save_data.perspective);
 		self.fx = Some(fx);
 

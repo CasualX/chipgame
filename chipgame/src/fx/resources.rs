@@ -40,11 +40,7 @@ impl Resources {
 			g.shader_create(Some(name.as_str()), &vs, &fs);
 		}
 		for (name, texture) in &config.textures {
-			let transform = match texture.transform {
-				Some(crate::config::TransformType::Gutter32x32) => Some(&mut shade::image::gutter(32, 32) as _),
-				_ => None,
-			};
-			load_png(g, Some(name.as_str()), fs, &texture.path, &texture.props, transform).expect("Failed to load texture");
+			load_png(g, Some(name.as_str()), fs, &texture.path, &texture.props, None).expect("Failed to load texture");
 		}
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 		for (name, font_config) in &config.fonts {

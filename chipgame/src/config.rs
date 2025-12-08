@@ -8,20 +8,14 @@ pub struct ShaderConfig {
 	pub fragment_shader: String,
 }
 
-pub enum TransformType {
-	Gutter32x32,
-}
-
 pub struct TextureConfig {
 	pub path: String,
-	pub transform: Option<TransformType>,
 	pub props: shade::image::TextureProps,
 }
 impl Default for TextureConfig {
 	fn default() -> Self {
 		Self {
 			path: String::new(),
-			transform: None,
 			props: shade::image::TextureProps {
 				filter_min: shade::TextureFilter::Linear,
 				filter_mag: shade::TextureFilter::Linear,
@@ -104,10 +98,6 @@ impl Config {
 						let entry = textures.entry(name.to_string()).or_default();
 						match key {
 							"Path" => entry.path = value.to_string(),
-							"Transform" => entry.transform = match value {
-								"Gutter32x32" => Some(TransformType::Gutter32x32),
-								_ => None,
-							},
 							"Filter" => {
 								let filter = match value {
 									"Nearest" => shade::TextureFilter::Nearest,
