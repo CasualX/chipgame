@@ -1,8 +1,4 @@
-use std::path::PathBuf;
-
 use super::*;
-
-pub use chipty::{LevelRef, LevelSetDto};
 
 #[derive(Default)]
 pub struct LevelSet {
@@ -100,7 +96,7 @@ fn load_levelsets(sets: &mut Vec<LevelSet>) {
 }
 
 fn load_levelset(fs: &FileSystem, name: String, sets: &mut Vec<LevelSet>) {
-	let index: LevelSetDto = {
+	let index: chipty::LevelSetDto = {
 		let index = match fs.read_compressed("index.json") {
 			Ok(data) => data,
 			Err(err) => {
@@ -119,12 +115,12 @@ fn load_levelset(fs: &FileSystem, name: String, sets: &mut Vec<LevelSet>) {
 	load_levelset_dto(Some(fs), index, name, sets);
 }
 
-fn load_levelset_dto(fs: Option<&FileSystem>, index: LevelSetDto, name: String, sets: &mut Vec<LevelSet>) {
+fn load_levelset_dto(fs: Option<&FileSystem>, index: chipty::LevelSetDto, name: String, sets: &mut Vec<LevelSet>) {
 	let mut levels = Vec::new();
 	for level_ref in index.levels {
 		let level = match level_ref {
-			LevelRef::Direct(level) => level,
-			LevelRef::Indirect(level_path) => {
+			chipty::LevelRef::Direct(level) => level,
+			chipty::LevelRef::Indirect(level_path) => {
 				let content = match fs.unwrap().read_to_string(&level_path) {
 					Ok(data) => data,
 					Err(err) => {
@@ -154,7 +150,7 @@ fn load_levelset_dto(fs: Option<&FileSystem>, index: LevelSetDto, name: String, 
 	sets.push(LevelSet { name, title, about, splash, levels });
 }
 
-fn load_dat(path: &PathBuf, sets: &mut Vec<LevelSet>) {
+fn load_dat(path: &path::PathBuf, sets: &mut Vec<LevelSet>) {
 	let opts = chipdat::Options {
 		encoding: chipdat::Encoding::Windows1252,
 	};

@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::path::Path;
 
 use super::*;
 
@@ -174,7 +173,7 @@ impl SaveData {
 		};
 
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
-		match std::fs::write(&file_name, content) {
+		match fs::write(&file_name, content) {
 			Ok(_) => {}
 			Err(e) => eprintln!("Error saving {}: {}", file_name, e),
 		}
@@ -205,7 +204,7 @@ impl SaveData {
 		};
 		this.unlocked_levels[0] = true;
 
-		let Ok(content) = std::fs::read_to_string(&file_name) else {
+		let Ok(content) = fs::read_to_string(&file_name) else {
 			return this;
 		};
 		let Some(dto) = serde_json::from_str::<SaveFileDto>(&content).ok() else {
@@ -253,7 +252,7 @@ impl SaveData {
 
 fn get_levelset_state_filename(level_set: &LevelSet) -> String {
 	let filename = format!("save/{}/state.json", level_set.name);
-	let _ = std::fs::create_dir(Path::new(&filename).parent().unwrap());
+	let _ = fs::create_dir(path::Path::new(&filename).parent().unwrap());
 	filename
 }
 

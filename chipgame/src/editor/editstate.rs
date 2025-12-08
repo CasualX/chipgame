@@ -21,7 +21,7 @@ pub struct EditorEditState {
 impl EditorEditState {
 	pub fn load_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
-		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES_EDIT);
+		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
 		self.game.hud_enabled = false;
 		self.game.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
 		self.game.camera.set_perspective(false);
@@ -30,7 +30,7 @@ impl EditorEditState {
 	pub fn reload_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
 		let old_cam = self.game.camera.clone();
-		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES_EDIT);
+		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
 		self.game.pause(); // Unlock the camera
 		self.game.camera = old_cam;
 	}

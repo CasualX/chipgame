@@ -12,11 +12,11 @@ use crate::menu;
 
 mod tool;
 mod tiles;
-mod edit;
-mod play;
+mod editstate;
+mod playstate;
 
-use self::edit::EditorEditState;
-use self::play::EditorPlayState;
+use self::editstate::EditorEditState;
+use self::playstate::EditorPlayState;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Tool {
@@ -180,7 +180,7 @@ impl EditorState {
 			EditorState::Edit(s) => {
 				let level = s.save_level();
 				let level_dto = serde_json::from_str(&level).unwrap();
-				let mut game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &crate::play::tiles::TILES_PLAY);
+				let mut game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &crate::play::TILES);
 				game.camera.set_perspective(true);
 				*self = EditorState::Play(Box::new(EditorPlayState {
 					level,

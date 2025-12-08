@@ -1,6 +1,6 @@
 use super::*;
 
-pub static TILES_EDIT: [render::TileGfx; 50] = [
+pub static TILES: [render::TileGfx; 50] = [
 	render::TileGfx { sprite: chipty::SpriteId::Blank, model: chipty::ModelId::Empty }, // Terrain::Blank
 	render::TileGfx { sprite: chipty::SpriteId::Floor, model: chipty::ModelId::Floor }, // Terrain::Floor
 	render::TileGfx { sprite: chipty::SpriteId::Wall, model: chipty::ModelId::Wall }, // Terrain::Wall
