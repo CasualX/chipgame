@@ -172,12 +172,12 @@ pub fn player_push(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 		return;
 	}
 
-	obj.data.sprite = match ent.step_dir {
-		Some(chipty::Compass::Up) => chipty::SpriteId::PlayerPushNA,
-		Some(chipty::Compass::Down) => chipty::SpriteId::PlayerPushSA,
-		Some(chipty::Compass::Left) => chipty::SpriteId::PlayerPushWA,
-		Some(chipty::Compass::Right) => chipty::SpriteId::PlayerPushEA,
-		_ => chipty::SpriteId::DirtBlock,
+	obj.data.sprite = match ent.face_dir.or(ent.step_dir) {
+		Some(chipty::Compass::Up) => chipty::SpriteId::PlayerPushN,
+		Some(chipty::Compass::Down) => chipty::SpriteId::PlayerPushS,
+		Some(chipty::Compass::Left) => chipty::SpriteId::PlayerPushW,
+		Some(chipty::Compass::Right) => chipty::SpriteId::PlayerPushE,
+		_ => chipty::SpriteId::PlayerWalkIdle,
 	};
 }
 
