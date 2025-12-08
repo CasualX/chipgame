@@ -1,10 +1,10 @@
 use super::*;
 
-fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i) -> Vec3f {
+fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i, check_elevated: bool) -> Vec3f {
 	let terrain = gs.field.get_terrain(pos);
 	let elevated = terrain.is_wall();
 	// Blocks appear on top of walls
-	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if elevated { 20.0 } else { 0.0 };
+	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if check_elevated && elevated { 20.0 } else { 0.0 };
 	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
 	return pos;
 }
@@ -12,7 +12,7 @@ fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i) -> Vec3
 pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	let pos = ent_pos(&ctx.gs, ent, ent.pos);
+	let pos = ent_pos(&ctx.gs, ent, ent.pos, true);
 	let sprite = sprite_for_ent(ent, &ctx.gs);
 	let mut obj = render::Object {
 		data: render::ObjectData {
@@ -81,8 +81,8 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
-	let start_pos = ent_pos(&ctx.gs, ent, src);
-	let end_pos = ent_pos(&ctx.gs, ent, ent.pos);
+	let start_pos = ent_pos(&ctx.gs, ent, src, false);
+	let end_pos = ent_pos(&ctx.gs, ent, ent.pos, false);
 	obj.data.pos = start_pos;
 
 	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs);
@@ -475,7 +475,7 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
-			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, -20.0),
 			sprite: chipty::SpriteId::Wall,
 			frame: 0,
 			model: chipty::ModelId::Wall,
