@@ -125,80 +125,78 @@ impl ModelData {
 	};
 }
 
-const TILE_SIZE: f32 = 32.0;
-
 fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, z1: f32, z2: f32, frame: u16, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
+
 	p.add_indices_quad();
 
-	let x = pos.x;
-	let y = pos.y;
+	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
+
+	let x = pos.x - spr.origin.x;
+	let y = pos.y - spr.origin.y;
 	let z1 = z1 + pos.z;
 	let z2 = z2 + pos.z;
-	let a = (alpha * 255.0) as u8;
 
-	let uv = sprite_uv(&resx.spritesheet_meta, sprite, frame);
-	let u = uv.x;
-	let v = uv.y;
+	let color = [255, 255, 255, (alpha * 255.0) as u8];
 
 	p.add_vertex(Vertex {
 		pos: Vec3(x, y, z2),
-		uv: Vec2(u, v),
-		color: [255, 255, 255, a],
+		uv: spr.top_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x, y + TILE_SIZE, z1),
-		uv: Vec2(u, v + TILE_SIZE),
-		color: [255, 255, 255, a],
+		pos: Vec3(x, y + spr.height, z1),
+		uv: spr.bottom_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE, y + TILE_SIZE, z1),
-		uv: Vec2(u + TILE_SIZE, v + TILE_SIZE),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width, y + spr.height, z1),
+		uv: spr.bottom_right,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE, y, z2),
-		uv: Vec2(u + TILE_SIZE, v),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width, y, z2),
+		uv: spr.top_right,
+		color,
 	});
 }
 
 fn draw_shadow(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, skew: f32, frame: u16, a: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
+
 	p.add_indices_quad();
 
-	let x = pos.x;
-	let y = pos.y;
+	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
+
+	let x = pos.x - spr.origin.x;
+	let y = pos.y - spr.origin.y;
 	let s = skew;
 
-	let uv = sprite_uv(&resx.spritesheet_meta, sprite, frame);
-	let u = uv.x;
-	let v = uv.y;
-	let a = (a * 128.0) as u8;
+	let color = [0, 0, 0, (a * 128.0) as u8];
 
 	p.add_vertex(Vertex {
 		pos: Vec3(x + s, y, 0.5),
-		uv: Vec2(u, v),
-		color: [0, 0, 0, a],
+		uv: spr.top_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x, y + TILE_SIZE, 0.5),
-		uv: Vec2(u, v + TILE_SIZE),
-		color: [0, 0, 0, a],
+		pos: Vec3(x, y + spr.height, 0.5),
+		uv: spr.bottom_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE, y + TILE_SIZE, 0.5),
-		uv: Vec2(u + TILE_SIZE, v + TILE_SIZE),
-		color: [0, 0, 0, a],
+		pos: Vec3(x + spr.width, y + spr.height, 0.5),
+		uv: spr.bottom_right,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + s + TILE_SIZE, y, 0.5),
-		uv: Vec2(u + TILE_SIZE, v),
-		color: [0, 0, 0, a],
+		pos: Vec3(x + s + spr.width, y, 0.5),
+		uv: spr.top_right,
+		color,
 	});
 }
 
-fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, w: f32, sprite: chipty::SpriteId, frame: u16, alpha: f32) {
+fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, base: f32, sprite: chipty::SpriteId, frame: u16, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
 
 	p.add_indices(&[
@@ -209,103 +207,101 @@ fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources,
 		4, 6, 7, 4, 5, 6,
 	]);
 
+	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
+
 	let x = pos.x;
 	let y = pos.y;
 	let z = pos.z;
-	let a = (alpha * 255.0) as u8;
 
-	let uv = sprite_uv(&resx.spritesheet_meta, sprite, frame);
-	let u = uv.x;
-	let v = uv.y;
-
-	let s = 4.0 + w;//if matches!(sprite, data::Sprite::Wall) { 0.0 } else { 4.0 };
+	let s = 4.0 + base;//if matches!(sprite, data::Sprite::Wall) { 0.0 } else { 4.0 };
 	let t = 4.0;
-	let h = 20.0; //if block.is_door() { 15.0 } else { 20.0 };
+	let tall = 20.0; //if block.is_door() { 15.0 } else { 20.0 };
+
+	let color = [255, 255, 255, (alpha * 255.0) as u8];
 
 	p.add_vertex(Vertex {
-		pos: Vec3(x + w, y + w, z),
-		uv: Vec2(u, v),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + base, y + base, z),
+		uv: spr.top_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + w, y + TILE_SIZE - w, z),
-		uv: Vec2(u, v + TILE_SIZE),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + base, y + spr.height - base, z),
+		uv: spr.bottom_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE - w, y + TILE_SIZE - w, z),
-		uv: Vec2(u + TILE_SIZE, v + TILE_SIZE),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width - base, y + spr.height - base, z),
+		uv: spr.bottom_right,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE - w, y + w, z),
-		uv: Vec2(u + TILE_SIZE, v),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width - base, y + base, z),
+		uv: spr.top_right,
+		color,
 	});
 
 	p.add_vertex(Vertex {
-		pos: Vec3(x + s, y + s, z + h),
-		uv: Vec2(u + t, v + t),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + s, y + s, z + tall),
+		uv: spr.top_left + Vec2(t, t),
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + s, y + TILE_SIZE - s, z + h),
-		uv: Vec2(u + t, v + TILE_SIZE - t),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + s, y + spr.height - s, z + tall),
+		uv: spr.bottom_left + Vec2(t, -t),
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE - s, y + TILE_SIZE - s, z + h),
-		uv: Vec2(u + TILE_SIZE - t, v + TILE_SIZE - t),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width - s, y + spr.height - s, z + tall),
+		uv: spr.bottom_right + Vec2(-t, -t),
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE - s, y + s, z + h),
-		uv: Vec2(u + TILE_SIZE - t, v + t),
-		color: [255, 255, 255, a],
+		pos: Vec3(x + spr.width - s, y + s, z + tall),
+		uv: spr.top_right + Vec2(-t, t),
+		color,
 	});
 }
 
 fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, frame: u16, sprite: chipty::SpriteId) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 5, 4);
+
 	p.add_indices(&[0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1]);
+
+	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
 
 	let x = pos.x;
 	let y = pos.y;
 	let z = pos.z;
 
-	let cx = x + TILE_SIZE * 0.5;
-	let cy = y + TILE_SIZE * 0.5;
+	let cx = x + spr.width * 0.5;
+	let cy = y + spr.height * 0.5;
 
-	let uv = sprite_uv(&resx.spritesheet_meta, sprite, frame);
-	let u = uv.x;
-	let v = uv.y;
-	let cu = u + TILE_SIZE * 0.5;
-	let cv = v + TILE_SIZE * 0.5;
+	let color = [255, 255, 255, 255];
 
 	p.add_vertex(Vertex {
 		pos: Vec3(cx, cy, z - 10.0),
-		uv: Vec2(cu, cv),
-		color: [255, 255, 255, 255],
+		uv: (spr.top_left + spr.bottom_right) * 0.5,
+		color,
 	});
 	p.add_vertex(Vertex {
 		pos: Vec3(x, y, z),
-		uv: Vec2(u, v),
-		color: [255, 255, 255, 255],
+		uv: spr.top_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x, y + TILE_SIZE, z),
-		uv: Vec2(u, v + TILE_SIZE),
-		color: [255, 255, 255, 255],
+		pos: Vec3(x, y + spr.height, z),
+		uv: spr.bottom_left,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE, y + TILE_SIZE, z),
-		uv: Vec2(u + TILE_SIZE, v + TILE_SIZE),
-		color: [255, 255, 255, 255],
+		pos: Vec3(x + spr.width, y + spr.height, z),
+		uv: spr.bottom_right,
+		color,
 	});
 	p.add_vertex(Vertex {
-		pos: Vec3(x + TILE_SIZE, y, z),
-		uv: Vec2(u + TILE_SIZE, v),
-		color: [255, 255, 255, 255],
+		pos: Vec3(x + spr.width, y, z),
+		uv: spr.top_right,
+		color,
 	});
 }
 

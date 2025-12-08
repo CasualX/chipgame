@@ -224,20 +224,19 @@ impl FxState {
 
 fn draw_sprite(cv: &mut shade::im::DrawBuilder<UiVertex, UiUniform>, resx: &Resources, sprite: chipty::SpriteId, pos: Vec2<f32>, size: f32) {
 	let uv = sprite_uv(&resx.spritesheet_meta, sprite, 0);
-	let tex_size = Vec2(resx.spritesheet_meta.width, resx.spritesheet_meta.height).map(|c| c as f32);
-	let top_left = UiVertex { pos: Vec2f::ZERO, uv, color: [255, 255, 255, 255] };
-	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(0.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
-	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 0.0) / tex_size, color: [255, 255, 255, 255] };
-	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv + Vec2(32.0, 32.0) / tex_size, color: [255, 255, 255, 255] };
+	let color = [255, 255, 255, 255];
+	let top_left = UiVertex { pos: Vec2f::ZERO, uv: uv.top_left(), color };
+	let bottom_left = UiVertex { pos: Vec2f::ZERO, uv: uv.bottom_left(), color };
+	let top_right = UiVertex { pos: Vec2f::ZERO, uv: uv.top_right(), color };
+	let bottom_right = UiVertex { pos: Vec2f::ZERO, uv: uv.bottom_right(), color };
 	let sprite = shade::d2::Sprite { bottom_left, top_left, top_right, bottom_right };
 	cv.sprite_rect(&sprite, &Bounds2(pos, pos + Vec2(size, size)));
 }
 
-fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: usize) -> Vec2f {
+fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: usize) -> Bounds2f {
 	let entry = sheet.sprites.get(&sprite).unwrap();
 	assert!(frame < entry.len as usize, "frame index in bounds");
 	let f = &sheet.frames[(entry.index as usize) + frame];
-	let x = f.rect[0] as f32 / sheet.width as f32;
-	let y = f.rect[1] as f32 / sheet.height as f32;
-	Vec2(x, y)
+	let [x, y, width, height] = f.rect;
+	Bounds2::c(x as f32 / sheet.width as f32, y as f32 / sheet.height as f32, (x + width) as f32 / sheet.width as f32, (y + height) as f32 / sheet.height as f32)
 }

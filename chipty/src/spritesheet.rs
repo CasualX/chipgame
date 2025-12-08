@@ -17,6 +17,19 @@ pub struct SpriteEntry {
 	pub duration: f32,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
+pub enum SpriteTransform {
+	#[default]
+	None,
+	FlipX,
+	FlipY,
+	FlipXY,
+	Rotate90,
+	Rotate180,
+	Rotate270,
+}
+
 /// A single frame in the sprite sheet.
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Default, Debug, PartialEq)]
@@ -25,6 +38,9 @@ pub struct SpriteFrame {
 	///
 	/// `[x, y, width, height]` in pixels.
 	pub rect: [i32; 4],
+	/// Sprite UV transform to apply when rendering.
+	#[serde(default, skip_serializing_if = "is_default")]
+	pub transform: SpriteTransform,
 	/// The origin of the sprite in pixels, relative to the top-left corner of the rect.
 	#[serde(default, skip_serializing_if = "is_default")]
 	pub origin: Vec2<i32>,

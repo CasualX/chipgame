@@ -6,14 +6,10 @@ pub struct MoveStep {
 	pub end_pos: Vec3f,
 	pub move_time: f64,
 	pub duration: f32,
+	pub jump_height: f32,
 }
 
 impl MoveStep {
-	#[inline]
-	fn ease_snap(t: f32) -> f32 {
-		1.0 - (1.0 - t).powf(4.0)
-	}
-
 	pub fn animate(&self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
 		if self.duration <= 0.0 {
 			obj.pos = self.end_pos;
@@ -21,8 +17,9 @@ impl MoveStep {
 		}
 		let elapsed = (ctx.time - self.move_time) as f32;
 		let fraction = (elapsed / self.duration).clamp(0.0, 1.0);
-		let eased = Self::ease_snap(fraction);
+		let eased = 1.0 - (1.0 - fraction).powf(4.0);
 		obj.pos = self.start_pos.lerp(self.end_pos, eased);
+		obj.pos.z += self.jump_height * (4.0 * fraction * (1.0 - fraction));
 		return fraction < 1.0;
 	}
 }

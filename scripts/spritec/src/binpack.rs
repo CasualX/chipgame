@@ -7,10 +7,9 @@ pub struct GridBinPacker {
 }
 
 impl GridBinPacker {
-	pub fn new(total_width: i32, total_height: i32, cell: i32) -> Self {
-		assert!(total_width % cell == 0 && total_height % cell == 0, "sheet aligns to grid");
-		let width_cells = total_width / cell;
-		let height_cells = total_height / cell;
+	pub fn new(width: i32, height: i32, cell: i32) -> Self {
+		let width_cells = width / cell;
+		let height_cells = height / cell;
 		let occupied = vec![false; (width_cells * height_cells) as usize];
 		Self {
 			cell,

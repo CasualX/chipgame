@@ -60,7 +60,17 @@ pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
 	g.clear(&shade::ClearArgs { surface: shade::Surface::BACK_BUFFER, depth: Some(1.0), ..Default::default() });
 }
 
-fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: u16) -> Vec2f {
+struct SpriteUV {
+	top_left: Vec2f,
+	top_right: Vec2f,
+	bottom_left: Vec2f,
+	bottom_right: Vec2f,
+	width: f32,
+	height: f32,
+	origin: Vec2f,
+}
+
+fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId, frame: u16) -> SpriteUV {
 	let Some(entry) = sheet.sprites.get(&sprite) else {
 		panic!("sprite {:?} not found in sheet", sprite);
 	};
@@ -73,8 +83,39 @@ fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::Spri
 	else {
 		(frame as usize) % (entry.len as usize)
 	};
-	let f = &sheet.frames[index];
-	Vec2(f.rect[0] as f32, f.rect[1] as f32)
+
+	let frame = &sheet.frames[index];
+	let [x, y, width, height] = frame.rect;
+
+	let ax = x as f32;
+	let ay = y as f32;
+	let bx = (x + width) as f32;
+	let cy = (y + height) as f32;
+
+	let a = Vec2f::new(ax, ay);
+	let b = Vec2f::new(bx, ay);
+	let c = Vec2f::new(ax, cy);
+	let d = Vec2f::new(bx, cy);
+
+	let (top_left, top_right, bottom_left, bottom_right) = match frame.transform {
+		chipty::SpriteTransform::None => (a, b, c, d),
+		chipty::SpriteTransform::FlipX => (b, a, d, c),
+		chipty::SpriteTransform::FlipY => (c, d, a, b),
+		chipty::SpriteTransform::FlipXY => (d, c, b, a),
+		chipty::SpriteTransform::Rotate90 => (c, a, d, b),
+		chipty::SpriteTransform::Rotate180 => (d, c, b, a),
+		chipty::SpriteTransform::Rotate270 => (b, d, a, c),
+	};
+
+	SpriteUV {
+		top_left,
+		top_right,
+		bottom_left,
+		bottom_right,
+		width: frame.rect[2] as f32,
+		height: frame.rect[3] as f32,
+		origin: Vec2f::new(frame.origin[0] as f32, frame.origin[1] as f32),
+	}
 }
 
 fn _sprite_frames(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::SpriteId) -> u16 {

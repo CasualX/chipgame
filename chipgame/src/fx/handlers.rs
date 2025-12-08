@@ -81,6 +81,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
+
 	let start_pos = ent_pos(&ctx.gs, ent, src, false);
 	let end_pos = ent_pos(&ctx.gs, ent, ent.pos, false);
 	obj.data.pos = start_pos;
@@ -92,11 +93,17 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// See [MoveStep::animate] setting obj.pos when the animation completes.
 	obj.anim.anims.clear();
 
+	let jump_height = match ent.kind {
+		chipty::EntityKind::PinkBall => 6.0,
+		_ => 0.0,
+	};
+
 	obj.anim.anims.push(render::AnimState::MoveStep(render::MoveStep {
 		start_pos,
 		end_pos,
 		move_time: ctx.time,
 		duration: ent.step_spd as f32 / chipcore::FPS as f32,
+		jump_height,
 	}));
 	obj.anim.anims.push(render::AnimState::AnimSeq(render::SpriteAnimSeq {
 		start_time: ctx.time,
@@ -105,7 +112,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	}));
 
 	// Quick hack to flatten sprites on top of walls
-	obj.data.model = if end_pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
+	// obj.data.model = if end_pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
 
 	if ehandle == ctx.gs.ps.master {
 		ctx.camera.move_src = src;
@@ -131,7 +138,7 @@ pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
-	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs);
+	obj.data.sprite = sprite_for_ent(ent, &ctx.gs);
 }
 
 pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
@@ -331,10 +338,10 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> 
 			_ => chipty::SpriteId::TeethN,
 		},
 		chipty::EntityKind::Blob => match ent.face_dir {
-			Some(chipty::Compass::Up) => chipty::SpriteId::Blob,
-			Some(chipty::Compass::Down) => chipty::SpriteId::Blob,
-			Some(chipty::Compass::Left) => chipty::SpriteId::Blob,
-			Some(chipty::Compass::Right) => chipty::SpriteId::Blob,
+			Some(chipty::Compass::Up) => chipty::SpriteId::BlobNA,
+			Some(chipty::Compass::Down) => chipty::SpriteId::BlobSA,
+			Some(chipty::Compass::Left) => chipty::SpriteId::BlobWA,
+			Some(chipty::Compass::Right) => chipty::SpriteId::BlobEA,
 			_ => chipty::SpriteId::Blob,
 		},
 		chipty::EntityKind::Paramecium => match ent.face_dir {
