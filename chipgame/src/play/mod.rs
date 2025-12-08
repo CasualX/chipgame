@@ -124,6 +124,10 @@ impl PlayState {
 	}
 
 	pub fn toggle_music(&mut self) {
+		// FIXME! Music can't be toggled during Select LevelSet screen
+		if self.lvsets.selected < 0 {
+			return;
+		}
 		self.save_data.bg_music = !self.save_data.bg_music;
 		self.save_data.save(&self.lvsets.current());
 		self.play_music();
