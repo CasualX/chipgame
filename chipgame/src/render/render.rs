@@ -347,9 +347,14 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 			draw(cv, resx, Vec2(x, y).map(|c| c as f32 * 32.0).vec3(0.0), sprite, model, frame, 1.0);
 		}
 	}
+
+	// Collect and sort the objects by Y position
+	let mut sorted_objects: Vec<_> = fx.objects.values().map(|obj| &obj.data).collect();
+	sorted_objects.sort_unstable_by_key(|obj| obj.pos.y as i32);
+
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;
-	for obj in fx.objects.values().map(|obj| &obj.data) {
+	for obj in &sorted_objects {
 		if matches!(obj.model, chipty::ModelId::Sprite | chipty::ModelId::FlatSprite) {
 			draw_shadow(cv, resx, obj.pos, obj.sprite, 10.0, obj.frame, obj.alpha * shadow);
 		}
@@ -358,7 +363,7 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 		}
 	}
 	// Render the objects
-	for obj in fx.objects.values().map(|obj| &obj.data) {
+	for obj in &sorted_objects {
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Draw the object
