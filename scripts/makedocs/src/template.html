@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chip's Challenge Remake</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #030712;
+      --bg-accent: #0d1324;
+      --panel: rgba(16, 23, 41, 0.78);
+      --text: #f2f5ff;
+      --muted: #94a3b8;
+      --primary: #6cf0ff;
+      --primary-strong: #2ec1ff;
+      --border: rgba(108, 240, 255, 0.18);
+      --code-bg: rgba(8, 12, 22, 0.9);
+      font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #030712;
+      color: var(--text);
+      font-family: inherit;
+      line-height: 1.7;
+      letter-spacing: 0.01em;
+      padding: 4rem 1.5rem;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("docs/menubg.png");
+      background-repeat: repeat;
+      background-position: center;
+      background-size: 50%;
+      image-rendering: pixelated;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 15% 20%, rgba(108, 240, 255, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 10%, rgba(46, 193, 255, 0.15), transparent 45%);
+      filter: blur(2px);
+      z-index: 0;
+    }
+
+    .doc-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1040px;
+      margin: 0 auto;
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 3rem clamp(1.5rem, 3vw, 3rem);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-top: 2.5rem;
+      margin-bottom: 0.85rem;
+      color: var(--text);
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 4vw, 3.2rem);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    h1::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 140px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+    }
+
+    h2 {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.45);
+      padding-bottom: 0.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    p {
+      color: var(--muted);
+      margin: 0 0 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 1.4rem;
+      color: var(--muted);
+    }
+
+    li + li {
+      margin-top: 0.35rem;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 150ms ease, border-color 150ms ease;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: var(--primary-strong);
+      border-bottom-color: var(--primary-strong);
+    }
+
+    code {
+      background: var(--code-bg);
+      color: var(--primary);
+      padding: 0.15rem 0.35rem;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 1.2rem;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: rgba(3, 7, 18, 0.45);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.9rem 1rem;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    thead {
+      background: rgba(108, 240, 255, 0.06);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.85rem;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--primary);
+      padding-left: 1rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 1.2rem auto;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 2.5rem 1rem;
+      }
+      .doc-shell {
+        padding: 2.4rem 1.25rem;
+        border-radius: 12px;
+      }
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
+        display: block;
+      }
+      tr + tr {
+        margin-top: 0.8rem;
+      }
+      th {
+        font-size: 0.85rem;
+      }
+      td {
+        padding-top: 0.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="doc-shell">
+    <!-- CONTENT -->
+  </main>
+</body>
+</html>

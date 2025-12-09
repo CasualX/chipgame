@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+# Require a clean git checkout (no staged/unstaged changes; untracked OK)
+if ! git diff-index --quiet HEAD --; then
+	echo "Error: git working tree is dirty (staged or unstaged changes)." >&2
+	echo "Please commit, stash, or discard changes before publishing." >&2
+	exit 1
+fi
+
 # Clean the publish directory
 rm -rf target/publish
 mkdir -p target/publish
@@ -29,11 +38,8 @@ cargo run --bin packset levelsets/cclp5 target/publish/levelsets/cclp5.paks
 # Create the save dir
 mkdir -p target/publish/save
 
-makurust levelsets/readme.md
-mv levelsets/readme.html target/publish/levelsets
-
-makurust readme.md
-mv readme.html target/publish/readme.html
+# Generate the documentation
+cargo run --bin makedocs
 
 # Zip it all up
 rm -f target/chipgame.zip

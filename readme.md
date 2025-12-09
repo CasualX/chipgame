@@ -22,17 +22,12 @@ Features
 - Supports additional levelsets in the game's native .DAT level format
 - Over 500 community levels available to play, thousands of hours of fun!
 
-Downloads
----------
-
-Precompiled binaries for Windows are available on the [Releases](https://github.com/CasualX/chipgame/releases) page.
-
-Other platforms can be built from source (see below).
-
 Getting Started
 ---------------
 
 ### Download and Play
+
+Precompiled binaries for Windows are available on the [Releases](https://github.com/CasualX/chipgame/releases) page.
 
 1. Download and extract the latest release.
 2. Run `chipplay.exe` to start the game.
@@ -42,14 +37,16 @@ Getting Started
 
 ### Build from Source
 
-1. Install [Rust](https://www.rust-lang.org/tools/install).
-2. Clone this repository.
-3. Run the game: `cargo run --release --bin chipplay`
-4. The level editor: `cargo run --release --bin chipedit`
+Other platforms must be built from source code.
 
-### Publishing
+1. Install [Rust](https://www.rust-lang.org/tools/install) and clone this repository.
+2. Run the game: `cargo run --release --bin chipplay`
+3. Level editor: `cargo run --release --bin chipedit`
 
-* Install [Makurust](https://github.com/fromgodd/makurust).
+### Publish from Source
+
+1. Run either `./scripts/publish.sh` or `scripts\publish.bat` on Linux/macOS or Windows, respectively.
+2. Find the packaged release in `target/publish/`.
 
 Controls
 --------
@@ -64,6 +61,13 @@ Controls
 | Toggle music | M | - |
 | Toggle fullscreen | F | - |
 | Exit fullscreen | Esc | - |
+
+Installing Additional Levelsets
+-------------------------------
+
+Visit [https://sets.bitbusters.club/](https://sets.bitbusters.club/) to download additional levelsets.
+
+Place the downloaded `.dat` files in the _levelsets_ folder.
 
 Level Editor
 ------------

@@ -1,11 +1,10 @@
 [package]
-name = "fixer"
+name = "fixlevel"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 clap.workspace = true
-dataview.workspace = true
-chipty = { path = "../../chipty" }
-cvmath.workspace = true
 serde_json.workspace = true
+chipdat = { path = "../../chipdat" }
+chipty = { path = "../../chipty" }

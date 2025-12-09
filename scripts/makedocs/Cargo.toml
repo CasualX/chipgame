@@ -1,0 +1,8 @@
+[package]
+name = "makedocs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+markdown = "1.0"
+mdast_util_to_markdown = "0.0.2"
