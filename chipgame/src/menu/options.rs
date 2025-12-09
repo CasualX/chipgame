@@ -3,14 +3,11 @@ use super::*;
 #[derive(Default)]
 pub struct OptionsMenu {
 	pub selected: u8,
-	pub bg_music: bool,
-	pub sound_fx: bool,
-	pub dev_mode: bool,
-	pub perspective: bool,
+	pub options: chipty::OptionsDto,
 }
 
 impl OptionsMenu {
-	const ITEMS: [&'static str; 4] = ["Background Music: ", "Sound Effects: ", "Perspective: ", "Back"];
+	const ITEMS_COUNT: u8 = 7;
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -19,24 +16,39 @@ impl OptionsMenu {
 			}
 		}
 		if input.down.is_pressed() {
-			if self.selected < Self::ITEMS.len() as u8 - 1 {
+			if self.selected < Self::ITEMS_COUNT - 1 {
 				self.selected = self.selected + 1;
 				events.push(MenuEvent::CursorMove);
 			}
 		}
+		if input.start.is_pressed() {
+			events.push(MenuEvent::ResumePlay);
+		}
 		if input.a.is_pressed() {
 			let evt = match self.selected {
 				0 => {
-					self.bg_music = !self.bg_music;
-					MenuEvent::SetBackgroundMusic { value: self.bg_music }
+					self.options.background_music = !self.options.background_music;
+					MenuEvent::SetBackgroundMusic { value: self.options.background_music }
 				}
 				1 => {
-					self.sound_fx = !self.sound_fx;
-					MenuEvent::SetSoundEffects { value: self.sound_fx }
+					self.options.sound_effects = !self.options.sound_effects;
+					MenuEvent::SetSoundEffects { value: self.options.sound_effects }
 				}
 				2 => {
-					self.perspective = !self.perspective;
-					MenuEvent::SetPerspective { value: self.perspective }
+					self.options.perspective = !self.options.perspective;
+					MenuEvent::SetPerspective { value: self.options.perspective }
+				}
+				3 => {
+					self.options.auto_save_replay = !self.options.auto_save_replay;
+					MenuEvent::SetAutoSaveReplay { value: self.options.auto_save_replay }
+				}
+				4 => {
+					self.options.speedrun_mode = !self.options.speedrun_mode;
+					MenuEvent::SetSpeedrunMode { value: self.options.speedrun_mode }
+				}
+				5 => {
+					self.options.developer_mode = !self.options.developer_mode;
+					MenuEvent::SetDeveloperMode { value: self.options.developer_mode }
 				}
 				_ => MenuEvent::CloseMenu,
 			};
@@ -59,10 +71,13 @@ impl OptionsMenu {
 
 		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
 
-		let items: [&dyn fmt::Display; 4] = [
-			&fmtools::fmt!("Background music: "{get_flag(self.bg_music)}),
-			&fmtools::fmt!("Sound effects: "{get_flag(self.sound_fx)}),
-			&fmtools::fmt!("Perspective: "{get_flag(self.perspective)}),
+		let items: [&dyn fmt::Display; _] = [
+			&fmtools::fmt!("Background music: "{get_flag(self.options.background_music)}),
+			&fmtools::fmt!("Sound effects: "{get_flag(self.options.sound_effects)}),
+			&fmtools::fmt!("Perspective: "{get_flag(self.options.perspective)}),
+			&fmtools::fmt!("Auto save replays: "{get_flag(self.options.auto_save_replay)}),
+			&fmtools::fmt!("Speedrun mode: "{get_flag(self.options.speedrun_mode)}),
+			&fmtools::fmt!("Developer mode: "{get_flag(self.options.developer_mode)}),
 			&"Back",
 		];
 

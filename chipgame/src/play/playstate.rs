@@ -9,6 +9,7 @@ pub struct PlayState {
 	pub input: chipcore::Input,
 	pub lvsets: LevelSets,
 	pub save_data: SaveData,
+	pub metrics: shade::DrawMetrics,
 }
 
 impl cvar::IVisit for PlayState {
@@ -75,31 +76,49 @@ impl PlayState {
 
 	pub fn play_level(&mut self, level_number: i32) {
 		// If loading a level fails just... do nothing
-		let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) else { return };
+		let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize)
+		else { return };
 
-		self.warp = None;
-
+		// Update save data
 		self.save_data.current_level = level_number;
 		let attempts = self.save_data.increase_level_attempts();
 		self.save_data.save(&self.lvsets.current());
 
-		let seed = chipcore::RngSeed::System;
-		// let set_name = &self.lvsets.current().name;
-		// let (seed, replay) = if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{set_name}/level{level_number}.json")) {
+		// Load the segmented replay if available
+		let (seed, inputs);
+		let load_segmented_replay = || {
+			if !self.save_data.segmented_speedrun {
+				return None;
+			}
+			let Some(fx) = &self.fx else {
+				return None;
+			};
+			if fx.level_number != level_number {
+				return None;
+			}
+			return Some(fx);
+		};
+		if let Some(fx) = load_segmented_replay() {
+			seed = chipcore::RngSeed::Manual(fx.gs.field.seed);
+			inputs = Some(fx.gs.inputs.clone());
+		}
+		// else if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{}/level{level_number}.json", self.lvsets.current().name)) {
 		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
-		// 	let seed = u64::from_str_radix(&replay.seed, 16).unwrap();
-		// 	let inputs = chipty::decode(&replay.replay);
-		// 	(chipcore::RngSeed::Manual(seed), Some(inputs))
+		// 	seed = chipcore::RngSeed::Manual(u64::from_str_radix(&replay.seed, 16).unwrap());
+		// 	inputs = Some(chipty::decode(&replay.replay));
 		// }
-		// else {
-		// 	(chipcore::RngSeed::System, None)
-		// };
+		else {
+			seed = chipcore::RngSeed::System;
+			inputs = None;
+		};
 
+		// Create the FX state
 		let mut fx = fx::FxState::new(level_number, level, seed, &tiles::TILES);
 		fx.gs.ps.attempts = attempts;
-		// fx.replay = replay;
-		fx.camera.set_perspective(self.save_data.perspective);
+		fx.replay_inputs = inputs;
+		fx.camera.set_perspective(self.save_data.options.perspective);
 		self.fx = Some(fx);
+		self.warp = None;
 
 		self.menu.close_all();
 		self.events.push(PlayEvent::SetTitle);
@@ -107,15 +126,16 @@ impl PlayState {
 	}
 
 	fn preview_level(&mut self, level_number: i32) {
-		if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
+		self.fx = if let Some(level) = self.lvsets.current().levels.get((level_number - 1) as usize) {
 			let mut fx = fx::FxState::new(level_number, level, chipcore::RngSeed::System, &tiles::TILES);
 			fx.is_preview = true;
-			fx.camera.set_perspective(self.save_data.perspective);
-			self.fx = Some(fx);
+			fx.camera.set_perspective(self.save_data.options.perspective);
+			Some(fx)
 		}
 		else {
-			self.fx = None;
-		}
+			None
+		};
+		self.warp = None;
 	}
 
 	pub fn toggle_music(&mut self) {
@@ -123,13 +143,13 @@ impl PlayState {
 		if self.lvsets.selected < 0 {
 			return;
 		}
-		self.save_data.bg_music = !self.save_data.bg_music;
+		self.save_data.options.background_music = !self.save_data.options.background_music;
 		self.save_data.save(&self.lvsets.current());
 		self.play_music();
 	}
 
 	fn play_music(&mut self) {
-		let music = if !self.save_data.bg_music {
+		let music = if !self.save_data.options.background_music {
 			None
 		}
 		else if let Some(fx) = &self.fx {
@@ -256,10 +276,7 @@ impl PlayState {
 				menu::MenuEvent::OpenOptions => {
 					let menu = menu::OptionsMenu {
 						selected: 0,
-						bg_music: self.save_data.bg_music,
-						sound_fx: self.save_data.sound_fx,
-						dev_mode: self.save_data.dev_mode,
-						perspective: self.save_data.perspective,
+						options: self.save_data.options.clone(),
 					};
 					self.menu.stack.push(menu::Menu::Options(menu));
 				}
@@ -298,31 +315,43 @@ impl PlayState {
 					}
 				}
 				menu::MenuEvent::SetBackgroundMusic { value } => {
-					if self.save_data.bg_music != value {
-						self.save_data.bg_music = value;
+					if self.save_data.options.background_music != value {
+						self.save_data.options.background_music = value;
 						self.save_data.save(&self.lvsets.current());
 						self.play_music();
 					}
 				}
 				menu::MenuEvent::SetSoundEffects { value } => {
-					if self.save_data.sound_fx != value {
-						self.save_data.sound_fx = value;
+					if self.save_data.options.sound_effects != value {
+						self.save_data.options.sound_effects = value;
 						self.save_data.save(&self.lvsets.current());
 					}
 				}
 				menu::MenuEvent::SetDeveloperMode { value } => {
-					if self.save_data.dev_mode != value {
-						self.save_data.dev_mode = value;
+					if self.save_data.options.developer_mode != value {
+						self.save_data.options.developer_mode = value;
 						self.save_data.save(&self.lvsets.current());
 					}
 				}
 				menu::MenuEvent::SetPerspective { value } => {
-					if self.save_data.perspective != value {
-						self.save_data.perspective = value;
+					if self.save_data.options.perspective != value {
+						self.save_data.options.perspective = value;
 						self.save_data.save(&self.lvsets.current());
 						if let Some(fx) = &mut self.fx {
 							fx.camera.set_perspective(value);
 						}
+					}
+				}
+				menu::MenuEvent::SetAutoSaveReplay { value } => {
+					if self.save_data.options.auto_save_replay != value {
+						self.save_data.options.auto_save_replay = value;
+						self.save_data.save(&self.lvsets.current());
+					}
+				}
+				menu::MenuEvent::SetSpeedrunMode { value } => {
+					if self.save_data.options.speedrun_mode != value {
+						self.save_data.options.speedrun_mode = value;
+						self.save_data.save(&self.lvsets.current());
 					}
 				}
 				menu::MenuEvent::CursorMove => {
@@ -387,11 +416,38 @@ impl PlayState {
 			menu::darken(g, resx, 168);
 		}
 		self.menu.draw(g, resx, time);
+
+		if self.save_data.options.developer_mode {
+			menu::draw_metrics(g, resx, &self.metrics);
+		}
+
+		if let Some(fx) = &self.fx {
+			if !fx.is_preview && self.save_data.options.speedrun_mode {
+				let realtime = if fx.game_realtime > 0.0 { fx.game_realtime }
+				else { (time - fx.game_start_time) as f32 };
+
+				let step_offset = if let Some(player) = fx.gs.ents.get(fx.gs.ps.master) {
+					player.step_time % player.base_spd
+				}
+				else { 0 };
+
+				menu::PlayMetrics {
+					level_number: fx.level_number,
+					level_name: &fx.gs.field.name,
+					attempts: fx.gs.ps.attempts,
+					time: fx.gs.time,
+					realtime,
+					step_offset,
+					steps: fx.gs.ps.steps,
+					bonks: fx.gs.ps.bonks,
+				}.draw(g, resx);
+			}
+		}
 	}
 }
 
 fn play_fx_play_sound(this: &mut PlayState, sound: chipty::SoundFx) {
-	if this.save_data.sound_fx {
+	if this.save_data.options.sound_effects {
 		this.events.push(PlayEvent::PlaySound { sound });
 	}
 }
@@ -449,7 +505,7 @@ fn play_fx_level_complete(this: &mut PlayState) {
 	this.save_data.save(&this.lvsets.current());
 
 	// Auto-save replay if enabled or if a new high score was achieved
-	if this.save_data.auto_save_replay || high_score {
+	if this.save_data.options.auto_save_replay || high_score {
 		save_replay(this.lvsets.current(), fx);
 	}
 

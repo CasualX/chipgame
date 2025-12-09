@@ -38,16 +38,19 @@ pub struct OptionsDto {
 	pub perspective: bool,
 	#[serde(default)]
 	pub auto_save_replay: bool,
+	#[serde(default)]
+	pub speedrun_mode: bool,
 }
 
 impl Default for OptionsDto {
-	fn default() -> Self {
-		Self {
+	fn default() -> OptionsDto {
+		OptionsDto {
 			background_music: true,
 			sound_effects: true,
 			developer_mode: false,
 			perspective: true,
 			auto_save_replay: false,
+			speedrun_mode: false,
 		}
 	}
 }

@@ -88,7 +88,7 @@ impl GoToLevel {
 		if input.right.is_pressed() {
 			self.jump(10, events);
 		}
-		if input.a.is_pressed() {
+		if input.a.is_pressed() || input.start.is_pressed() {
 			let evt = match self.selected {
 				0 => MenuEvent::OpenUnlockLevel,
 				index => MenuEvent::PlayLevel { level_number: self.items[index as usize].level_number },

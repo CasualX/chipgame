@@ -95,6 +95,7 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 
 	let jump_height = match ent.kind {
 		chipty::EntityKind::PinkBall => 6.0,
+		chipty::EntityKind::Walker => 6.0,
 		_ => 0.0,
 	};
 
@@ -176,6 +177,12 @@ pub fn player_push(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
 
 	if !matches!(ent.kind, chipty::EntityKind::Player) {
+		return;
+	}
+
+	// No pushing animation in water
+	let terrain = ctx.gs.field.get_terrain(ent.pos);
+	if matches!(terrain, chipty::Terrain::Water) {
 		return;
 	}
 

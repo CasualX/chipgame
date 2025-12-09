@@ -31,6 +31,8 @@ pub enum MenuEvent {
 	SetSoundEffects { value: bool },
 	SetDeveloperMode { value: bool },
 	SetPerspective { value: bool },
+	SetAutoSaveReplay { value: bool },
+	SetSpeedrunMode { value: bool },
 
 	// PauseMenu Events
 	OpenPauseMenu,

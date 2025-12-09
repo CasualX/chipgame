@@ -169,3 +169,107 @@ struct MenuItems<'a> {
 	labels: &'a [&'a (dyn fmt::Display + 'a)],
 	events: &'a [MenuEvent],
 }
+
+#[repr(transparent)]
+pub struct FmtRealtime(pub f32);
+
+impl fmt::Display for FmtRealtime {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let &FmtRealtime(realtime) = self;
+
+		let realmins = (realtime as i32) / 60;
+		let realsecs = (realtime as i32) % 60;
+		let realmilis = realtime.fract() * 1000.0;
+
+		if realmins > 0 {
+			write!(f, "{}:{:02}.{:03}", realmins, realsecs, realmilis as i32)
+		}
+		else {
+			write!(f, "{}.{:03}", realsecs, realmilis as i32)
+		}
+	}
+}
+
+pub struct PlayMetrics<'a> {
+	pub level_number: i32,
+	pub level_name: &'a str,
+	pub attempts: i32,
+	pub time: i32,
+	pub realtime: f32,
+	pub steps: i32,
+	pub step_offset: i32,
+	pub bonks: i32,
+}
+
+impl<'a> PlayMetrics<'a> {
+	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources) {
+		let mut buf = shade::d2::TextBuffer::new();
+		buf.viewport = resx.viewport;
+		buf.blend_mode = shade::BlendMode::Alpha;
+		buf.shader = resx.font.shader;
+
+		let rect = resx.viewport.cast();
+		buf.uniform.transform = cvmath::Transform2f::ortho(rect);
+		buf.uniform.texture = resx.font.texture;
+
+		let size = rect.height() * FONT_SIZE * 0.75;
+
+		let scribe = shade::d2::Scribe {
+			font_size: size,
+			line_height: size * (5.0 / 4.0),
+			color: Vec4(255, 255, 255, 255),
+			..Default::default()
+		};
+
+		let [_, rect, _] = draw::flexh(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
+		let [_, rect, _] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
+
+		let text = fmtools::format!(
+			"Level "{self.level_number}": \x1b[color=#ff0]"{self.level_name}"\x1b[color=#fff]\n"
+			"Attempt: \x1b[color=#0f8]"{self.attempts}"\x1b[color=#fff]\n"
+			"Real: \x1b[color=#0f8]"{FmtRealtime(self.realtime)}"\x1b[color=#fff]\n"
+			"Time: \x1b[color=#0f8]"{chipcore::FmtTime(self.time)}"\x1b[color=#fff]\n"
+			"Step offset: \x1b[color=#0f8]"{self.step_offset}"\x1b[color=#fff]\n"
+			"Steps: \x1b[color=#0f8]"{self.steps}"\x1b[color=#fff]\n"
+			"Bonks: \x1b[color=#0f8]"{self.bonks}"\x1b[color=#fff]\n"
+		);
+
+		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &text);
+
+		buf.draw(g, shade::Surface::BACK_BUFFER);
+	}
+}
+
+pub fn draw_metrics(g: &mut shade::Graphics, resx: &Resources, metrics: &shade::DrawMetrics) {
+	let mut buf = shade::d2::TextBuffer::new();
+	buf.viewport = resx.viewport;
+	buf.blend_mode = shade::BlendMode::Alpha;
+	buf.shader = resx.font.shader;
+
+	let rect = resx.viewport.cast();
+	buf.uniform.transform = cvmath::Transform2f::ortho(rect);
+	buf.uniform.texture = resx.font.texture;
+
+	let size = rect.height() * FONT_SIZE * 0.75;
+
+	let scribe = shade::d2::Scribe {
+		font_size: size,
+		line_height: size * (5.0 / 4.0),
+		color: Vec4(255, 255, 255, 255),
+		..Default::default()
+	};
+
+	let [_, rect, _] = draw::flexh(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
+	let [_, rect, _] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
+
+	let text = fmtools::format!(
+		"Draw duration: \x1b[color=#0f8]"{metrics.draw_duration.as_secs_f64() * 1000.0:.2}"\x1b[color=#fff] ms\n"
+		"Draw calls: \x1b[color=#0f8]"{metrics.draw_call_count}"\x1b[color=#fff]\n"
+		"Vertex count: \x1b[color=#0f8]"{metrics.vertex_count}"\x1b[color=#fff]\n"
+		"Bytes uploaded: \x1b[color=#0f8]"{metrics.bytes_uploaded as f64 / 1024.0:.2}"\x1b[color=#fff] KiB\n"
+	);
+
+	buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::BottomLeft, &text);
+
+	buf.draw(g, shade::Surface::BACK_BUFFER);
+}

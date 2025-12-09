@@ -253,6 +253,8 @@ fn main() {
 						state.draw(&mut app.g, &mut app.resx, time);
 						app.g.end();
 
+						state.metrics = app.g.get_draw_metrics(true);
+
 						app.surface.swap_buffers(&app.context).unwrap();
 					}
 				}

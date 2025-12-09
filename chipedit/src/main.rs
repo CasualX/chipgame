@@ -380,6 +380,8 @@ fn main() {
 						editor.draw(&mut app.g, &app.resx, time);
 						app.g.end();
 
+						_ = app.g.get_draw_metrics(true);
+
 						app.surface.swap_buffers(&app.context).unwrap();
 					}
 				}

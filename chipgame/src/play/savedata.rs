@@ -18,44 +18,22 @@ pub struct Scores {
 	// pub attempts: i32,
 }
 
+#[derive(Default)]
 pub struct HighScores {
 	pub ticks: Vec<i32>,
 	pub steps: Vec<i32>,
 	pub attempts: Vec<i32>,
 }
 
+#[derive(Default)]
 pub struct SaveData {
 	pub current_level: i32,
 	pub unlocked_levels: Vec<bool>,
 	pub completed_levels: Vec<bool>,
 	pub high_scores: HighScores,
-	pub bg_music: bool,
-	pub sound_fx: bool,
-	pub dev_mode: bool,
-	pub perspective: bool,
-	pub auto_save_replay: bool,
 	pub show_hidden_levels: bool,
-}
-
-impl Default for SaveData {
-	fn default() -> Self {
-		Self {
-			current_level: 0,
-			unlocked_levels: Vec::new(),
-			completed_levels: Vec::new(),
-			high_scores: HighScores {
-				ticks: Vec::new(),
-				steps: Vec::new(),
-				attempts: Vec::new(),
-			},
-			bg_music: true,
-			sound_fx: true,
-			dev_mode: false,
-			perspective: true,
-			auto_save_replay: false,
-			show_hidden_levels: false,
-		}
-	}
+	pub segmented_speedrun: bool,
+	pub options: chipty::OptionsDto,
 }
 
 impl SaveData {
@@ -103,14 +81,6 @@ impl SaveData {
 		let Some(attempts_entry) = self.high_scores.attempts.get_mut(level_index) else { return 0 };
 		*attempts_entry += 1;
 		*attempts_entry
-	}
-
-	pub fn is_level_unlocked(&self, level_number: i32) -> bool {
-		if self.show_hidden_levels {
-			return true;
-		}
-		let level_index = (level_number - 1) as usize;
-		self.unlocked_levels.get(level_index).copied().unwrap_or(false)
 	}
 
 	pub fn get_level_state(&self, level_number: i32) -> LevelState {
@@ -163,13 +133,7 @@ impl SaveData {
 				steps: self.high_scores.steps.iter().enumerate().filter(|(_, &v)| v >= 0).map(|(i, &v)| (level_set.levels[i].name.clone(), v)).collect(),
 				attempts: self.high_scores.attempts.iter().enumerate().filter(|(_, &v)| v > 0).map(|(i, &v)| (level_set.levels[i].name.clone(), v)).collect(),
 			},
-			options: OptionsDto {
-				background_music: self.bg_music,
-				sound_effects: self.sound_fx,
-				developer_mode: self.dev_mode,
-				perspective: self.perspective,
-				auto_save_replay: self.auto_save_replay,
-			},
+			options: self.options.clone(),
 		};
 
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
@@ -195,12 +159,9 @@ impl SaveData {
 				steps: vec![-1; level_set.levels.len()],
 				attempts: vec![0; level_set.levels.len()],
 			},
-			bg_music: true,
-			sound_fx: true,
-			dev_mode: false,
-			perspective: true,
-			auto_save_replay: true,
 			show_hidden_levels: false,
+			segmented_speedrun: false,
+			options: chipty::OptionsDto::default(),
 		};
 		this.unlocked_levels[0] = true;
 
@@ -217,11 +178,7 @@ impl SaveData {
 			}
 		}
 
-		this.bg_music = dto.options.background_music;
-		this.sound_fx = dto.options.sound_effects;
-		this.dev_mode = dto.options.developer_mode;
-		this.perspective = dto.options.perspective;
-		this.auto_save_replay = dto.options.auto_save_replay;
+		this.options = dto.options.clone();
 
 		for level_index in dto.unlocked_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
 			this.unlocked_levels[level_index] = true;

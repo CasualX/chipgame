@@ -24,7 +24,7 @@ pub struct FxState {
 	pub darken: bool,
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
-	pub replay: Option<Vec<u8>>,
+	pub replay_inputs: Option<Vec<u8>>,
 	pub warps_set: i32,
 	pub warps_used: i32,
 	pub scout_active: bool,
@@ -120,13 +120,13 @@ impl FxState {
 			select: input.select.is_held(),
 		};
 
-		if let Some(_) = &mut self.replay {
+		if let Some(_) = &mut self.replay_inputs {
 			if player_input.has_directional_input() {
-				self.replay = None;
+				self.replay_inputs = None;
 			}
 		}
-		let replay_input = self.replay.as_ref().and_then(|replay| {
-			replay.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
+		let replay_input = self.replay_inputs.as_ref().and_then(|inputs| {
+			inputs.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
 		});
 
 		self.gs.tick(&replay_input.unwrap_or(player_input));
