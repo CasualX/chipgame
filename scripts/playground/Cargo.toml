@@ -10,3 +10,6 @@ dataview.workspace = true
 cvmath.workspace = true
 serde_json.workspace = true
 ini_core.workspace = true
+
+soloud = "1.1"
+rfd = { version = "0.16", default-features = false }
