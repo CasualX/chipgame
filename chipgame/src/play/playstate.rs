@@ -104,7 +104,7 @@ impl PlayState {
 		// else if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{}/level{level_number}.json", self.lvsets.current().name)) {
 		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
 		// 	seed = chipcore::RngSeed::Manual(u64::from_str_radix(&replay.seed, 16).unwrap());
-		// 	inputs = Some(chipty::decode(&replay.replay));
+		// 	inputs = Some(chipty::decode(&replay.inputs));
 		// }
 		else {
 			seed = chipcore::RngSeed::System;
@@ -521,6 +521,12 @@ fn play_fx_game_over(this: &mut PlayState) {
 
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	let replay = fx.gs.save_replay(fx.game_realtime);
+	let replay = chipty::ReplayDto {
+		warps_set: fx.warps_set,
+		warps_used: fx.warps_used,
+		unpauses: fx.unpauses,
+		..replay
+	};
 	let record = serde_json::to_string_pretty(&replay).unwrap();
 	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.gs.ps.attempts);
 	let path = path::Path::new(&path);

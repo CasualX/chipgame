@@ -5,7 +5,7 @@ use std::io::Write;
 use rayon::prelude::*;
 
 fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, seed: u64, count: usize) -> Option<(usize, u64)> {
-	let inputs = chipty::decode(&replay.replay);
+	let inputs = chipty::decode(&replay.inputs);
 
 	let attempts_done = Arc::new(atomic::AtomicUsize::new(0));
 	let best_time = Arc::new(atomic::AtomicI32::new(0));

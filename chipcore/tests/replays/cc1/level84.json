@@ -1,8 +1,10 @@
 {
-  "ticks": 1995,
-  "realtime": 33.733334,
+  "level_name": "Wars",
+  "attempts": 1,
+  "realtime": 32.8325,
+  "ticks": 1971,
   "steps": 131,
   "bonks": 1,
   "seed": "cb3ac42905b94c57",
-  "replay": "eNrtlUsOgCAMRAfiwvuf2OCnqZpaCi1xwVsRQqAz9JNzHbCRfwSwnPDIyjr1w7WCba4x3J2VTvk7iEOVTKt5FumTDq4asGZcckf+dIOMRvY7Hq/RPgLq9h3yoN5osQoftygtT+kGtCZ3B0wH6FlQr9Yz7+PmQjF2Ax3lFOc"
+  "inputs": "eNrtlNEOgCAIRYGa86H//97Wykabt0Jg66Hz5NAp9yKIvINsyIcgmg90Ztua/WitpII1h6uz6FS8g7SrwoyaZ5H+46D1gPXHcTi46I/JOzgfXfrhSFAOJXvUmRzB13TL1janu9riWZVAGRfJydREVuUJFfw"
 }

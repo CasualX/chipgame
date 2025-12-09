@@ -1,8 +1,10 @@
 {
-  "ticks": 3384,
-  "realtime": 57.6,
-  "steps": 248,
+  "level_name": "Metastable to Chaos",
+  "attempts": 14,
+  "realtime": 13.596574,
+  "ticks": 817,
+  "steps": 68,
   "bonks": 0,
   "seed": "7588f4bdc2a02066",
-  "replay": "eNrNlkEOxCAIRX/VNC68/3mnsZ2qIyA4NunbNSpSBD4hZJBxB4GgrB7sYQTiSTmeP9NtqVrL5NUTxuTe4DRg0+Am6K0A9499weh+rzHM73XCc6j+wvvNTBxBJw+/H8A2gWRyDiaTq0dFeev4HOe9iQ0X6WWd9RJ3ql7mFEXRpjVoB65AdXXXuP5n0c1Tbq4DFexQIf0NO7mxTfjmoKnkwKW/8ObynuWxvvI3KTyjPUHXVJfj3sgenmWuARoU5dDlFX4w9BKgPwvOl5RSfB2pw3RcqagWFWO7vqJlGquA7Lrrisxbp6vBBCXMUA9lRy3l43FIkQyiapATxD+Nub5Up1/U8TXSYBk3Ox39AJvfLfg"
+  "inputs": "eNq90ksKwCAMBNCpGaSLLHP/sxZaaq0fJAq+ZcQkDDEzIwkcHudGqnyoZkX2hJcMdy8ewlYpcJFUi5wQ688oIgQaC0wN+3rW5YVmDr5D/ctz8R85bheekw1W"
 }

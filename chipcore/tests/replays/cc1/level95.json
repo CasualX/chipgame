@@ -1,8 +1,11 @@
 {
-  "ticks": 2819,
-  "realtime": 57.533333,
-  "steps": 148,
+  "level_name": "Four Square",
+  "attempts": 6,
+  "realtime": 36.83554,
+  "ticks": 2091,
+  "steps": 117,
   "bonks": 2,
   "seed": "e5d14f9079db77f7",
-  "replay": "eNrNlusOgyAMhYuSBRIfyvd/qmXTyWU99QAx4fsntNp79f5E2vC13mIil3Rx+iVciKvBBtxL2Fzf7NbM7H7YhjJeufcf//N4et+Xz1NnuWddnUryJjqGGAMgc8KgNdaWXm8tMXWKlGAxBa0f5K/aUkZeTLQWDt4NrKWdcwnE4dQv7A7cD+DFrj9SnV951GDVGL3VPxNlllO0olrtKZbUWHECChpN7MG5Qk8A0OH0hOnfdPMknMrf+Cuao9Wjw0+NafNxPOE1oBWrvYx/ktumCqWVBXYWWoci1o9AoFHtegP14Bjw"
+  "inputs": "eNq1lFsOhSAMRAs2BhIX5f5XdXOVYMW+qPH8KTS2Mx0RGzAHjnVZBfrt29uD0oE0Ijdg39Dp3wxXkr4/7uGuF53+Pz/VEzHmZ6vJNsuSWK5pavJQaxEgQyjMaq3VRXfJs6dSkbhMhcsDPLbtcmT1qJV9+MeQq7j3PgNlOfkDPYH7iXiw84+u5A8TGf8HaqVsNliRgZBvbr9LgA3jsI2y6RIFmEprM5lGZrXSYOl+XmPN4odmVSTnm0dZySpV7tfG/gDGuBom",
+  "unpauses": 1
 }

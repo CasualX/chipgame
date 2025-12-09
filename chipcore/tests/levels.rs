@@ -6,7 +6,7 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) {
 	let mut game = chipcore::GameState::default();
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
-	let inputs = chipty::decode(&replay.replay);
+	let inputs = chipty::decode(&replay.inputs);
 	for &byte in &inputs {
 		if game.is_game_over() {
 			panic!("Game ended early during replay");

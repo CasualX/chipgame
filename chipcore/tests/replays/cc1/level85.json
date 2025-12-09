@@ -1,8 +1,10 @@
 {
-  "ticks": 5736,
-  "realtime": 96.26667,
-  "steps": 418,
-  "bonks": 3,
+  "level_name": "Telenet",
+  "attempts": 1,
+  "realtime": 95.39944,
+  "ticks": 5725,
+  "steps": 420,
+  "bonks": 1,
   "seed": "9ac2e4847da0330b",
-  "replay": "eNrVWO1ywyAMU7Jdj73/C6+9loDBXxB8TfRvawi2LMuEfb8N8HsfrM/+4gnjiYiibxFYrySkmwFYxubF83xhpcp1oaMitn4QE1R+dqteOJ0n1IiPLVDQPSa00hs04IL8f5FPheaWUPJid2Q5CFgYlovM1Y6O1OQLoqn3sdBTaEuapNKbEr1kuzyfecnjYdPVa7vO+E/RtvzSXWW/CRJe0BIrfU5WwOlHjEgt6KURN9PFy9BWloBUrNUm7XypsOhn5OABou1/vY6fJyX50+y1NhPJqx8G553edmKM03PWo86aMIh2A7knXSbFMpdUC/WYlL2rbOHG9q5WyPgxx7TTUsWTKJjeyX/5IncQp3+VzJ/sOrc4hyORrZ+cg+rsIjooGjbemXlBsuHnOeLgnnXpRDCm7Fp3mZh5jhDqvagFhDJnEdpG0HYJ73vndS8UiU+pH/PlN75U7PnWOn6H32Zgydc3Am4FpPRHb76A615+ceIvp7zQb/uIq6FVsZkN8s3olLC3GPwDVo5AaA"
+  "inputs": "eNrVWO1ywyAMU9Jdj931/Z9367Uk2PgLAm2if1sh2LIsk6zrZYCf62B89idPGP+YUfRlBsYrCeliAIaxefI8nxipclvoKIgtF6KDyvdpxQO784QZ8XYEdlTLlFZ6gQa8I/9f5dOgmRNKHhyOLAcBD81y0blaUZGaYkGwem8bI4X2pEkqvRjRa7Yr85m33O8+XbW2y4x/DW3rD11N9lmQiIKW2OhzsgNBPxJE6sEujXqYLV6Btn0LSMW4Nmnna4VFPSMbLxC8/+06vldq8qfZW22mklcuhuSd0XYSjDNy16POmtAIfoDekyGTEplLpoVGTMo/Vbdw5/hQK2Tc3DEdtFT1Jgqhd/JfscgDxNlvJf03u8otjmFLZKknZ6M6q4g2ipqNt2dekGzkeY55CM+6dCAYV3bcXTpmXiCE8ixqAVOZ8wjlEfAukX3vuO6VIskp1WN+/00ulXi/lXH71qeMCS+Rj8fIAMd/JPGu3t/CpHf6M32zWD6ANBfzAv8DTN5Asw"
 }

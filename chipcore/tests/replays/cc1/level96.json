@@ -1,8 +1,10 @@
 {
-  "ticks": 6716,
-  "realtime": 119.55,
-  "steps": 418,
-  "bonks": 3,
+  "level_name": "Paranoia",
+  "attempts": 1,
+  "realtime": 104.31763,
+  "ticks": 6260,
+  "steps": 412,
+  "bonks": 2,
   "seed": "b62cdd8dd81d40d2",
-  "replay": "eNrtWduSgyAMjcg4PvSj9v+/andrqwFOSIIw1Zmet2qIuRySQGPcQS9sv1aMaQcXFqSJply+AdUvpLqZMxXp0qZtSdiRGrB7Q0zkBayv6skSeoH5K4BwHLKkH9avinhk4m0ZzRkSSwJuH0hizZl0ljOQzZviwxYx5hEZLONfbyNbEmceq46EDkfAgskXszfzHHpi+YPG4kfCmM9gujC4neEOkDZshA+fLwSu6puC6zniw/RbKol9i5SLUFUmSw2XfVQjZ7BPpgp2gNssRT4NNeqsQVzaEGapfb8JJlMBBHDRnbMx5lYoGx73PgsjtSaok5FKgriJln5Z31cZmrqPY/gY0gzUgggSOsiUPt2XzeIDbYgGqIsqLLNYqH1Os9gl749J/wXIAddQMSsk8FHDwSUP6bwM9XHax9H6a/cm6UYHabvVxshrDOJSbpBgvQNVxuZ4L6yjcLXM68D3GZ51vY9d2XNGYtNs5B+l1LsLMurDu+4MQ2BoUNBYmSIr9EoPYuRtF0h43NldPhR04e1yquoQoQNtY4O3AxOynmmooKShYxT9wo+fNzxZRgQSalZy7drvL4ChOCgGDf4FwVs3mg"
+  "inputs": "eNrVWNuygyAMjMg4PvT/v/dcbDXg5oYw1X1rDTHZLCSY8w56Y/u1Ykw7uLFgTTTV9g1Q31D6Zsko1ueYtiVpRxnAng0xkzewPzWTJfUCy1cAYR6qoh/Rr4Z5ZuZtFa0Vks8C3F5QcM2VdFUzUM2b4yMWkfOMApbx57dRLUUyr9VGIYeDsOTKxZ3NPKeeWH5hqfhVKOY7mG4MHmd6AqQNm+Gf/w8Erdqbgvs5+GH+PSeJf4ucF6FTmTxnuJyjyZwjPlkqOAEes8R8STXqrElc2kCz1L4/ApOlAAhc7OR8inkUzg2PZ1/RSK0F6hSkUSAeoqdf6vuqQlP3CQwfQ5qBeSCCgg4KpU/3ZbP4wBiyA+YiRWWeCK3XWRGH7OOc9F+AEggNFbMhgpg0AlqKiC6q0JimYxrVH4c3STc5SNtNGyPvMYhLtUGGegdSxub8LKyjcLfK28DfMyLrel+7qv+ZiF2zUXyUMr9dkNMf3nVXFAKpQaSxY4q8sE96wFG0XSDjcXd3+VLQRbfLpVOHCF1oGxu8H1iQeqWhA1Ibwe1x1AHo5wc0ZDRc"
 }

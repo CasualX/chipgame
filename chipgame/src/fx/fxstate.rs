@@ -27,6 +27,7 @@ pub struct FxState {
 	pub replay_inputs: Option<Vec<u8>>,
 	pub warps_set: i32,
 	pub warps_used: i32,
+	pub unpauses: i32,
 	pub scout_active: bool,
 	pub scout_dir_until: [f64; 4],
 	pub scout_speed: f32,
@@ -93,6 +94,7 @@ impl FxState {
 			self.gs.ts = chipcore::TimeState::Running;
 			self.events.push(FxEvent::Unpause);
 			self.hud_enabled = true;
+			self.unpauses += 1;
 			self.scout_init(false);
 
 			// Center camera on player again

@@ -7,7 +7,7 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 	let mut game = chipcore::GameState::default();
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
-	let inputs = chipty::decode(&replay.replay);
+	let inputs = chipty::decode(&replay.inputs);
 	for &byte in &inputs {
 		if game.is_game_over() {
 			break;
@@ -46,7 +46,7 @@ fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, mut seed: u
 		let mut game = chipcore::GameState::default();
 		game.parse(level, chipcore::RngSeed::Manual(seed));
 
-		let inputs = chipty::decode(&replay.replay);
+		let inputs = chipty::decode(&replay.inputs);
 		for &byte in &inputs {
 			let input = chipcore::Input::decode(byte);
 			game.tick(&input);

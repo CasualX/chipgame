@@ -288,13 +288,18 @@ impl GameState {
 	/// Save replay data.
 	pub fn save_replay(&self, realtime: f32) -> chipty::ReplayDto {
 		chipty::ReplayDto {
+			level_name: Some(self.field.name.clone()),
 			date: None,
-			ticks: self.time,
+			attempts: self.ps.attempts,
 			realtime,
+			ticks: self.time,
 			steps: self.ps.steps,
 			bonks: self.ps.bonks,
 			seed: format!("{:016x}", self.field.seed),
-			replay: chipty::encode(&self.inputs),
+			inputs: chipty::encode(&self.inputs),
+			unpauses: 0,
+			warps_set: 0,
+			warps_used: 0,
 		}
 	}
 }
