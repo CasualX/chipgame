@@ -180,32 +180,30 @@ impl EditorEditState {
 		}
 
 		{
-			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
+			let mut cv = shade::im::DrawBuilder::<menu::UiVertex, menu::UiUniform>::new();
 			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.depth_test = Some(shade::DepthTest::Less);
-			cv.shader = resx.shader;
-			cv.uniform.transform = cam.view_proj;
+			cv.shader = resx.colorshader;
+			cv.uniform.transform = cvmath::Transform2::ortho(cv.viewport.cast());
 			cv.uniform.texture = resx.spritesheet_texture;
-			cv.uniform.pixel_bias = resx.pixel_art_bias;
 
 			struct ToVertex {
 				color: [u8; 4],
 			}
-			impl shade::d2::ToVertex<render::Vertex> for ToVertex {
-				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> render::Vertex {
-					render::Vertex { pos: pos.vec3(0.0), uv: Vec2::ZERO, color: self.color }
+			impl shade::d2::ToVertex<menu::UiVertex> for ToVertex {
+				fn to_vertex(&self, pos: Point2<f32>, _: usize) -> menu::UiVertex {
+					menu::UiVertex { pos: pos, uv: Vec2::ZERO, color: self.color }
 				}
 			}
-			let pen = shade::d2::Pen { template: ToVertex { color: [0, 0, 255, 255] } };
+			let pen = shade::d2::Pen { template: ToVertex { color: [0, 128, 255, 255] } };
 			for conn in &self.game.gs.field.conns {
-				let src = conn.src.map(|c| c as f32 * 32.0 + 16.0);
-				let dest = conn.dest.map(|c| c as f32 * 32.0 + 16.0);
+				let src = cam.world_to_viewport(conn.src.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
+				let dest = cam.world_to_viewport(conn.dest.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				cv.draw_arrow(&pen, src, dest, 12.0);
 			}
 
 			let pen = shade::d2::Pen { template: ToVertex { color: [255, 0, 0, 255] } };
 			for ent in self.game.gs.ents.iter() {
-				let pos = ent.pos.map(|c| c as f32 * 32.0 + 16.0);
+				let pos = cam.world_to_viewport(ent.pos.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				if let Some(face_dir) = ent.face_dir {
 					cv.draw_arrow(&pen, pos, pos + face_dir.to_vec().map(|c| c as f32 * 20.0), 4.0);
 				}
