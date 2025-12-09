@@ -34,7 +34,7 @@ impl EditorPlayState {
 			start: menu::KeyState::Up,
 			select: menu::KeyState::Up,
 		};
-		self.game.think(&input);
+		self.game.think(&input, false);
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
 		g.clear(&shade::ClearArgs {

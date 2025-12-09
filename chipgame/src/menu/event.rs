@@ -46,8 +46,4 @@ pub enum MenuEvent {
 
 	// ScoutMode Events
 	OpenScoutMode,
-	ScoutN,
-	ScoutE,
-	ScoutS,
-	ScoutW,
 }

@@ -22,19 +22,6 @@ impl ScoutMode {
 		self.down = input.down.is_held();
 		self.left = input.left.is_held();
 		self.right = input.right.is_held();
-
-		if self.up {
-			events.push(MenuEvent::ScoutN);
-		}
-		if self.down {
-			events.push(MenuEvent::ScoutS);
-		}
-		if self.left {
-			events.push(MenuEvent::ScoutW);
-		}
-		if self.right {
-			events.push(MenuEvent::ScoutE);
-		}
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();

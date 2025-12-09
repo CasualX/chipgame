@@ -99,7 +99,12 @@ impl FxState {
 			self.camera.move_teleport = true;
 		}
 	}
-	pub fn think(&mut self, input: &Input) {
+	pub fn think(&mut self, input: &Input, menu_active: bool) {
+		if menu_active {
+			self.scout_handle_input(input);
+			return;
+		}
+
 		if !self.gs.is_game_over() {
 			if input.start.is_pressed() {
 				self.pause();
@@ -214,12 +219,22 @@ impl FxState {
 		}
 	}
 
-	pub fn scout_dir(&mut self, dir: chipty::Compass, speed: f32) {
-		if !self.scout_active {
-			return;
+	fn scout_handle_input(&mut self, input: &Input) {
+		self.scout_speed = if input.a.is_held() { 5.0 } else { 2.0 };
+
+		let scout_until = self.time + SCOUT_INPUT_HOLD;
+		if input.up.is_held() {
+			self.scout_dir_until[chipty::Compass::Up as usize] = scout_until;
 		}
-		self.scout_speed = speed;
-		self.scout_dir_until[dir as usize] = self.time + SCOUT_INPUT_HOLD;
+		if input.right.is_held() {
+			self.scout_dir_until[chipty::Compass::Right as usize] = scout_until;
+		}
+		if input.down.is_held() {
+			self.scout_dir_until[chipty::Compass::Down as usize] = scout_until;
+		}
+		if input.left.is_held() {
+			self.scout_dir_until[chipty::Compass::Left as usize] = scout_until;
+		}
 	}
 	fn scout_camera(&mut self, dt: f64) {
 		if !self.scout_active || dt <= 0.0 {

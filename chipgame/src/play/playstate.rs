@@ -63,10 +63,9 @@ impl PlayState {
 				select: menu::KeyState::w(self.input.select, input.select),
 			};
 			self.menu.think(&input);
-			if self.menu.stack.is_empty() {
-				if let Some(fx) = &mut self.fx {
-					fx.think(&input);
-				}
+			let menu_active = !self.menu.stack.is_empty();
+			if let Some(fx) = &mut self.fx {
+				fx.think(&input, menu_active);
 			}
 		}
 		self.input = *input;
@@ -288,30 +287,6 @@ impl PlayState {
 				menu::MenuEvent::OpenScoutMode => {
 					if let Some(fx) = &mut self.fx {
 						fx.scout();
-					}
-				}
-				menu::MenuEvent::ScoutN => {
-					if let Some(fx) = &mut self.fx {
-						let speed = if self.input.a { 5.0 } else { 2.0 };
-						fx.scout_dir(chipty::Compass::Up, speed);
-					}
-				}
-				menu::MenuEvent::ScoutE => {
-					if let Some(fx) = &mut self.fx {
-						let speed = if self.input.a { 5.0 } else { 2.0 };
-						fx.scout_dir(chipty::Compass::Right, speed);
-					}
-				}
-				menu::MenuEvent::ScoutS => {
-					if let Some(fx) = &mut self.fx {
-						let speed = if self.input.a { 5.0 } else { 2.0 };
-						fx.scout_dir(chipty::Compass::Down, speed);
-					}
-				}
-				menu::MenuEvent::ScoutW => {
-					if let Some(fx) = &mut self.fx {
-						let speed = if self.input.a { 5.0 } else { 2.0 };
-						fx.scout_dir(chipty::Compass::Left, speed);
 					}
 				}
 				menu::MenuEvent::SetBackgroundMusic { value } => {
