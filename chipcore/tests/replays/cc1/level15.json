@@ -1,8 +1,13 @@
 {
-  "ticks": 9802,
-  "realtime": 165.68333,
+  "level_name": "Elementary",
+  "attempts": 80,
+  "realtime": 246.63414,
+  "ticks": 9793,
   "steps": 816,
   "bonks": 0,
   "seed": "e63a93f9c23d70fa",
-  "replay": "eNrNWdGSwjAIpKZmmk7+/3vv9IxaGwILtN4+OrZJyMIudJ5/UesCokwQaAlDfaDzU63zHTlfzJB3Wpizp4sLeY5BjQlzeaLz2+20zuMqAv28zz3sF5wkqg7OldJkw2cgj0WZHARFj+jgQXpAlx4N0Ltvpaeh5Yc2QaBLow09ScNhJlWZB3DGryuW7ej99phCcKHfVxmoENwvFJYv0kjWhjUDNGLOwh7fBKr/AvEt3TdW7ROWFVq8kOpQ3mVCVUHeMSErqN4p/UUoI/LuBzXLIeMip7mbd5if77mW4NjEgklbPFhstCh0v6SMY1NGqx9yESfbQ8Ey30F9s7fTFgPQ+v6LTGErLHcCadvVduKcjypqKYj0KYQ/KgapVrqiLoKDh32yXc+ArX+pOX14ep0B1DjNrencTxoW+OE9lmBojFZCEyCmw7vg/eQEtcndk9PlTPjynj4ZHrGjXoVIkTqee3n7ai68HF+thzR1oC1hw+xplFqlTouyaWl8M6VVd9VztGflypXVU5zSAOVTO5Fq7TiGHSeJWuXQzuYVXto8Vh6N8KvGg4mHWLy2GFQ70MwiPAbZuoYw6UDujnGuNseLvUrtQRlXj4m4G/urqFtPzNM5qlUZzef8RCnomvFcLdO3kCIZ25+B0nIcKjJfGt4fEVTBD5gT8BPkGEety0aZ3Wh3WVTtsOyKdSuujjjrEgMhQErQp0feAeiqtlmjs25rX5nBs8fivl/CmYnq1PUKHgD0PwWbjxwvs3YlHIyMHPNHCtEUxedvQ5ODbAAfBdRxne1Eiv24XFW1l+TbCMoSPX4A1JihJg"
+  "inputs": "eNrFWctuwzAMU+vASABdduv/f+m2ommzzg/SplIeiya2JIqindvttu7w5Re+dmAXEqsMy47XJt2XA64TMOtvoBpjmlg4LxqosvwssNVCn4n2nmqq2EfkiVVTn6r1hy8TWE9EozutnyIurquiGGiT7CCW+ME97qWgG1ifI/89CpCXf0ZbtfYME7XZOgBW1R6pnaU68FyE8EHsNkNEtyvhGCOe9KaidXw4PCiEzZoXjY2Szz91xJLMvf6wAKRLaUa7oB2liJnOyo7E/3zKtvDw9US4FzJtfLayRrrG9/weghHNGc4bNLByKAofMgXIEBswmnVNoreQU3t2op5S1886XZpAO2KM7NNo2cGPkDZHaIpmkga0GuS5EPn/0LDxMweWTVSGcWbhqqqMffZq4pzRYeVipJgtCWPORVHOGqYDlEutpG/bqF+SqYV6OqX/xd2GwyQy3TiIjpa4bjhNpOFym9DIQoCe+wSlKjcH0Grek9imbT0cNd4qbA39wEQsDYlv+QE6t+Xac7dr9XMYyUQjr/Vc3LwCtxJzmjwRes/E3fa94eWZrS+BmmNuE5uIKOy6aqI2lvq6Iy6FOq6mU1JVFR3DPhIbKRY50nOhDRO/Alwud1rYsXeL7pcAzUeEqWF6Bj4JMpc1U2eB8SmtGh4RcDYY1pVzB2mjNq+bBvT2o2dHXy4aojxeFNXUr3Io9wkftvZQJxjF1IKo9c4dPDPILmHwDaqOmdw",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 10
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 5997,
-  "realtime": 99.93174,
+  "level_name": "Nuts and Bolts",
+  "attempts": 136,
+  "realtime": 171.44173,
+  "ticks": 5995,
   "steps": 543,
-  "bonks": 1,
+  "bonks": 4,
   "seed": "a65b159bd43a210e",
-  "replay": "eNrdVlsOwzAIo0mE+pH7n3fTNG1sg8QQ9qr/2wA2xq1dsKvozQeiDcb+SVDgUaJyBxsNjx4LgYie3iivENX026vik6V6XgqYoOhga1JWnbQ0N7ObFkdxQtLSAYU1hcb3TQJXnGPhJ/InfNlGQJznghlD4zGonDK086IHYN7DGrX23H63oGm77tBcg1K0pLB9Ewur4rQSIi/l4IHGdso15+r1yXN3jvZ61xvwuESWcCLRg+CxcEuEo2O/2FDj/i9cJ8clGWlewTrRyA0QMqySe0h/T+tDyJkc30orlUaUSNPtlBWtEKlMjRmzHZtT6wfQ7mF3eF8H4iZFl5hyRRWv5pkH9jQ+NSlPeJxeOv37gJvGAxZ0TLVxjuEiHpI2aZmF3bZblQKGND7cRN8NXriQGB2IVET5DxvkyxaB2GlmiRQzzYph/oyXU1i11H8FSsyx0H1XxI7v9v7X7YCgSYLZfwOJ0SIfUXkKjdaaZVYCJ6DsVF4"
+  "inputs": "eNrdWNFuwzAIJMFCieSH7Y/2/181rVI3tEB8ZztR1XtubeC4g7iUB7YQtXAQWWBsd0I6LhVZ/2BJwmeXdUFE/t2xHuGiqb+3ur8MxXMIoIE1hmWVyuKUobql2ZR+rCQ8LRXosBLQeF0l8I4jBN9of8HFdgbEeR5oMXRehpBTgzTvcgDqfRpjlB7tdwM9ncfdVVcGR23cqoS5vjjgJCIs4RsTiKHTnKv+xTnWMBUwlzLNU1klCl4SNJf56Y6uVy+Hrx/gP+8e+QCpNKtkd0hTLf4UjQV7HqVzAiWzjBsms9i+rX5BfWOMyWfpVH3eBmhQlWyOHnfRC4TdZMzB56jKTVGgyyUg1EZodAEbaqUpjUZIkx4Y2i7+Ti4JeDx739zPS1qjeT7Co5eX5YKUpeFhuR63S1ArY//pxsRKPf7wg6uuzSIypwT4+OxcVfhdTmfF3D7SJi53L4TKkhF/RBmg8rfC3jDs/YntNgR2lLxi7cTIuR0VerSu2QNdsOjO4vwb8TFYoQ",
+  "unpauses": 4,
+  "warps_set": 3,
+  "warps_used": 10
 }

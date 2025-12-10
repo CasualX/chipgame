@@ -1,8 +1,13 @@
 {
-  "ticks": 3929,
-  "realtime": 66.183334,
+  "level_name": "Teleblock",
+  "attempts": 59,
+  "realtime": 132.85994,
+  "ticks": 3541,
   "steps": 295,
   "bonks": 0,
   "seed": "8cda471f64b7b53e",
-  "replay": "eNqtVlmOBSEIxCVGE+9/3pl5rxVsAcFMfXa7lFSxxPhGyX/ov6gDwCJMwNhLPwbufxDQKqJnP2Blv9IX+CPmKR9sEYnp9Q7cwVFhAoSRgCpgZTQvOmKc+8X3rNbCESIRQsm0dshVSnQCA5TwvRfi53lzeeTPVP0KdlANZcZUH79VFXs4xYI7RLu7pDgg/SSIW/DFvbrQuY2N5pAFNEKcBKthuspRC4Vc03xu+x8QgYY+yZOIsgNnLUzyGriv4MBU8HoFcjkw9rF7p4KQ3hA3rjdEwVUstbDrXY3pTNqqJT9oGi8rMDWCExhf0qbQpSabb0e9IjvfwZQPJX4HZ+41kHONZ+JYcra4Bh0J5YHipCeF211+wdsDlmlDm4TGfqcHhClI4Uz/thvGqk/sYjn619FJfLc6zG3d4SetWcB8Tna1MmaMYJzRtvFQDufxnedCuHIxKrNWGaUpdYdZRH/BPprfZZwtsHL9+IDztHuiwc3K2Nv2McThV5ANcs6Pa/wAsWwslQ"
+  "inputs": "eNqtV9uuhCAMLGIMJj6Y8/8fe3Y3KlCmN3bnURHazkyLy8KxrW8cL5QbBJEePN8mgGbrpOI67HXwGkNzwv2ISo8a9bOCFgX5DoqtkoNo6wGywlCDyPIulDwoBvZ74a4sEkttg6AILoFVnOfpZJh9WQSBVkrk8o6BbesUfFR4ONEV6VGrvOIydZlDl/CBRdjUv/edwSkzUbw8cq2Vw7mYM1SqAgfVkpdFPYS1J2h3gmFC/IoEkx00QWNp/P7GFFlTQ98eYjbX20RNjIIN4RNZl3L7pvZSNHp3p23x5kMYlkl4ex/FoA+Pupndax1Ub56lVQ/7TOc7RlvE6WWCrm9yxvx6pgWnNk0j5Ahtpi5xe/OriIeJTTj97wOjX2d4EeFX2yYjo28nyCYojdMhY7nJfZkAYjWL6Zousl2/kF8jljbFPHMBwkNXoNc1x4WWGY8u6onozw/CP8C4Mqs",
+  "unpauses": 8,
+  "warps_set": 8,
+  "warps_used": 15
 }

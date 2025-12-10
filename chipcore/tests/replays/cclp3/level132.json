@@ -1,8 +1,13 @@
 {
-  "ticks": 3902,
-  "realtime": 65.7,
+  "level_name": "Commit Suicide?",
+  "attempts": 59,
+  "realtime": 77.56948,
+  "ticks": 3805,
   "steps": 343,
-  "bonks": 0,
+  "bonks": 1,
   "seed": "0824c63219179099",
-  "replay": "eNrFllsSgyAMRbE4jOlk/+stHaUVEJKQoOdTEfPO3TYeeLCZ4Bpoz2YALCZI/kl5/boFt5rASjbi2N3aWpLUIyTab+D6cV4AyfgQ9jiHSO5WOJAF4/sFI63ee4NyjrfYV5zGsrY9ddNzzjjzPvOiyF+UmRQQJnRCRin2Ek/xNvJbCQqbTum8bNqRrBMIGi/Z3V2MxwJH7udTw2az82960wCob5O0w9u0pNhL0wq2LhqUUBPb7x5cd0uU/L7qUatCzvH+BG+0nY1+BbOMoUIEIjkFpLJhTIfAgxWNXYk6mN0z1MHR5BXyVrr6aHm+GMPRItqNG5v7A3mRP5c"
+  "inputs": "eNrVl0sOgCAMRKsY48KV9z+sC3+o9AMdML4liQU6ZVqnqTXzji8KdT5IwHwGmR7JO/wAwSAXIoq0gR5+1pW4dGXKhITyuSUzFi4+xLlcknmLxFn1qwVbNvpv6BqCP6jf41peoZy45gl5/Vo+8KDYYcfcjWqcHuYbiNcothOt/TJ5PVZD4PdNPZoQzC1R16VCR/wplSrUX9lk5TKrNIbRjv8q355hHQylmOcNoGdsdvzNTULLepYmTEcmTGMBxr5Sg6vb7Lz/WmVqA/RcAXS2O8g",
+  "unpauses": 3,
+  "warps_set": 3,
+  "warps_used": 2
 }

@@ -1,8 +1,10 @@
 {
-  "ticks": 3337,
-  "realtime": 60.8,
+  "level_name": "Shuttle Run",
+  "attempts": 6,
+  "realtime": 53.001408,
+  "ticks": 3181,
   "steps": 260,
-  "bonks": 0,
-  "seed": "60f47c680531250b",
-  "replay": "eNrVllkOgCAMROuSRgyH8v6nMhU0LgkdFgO8TxPUDuXRcewA5jkInQxhjFmaxhykrpUKryRIcmGOT9rRQ1cIkydmzQqkaT1t9wuOtXOZIzTEZd22VWCvqLmYKmqhD79/QMnh6Z9Qsj12jJimTP1Cq3JxNwlWp1Yjss0UIHqL8lYD/7cJ9weuUOzK5JdYLn1gk0GCZQigoB1y3mf1I4NqSLukCCavWehfz9XWUeaOl+xFP+WkD207TNs3rA"
+  "bonks": 5,
+  "seed": "2e39c2a5eb8b43fc",
+  "inputs": "eNrVldEKwCAIRa1E9tD/f+9iwWgD05YjO88ZeL1eY/QOSgBAEDm2o2mr/+7usVQ0shCrKBEJL1yTKuOFAJyG+WI/j4hkRMX+CLuzp0048yOqNOmKAusG+rNVg4ZHzvAaLhsxzYdbSiohNDr4SYPO7Zjq0PMlocqEk94h+XmrHBtBfSyKEoJhBgZj4h1qMPaOLgS0a7JoqEb3wuKXE6xeOS0"
 }

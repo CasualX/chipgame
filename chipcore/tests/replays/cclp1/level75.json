@@ -1,8 +1,13 @@
 {
-  "ticks": 5117,
-  "realtime": 111.5,
-  "steps": 326,
-  "bonks": 3,
-  "seed": "1692a43bb5309a05",
-  "replay": "eNq9WFmuwjAMdEkVtU851Lv/qZCA7LYzTgLzB7SO7Rkv4bpaED2+AJpE9oro+MAlq+71+b5MyMZL/84GdC2iOWCQm0MAKX6Ewt2QTi3fzejCI8lXd+xDzSWvBo6Y7ptl/TlLWMTn2CdrPmY9gPJ6xdxyECRe37h2wpxCQ23WUStiFnTRgnci6rZSzMlBs9jaHlcZ0qX4k81NyJR+PpIs3tKrvjdgzIwyy3Xn2lob1UL7GOZhxDJi/P+N/gfZw4ehc/IOs0kfDMOK8qaJYkVBVJoDHid9eN0360LoJS9RwGXEpAW1RWmlJwkeBxkXBtZd83xdHnWHXOy6hrS4MAvDkltHPlSmem63oB8C6V6jJA8qezsEUuf3F129mRZZl6gmdcJXL0FYNeIXCqRykbTPNKHWo/59tCt/VXTS+NSonhkBwa7fqoX/pf1fPsMD3WhugsSxQZZ7hN+bJXRibpiSk/dcy7i0peCO/264Ir0pv97PDng0oHN3QN39eWqrAhjX5t3a5mDeD9wSN3cE8MjoQYT4J5g+OwE"
+  "level_name": "ToggleTank",
+  "attempts": 14,
+  "realtime": 112.18549,
+  "ticks": 3577,
+  "steps": 298,
+  "bonks": 0,
+  "seed": "5df3956eefcd0f0e",
+  "inputs": "eNq1Vu0OwyAIpNUQTfizvf/Dbl26+hFQUbyfTRU4jsMQagDAuQ44/ihuc/fHGIaRnfcCKMxDVa07RLSjkCbpLKVDidcPcnImvT316aV+1zQg3ndh8ZmXI3oZwQZjDLluxY7PGaCtioeWdtDYURrRcLndep1jRZ6Sr4M1WPmGk6RPD0PsydmJKA4bKJnptBvSBR9XsoTEWE5RQzD5AJBKVierKhKHS6rpqT3Gwfny85iwfBvV6K4AZVmg2SAXpPWb+4xGCwbuXwsixlHDRdzSeBbvCxaLvysep33yCJbs/ZZ5gc7+OjMpKReWnrjMS7V2gn4ROx0FNmwegCVBUKek1ApMc4n8u2Ad4G1AOvuUoHaCpfZ2h7H4C0wI/wBaCTRS",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 8
 }

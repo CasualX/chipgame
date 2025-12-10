@@ -1,8 +1,13 @@
 {
-  "ticks": 5975,
-  "realtime": 100.166664,
-  "steps": 505,
-  "bonks": 0,
+  "level_name": "Trinity",
+  "attempts": 77,
+  "realtime": 486.2463,
+  "ticks": 5971,
+  "steps": 507,
+  "bonks": 2,
   "seed": "0010561f02d43615",
-  "replay": "eNrdl9EOwyAIRVmxRhb+/3u3ZFn2MKncylrW82wtoFyupbyodXFSSwdyryxErYtqMSB/HBv4MxzANwhmax9oI+mUjPxLnwgWt7FL96cMFxE8PQo5ChPjStolZjwc+x9+dGedBvWmmFOyt0F79TC0ZYQ6dPqYLIbienjaEiIa/p4jQiIxGjZkKgioLBtfTGbEcHdWKNtOvShMhwUZrfZkRWsbgxpGaAnFq7Ievfgo0XftRIbVVFVQiCuSD4EGcjqU0Tgk3zqdvzRw3Dw2onuVl7EuBv0ne+/DtK+vwJOBOcpz3ibL8ZbYiFpnSeYk7i0PUSr2I78c6hwJclIZkJYLWhJR877zzFENe6h1zS2t11Pnf1HuK5N6KJ3Dpu18AN1BWxw"
+  "inputs": "eNrdl0sOwyAMRIeAUCJ5013vf9JWyq61Ew9YjZu3JmDGnwyt7fS+OOlNAe6VDVhVRJoB/HEc4L/hCbVQ1GrtQ220KZLBv/TNxsVt7KIeWmkRyewhJBUmRknaElc+HPsMPzKo04neiMmSvQ3bqz9DJpLxnMkkPsQCzpMuakNvvoqZuek4Ri9ETGGj2QaimYvR3oGKIkrawgwsvS87dVPwwvhHo/0Jd+h6GZrASxTjc9U5pL4T5EiauKPoA38MSukB9IDm186XDRk006ssVJOBtWPVWwwBlr5zrwWfaX/slAhMb61bhpKfuqQBEa48FGlJCTWQAGYMwwVkqxNgSUXP+8jrUdYJKHcnV1H91eS+IZL2b3Qpx5X5Aiy3XF4",
+  "unpauses": 4,
+  "warps_set": 4,
+  "warps_used": 19
 }

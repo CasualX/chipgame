@@ -1,8 +1,10 @@
 {
-  "ticks": 3732,
-  "realtime": 63.133335,
-  "steps": 244,
-  "bonks": 2,
+  "level_name": "Tossed Salad",
+  "attempts": 113,
+  "realtime": 54.19832,
+  "ticks": 3253,
+  "steps": 236,
+  "bonks": 34,
   "seed": "c202914580d02a8a",
-  "replay": "eNrVl1kOxSAIRXGI0YT9r/flTU1sVZTBtOe3LQLeS2jOf/BDFlJKcQKgG/VNtgAjTfJ9UlwCNHKGJX4HWxKlsI4A8EPs6m2fdqh4P1cnwakTW5OrM+k9JYtwoziUMWYFR84kQ818NTpvgjv499x/uAGc8cIZtwbacLZQM9KHEHpf5keAOK9dtEsC1x3U0JPXJhnuJ6NdD1gL15rbk99LOJh7l3Zn0Ly91XYMYuvqME2U0b9tyV4clTEb2lWdsn+oMUVv4DXgxqma/ALqLSzL"
+  "inputs": "eNrNlmEOgzAIhV9N03QJB+hxtt3/UNt0cWnCFAqo3y8btaHAe7S1Vt8Q5QWqwyCNA/B7ru9rJHkPTBwlqwiPG4HcZ76LbAfyapTpggia/ffxgCA4fWHwx40sr0vaLZj0sBzPGa/clxyMwSkMQn98WLLZPanKKiEFIiiftXNPx62bLBCpgvgrX3i6YmhioGscSQTdVOu44NwJEGPRW6ljMzA5Pw1ANmEk8wiWm7DYDtPB3Hw8Umtz3B4ve9Q6sw"
 }

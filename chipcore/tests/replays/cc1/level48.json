@@ -1,8 +1,10 @@
 {
-  "ticks": 2301,
-  "realtime": 38.95,
-  "steps": 201,
-  "bonks": 1,
+  "level_name": "Mugger Square",
+  "attempts": 53,
+  "realtime": 36.798786,
+  "ticks": 2209,
+  "steps": 196,
+  "bonks": 0,
   "seed": "b950277fe3d5c812",
-  "replay": "eNrV1dEKgCAMBVBNEQP//3vLhMTQ7aqL8jxX5nWb3pOC7bHR3P2ggukWpbZlGY07M2gdDpnPJS+JZO1Z3HrJnun/iTutly+SAOZZu0j6aJOF4BcU+iZJAf1GfSQ4x7zVtY9Y1PLpYH01Vu32I2U3kPdCQWbEcqc+T25aYClNXTjmjdoa+Y9E5ITZumMddzsh7g"
+  "inputs": "eNrVlTkOgCAQRQckkykoLD0Opfc/kRJcQTZBA69gC0vmzwKRD+EHkWtwnwPwjWOL2YD7iN8PrCfCsBXTPsA7ZWCvOd0C9gp4hIlJDEop3Y3jRGGAdQwYG2YNueMY0sSrPb+sPHrFp7nIgDpFigJk2iXgZhdmK3u+gfZlOjm2/EhK7YzH24QukeuahX+UR/xWRFk7zhNDo91PJY0Ch9YobgtLXCRa"
 }

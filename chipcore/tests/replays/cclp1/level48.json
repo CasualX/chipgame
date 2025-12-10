@@ -1,8 +1,10 @@
 {
-  "ticks": 2392,
-  "realtime": 67.15,
+  "level_name": "Sundance",
+  "attempts": 35,
+  "realtime": 17.606533,
+  "ticks": 1057,
   "steps": 88,
   "bonks": 0,
-  "seed": "4ca4d8aba5169a00",
-  "replay": "eNq9lt0OgCAIhcl5wWP1/k/VVmumIH9K312TAM8RC5EAUHjgy6HQBdeH97FVokzKqVQBSMNTATmp2Z1PRV8iM7fmgKwRGyGdJ01X9FQaK3A5IqrtdnOaxZhbdkSZYJbIO0XBt3dEj/t/nOtRBa7v1Tb9qvOcN4HCtjXVW7t5GT4fdsxTFL0XPDcDtaB1QtPlTMWCH45wGmj5y9j59RcyEu+69Qv0cg2n"
+  "seed": "5a39dce7ad687305",
+  "inputs": "eNqtksERgDAIBE+ScXjQf73+FBQGMNkCljuA+QvIYYwjAZg3onVQwtlE2AduyIhz9kHQkis88awTykq0XsEIa1CTqLDkG4Q/F0q5KTtqZ/k79/XdlsIKbTr4UtlSIc6Z40W/AEiRDrk"
 }

@@ -1,8 +1,10 @@
 {
-  "ticks": 2137,
-  "realtime": 36.583332,
+  "level_name": "Iceberg",
+  "attempts": 40,
+  "realtime": 35.297276,
+  "ticks": 2119,
   "steps": 225,
   "bonks": 0,
   "seed": "a59203386429c8ec",
-  "replay": "eNrNld0OgCAIhUlci833f95qWK0UlTTzu3Nzwjn8aExjZka+gDhFgSWPswz4y0RTKcBYAdBI9Dkw/DwthTj70KBS8ZSTUFShbyOisEjilU+dPqUJKi96ARrTj7a6uU7FbRXOxoe+/8LuiRkF1MxED+K1RnnChY5VBz73mXudLeZs3qufKAYIe+A4XVHp7CSfvOu3C0alza8fKF0B3lka+Q"
+  "inputs": "eNrV1e0OhSAIBmAUxnTj/q/3nD7GsrTAarPnZ5vGy0Rj7MQ0Yf/CUAHJQoRWsv0cTIBqmHtSTwB062Sl9YOvdkOQU66QzJuVHSk1JN0I2QxfoFG5x6Jo+r/trqbrXIjORQ7Pg7pndzsVh4CIc4KcBtFqMV5cYTsArr8up0466s0XFRavBBrH5tCL1tvxLviCe+e/doB+rhkbuw"
 }
