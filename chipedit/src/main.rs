@@ -137,6 +137,12 @@ fn load_level(editor: &mut editor::EditorState, file_path: &Option<path::PathBuf
 	}
 }
 
+fn init_audio(fs: &FileSystem, config: &chipgame::config::Config) -> Option<audio::AudioPlayer> {
+	let mut ap = audio::AudioPlayer::create();
+	ap.load(fs, config);
+	Some(ap)
+}
+
 fn main() {
 	let time_base = time::Instant::now();
 
@@ -163,8 +169,7 @@ fn main() {
 
 	let mut gamepads = gamepad::GamepadManager::new();
 
-	let mut ap = audio::AudioPlayer::create();
-	ap.load(&fs, &config);
+	let mut ap = init_audio(&fs, &config);
 
 	// App state
 	let mut app: Option<Box<AppStuff>> = None;
@@ -229,6 +234,10 @@ fn main() {
 						PhysicalKey::Code(KeyCode::Enter) if pressed => editor.toggle_play(),
 						PhysicalKey::Code(KeyCode::Delete) => editor.delete(pressed),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
+							#[cfg(windows)]
+							if let Some(ap) = ap.take() {
+								ap.delete();
+							}
 							// Open file dialog to load a level
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
@@ -242,8 +251,16 @@ fn main() {
 								file_path = Some(path);
 								load_level(&mut editor, &file_path, app.as_deref());
 							}
+							#[cfg(windows)] {
+								ap = init_audio(&fs, &config);
+							}
 						}
 						PhysicalKey::Code(KeyCode::F5) if pressed => {
+							#[cfg(windows)]
+							if let Some(ap) = ap.take() {
+								ap.delete();
+							}
+							// Save file dialog to save the level
 							let mut dialog = rfd::FileDialog::new()
 								.add_filter("Level", &["json"])
 								.set_title("Save Level");
@@ -268,6 +285,9 @@ fn main() {
 										eprintln!("Failed to save level: {err}");
 									}
 								}
+							}
+							#[cfg(windows)] {
+								ap = init_audio(&fs, &config);
 							}
 						}
 						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
@@ -365,7 +385,7 @@ fn main() {
 						let fx_events = editor.take_fx_events();
 						for evt in fx_events {
 							match evt {
-								chipgame::fx::FxEvent::Sound(sound) => ap.play_sound(sound),
+								chipgame::fx::FxEvent::Sound(sound) => if let Some(ap) = &mut ap { ap.play_sound(sound) },
 								chipgame::fx::FxEvent::LevelComplete => level_complete(&mut editor),
 								chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
 								_ => {}
@@ -373,7 +393,7 @@ fn main() {
 						}
 
 						let music = editor.get_music(music_enabled);
-						ap.play_music(music);
+						if let Some(ap) = &mut ap { ap.play_music(music); }
 
 						app.g.begin();
 						let time = time_base.elapsed().as_secs_f64();

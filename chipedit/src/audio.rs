@@ -21,6 +21,20 @@ impl AudioPlayer {
 		}
 	}
 
+	/// Deletes the AudioPlayer instance and frees resources.
+	#[cfg(windows)]
+	pub fn delete(self) {
+		let AudioPlayer {
+			instance,
+			sound_effects,
+			music_tracks,
+			active_music: _,
+		} = self;
+		drop(sound_effects);
+		drop(music_tracks);
+		unsafe { soloud::Soloud::delete(instance) };
+	}
+
 	/// Loads sound effects and music tracks from the given configuration.
 	pub fn load(&mut self, fs: &FileSystem, config: &chipgame::config::Config) {
 		for (fx, path) in &config.sound_fx {

@@ -25,7 +25,6 @@ winit = "0.29"
 raw-window-handle = "0.5"
 gilrs = { version = "0.11", default-features = false, features = ["xinput"] }
 
-soloud = "1.0"
+soloud = "1.1"
 
-# Use only synchronous GTK backend (provides FileDialog + MessageDialog) on Linux/BSD; no effect on Win/mac.
 rfd = { version = "0.16", default-features = false, features = ["gtk3"] }
