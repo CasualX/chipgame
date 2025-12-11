@@ -57,13 +57,18 @@ impl GameState {
 		}
 		// And update their hidden flags
 		for ehandle in self.ents.handles() {
-			if let Some(ent) = self.ents.take(ehandle) {
+			if let Some(mut ent) = self.ents.take(ehandle) {
+				if matches!(self.field.get_terrain(ent.pos), Terrain::BearTrap) {
+					bear_trap(self, &mut ent);
+				}
 				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
 					self.update_hidden_flag(ent.pos, true);
 				}
 				self.ents.put(ent);
 			}
 		}
+		// Initialize player state
+		ps_init_player(self);
 	}
 }
 

@@ -12,6 +12,7 @@ mod iceblock;
 mod paramecium;
 mod pickup;
 mod player;
+mod playernpc;
 mod pinkball;
 mod socket;
 mod tank;
@@ -32,6 +33,7 @@ impl GameState {
 		let s = self;
 		let create_fn = match data.kind {
 			EntityKind::Player => player::create,
+			EntityKind::PlayerNPC => playernpc::create,
 			EntityKind::Chip => pickup::create,
 			EntityKind::Socket => socket::create,
 			EntityKind::Block => block::create,

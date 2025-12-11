@@ -9,12 +9,10 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		pos: args.pos,
 		base_spd: BASE_SPD,
 		face_dir: args.face_dir,
-		step_dir: args.face_dir,
+		step_dir: None,
 		step_spd: BASE_SPD,
 		step_time: -BASE_SPD,
-		// Start with momentum if facing a direction
-		// CCLP2: Level 28: Madness I
-		flags: if args.face_dir.is_some() { EF_MOMENTUM } else { 0 },
+		flags: 0,
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
@@ -30,12 +28,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 }
 
-fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
-	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
-		return;
-	}
-
-	ps_attack_pos(s, ent.pos, GameOverReason::Collided);
+fn action_phase(_s: &mut GameState, _phase: &mut ActionPhase, _ent: &mut Entity) {
 }
 
 fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
@@ -48,7 +41,6 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
 		match terrain {
 			Terrain::Water => {
-				s.set_terrain(ent.pos, Terrain::Dirt);
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::WaterSplash });
 				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });
 				ent.flags |= EF_REMOVE;
@@ -74,11 +66,11 @@ static DATA: EntityData = EntityData {
 		exit: true,
 		blue_fake: true,
 		recessed_wall: true,
-		keys: false,
+		keys: true,
 		boots: true,
 		chips: true,
 		creatures: true,
-		player: false,
+		player: true,
 		thief: true,
 		hint: false,
 	},

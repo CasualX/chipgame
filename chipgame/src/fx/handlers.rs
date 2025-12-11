@@ -2,7 +2,7 @@ use super::*;
 
 fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i, check_elevated: bool) -> Vec3f {
 	let terrain = gs.field.get_terrain(pos);
-	let elevated = terrain.is_wall();
+	let elevated = terrain.is_wall() && !matches!(terrain, chipty::Terrain::DirtBlock);
 	// Blocks appear on top of walls
 	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if check_elevated && elevated { 20.0 } else { 0.0 };
 	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
@@ -41,7 +41,7 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	ctx.render.objects.insert(handle, obj);
 	ctx.objlookup.insert(ehandle, handle);
 
-	if matches!(kind, chipty::EntityKind::Player) {
+	if ctx.gs.ps.master == ehandle {
 		ctx.camera.move_src = ent.pos;
 		ctx.camera.move_dest = ent.pos;
 		ctx.camera.move_time = ctx.time;
@@ -274,26 +274,55 @@ fn model_for_ent(ent: &chipcore::Entity) -> chipty::ModelId {
 	}
 }
 
+fn sprite_for_player(face_dir: Option<chipty::Compass>, terrain: chipty::Terrain) -> chipty::SpriteId {
+	if matches!(terrain, chipty::Terrain::Water) {
+		match face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
+			_ => chipty::SpriteId::PlayerSwimIdle,
+		}
+	}
+	else {
+		match face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
+			_ => chipty::SpriteId::PlayerWalkIdle,
+		}
+	}
+}
+
+fn sprite_for_playernpc(face_dir: Option<chipty::Compass>, terrain: chipty::Terrain) -> chipty::SpriteId {
+	if matches!(terrain, chipty::Terrain::Water) {
+		match face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
+			_ => chipty::SpriteId::PlayerSwimIdle,
+		}
+	}
+	else if matches!(terrain, chipty::Terrain::Fire) {
+		chipty::SpriteId::PlayerBurned
+	}
+	else {
+		match face_dir {
+			Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
+			Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
+			Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
+			Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
+			_ => chipty::SpriteId::PlayerBurned,
+		}
+	}
+}
+
 fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => if matches!(gs.field.get_terrain(ent.pos), chipty::Terrain::Water) {
-			match ent.face_dir {
-				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
-				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
-				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
-				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
-				_ => chipty::SpriteId::PlayerSwimIdle,
-			}
-		}
-		else {
-			match ent.face_dir {
-				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
-				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
-				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
-				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
-				_ => chipty::SpriteId::PlayerWalkIdle,
-			}
-		},
+		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, gs.field.get_terrain(ent.pos)),
+		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, gs.field.get_terrain(ent.pos)),
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
 		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,
@@ -364,24 +393,8 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> 
 
 fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => if matches!(gs.field.get_terrain(ent.pos), chipty::Terrain::Water) {
-			match ent.face_dir {
-				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerSwimN,
-				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerSwimS,
-				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerSwimW,
-				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerSwimE,
-				_ => chipty::SpriteId::PlayerSwimIdle,
-			}
-		}
-		else {
-			match ent.face_dir {
-				Some(chipty::Compass::Up) => chipty::SpriteId::PlayerWalkN,
-				Some(chipty::Compass::Down) => chipty::SpriteId::PlayerWalkS,
-				Some(chipty::Compass::Left) => chipty::SpriteId::PlayerWalkW,
-				Some(chipty::Compass::Right) => chipty::SpriteId::PlayerWalkE,
-				_ => chipty::SpriteId::PlayerWalkIdle,
-			}
-		},
+		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, gs.field.get_terrain(ent.pos)),
+		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, gs.field.get_terrain(ent.pos)),
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
 		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,

@@ -75,6 +75,39 @@ pub struct LevelDto {
 	pub trophies: Option<Trophies>,
 }
 
+impl LevelDto {
+	pub fn sort_entities(entities: &mut Vec<EntityArgs>) {
+		// Keep entities of the same kind together for consistent interaction order
+		entities.sort_by_key(|e| match e.kind {
+			EntityKind::Player       => 1,
+			EntityKind::PlayerNPC    => 1,
+			EntityKind::Block        => 2,
+			EntityKind::IceBlock     => 2,
+			EntityKind::Chip         => 3,
+			EntityKind::Flippers     => 3,
+			EntityKind::FireBoots    => 3,
+			EntityKind::IceSkates    => 3,
+			EntityKind::SuctionBoots => 3,
+			EntityKind::BlueKey      => 3,
+			EntityKind::RedKey       => 3,
+			EntityKind::GreenKey     => 3,
+			EntityKind::YellowKey    => 3,
+			EntityKind::Socket       => 4,
+			EntityKind::Thief        => 4,
+			EntityKind::Bomb         => 5,
+			EntityKind::Bug          => 5,
+			EntityKind::FireBall     => 5,
+			EntityKind::PinkBall     => 5,
+			EntityKind::Tank         => 5,
+			EntityKind::Glider       => 5,
+			EntityKind::Teeth        => 5,
+			EntityKind::Walker       => 5,
+			EntityKind::Blob         => 5,
+			EntityKind::Paramecium   => 5,
+		})
+	}
+}
+
 /// Connection between terrain tiles.
 ///
 /// The connection defines the relationship between:

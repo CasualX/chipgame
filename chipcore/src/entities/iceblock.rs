@@ -9,10 +9,11 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		pos: args.pos,
 		base_spd: BASE_SPD,
 		face_dir: args.face_dir,
-		step_dir: None,
+		step_dir: args.face_dir,
 		step_spd: BASE_SPD,
 		step_time: -BASE_SPD,
-		flags: 0,
+		// Start with momentum if facing a direction
+		flags: if args.face_dir.is_some() { EF_MOMENTUM } else { 0 },
 	});
 	s.qt.add(handle, args.pos);
 	return handle;
@@ -24,7 +25,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		try_terrain_move(s, phase, ent, ent.step_dir);
+		try_terrain_move(s, phase, ent);
 	}
 }
 
@@ -40,7 +41,7 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, phase, ent);
+		return bear_trap(s, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {

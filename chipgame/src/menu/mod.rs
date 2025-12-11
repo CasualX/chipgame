@@ -203,27 +203,6 @@ pub struct PlayMetrics<'a> {
 
 impl<'a> PlayMetrics<'a> {
 	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources) {
-		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = resx.viewport;
-		buf.blend_mode = shade::BlendMode::Alpha;
-		buf.shader = resx.font.shader;
-
-		let rect = resx.viewport.cast();
-		buf.uniform.transform = cvmath::Transform2f::ortho(rect);
-		buf.uniform.texture = resx.font.texture;
-
-		let size = rect.height() * FONT_SIZE * 0.75;
-
-		let scribe = shade::d2::Scribe {
-			font_size: size,
-			line_height: size * (5.0 / 4.0),
-			color: Vec4(255, 255, 255, 255),
-			..Default::default()
-		};
-
-		let [_, rect, _] = draw::flexh(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
-		let [_, rect, _] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
-
 		let text = fmtools::format!(
 			"Level "{self.level_number}": \x1b[color=#ff0]"{self.level_name}"\x1b[color=#fff]\n"
 			"Attempt: \x1b[color=#0f8]"{self.attempts}"\x1b[color=#fff]\n"
@@ -234,13 +213,22 @@ impl<'a> PlayMetrics<'a> {
 			"Bonks: \x1b[color=#0f8]"{self.bonks}"\x1b[color=#fff]\n"
 		);
 
-		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, &text);
-
-		buf.draw(g, shade::Surface::BACK_BUFFER);
+		draw_overlay(g, resx, shade::d2::TextAlign::MiddleLeft, &text);
 	}
 }
 
 pub fn draw_metrics(g: &mut shade::Graphics, resx: &Resources, metrics: &shade::DrawMetrics) {
+	let text = fmtools::format!(
+		"Draw duration: \x1b[color=#0f8]"{metrics.draw_duration.as_secs_f64() * 1000.0:.2}"\x1b[color=#fff] ms\n"
+		"Draw calls: \x1b[color=#0f8]"{metrics.draw_call_count}"\x1b[color=#fff]\n"
+		"Vertex count: \x1b[color=#0f8]"{metrics.vertex_count}"\x1b[color=#fff]\n"
+		"Bytes uploaded: \x1b[color=#0f8]"{metrics.bytes_uploaded as f64 / 1024.0:.2}"\x1b[color=#fff] KiB\n"
+	);
+
+	draw_overlay(g, resx, shade::d2::TextAlign::BottomLeft, &text);
+}
+
+pub fn draw_overlay(g: &mut shade::Graphics, resx: &Resources, align: shade::d2::TextAlign, text: &str) {
 	let mut buf = shade::d2::TextBuffer::new();
 	buf.viewport = resx.viewport;
 	buf.blend_mode = shade::BlendMode::Alpha;
@@ -262,14 +250,7 @@ pub fn draw_metrics(g: &mut shade::Graphics, resx: &Resources, metrics: &shade::
 	let [_, rect, _] = draw::flexh(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
 	let [_, rect, _] = draw::flexv(rect, None, layout::Justify::Start, &[layout::Unit::Pct(2.5), layout::Unit::Fr(1.0), layout::Unit::Pct(2.5)]);
 
-	let text = fmtools::format!(
-		"Draw duration: \x1b[color=#0f8]"{metrics.draw_duration.as_secs_f64() * 1000.0:.2}"\x1b[color=#fff] ms\n"
-		"Draw calls: \x1b[color=#0f8]"{metrics.draw_call_count}"\x1b[color=#fff]\n"
-		"Vertex count: \x1b[color=#0f8]"{metrics.vertex_count}"\x1b[color=#fff]\n"
-		"Bytes uploaded: \x1b[color=#0f8]"{metrics.bytes_uploaded as f64 / 1024.0:.2}"\x1b[color=#fff] KiB\n"
-	);
-
-	buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::BottomLeft, &text);
+	buf.text_box(&resx.font, &scribe, &rect, align, &text);
 
 	buf.draw(g, shade::Surface::BACK_BUFFER);
 }

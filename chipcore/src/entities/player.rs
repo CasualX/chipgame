@@ -5,8 +5,6 @@ const IDLE_TIME: i32 = 20;
 
 pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 	let handle = s.ents.alloc();
-	s.ps.ents.push(handle);
-	s.ps.master = handle;
 	s.ents.put(Entity {
 		data: &DATA,
 		handle,
@@ -181,9 +179,12 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 	ent.step_time = s.time;
 	ent.face_dir = Some(dir);
 	s.ps.bonks += 1;
-	s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
 	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
 	s.events.fire(GameEvent::PlayerBump { entity: ent.handle });
+	// Play sound only for the master player
+	if s.ps.master == ent.handle {
+		s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
+	}
 }
 
 fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
@@ -225,7 +226,7 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, phase, ent);
+		return bear_trap(s, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {

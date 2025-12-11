@@ -56,6 +56,20 @@ pub struct PlayerState {
 	pub dev_wtw: bool,
 }
 
+pub(super) fn ps_init_player(s: &mut GameState) {
+	// Collect all player entities, first one is master
+	s.ps.ents.clear();
+	s.ps.master = EntityHandle::INVALID;
+	for ent in s.ents.iter() {
+		if matches!(ent.kind, EntityKind::Player) {
+			if s.ps.master == EntityHandle::INVALID {
+				s.ps.master = ent.handle;
+			}
+			s.ps.ents.push(ent.handle);
+		}
+	}
+}
+
 pub(super) fn ps_input(s: &mut GameState, input: &Input) {
 	s.inputs.push(input.encode());
 	s.ps.inbuf.handle(Compass::Left,  input.left,  s.input.left);

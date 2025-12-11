@@ -24,7 +24,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if try_terrain_move(s, phase, ent, ent.step_dir) { }
+		if try_terrain_move(s, phase, ent) { }
 		else if let Some(face_dir) = ent.face_dir {
 			// Try to move forward
 			if try_move(s, phase, ent, face_dir) { }
@@ -52,11 +52,15 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, phase, ent);
+		return bear_trap(s, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
 		match terrain {
+			// Gliders are killed by Fire in MS, they are not killed by Fire in Lynx
+			Terrain::Fire => {
+				ent.flags |= EF_REMOVE;
+			}
 			Terrain::GreenButton => green_button(s, phase, ent),
 			Terrain::RedButton => red_button(s, phase, ent),
 			Terrain::BrownButton => brown_button(s, phase, ent),
@@ -72,7 +76,7 @@ static DATA: EntityData = EntityData {
 	terrain_phase,
 	flags: SolidFlags {
 		gravel: true,
-		fire: true,
+		fire: false,
 		dirt: true,
 		water: false,
 		exit: true,

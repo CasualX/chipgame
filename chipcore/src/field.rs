@@ -77,6 +77,30 @@ impl Field {
 		*ptr = terrain;
 		Some(old)
 	}
+	pub fn find_teleport_dest(&self, src: Vec2i) -> Option<Vec2i> {
+		// Use connections to find teleport destination
+		if let Some(conn) = self.conns.iter().find(|conn| conn.src == src) {
+			return Some(conn.dest);
+		}
+		// If no explicit connection, find another teleport in reverse reading order
+		let mut pos = src;
+		loop {
+			pos.x -= 1;
+			if pos.x < 0 {
+				pos.x = self.width - 1;
+				pos.y -= 1;
+				if pos.y < 0 {
+					pos.y = self.height - 1;
+				}
+			}
+			if pos == src {
+				return None;
+			}
+			if matches!(self.get_terrain(pos), Terrain::Teleport) {
+				return Some(pos);
+			}
+		}
+	}
 	pub fn find_conn_by_src(&self, pos: Vec2i) -> Option<&FieldConn> {
 		self.conns.iter().find(|conn| conn.src == pos)
 	}

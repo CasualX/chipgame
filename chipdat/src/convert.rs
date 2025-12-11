@@ -5,8 +5,13 @@ use chipty::*;
 pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 	let mut levels = Vec::new();
 	for lvdat in dat.levels.iter() {
-		let (map, ents, mut conns) = parse_content(&lvdat.top_layer, &lvdat.bottom_layer);
+		// Parse the tile layers
+		let (map, entities) = parse_content(&lvdat.top_layer, &lvdat.bottom_layer);
+		let mut entities = monster_order(&lvdat.metadata.monsters, entities);
+		chipty::LevelDto::sort_entities(&mut entities);
 
+		// Build connections
+		let mut conns = Vec::new();
 		if let Some(traps) = &lvdat.metadata.traps {
 			for lnk in traps {
 				conns.push(FieldConn {
@@ -15,7 +20,6 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 				});
 			}
 		}
-
 		if let Some(cloners) = &lvdat.metadata.cloners {
 			for lnk in cloners {
 				conns.push(FieldConn {
@@ -33,14 +37,13 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 			time_limit: lvdat.time_limit as i32,
 			required_chips: lvdat.required_chips as i32,
 			map,
-			entities: ents,
+			entities,
 			connections: conns,
 			replays: None,
 			trophies: None,
 		};
 
 		replace_block_cloners(&mut level);
-		level.entities = monster_order(&lvdat.metadata.monsters, level.entities);
 
 		levels.push(LevelRef::Direct(level));
 	}
@@ -111,18 +114,18 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 		0x31 => terrain[index] = Terrain::CloneMachine,
 		0x32 => terrain[index] = Terrain::ForceRandom,
 		0x33 => terrain[index] = Terrain::WaterHazard, // Drowned Chip
-		0x34 => terrain[index] = Terrain::Blank, // Burned Chip
-		0x35 => terrain[index] = Terrain::Blank, // Burned Chip
+		0x34 => { terrain[index] = Terrain::Fire; entities.push(ent_args(EntityKind::PlayerNPC, pos, None)) }, // Burned Chip
+		0x35 => { terrain[index] = Terrain::Floor; entities.push(ent_args(EntityKind::PlayerNPC, pos, None)) }, // Burned Chip
 		0x36 => terrain[index] = Terrain::InvisibleWall, // This byte does not correspond to any defined tile, but acts like an invisible wall.
 		0x37 => terrain[index] = Terrain::InvisibleWall, // This byte does not correspond to any defined tile, but acts like an invisible wall.
 		0x38 => entities.push(ent_args(EntityKind::IceBlock, pos, None)),
 		0x39 => terrain[index] = Terrain::FakeExit,
 		0x3a => terrain[index] = Terrain::FakeExit,
 		0x3b => terrain[index] = Terrain::FakeExit,
-		0x3c => terrain[index] = Terrain::WaterHazard, // Swimming Chip (N)
-		0x3d => terrain[index] = Terrain::WaterHazard, // Swimming Chip (W)
-		0x3e => terrain[index] = Terrain::WaterHazard, // Swimming Chip (S)
-		0x3f => terrain[index] = Terrain::WaterHazard, // Swimming Chip (E)
+		0x3c => { terrain[index] = Terrain::Water; entities.push(ent_args(EntityKind::Player, pos, Some(Compass::Up))) }, // Swimming Chip (N)
+		0x3d => { terrain[index] = Terrain::Water; entities.push(ent_args(EntityKind::Player, pos, Some(Compass::Left))) }, // Swimming Chip (W)
+		0x3e => { terrain[index] = Terrain::Water; entities.push(ent_args(EntityKind::Player, pos, Some(Compass::Down))) }, // Swimming Chip (S)
+		0x3f => { terrain[index] = Terrain::Water; entities.push(ent_args(EntityKind::Player, pos, Some(Compass::Right))) }, // Swimming Chip (E)
 
 		0x40 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Up))),
 		0x41 => entities.push(ent_args(EntityKind::Bug, pos, Some(Compass::Left))),
@@ -187,7 +190,7 @@ fn process_tile(terrain: &mut Vec<Terrain>, entities: &mut Vec<EntityArgs>, pos:
 	}
 }
 
-fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>, Vec<FieldConn>) {
+fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>) {
 	let mut terrain = vec![Terrain::Floor; 32 * 32];
 	let mut entities = Vec::new();
 
@@ -211,31 +214,6 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>, Vec<
 		true
 	});
 
-	let mut conns = Vec::new();
-	let mut last_teleport = None;
-	let mut prev_teleport = None;
-	for y in (0..32).rev() {
-		for x in (0..32).rev() {
-			let index = y as usize * 32 + x as usize;
-			let pos = cvmath::Vec2i(x as i32, y as i32);
-
-			if terrain[index] == Terrain::Teleport {
-				if last_teleport.is_none() {
-					last_teleport = Some(pos);
-				}
-				if let Some(prev_teleport) = prev_teleport {
-					conns.push(FieldConn { src: prev_teleport, dest: pos });
-				}
-				prev_teleport = Some(pos);
-			}
-		}
-	}
-	if let Some(last_teleport) = last_teleport {
-		if let Some(prev_teleport) = prev_teleport {
-			conns.push(FieldConn { src: prev_teleport, dest: last_teleport });
-		}
-	}
-
 	let mut legend = Vec::new();
 	let data = {
 		let mut legend_map = HashMap::new();
@@ -253,7 +231,7 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>, Vec<
 	};
 
 	let map = FieldDto { width: 32, height: 32, data, legend };
-	return (map, entities, conns);
+	return (map, entities);
 }
 
 fn ent_args(kind: EntityKind, pos: cvmath::Vec2i, face_dir: Option<Compass>) -> EntityArgs {

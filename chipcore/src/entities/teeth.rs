@@ -24,7 +24,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if try_terrain_move(s, phase, ent, ent.step_dir) { }
+		if try_terrain_move(s, phase, ent) { }
 		else if let Some((first_dir, second_dir)) = chase_dirs(s, ent) {
 			if try_move(s, phase, ent, first_dir) { }
 			else if try_move(s, phase, ent, second_dir) { }
@@ -111,7 +111,7 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, phase, ent);
+		return bear_trap(s, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {

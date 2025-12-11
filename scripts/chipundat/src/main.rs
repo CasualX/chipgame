@@ -7,7 +7,7 @@ fn main() {
 			.value_parser(clap::value_parser!(path::PathBuf)))
 		.arg(clap::arg!([OUT_DIR] "Directory to write the extracted levelset (created if missing, defaults to the input's directory)")
 			.value_parser(clap::value_parser!(path::PathBuf)))
-		.arg(clap::arg!(-e --encoding <ENCODING> "Text encoding [default: windows1252]")
+		.arg(clap::arg!(-e --encoding [ENCODING] "Text encoding [default: windows1252]")
 			.value_parser(["utf8", "latin1", "windows1252"]))
 		.arg(clap::arg!(--direct "Keeps levels embedded within index instead of separate files")
 			.action(clap::ArgAction::SetTrue))
@@ -18,13 +18,13 @@ fn main() {
 		.get_one::<path::PathBuf>("OUT_DIR").map(path::PathBuf::as_path)
 		.or_else(|| input.parent())
 		.unwrap_or_else(|| path::Path::new("."));
-	let encoding = match matches.get_one::<String>("ENCODING").map(String::as_str).unwrap_or("windows1252") {
+	let encoding = match matches.get_one::<String>("encoding").map(String::as_str).unwrap_or("windows1252") {
 		"utf8" => chipdat::Encoding::Utf8,
 		"latin1" => chipdat::Encoding::Latin1,
 		"windows1252" => chipdat::Encoding::Windows1252,
 		_ => chipdat::Encoding::Windows1252,
 	};
-	let direct = matches.get_flag("DIRECT");
+	let direct = matches.get_flag("direct");
 
 	// Parse the DAT file
 	let opts = chipdat::Options { encoding };

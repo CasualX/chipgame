@@ -5,6 +5,7 @@ use super::*;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum EntityKind {
 	Player,
+	PlayerNPC,
 	Chip,
 	Socket,
 	Block,
@@ -36,6 +37,7 @@ impl str::FromStr for EntityKind {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"Player" => Ok(EntityKind::Player),
+			"PlayerNPC" => Ok(EntityKind::PlayerNPC),
 			"Chip" => Ok(EntityKind::Chip),
 			"Socket" => Ok(EntityKind::Socket),
 			"Block" => Ok(EntityKind::Block),

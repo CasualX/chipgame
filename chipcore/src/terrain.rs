@@ -7,7 +7,7 @@ pub struct TerrainPhase {
 	pub spawns: Vec<EntityArgs>,
 }
 
-pub fn bear_trap(s: &mut GameState, _phase: &mut TerrainPhase, ent: &mut Entity) {
+pub fn bear_trap(s: &mut GameState, ent: &mut Entity) {
 	if matches!(s.get_trap_state(ent.pos), TrapState::Closed) {
 		// Notify only if the entity is newly trapped
 		if ent.flags & (EF_TRAPPED | EF_RELEASED) == 0 {

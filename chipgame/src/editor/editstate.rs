@@ -48,7 +48,8 @@ impl EditorEditState {
 			}
 		}
 		let data = self.game.gs.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
-		let entities = self.game.gs.ents.iter().map(chipcore::Entity::to_entity_args).collect();
+		let mut entities = self.game.gs.ents.iter().map(chipcore::Entity::to_entity_args).collect();
+		LevelDto::sort_entities(&mut entities);
 		let dto = LevelDto {
 			name: self.game.gs.field.name.clone(),
 			author: self.game.gs.field.author.clone(),
@@ -210,6 +211,15 @@ impl EditorEditState {
 				cv.draw_line_rect(&pen, &Bounds2::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
 			}
 			cv.draw(g, shade::Surface::BACK_BUFFER);
+		}
+
+		{
+			let text = fmtools::format!(
+				"Tool: "{self.tool:?}"\n"
+				"Cursor: ("{self.cursor_pos.x}", "{self.cursor_pos.y}")\n"
+			);
+
+			menu::draw_overlay(g, resx, shade::d2::TextAlign::BottomRight, &text);
 		}
 	}
 

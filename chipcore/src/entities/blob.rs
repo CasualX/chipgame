@@ -24,7 +24,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 
 	if s.time >= ent.step_time + ent.step_spd {
-		if try_terrain_move(s, phase, ent, ent.step_dir) { }
+		if try_terrain_move(s, phase, ent) { }
 		// The direction of the blob means nothing, it is completely random
 		else if { let step_dir = s.rand.next(); try_move(s, phase, ent, step_dir) } { }
 	}
@@ -42,7 +42,7 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	let terrain = s.field.get_terrain(ent.pos);
 
 	if matches!(terrain, Terrain::BearTrap) {
-		return bear_trap(s, phase, ent);
+		return bear_trap(s, ent);
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
