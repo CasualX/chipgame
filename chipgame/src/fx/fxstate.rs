@@ -14,6 +14,7 @@ pub struct FxState {
 	pub fire_sprites: HashMap<Vec2i, render::ObjectHandle>,
 	pub toggle_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub mirage_walls: HashMap<Vec2i, render::ObjectHandle>,
+	pub water_hazards: HashMap<Vec2i, render::ObjectHandle>,
 	pub level_number: i32,
 	pub next_level_load: f64,
 	pub game_start_time: f64,
@@ -67,6 +68,7 @@ impl FxState {
 					chipty::Terrain::ToggleWall => handlers::create_toggle_wall(&mut fx, pos, true),
 					chipty::Terrain::HiddenWall => handlers::create_wall_mirage(&mut fx, pos),
 					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(&mut fx, pos),
+					chipty::Terrain::WaterHazard => handlers::create_water_hazard(&mut fx, pos),
 					_ => {}
 				}
 			}

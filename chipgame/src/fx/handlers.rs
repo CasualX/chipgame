@@ -220,6 +220,9 @@ pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new:
 		(chipty::Terrain::HiddenWall, chipty::Terrain::InvisibleWall) => {},
 		(chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall, _) => handlers::remove_wall_mirage(ctx, pos),
 		(_, chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall) => handlers::create_wall_mirage(ctx, pos),
+
+		(chipty::Terrain::WaterHazard, _) => handlers::remove_water_hazard(ctx, pos),
+		(_, chipty::Terrain::WaterHazard) => handlers::create_water_hazard(ctx, pos),
 		_ => {}
 	}
 }
@@ -598,6 +601,34 @@ pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 
 pub fn remove_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = ctx.mirage_walls.remove(&pos) else { return };
+
+	ctx.render.objects.remove(obj_handle);
+}
+
+pub fn create_water_hazard(ctx: &mut FxState, pos: Vec2<i32>) {
+	let obj = render::Object {
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: chipty::SpriteId::WaterSplash,
+			frame: 0,
+			model: chipty::ModelId::Sprite,
+			alpha: 1.0,
+			visible: true,
+			greyscale: false,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
+	};
+	let handle = ctx.render.objects.alloc();
+	ctx.render.objects.insert(handle, obj);
+	ctx.water_hazards.insert(pos, handle);
+	ctx.render.field.set_terrain(pos, chipty::Terrain::Water);
+}
+
+pub fn remove_water_hazard(ctx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = ctx.water_hazards.remove(&pos) else { return };
 
 	ctx.render.objects.remove(obj_handle);
 }
