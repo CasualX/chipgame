@@ -22,7 +22,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity) {
-	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+	if ent.flags & EF_TEMPLATE != 0 {
 		return;
 	}
 
@@ -188,6 +188,8 @@ fn bump(s: &mut GameState, ent: &mut Entity, dir: Compass) {
 }
 
 fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
+	update_hidden_flag(s, ent);
+
 	let activity = match s.field.get_terrain(ent.pos) {
 		Terrain::Water => {
 			PlayerActivity::Swimming
@@ -236,6 +238,10 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::TileEmptied });
 			}
 			Terrain::Water => water_splash(s, ent),
+			Terrain::FakeBlueWall => {
+				s.set_terrain(ent.pos, Terrain::Floor);
+				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
+			}
 			Terrain::GreenButton => green_button(s, phase, ent),
 			Terrain::RedButton => red_button(s, phase, ent),
 			Terrain::BrownButton => brown_button(s, phase, ent),
@@ -272,5 +278,8 @@ static DATA: EntityData = EntityData {
 		player: true,
 		thief: false,
 		hint: false,
+	},
+	hidden: HiddenData {
+		dirt: false,
 	},
 };

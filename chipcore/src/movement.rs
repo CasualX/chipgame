@@ -200,11 +200,6 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 					s.set_terrain(new_pos, Terrain::Wall);
 					true
 				}
-				Terrain::FakeBlueWall => {
-					s.set_terrain(new_pos, Terrain::Floor);
-					s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlueWallCleared });
-					false
-				}
 				Terrain::HiddenWall => {
 					s.set_terrain(new_pos, Terrain::Wall);
 					true
@@ -320,6 +315,8 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 			if matches!(mover_kind, EntityKind::Player) && player_push {
 				s.events.fire(GameEvent::PlayerPush { entity: mover_entity });
 			}
+			// Order dependence: The first solid entity prevents later entities from being pushed off
+			// Example: Block on top of PlayerNPC, PlayerNPC is listed before Block so prevents the Block from being pushed
 			return false;
 		}
 	}
@@ -363,8 +360,8 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	ent.flags &= !(EF_RELEASED | EF_TRAPPED);
 
 	if matches!(mover_kind, EntityKind::Block | EntityKind::IceBlock) {
-		s.update_hidden_flag(new_pos, true);
-		s.update_hidden_flag(old_pos, false);
+		update_hidden_fire(s, new_pos, true);
+		update_hidden_fire(s, old_pos, false);
 	}
 
 	// Retain momentum when entity lands on a Trap

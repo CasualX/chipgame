@@ -62,7 +62,10 @@ impl GameState {
 					bear_trap(self, &mut ent);
 				}
 				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
-					self.update_hidden_flag(ent.pos, true);
+					update_hidden_fire(self, ent.pos, true);
+				}
+				else {
+					update_hidden_flag(self, &mut ent);
 				}
 				self.ents.put(ent);
 			}
@@ -212,25 +215,6 @@ impl GameState {
 			}
 		}
 		return false;
-	}
-
-	pub(super) fn update_hidden_flag(&mut self, pos: Vec2i, hidden: bool) {
-		for ehandle in self.qt.get(pos) {
-			if let Some(ent) = self.ents.get_mut(ehandle) {
-				if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock | EntityKind::Bomb) {
-					continue;
-				}
-				if (ent.flags & EF_HIDDEN != 0) != hidden {
-					ent.flags = if hidden { ent.flags | EF_HIDDEN } else { ent.flags & !EF_HIDDEN };
-					self.events.fire(GameEvent::EntityHidden { entity: ent.handle, hidden });
-				}
-			}
-		}
-
-		let terrain = self.field.get_terrain(pos);
-		if matches!(terrain, Terrain::Fire) {
-			self.events.fire(GameEvent::FireHidden { pos, hidden });
-		}
 	}
 
 	/// Toggle all toggleable walls and floors on the field.

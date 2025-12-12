@@ -9,6 +9,7 @@ pub struct EntityData {
 	pub action_phase: fn(&mut GameState, &mut ActionPhase, &mut Entity),
 	pub terrain_phase: fn(&mut GameState, &mut TerrainPhase, &mut Entity),
 	pub flags: SolidFlags,
+	pub hidden: HiddenData,
 }
 
 /// Entity structure.

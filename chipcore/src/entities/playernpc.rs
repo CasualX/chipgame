@@ -19,7 +19,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity) {
-	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+	if ent.flags & EF_TEMPLATE != 0 {
 		return;
 	}
 
@@ -28,7 +28,8 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 	}
 }
 
-fn action_phase(_s: &mut GameState, _phase: &mut ActionPhase, _ent: &mut Entity) {
+fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
+	update_hidden_flag(s, ent);
 }
 
 fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
@@ -73,5 +74,8 @@ static DATA: EntityData = EntityData {
 		player: true,
 		thief: true,
 		hint: false,
+	},
+	hidden: HiddenData {
+		dirt: false,
 	},
 };

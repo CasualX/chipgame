@@ -21,7 +21,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 }
 
 fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity) {
-	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+	if ent.flags & EF_TEMPLATE != 0 {
 		return;
 	}
 
@@ -31,11 +31,14 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 }
 
 fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
-	if ent.flags & (EF_HIDDEN | EF_TEMPLATE) != 0 {
+	if ent.flags & EF_TEMPLATE != 0 {
 		return;
 	}
 
-	ps_attack_pos(s, ent.pos, GameOverReason::Collided);
+	// Allow Player to start under a Block
+	if ent.flags & EF_NEW_POS != 0 {
+		ps_attack_pos(s, ent.pos, GameOverReason::Collided);
+	}
 }
 
 fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) {
@@ -81,5 +84,8 @@ static DATA: EntityData = EntityData {
 		player: false,
 		thief: true,
 		hint: false,
+	},
+	hidden: HiddenData {
+		dirt: false,
 	},
 };

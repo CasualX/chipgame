@@ -22,6 +22,8 @@ fn movement_phase(_s: &mut GameState, _phase: &mut MovementPhase, _ent: &mut Ent
 }
 
 fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
+	update_hidden_flag(s, ent);
+
 	if ps_check_new_pos(s, ent.pos) {
 		if s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots {
 			s.ps.flippers = false;
@@ -56,5 +58,8 @@ static DATA: EntityData = EntityData {
 		player: false,
 		thief: true,
 		hint: false,
+	},
+	hidden: HiddenData {
+		dirt: false,
 	},
 };
