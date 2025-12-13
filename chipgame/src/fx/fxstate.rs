@@ -22,6 +22,7 @@ pub struct FxState {
 	pub game_over: Option<chipcore::GameOverReason>,
 	pub hud_enabled: bool,
 	pub is_preview: bool,
+	pub step_mode: bool,
 	pub darken: bool,
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
@@ -138,8 +139,37 @@ impl FxState {
 			inputs.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
 		});
 
-		self.gs.tick(&replay_input.unwrap_or(player_input));
-		self.sync();
+		let input = replay_input.unwrap_or(player_input);
+
+		// Handle step mode
+		let mut run_tick = true;
+		if self.step_mode {
+			run_tick = input.has_directional_input() || input.b;
+			if let Some(player) = self.gs.ents.get(self.gs.ps.master) {
+				if self.gs.time < player.step_time + player.step_spd {
+					run_tick = true;
+				}
+				// Automatically run ticks when the player has no control
+				// TODO: What about trapped in a BearTrap?
+				let terrain = self.gs.field.get_terrain(player.pos);
+				if matches!(terrain,
+					| chipty::Terrain::Ice
+					| chipty::Terrain::IceNW | chipty::Terrain::IceNE | chipty::Terrain::IceSW | chipty::Terrain::IceSE
+					| chipty::Terrain::Teleport | chipty::Terrain::Exit
+				) {
+					run_tick = true;
+				}
+			}
+			// Reset input buffering to avoid stale inputs
+			if !run_tick {
+				self.gs.ps.inbuf = chipcore::InputBuffer::default();
+			}
+		}
+
+		if run_tick {
+			self.gs.tick(&input);
+			self.sync();
+		}
 
 		if self.game_start_time == 0.0 && self.gs.time > 0 {
 			self.game_start_time = self.time;

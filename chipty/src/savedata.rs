@@ -37,6 +37,8 @@ pub struct OptionsDto {
 	#[serde(default = "default_true")]
 	pub perspective: bool,
 	#[serde(default)]
+	pub step_mode: bool,
+	#[serde(default)]
 	pub auto_save_replay: bool,
 	#[serde(default)]
 	pub speedrun_mode: bool,
@@ -49,6 +51,7 @@ impl Default for OptionsDto {
 			sound_effects: true,
 			developer_mode: false,
 			perspective: true,
+			step_mode: false,
 			auto_save_replay: false,
 			speedrun_mode: false,
 		}

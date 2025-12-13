@@ -65,6 +65,7 @@ impl PlayState {
 			self.menu.think(&input);
 			let menu_active = !self.menu.stack.is_empty();
 			if let Some(fx) = &mut self.fx {
+				fx.step_mode = self.save_data.options.step_mode;
 				fx.think(&input, menu_active);
 			}
 		}
@@ -314,6 +315,15 @@ impl PlayState {
 						self.save_data.save(&self.lvsets.current());
 						if let Some(fx) = &mut self.fx {
 							fx.camera.set_perspective(value);
+						}
+					}
+				}
+				menu::MenuEvent::SetStepMode { value } => {
+					if self.save_data.options.step_mode != value {
+						self.save_data.options.step_mode = value;
+						self.save_data.save(&self.lvsets.current());
+						if let Some(fx) = &mut self.fx {
+							fx.step_mode = value;
 						}
 					}
 				}
