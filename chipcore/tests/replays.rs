@@ -111,6 +111,14 @@ fn cclp1() {
 }
 
 #[test]
+fn cclp2() {
+	let current_dir = env::current_dir().unwrap();
+	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp2/lv");
+	let replays_dir = current_dir.join("tests/replays/cclp2");
+	test_levelset(&levels_dir, &replays_dir);
+}
+
+#[test]
 fn cclp3() {
 	let current_dir = env::current_dir().unwrap();
 	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp3/lv");
