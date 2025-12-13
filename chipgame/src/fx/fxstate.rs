@@ -22,6 +22,7 @@ pub struct FxState {
 	pub game_over: Option<chipcore::GameOverReason>,
 	pub hud_enabled: bool,
 	pub is_preview: bool,
+	pub step_mode: bool,
 	pub darken: bool,
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
@@ -138,8 +139,22 @@ impl FxState {
 			inputs.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
 		});
 
-		self.gs.tick(&replay_input.unwrap_or(player_input));
-		self.sync();
+		let input = replay_input.unwrap_or(player_input);
+
+		// Handle step mode
+		let mut run_tick = true;
+		if self.step_mode {
+			run_tick = self.gs.should_tick_step_mode(&input);
+			// Reset input buffering to avoid stale inputs
+			if !run_tick {
+				self.gs.input_reset();
+			}
+		}
+
+		if run_tick {
+			self.gs.tick(&input);
+			self.sync();
+		}
 
 		if self.game_start_time == 0.0 && self.gs.time > 0 {
 			self.game_start_time = self.time;

@@ -274,6 +274,36 @@ impl GameState {
 		matches!(self.ts, TimeState::GameOver)
 	}
 
+	/// Returns true if the game should advance one tick in step mode.
+	pub fn should_tick_step_mode(&self, input: &Input) -> bool {
+		if input.b || input.has_directional_input() {
+			return true;
+		}
+		let Some(player) = self.ents.get(self.ps.master) else {
+			return true;
+		};
+		// When the player is in the middle of a step
+		if self.time < player.step_time + player.step_spd {
+			return true;
+		}
+		// Check terrain conditions
+		let terrain = self.field.get_terrain(player.pos);
+		if matches!(terrain, Terrain::Exit | Terrain::Teleport) {
+			return true;
+		}
+		if !self.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
+			return true;
+		}
+		// What to do about BearTraps?
+		return false;
+	}
+
+	/// Reset player input state.
+	pub fn input_reset(&mut self) {
+		self.input = Input::default();
+		self.ps.inbuf = InputBuffer::default();
+	}
+
 	/// Save replay data.
 	pub fn save_replay(&self, realtime: f32) -> chipty::ReplayDto {
 		chipty::ReplayDto {
