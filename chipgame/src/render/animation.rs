@@ -52,21 +52,6 @@ impl FadeOut {
 }
 
 #[derive(Clone, Debug)]
-pub struct FadeIn {
-	pub atime: f64,
-}
-
-impl FadeIn {
-	pub fn animate(&mut self, obj: &mut ObjectData, ctx: &UpdateCtx) -> bool {
-		if self.atime == 0.0 {
-			self.atime = ctx.time;
-		}
-		obj.alpha = f32::min(1.0, (ctx.time - self.atime) as f32 * 8.0);
-		return obj.alpha < 1.0;
-	}
-}
-
-#[derive(Clone, Debug)]
 pub struct FadeTo {
 	pub target_alpha: f32,
 	pub fade_spd: f32,
@@ -145,7 +130,6 @@ pub enum AnimState {
 	MoveVel(MoveVel),
 	MoveZ(MoveZ),
 	FadeOut(FadeOut),
-	FadeIn(FadeIn),
 	FadeTo(FadeTo),
 	AnimLoop(SpriteAnimLoop),
 	AnimSeq(SpriteAnimSeq),
@@ -158,7 +142,6 @@ impl AnimState {
 			AnimState::MoveVel(vel) => vel.animate(obj, ctx),
 			AnimState::MoveZ(mz) => mz.animate(obj, ctx),
 			AnimState::FadeOut(fade) => fade.animate(obj, ctx),
-			AnimState::FadeIn(fade) => fade.animate(obj, ctx),
 			AnimState::FadeTo(fade) => fade.animate(obj, ctx),
 			AnimState::AnimSeq(anim) => anim.animate(obj, ctx),
 			AnimState::AnimLoop(anim) => anim.animate(obj, ctx),

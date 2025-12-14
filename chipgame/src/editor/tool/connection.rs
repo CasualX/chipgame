@@ -12,11 +12,11 @@ pub fn left_click(s: &mut EditorEditState, pressed: bool) {
 		let new_conn = FieldConn { src: s.conn_src, dest: s.cursor_pos };
 
 		if new_conn.src != new_conn.dest {
-			if let Some(index) = s.game.gs.field.conns.iter().position(|conn| conn == &new_conn) {
-				s.game.gs.field.conns.remove(index);
+			if let Some(index) = s.fx.game.field.conns.iter().position(|conn| conn == &new_conn) {
+				s.fx.game.field.conns.remove(index);
 			}
 			else {
-				s.game.gs.field.conns.push(new_conn);
+				s.fx.game.field.conns.push(new_conn);
 			}
 		}
 	}

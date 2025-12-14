@@ -385,7 +385,7 @@ fn main() {
 						let fx_events = editor.take_fx_events();
 						for evt in fx_events {
 							match evt {
-								chipgame::fx::FxEvent::Sound(sound) => if let Some(ap) = &mut ap { ap.play_sound(sound) },
+								chipgame::fx::FxEvent::PlaySound(sound) => if let Some(ap) = &mut ap { ap.play_sound(sound) },
 								chipgame::fx::FxEvent::LevelComplete => level_complete(&mut editor),
 								chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
 								_ => {}

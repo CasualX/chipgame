@@ -99,8 +99,8 @@ impl PlayState {
 			return Some(fx);
 		};
 		if let Some(fx) = load_segmented_replay() {
-			seed = chipcore::RngSeed::Manual(fx.gs.field.seed);
-			inputs = Some(fx.gs.inputs.clone());
+			seed = chipcore::RngSeed::Manual(fx.game.field.seed);
+			inputs = Some(fx.game.inputs.clone());
 		}
 		// else if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{}/level{level_number}.json", self.lvsets.current().name)) {
 		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
@@ -114,7 +114,7 @@ impl PlayState {
 
 		// Create the FX state
 		let mut fx = fx::FxState::new(level_number, level, seed, &tiles::TILES);
-		fx.gs.ps.attempts = attempts;
+		fx.game.ps.attempts = attempts;
 		fx.replay_inputs = inputs;
 		fx.camera.set_perspective(self.save_data.options.perspective);
 		self.fx = Some(fx);
@@ -252,7 +252,7 @@ impl PlayState {
 				menu::MenuEvent::ResumePlay => {
 					if let Some(fx) = &mut self.fx {
 						self.menu.close_all();
-						fx.unpause();
+						fx.resume();
 					}
 				}
 				menu::MenuEvent::SaveReplay => {
@@ -361,12 +361,12 @@ impl PlayState {
 					if let Some(warp) = &mut self.warp {
 						// Update progression state
 						warp.warps_used += 1;
-						warp.gs.ps.attempts = self.save_data.increase_level_attempts();
+						warp.game.ps.attempts = self.save_data.increase_level_attempts();
 
 						// Restore FX state
 						let mut warp = warp.clone();
-						warp.unpause();
-						warp.gs.ts = chipcore::TimeState::Waiting;
+						warp.resume();
+						warp.game.time_state = chipcore::TimeState::Waiting;
 						self.fx = Some(warp);
 					}
 				}
@@ -378,10 +378,10 @@ impl PlayState {
 			for evt in events {
 				// eprintln!("FxEvent: {:?}", evt);
 				match evt {
-					fx::FxEvent::Sound(sound) => play_fx_play_sound(self, sound),
-					fx::FxEvent::Scout => play_fx_scout(self),
-					fx::FxEvent::Pause => play_fx_pause(self),
-					fx::FxEvent::Unpause => play_fx_unpause(self),
+					fx::FxEvent::PlaySound(sound) => play_fx_play_sound(self, sound),
+					fx::FxEvent::ScoutMode => play_fx_scout(self),
+					fx::FxEvent::PauseGame => play_fx_pause(self),
+					fx::FxEvent::ResumePlay => play_fx_unpause(self),
 					fx::FxEvent::LevelComplete => play_fx_level_complete(self),
 					fx::FxEvent::GameOver => play_fx_game_over(self),
 					// _ => {}
@@ -411,20 +411,20 @@ impl PlayState {
 				let realtime = if fx.game_realtime > 0.0 { fx.game_realtime }
 				else { (time - fx.game_start_time) as f32 };
 
-				let step_offset = if let Some(player) = fx.gs.ents.get(fx.gs.ps.master) {
+				let step_offset = if let Some(player) = fx.game.ents.get(fx.game.ps.master) {
 					player.step_time % player.base_spd
 				}
 				else { 0 };
 
 				menu::PlayMetrics {
 					level_number: fx.level_number,
-					level_name: &fx.gs.field.name,
-					attempts: fx.gs.ps.attempts,
-					time: fx.gs.time,
+					level_name: &fx.game.field.name,
+					attempts: fx.game.ps.attempts,
+					time: fx.game.time,
 					realtime,
 					step_offset,
-					steps: fx.gs.ps.steps,
-					bonks: fx.gs.ps.bonks,
+					steps: fx.game.ps.steps,
+					bonks: fx.game.ps.bonks,
 				}.draw(g, resx);
 			}
 		}
@@ -455,7 +455,7 @@ fn play_fx_pause(this: &mut PlayState) {
 		selected: 0,
 		has_warp: this.warp.is_some(),
 		level_number: fx.level_number,
-		level_name: fx.gs.field.name.clone(),
+		level_name: fx.game.field.name.clone(),
 	};
 	this.menu.stack.push(menu::Menu::Pause(menu));
 }
@@ -471,8 +471,8 @@ fn play_fx_level_complete(this: &mut PlayState) {
 
 	// Check for high scores
 	let scores = savedata::Scores {
-		ticks: fx.gs.time,
-		steps: fx.gs.ps.steps,
+		ticks: fx.game.time,
+		steps: fx.game.ps.steps,
 	};
 	let time_high_score = this.save_data.get_time_high_score(fx.level_number);
 	let steps_high_score = this.save_data.get_steps_high_score(fx.level_number);
@@ -498,11 +498,11 @@ fn play_fx_level_complete(this: &mut PlayState) {
 	let menu = menu::GameWinMenu {
 		selected: 0,
 		level_number: fx.level_number,
-		level_name: fx.gs.field.name.clone(),
-		attempts: fx.gs.ps.attempts,
-		time: fx.gs.time,
-		steps: fx.gs.ps.steps,
-		bonks: fx.gs.ps.bonks,
+		level_name: fx.game.field.name.clone(),
+		attempts: fx.game.ps.attempts,
+		time: fx.game.time,
+		steps: fx.game.ps.steps,
+		bonks: fx.game.ps.bonks,
 		time_high_score,
 		steps_high_score,
 		..Default::default()
@@ -520,17 +520,17 @@ fn play_fx_game_over(this: &mut PlayState) {
 		reason: fx.game_over,
 		has_warp: this.warp.is_some(),
 		level_number: fx.level_number,
-		level_name: fx.gs.field.name.clone(),
-		attempts: fx.gs.ps.attempts,
-		time: fx.gs.time,
-		steps: fx.gs.ps.steps,
-		bonks: fx.gs.ps.bonks,
+		level_name: fx.game.field.name.clone(),
+		attempts: fx.game.ps.attempts,
+		time: fx.game.time,
+		steps: fx.game.ps.steps,
+		bonks: fx.game.ps.bonks,
 	};
 	this.menu.stack.push(menu::Menu::GameOver(menu));
 }
 
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
-	let replay = fx.gs.save_replay(fx.game_realtime);
+	let replay = fx.game.save_replay(fx.game_realtime);
 	let replay = chipty::ReplayDto {
 		warps_set: fx.warps_set,
 		warps_used: fx.warps_used,
@@ -538,7 +538,7 @@ fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 		..replay
 	};
 	let record = serde_json::to_string_pretty(&replay).unwrap();
-	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.gs.ps.attempts);
+	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.game.ps.attempts);
 	let path = path::Path::new(&path);
 	let _ = fs::create_dir(path.parent().unwrap_or(path));
 	if let Err(err) = fs::write(path, record) {

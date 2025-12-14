@@ -53,4 +53,4 @@ Common modifications
 Quick reference flows
 ---------------------
 - Level boot: `PlayState::play_level(n)` → parses JSON (level + save) → `FxState::new` primes render objects → posts `PlayEvent::SetTitle` for chipplay to switch.
-- Replay/save: `fx.gs.save_replay` dumps JSON; deterministic tests reload via `chipty::decode` inside `chipcore/tests/replays.rs`.
+- Replay/save: `fx.game.save_replay` dumps JSON; deterministic tests reload via `chipty::decode` inside `chipcore/tests/replays.rs`.

@@ -32,7 +32,7 @@ impl FxState {
 		let ss = resx.viewport.size();
 		let a = f32::max(ss.y as f32 * 0.075, ss.x as f32 * 0.05);
 		let y = resx.viewport.bottom() as f32 - a * 1.1;
-		let ref gs = self.gs;
+		let ref game = self.game;
 
 		let [[keys_x1, keys_x2], [items_x1, items_x2]] = shade::d2::layout::flex1d(resx.viewport.left() as f32, resx.viewport.right() as f32, None, shade::d2::layout::Justify::SpaceAround, &[
 			shade::d2::layout::Unit::Abs(a * 5.0),
@@ -42,10 +42,10 @@ impl FxState {
 			shade::d2::layout::Unit::Abs(a * 3.0),
 			shade::d2::layout::Unit::Abs(a * 3.0),
 		]);
-		if gs.ps.keys.iter().any(|&k| k > 0) {
+		if game.ps.keys.iter().any(|&k| k > 0) {
 			cv.fill_rect(&paint, &Bounds2::c(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
 		}
-		if gs.ps.flippers || gs.ps.fire_boots || gs.ps.ice_skates || gs.ps.suction_boots {
+		if game.ps.flippers || game.ps.fire_boots || game.ps.ice_skates || game.ps.suction_boots {
 			cv.fill_rect(&paint, &Bounds2::c(items_x1, y, items_x2, resx.viewport.bottom() as f32));
 		}
 		if !self.darken {
@@ -55,28 +55,28 @@ impl FxState {
 
 		// Draw the inventory items
 		cv.uniform.texture = resx.spritesheet_texture;
-		if gs.ps.keys[0] > 0 {
+		if game.ps.keys[0] > 0 {
 			draw_sprite(cv, resx, chipty::SpriteId::BlueKey, Vec2(keys_x1 + a * 0.5, y), a);
 		}
-		if gs.ps.keys[1] > 0 {
+		if game.ps.keys[1] > 0 {
 			draw_sprite(cv, resx, chipty::SpriteId::RedKey, Vec2(keys_x1 + a * 1.5, y), a);
 		}
-		if gs.ps.keys[2] > 0 {
+		if game.ps.keys[2] > 0 {
 			draw_sprite(cv, resx, chipty::SpriteId::GreenKey, Vec2(keys_x1 + a * 2.5, y), a);
 		}
-		if gs.ps.keys[3] > 0 {
+		if game.ps.keys[3] > 0 {
 			draw_sprite(cv, resx, chipty::SpriteId::YellowKey, Vec2(keys_x1 + a * 3.5, y), a);
 		}
-		if gs.ps.flippers {
+		if game.ps.flippers {
 			draw_sprite(cv, resx, chipty::SpriteId::Flippers, Vec2(items_x1 + a * 0.5, y), a);
 		}
-		if gs.ps.fire_boots {
+		if game.ps.fire_boots {
 			draw_sprite(cv, resx, chipty::SpriteId::FireBoots, Vec2(items_x1 + a * 1.5, y), a);
 		}
-		if gs.ps.ice_skates {
+		if game.ps.ice_skates {
 			draw_sprite(cv, resx, chipty::SpriteId::IceSkates, Vec2(items_x1 + a * 2.5, y), a);
 		}
-		if gs.ps.suction_boots {
+		if game.ps.suction_boots {
 			draw_sprite(cv, resx, chipty::SpriteId::SuctionBoots, Vec2(items_x1 + a * 3.5, y), a);
 		}
 
@@ -100,8 +100,8 @@ impl FxState {
 				outline: Vec4(0, 0, 0, 255),
 				..Default::default()
 			};
-			for i in 0..gs.ps.keys.len() {
-				if gs.ps.keys[i] >= 2 {
+			for i in 0..game.ps.keys.len() {
+				if game.ps.keys[i] >= 2 {
 					scribe.color = match i {
 						0 => Vec4(0, 255, 255, 255),
 						1 => Vec4(255, 0, 0, 255),
@@ -109,7 +109,7 @@ impl FxState {
 						3 => Vec4(255, 255, 0, 255),
 						_ => Vec4(255, 255, 255, 255),
 					};
-					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(keys_x1 + a * (i as f32 + 0.5), y + 0.0, keys_x1 + a * (i as f32 + 1.5), y + a), shade::d2::TextAlign::BottomCenter, &format!("x{}", gs.ps.keys[i]));
+					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(keys_x1 + a * (i as f32 + 0.5), y + 0.0, keys_x1 + a * (i as f32 + 1.5), y + a), shade::d2::TextAlign::BottomCenter, &format!("x{}", game.ps.keys[i]));
 				}
 			}
 
@@ -117,9 +117,9 @@ impl FxState {
 			scribe.line_height = scribe.font_size * 1.2;
 
 			let chips_x = (keys_x1 + keys_x2) * 0.5;
-			let chips_remaining = i32::max(0, gs.field.required_chips - gs.ps.chips);
+			let chips_remaining = i32::max(0, game.field.required_chips - game.ps.chips);
 			let time_x = (items_x1 + items_x2) * 0.5;
-			let time_remaining = if gs.field.time_limit <= 0 { -1 } else { f32::ceil((gs.field.time_limit * 60 - gs.time) as f32 / 60.0) as i32 };
+			let time_remaining = if game.field.time_limit <= 0 { -1 } else { f32::ceil((game.field.time_limit * 60 - game.time) as f32 / 60.0) as i32 };
 
 			scribe.color = Vec4(255, 0, 128, 255);
 			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "💎");
@@ -139,7 +139,7 @@ impl FxState {
 
 		// Draw the level title or hint text
 		let mut darken = false;
-		if self.gs.time == 0 {
+		if self.game.time == 0 {
 			darken = true;
 			let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
 			tbuf.shader = resx.font.shader;
@@ -163,17 +163,17 @@ impl FxState {
 			let level_index = format!("~ Level {} ~", self.level_number);
 			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &level_index);
 			tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 - size * 1.2), &level_index);
-			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.gs.field.name);
+			let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &self.game.field.name);
 			scribe.color = Vec4(255, 255, 0, 255);
-			tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.gs.field.name);
-			if let Some(password) = &self.gs.field.password {
+			tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75), &self.game.field.name);
+			if let Some(password) = &self.game.field.password {
 				let password = format!("Password: {}", password);
 				let width = scribe.text_width(&mut {Vec2::ZERO}, &resx.font.font, &password);
 				tbuf.text_write(&resx.font, &mut scribe, &mut Vec2((ss.x as f32 - width) * 0.5, ss.y as f32 * 0.75 + size * 1.2), &password);
 			}
 		}
-		else if matches!(self.gs.ts, chipcore::TimeState::Running) && self.gs.is_show_hint() {
-			if let Some(hint) = &self.gs.field.hint {
+		else if matches!(self.game.time_state, chipcore::TimeState::Running) && self.game.is_show_hint() {
+			if let Some(hint) = &self.game.field.hint {
 				darken = true;
 
 				let tbuf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();

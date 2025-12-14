@@ -1,19 +1,19 @@
 use super::*;
 
-fn ent_pos(gs: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i, check_elevated: bool) -> Vec3f {
-	let terrain = gs.field.get_terrain(pos);
-	let elevated = terrain.is_wall() && !matches!(terrain, chipty::Terrain::DirtBlock);
+fn ent_pos(game: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i, check_elevated: bool) -> Vec3f {
+	let terrain = game.field.get_terrain(pos);
+	let elevated = matches!(terrain, chipty::Terrain::CloneMachine);
 	// Blocks appear on top of walls
 	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if check_elevated && elevated { 20.0 } else { 0.0 };
 	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
 	return pos;
 }
 
-pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+pub fn entity_created(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
+	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
-	let pos = ent_pos(&ctx.gs, ent, ent.pos, true);
-	let sprite = sprite_for_ent(ent, &ctx.gs);
+	let pos = ent_pos(&fx.game, ent, ent.pos, true);
+	let sprite = sprite_for_ent(ent, &fx.game);
 	let mut obj = render::Object {
 		data: render::ObjectData {
 			pos,
@@ -32,27 +32,29 @@ pub fn entity_created(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	if matches!(kind, chipty::EntityKind::Bomb) {
 		obj.data.sprite = chipty::SpriteId::BombA;
 		obj.anim.anims.push(render::AnimState::AnimLoop(render::SpriteAnimLoop {
-			start_time: ctx.time + ctx.random.next_f64() * 10.0,
+			start_time: fx.time + fx.random.next_f64() * 10.0,
 			frame_rate: 16.0,
 		}));
 	}
 
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
-	ctx.objlookup.insert(ehandle, handle);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.game_objects.insert(ehandle, handle);
 
-	if ctx.gs.ps.master == ehandle {
-		ctx.camera.move_src = ent.pos;
-		ctx.camera.move_dest = ent.pos;
-		ctx.camera.move_time = ctx.time;
-		ctx.camera.move_spd = ent.base_spd as f32 / chipcore::FPS as f32;
-		ctx.camera.move_teleport = true;
+	if fx.game.ps.master == ehandle {
+		fx.camera.move_src = ent.pos;
+		fx.camera.move_dest = ent.pos;
+		fx.camera.move_time = fx.time;
+		fx.camera.move_spd = ent.base_spd as f32 / chipcore::FPS as f32;
+		fx.camera.move_teleport = true;
 	}
 }
 
-pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
-	let Some(obj_handle) = ctx.objlookup.remove(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+pub fn entity_removed(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
+	let Some(obj_handle) = fx.game_objects.remove(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+
+	obj.data.visible = true;
 
 	// Object rises, fades and is removed
 	let rises = matches!(kind, chipty::EntityKind::Chip
@@ -75,18 +77,18 @@ pub fn entity_removed(ctx: &mut FxState, ehandle: chipcore::EntityHandle, kind: 
 	obj.anim.unalive_after_anim = true;
 }
 
-pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+pub fn entity_step(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
+	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
 	let src = ent.pos - match ent.step_dir { Some(step_dir) => step_dir.to_vec(), None => Vec2::ZERO };
 
-	let start_pos = ent_pos(&ctx.gs, ent, src, false);
-	let end_pos = ent_pos(&ctx.gs, ent, ent.pos, false);
+	let start_pos = ent_pos(&fx.game, ent, src, false);
+	let end_pos = ent_pos(&fx.game, ent, ent.pos, false);
 	obj.data.pos = start_pos;
 
-	obj.data.sprite = animated_sprite_for_ent(ent, &ctx.gs);
+	obj.data.sprite = animated_sprite_for_ent(ent, &fx.game);
 	obj.data.frame = 0;
 
 	// Ensure the previous step animation is cleared...
@@ -102,12 +104,12 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	obj.anim.anims.push(render::AnimState::MoveStep(render::MoveStep {
 		start_pos,
 		end_pos,
-		move_time: ctx.time,
+		move_time: fx.time,
 		duration: ent.step_spd as f32 / chipcore::FPS as f32,
 		jump_height,
 	}));
 	obj.anim.anims.push(render::AnimState::AnimSeq(render::SpriteAnimSeq {
-		start_time: ctx.time,
+		start_time: fx.time,
 		frame_count: 4, //render::sprite_frames(&resx.spritesheet_meta, obj.data.sprite),
 		frame_rate: 16.0,
 	}));
@@ -115,37 +117,39 @@ pub fn entity_step(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// Quick hack to flatten sprites on top of walls
 	// obj.data.model = if end_pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
 
-	if ehandle == ctx.gs.ps.master {
-		ctx.camera.move_src = src;
-		ctx.camera.move_dest = ent.pos;
-		ctx.camera.move_time = ctx.time;
-		ctx.camera.move_spd = ent.step_spd as f32 / chipcore::FPS as f32;
-		ctx.camera.move_teleport = false;
+	if ehandle == fx.game.ps.master {
+		fx.camera.move_src = src;
+		fx.camera.move_dest = ent.pos;
+		fx.camera.move_time = fx.time;
+		fx.camera.move_spd = ent.step_spd as f32 / chipcore::FPS as f32;
+		fx.camera.move_teleport = false;
 	}
 }
 
-pub fn entity_teleport(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
+pub fn entity_teleport(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// Step out of the teleport
-	entity_step(ctx, ehandle);
+	entity_step(fx, ehandle);
 
 	// When teleporting the player snap the camera
-	if ehandle == ctx.gs.ps.master {
-		ctx.camera.move_teleport = true;
+	if ehandle == fx.game.ps.master {
+		fx.camera.move_teleport = true;
 	}
 }
 
-pub fn entity_face_dir(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+pub fn entity_face_dir(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
+	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
-	obj.data.sprite = sprite_for_ent(ent, &ctx.gs);
+	obj.data.sprite = sprite_for_ent(ent, &fx.game);
 }
 
-pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+pub fn player_game_over(fx: &mut FxState, ehandle: chipcore::EntityHandle, reason: chipcore::GameOverReason) {
+	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = fx.game.ents.get(ehandle) else { return };
+
+	obj.data.visible = true;
 
 	// Update the player sprite
 	obj.data.sprite = match reason {
@@ -160,28 +164,28 @@ pub fn player_game_over(ctx: &mut FxState, ehandle: chipcore::EntityHandle, reas
 	};
 
 	if matches!(reason, chipcore::GameOverReason::LevelComplete) {
-		handlers::effect(ctx, ent.pos, render::EffectType::Fireworks);
+		handlers::effect(fx, ent.pos, render::EffectType::Fireworks);
 	}
 }
 
-pub fn player_activity(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
+pub fn player_activity(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// PlayerActivity is fired after PlayerGameOver in case of drowning and burning...
-	if !ctx.gs.is_game_over() {
-		entity_face_dir(ctx, ehandle);
+	if !fx.game.is_game_over() {
+		entity_face_dir(fx, ehandle);
 	}
 }
 
-pub fn player_push(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
-	let Some(ent) = ctx.gs.ents.get(ehandle) else { return };
+pub fn player_push(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
+	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
 	if !matches!(ent.kind, chipty::EntityKind::Player) {
 		return;
 	}
 
 	// No pushing animation in water
-	let terrain = ctx.gs.field.get_terrain(ent.pos);
+	let terrain = fx.game.field.get_terrain(ent.pos);
 	if matches!(terrain, chipty::Terrain::Water) {
 		return;
 	}
@@ -195,46 +199,45 @@ pub fn player_push(ctx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	};
 }
 
-pub fn entity_hidden(ctx: &mut FxState, ehandle: chipcore::EntityHandle, hidden: bool) {
-	let Some(&obj_handle) = ctx.objlookup.get(&ehandle) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+pub fn entity_hidden(fx: &mut FxState, ehandle: chipcore::EntityHandle, hidden: bool) {
+	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
 	obj.data.visible = !hidden;
 }
 
-pub fn terrain_updated(ctx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: chipty::Terrain) {
-	ctx.render.field.set_terrain(pos, new);
+pub fn terrain_updated(fx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: chipty::Terrain) {
+	fx.render.field.set_terrain(pos, new);
 	match (old, new) {
-		(chipty::Terrain::FakeBlueWall, _) => handlers::blue_wall_cleared(ctx, pos),
-		(chipty::Terrain::ToggleFloor, chipty::Terrain::ToggleWall) => handlers::toggle_wall(ctx, pos),
-		(chipty::Terrain::ToggleWall, chipty::Terrain::ToggleFloor) => handlers::toggle_wall(ctx, pos),
-		(chipty::Terrain::ToggleFloor, _) => handlers::remove_toggle_wall(ctx, pos),
-		(chipty::Terrain::ToggleWall, _) => handlers::remove_toggle_wall(ctx, pos),
-		(_, chipty::Terrain::ToggleFloor) => handlers::create_toggle_wall(ctx, pos, false),
-		(_, chipty::Terrain::ToggleWall) => handlers::create_toggle_wall(ctx, pos, true),
-		(chipty::Terrain::Fire, _) => handlers::remove_fire(ctx, pos),
-		(_, chipty::Terrain::Fire) => handlers::create_fire(ctx, pos),
-		(chipty::Terrain::RecessedWall, chipty::Terrain::Wall) => handlers::recessed_wall_raised(ctx, pos),
+		(chipty::Terrain::FakeBlueWall, _) => handlers::blue_wall_cleared(fx, pos),
+		(chipty::Terrain::ToggleFloor, chipty::Terrain::ToggleWall) => handlers::toggle_wall(fx, pos),
+		(chipty::Terrain::ToggleWall, chipty::Terrain::ToggleFloor) => handlers::toggle_wall(fx, pos),
+		(chipty::Terrain::ToggleFloor, _) => handlers::remove_toggle_wall(fx, pos),
+		(chipty::Terrain::ToggleWall, _) => handlers::remove_toggle_wall(fx, pos),
+		(_, chipty::Terrain::ToggleFloor) => handlers::create_toggle_wall(fx, pos, false),
+		(_, chipty::Terrain::ToggleWall) => handlers::create_toggle_wall(fx, pos, true),
+		(chipty::Terrain::Fire, _) => handlers::remove_fire(fx, pos),
+		(_, chipty::Terrain::Fire) => handlers::create_fire(fx, pos),
+		(chipty::Terrain::RecessedWall, chipty::Terrain::Wall) => handlers::recessed_wall_raised(fx, pos),
 
 		(chipty::Terrain::InvisibleWall, chipty::Terrain::HiddenWall) => {},
 		(chipty::Terrain::HiddenWall, chipty::Terrain::InvisibleWall) => {},
-		(chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall, _) => handlers::remove_wall_mirage(ctx, pos),
-		(_, chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall) => handlers::create_wall_mirage(ctx, pos),
+		(chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall, _) => handlers::remove_wall_mirage(fx, pos),
+		(_, chipty::Terrain::InvisibleWall | chipty::Terrain::HiddenWall) => handlers::create_wall_mirage(fx, pos),
 
-		(chipty::Terrain::WaterHazard, _) => handlers::remove_water_hazard(ctx, pos),
-		(_, chipty::Terrain::WaterHazard) => handlers::create_water_hazard(ctx, pos),
+		(chipty::Terrain::WaterHazard, _) => handlers::remove_water_hazard(fx, pos),
+		(_, chipty::Terrain::WaterHazard) => handlers::create_water_hazard(fx, pos),
 		_ => {}
 	}
 }
 
-pub fn fire_hidden(ctx: &mut FxState, pos: Vec2i, hidden: bool) {
-	let Some(&obj_handle) = ctx.fire_sprites.get(&pos) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+pub fn fire_hidden(fx: &mut FxState, pos: Vec2i, hidden: bool) {
+	let Some(&obj_handle) = fx.fire_sprites.get(&pos) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
 	obj.data.visible = !hidden;
 }
-
-pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn create_fire(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0 - 2.0, 0.0), // Make fire appear below other sprites
@@ -247,19 +250,19 @@ pub fn create_fire(ctx: &mut FxState, pos: Vec2<i32>) {
 		},
 		anim: render::Animation {
 			anims: vec![render::AnimState::AnimLoop(render::SpriteAnimLoop {
-				start_time: ctx.time + ctx.random.next_f64() * 10.0,
+				start_time: fx.time + fx.random.next_f64() * 10.0,
 				frame_rate: 8.0,
 			})],
 			unalive_after_anim: false,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
-	ctx.fire_sprites.insert(pos, handle);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.fire_sprites.insert(pos, handle);
 }
-pub fn remove_fire(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.fire_sprites.remove(&pos) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+pub fn remove_fire(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = fx.fire_sprites.remove(&pos) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
 	obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 	obj.anim.unalive_after_anim = true;
@@ -322,10 +325,10 @@ fn sprite_for_playernpc(face_dir: Option<chipty::Compass>, terrain: chipty::Terr
 	}
 }
 
-fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
+fn animated_sprite_for_ent(ent: &chipcore::Entity, game: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, gs.field.get_terrain(ent.pos)),
-		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, gs.field.get_terrain(ent.pos)),
+		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, game.field.get_terrain(ent.pos)),
+		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, game.field.get_terrain(ent.pos)),
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
 		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,
@@ -394,10 +397,10 @@ fn animated_sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> 
 	}
 }
 
-fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::SpriteId {
+fn sprite_for_ent(ent: &chipcore::Entity, game: &chipcore::GameState) -> chipty::SpriteId {
 	match ent.kind {
-		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, gs.field.get_terrain(ent.pos)),
-		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, gs.field.get_terrain(ent.pos)),
+		chipty::EntityKind::Player => sprite_for_player(ent.face_dir, game.field.get_terrain(ent.pos)),
+		chipty::EntityKind::PlayerNPC => sprite_for_playernpc(ent.face_dir, game.field.get_terrain(ent.pos)),
 		chipty::EntityKind::Chip => chipty::SpriteId::Chip,
 		chipty::EntityKind::Socket => chipty::SpriteId::Socket,
 		chipty::EntityKind::Block => chipty::SpriteId::DirtBlock,
@@ -460,7 +463,7 @@ fn sprite_for_ent(ent: &chipcore::Entity, gs: &chipcore::GameState) -> chipty::S
 	}
 }
 
-pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
+pub fn lock_opened(fx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -484,11 +487,11 @@ pub fn lock_opened(ctx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 			unalive_after_anim: true,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
 }
 
-pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn blue_wall_cleared(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -504,11 +507,11 @@ pub fn blue_wall_cleared(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: true,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
 }
 
-pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn recessed_wall_raised(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, -20.0),
@@ -527,14 +530,14 @@ pub fn recessed_wall_raised(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
 
 	// Keep the terrain as RecessedWall so that the wall object is drawn on top
-	ctx.render.field.set_terrain(pos, chipty::Terrain::RecessedWall);
+	fx.render.field.set_terrain(pos, chipty::Terrain::RecessedWall);
 }
 
-pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
+pub fn create_toggle_wall(fx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 	let z = if raised { 0.0 } else { -21.0 };
 	let obj = render::Object {
 		data: render::ObjectData {
@@ -556,21 +559,21 @@ pub fn create_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 			unalive_after_anim: false,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
-	ctx.toggle_walls.insert(pos, handle);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.toggle_walls.insert(pos, handle);
 }
 
-pub fn remove_toggle_wall(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.toggle_walls.remove(&pos) else { return };
-	ctx.render.objects.remove(obj_handle);
+pub fn remove_toggle_wall(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = fx.toggle_walls.remove(&pos) else { return };
+	fx.render.objects.remove(obj_handle);
 }
 
-pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
-	let Some(&obj_handle) = ctx.toggle_walls.get(&pos) else { return };
-	let Some(obj) = ctx.render.objects.get_mut(obj_handle) else { return };
+pub fn toggle_wall(fx: &mut FxState, pos: Vec2i) {
+	let Some(&obj_handle) = fx.toggle_walls.get(&pos) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
-	let terrain = ctx.gs.field.get_terrain(pos);
+	let terrain = fx.game.field.get_terrain(pos);
 	obj.anim.anims.clear();
 	obj.anim.anims.push(render::AnimState::MoveZ(render::MoveZ {
 		target_z: if matches!(terrain, chipty::Terrain::ToggleWall) { 0.0 } else { -21.0 },
@@ -578,7 +581,7 @@ pub fn toggle_wall(ctx: &mut FxState, pos: Vec2i) {
 	}));
 }
 
-pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn create_wall_mirage(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -594,18 +597,18 @@ pub fn create_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
-	ctx.mirage_walls.insert(pos, handle);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.mirage_walls.insert(pos, handle);
 }
 
-pub fn remove_wall_mirage(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.mirage_walls.remove(&pos) else { return };
+pub fn remove_wall_mirage(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = fx.mirage_walls.remove(&pos) else { return };
 
-	ctx.render.objects.remove(obj_handle);
+	fx.render.objects.remove(obj_handle);
 }
 
-pub fn create_water_hazard(ctx: &mut FxState, pos: Vec2<i32>) {
+pub fn create_water_hazard(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
 		data: render::ObjectData {
 			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
@@ -621,26 +624,26 @@ pub fn create_water_hazard(ctx: &mut FxState, pos: Vec2<i32>) {
 			unalive_after_anim: false,
 		},
 	};
-	let handle = ctx.render.objects.alloc();
-	ctx.render.objects.insert(handle, obj);
-	ctx.water_hazards.insert(pos, handle);
-	ctx.render.field.set_terrain(pos, chipty::Terrain::Water);
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.water_hazards.insert(pos, handle);
+	fx.render.field.set_terrain(pos, chipty::Terrain::Water);
 }
 
-pub fn remove_water_hazard(ctx: &mut FxState, pos: Vec2<i32>) {
-	let Some(obj_handle) = ctx.water_hazards.remove(&pos) else { return };
+pub fn remove_water_hazard(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = fx.water_hazards.remove(&pos) else { return };
 
-	ctx.render.objects.remove(obj_handle);
+	fx.render.objects.remove(obj_handle);
 }
 
-pub fn game_over(ctx: &mut FxState, reason: chipcore::GameOverReason) {
-	ctx.game_realtime = (ctx.time - ctx.game_start_time) as f32;
-	ctx.next_level_load = ctx.time + 2.0;
-	ctx.game_over = Some(reason);
+pub fn game_over(fx: &mut FxState, reason: chipcore::GameOverReason) {
+	fx.game_realtime = (fx.time - fx.game_start_time) as f32;
+	fx.next_level_load = fx.time + 2.0;
+	fx.game_over = Some(reason);
 }
 
-pub fn effect(ctx: &mut FxState, pos: Vec2i, ty: render::EffectType) {
+pub fn effect(fx: &mut FxState, pos: Vec2i, ty: render::EffectType) {
 	let pos = Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 10.0);
-	let start = ctx.time;
-	ctx.render.effects.push(render::Effect { ty, pos, start });
+	let start = fx.time;
+	fx.render.effects.push(render::Effect { ty, pos, start });
 }

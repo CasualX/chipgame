@@ -4,17 +4,19 @@ const SCOUT_INPUT_HOLD: f64 = 1.5 / chipcore::FPS as f64;
 
 #[derive(Clone, Default)]
 pub struct FxState {
-	pub gs: chipcore::GameState,
+	pub game: chipcore::GameState,
 	pub camera: PlayCamera,
 	pub time: f64,
 	pub dt: f64,
 	pub random: Random,
 	pub render: render::RenderState,
-	pub objlookup: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
+
+	pub game_objects: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
 	pub fire_sprites: HashMap<Vec2i, render::ObjectHandle>,
 	pub toggle_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub mirage_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub water_hazards: HashMap<Vec2i, render::ObjectHandle>,
+
 	pub level_number: i32,
 	pub next_level_load: f64,
 	pub game_start_time: f64,
@@ -37,7 +39,7 @@ pub struct FxState {
 
 impl cvar::IVisit for FxState {
 	fn visit(&mut self, f: &mut dyn FnMut(&mut dyn cvar::INode)) {
-		self.gs.visit(f);
+		self.game.visit(f);
 	}
 }
 
@@ -52,17 +54,17 @@ impl FxState {
 		fx.darken_time = -1.0;
 
 		// Parse the level data into the game state
-		fx.gs.parse(level_dto, rng_seed);
+		fx.game.parse(level_dto, rng_seed);
 
 		// Initialize the render field based on the game state
-		fx.render.field.width = fx.gs.field.width;
-		fx.render.field.height = fx.gs.field.height;
-		fx.render.field.terrain.extend_from_slice(&fx.gs.field.terrain);
-		for y in 0..fx.gs.field.height {
-			for x in 0..fx.gs.field.width {
+		fx.render.field.width = fx.game.field.width;
+		fx.render.field.height = fx.game.field.height;
+		fx.render.field.terrain.extend_from_slice(&fx.game.field.terrain);
+		for y in 0..fx.game.field.height {
+			for x in 0..fx.game.field.width {
 				let pos = Vec2(x, y);
-				let index = (y * fx.gs.field.width + x) as usize;
-				let terrain = fx.gs.field.terrain[index];
+				let index = (y * fx.game.field.width + x) as usize;
+				let terrain = fx.game.field.terrain[index];
 				match terrain {
 					chipty::Terrain::Fire => handlers::create_fire(&mut fx, pos),
 					chipty::Terrain::ToggleFloor => handlers::create_toggle_wall(&mut fx, pos, false),
@@ -81,21 +83,21 @@ impl FxState {
 	}
 
 	pub fn scout(&mut self) {
-		self.gs.ts = chipcore::TimeState::Paused;
-		self.events.push(FxEvent::Scout);
+		self.game.time_state = chipcore::TimeState::Paused;
+		self.events.push(FxEvent::ScoutMode);
 		self.hud_enabled = true;
 		self.scout_init(true);
 	}
 	pub fn pause(&mut self) {
-		self.gs.ts = chipcore::TimeState::Paused;
-		self.events.push(FxEvent::Pause);
+		self.game.time_state = chipcore::TimeState::Paused;
+		self.events.push(FxEvent::PauseGame);
 		self.hud_enabled = false;
 		self.scout_init(false);
 	}
-	pub fn unpause(&mut self) {
-		if matches!(self.gs.ts, chipcore::TimeState::Paused) {
-			self.gs.ts = chipcore::TimeState::Running;
-			self.events.push(FxEvent::Unpause);
+	pub fn resume(&mut self) {
+		if matches!(self.game.time_state, chipcore::TimeState::Paused) {
+			self.game.time_state = chipcore::TimeState::Running;
+			self.events.push(FxEvent::ResumePlay);
 			self.hud_enabled = true;
 			self.unpauses += 1;
 			self.scout_init(false);
@@ -110,7 +112,7 @@ impl FxState {
 			return;
 		}
 
-		if !self.gs.is_game_over() {
+		if !self.game.is_game_over() {
 			if input.start.is_pressed() {
 				self.pause();
 			}
@@ -136,7 +138,7 @@ impl FxState {
 			}
 		}
 		let replay_input = self.replay_inputs.as_ref().and_then(|inputs| {
-			inputs.get(self.gs.time as usize).cloned().map(chipcore::Input::decode)
+			inputs.get(self.game.time as usize).cloned().map(chipcore::Input::decode)
 		});
 
 		let input = replay_input.unwrap_or(player_input);
@@ -144,19 +146,19 @@ impl FxState {
 		// Handle step mode
 		let mut run_tick = true;
 		if self.step_mode {
-			run_tick = self.gs.should_tick_step_mode(&input);
+			run_tick = self.game.should_tick_step_mode(&input);
 			// Reset input buffering to avoid stale inputs
 			if !run_tick {
-				self.gs.input_reset();
+				self.game.input_reset();
 			}
 		}
 
 		if run_tick {
-			self.gs.tick(&input);
+			self.game.tick(&input);
 			self.sync();
 		}
 
-		if self.game_start_time == 0.0 && self.gs.time > 0 {
+		if self.game_start_time == 0.0 && self.game.time > 0 {
 			self.game_start_time = self.time;
 		}
 
@@ -175,22 +177,22 @@ impl FxState {
 		for (&pos, &obj_handle) in &self.mirage_walls {
 			let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
 
-			let Some(player) = chipcore::ps_nearest_ent(&self.gs, pos) else { continue };
+			let Some(player) = chipcore::ps_nearest_ent(&self.game, pos) else { continue };
 			if player.pos.distance_hat(pos) <= 2 {
-				if obj.anim.anims.is_empty() && obj.data.alpha < 1.0 {
-					obj.anim.anims.push(render::AnimState::FadeIn(render::FadeIn { atime: 0.0 }));
+				if obj.anim.anims.is_empty() && obj.data.alpha < 0.5 {
+					obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.5, fade_spd: 2.0 }));
 				}
 			}
 			else {
 				if obj.anim.anims.is_empty() && obj.data.alpha > 0.0 {
-					obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
+					obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.0, fade_spd: 2.0 }));
 				}
 			}
 		}
 	}
 	/// Process game events and update FX state accordingly.
 	pub fn sync(&mut self) {
-		for ev in &self.gs.events.take() {
+		for ev in &self.game.events.take() {
 			eprintln!("GameEvent: {:?}", ev);
 			match ev {
 				&chipcore::GameEvent::EntityCreated { entity, kind } => handlers::entity_created(self, entity, kind),
@@ -207,7 +209,7 @@ impl FxState {
 				&chipcore::GameEvent::FireHidden { pos, hidden } => handlers::fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),
 				&chipcore::GameEvent::GameOver { reason } => handlers::game_over(self, reason),
-				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::Sound(sound)),
+				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound(sound)),
 				&chipcore::GameEvent::BombExplode { pos } => handlers::effect(self, pos, render::EffectType::Sparkles),
 				&chipcore::GameEvent::WaterSplash { pos } => handlers::effect(self, pos, render::EffectType::Splash),
 				_ => {}
@@ -220,10 +222,10 @@ impl FxState {
 		self.dt = dt;
 		let ctx = render::UpdateCtx { time: self.time, dt: self.dt };
 
-		if self.gs.time != 0 {
+		if self.game.time != 0 {
 			self.camera.animate_blend();
 		}
-		if !matches!(self.gs.ts, chipcore::TimeState::Paused) {
+		if !matches!(self.game.time_state, chipcore::TimeState::Paused) {
 			self.camera.animate_move(ctx.time);
 		}
 		self.scout_camera(ctx.dt);

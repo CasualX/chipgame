@@ -10,25 +10,14 @@ use crate::fx;
 use crate::render;
 use crate::menu;
 
-mod tool;
-mod tiles;
 mod editstate;
 mod playstate;
+mod tiles;
+mod tool;
 
 use self::editstate::EditorEditState;
 use self::playstate::EditorPlayState;
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Tool {
-	Terrain,
-	Entity,
-	Connection,
-}
-impl Default for Tool {
-	fn default() -> Self {
-		Tool::Terrain
-	}
-}
+pub use self::tool::Tool;
 
 #[derive(Clone, Debug)]
 pub struct EditorPlayStats {
@@ -180,11 +169,11 @@ impl EditorState {
 			EditorState::Edit(s) => {
 				let level = s.save_level();
 				let level_dto = serde_json::from_str(&level).unwrap();
-				let mut game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &crate::play::TILES);
-				game.camera.set_perspective(true);
+				let mut fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &crate::play::TILES);
+				fx.camera.set_perspective(true);
 				*self = EditorState::Play(Box::new(EditorPlayState {
 					level,
-					game,
+					fx,
 					input: Input::default(),
 					screen_size: s.screen_size,
 				}));
@@ -224,8 +213,8 @@ impl EditorState {
 
 	pub fn take_fx_events(&mut self) -> Vec<fx::FxEvent> {
 		match self {
-			EditorState::Edit(s) => mem::take(&mut s.game.events),
-			EditorState::Play(s) => mem::take(&mut s.game.events),
+			EditorState::Edit(s) => mem::take(&mut s.fx.events),
+			EditorState::Play(s) => mem::take(&mut s.fx.events),
 		}
 	}
 

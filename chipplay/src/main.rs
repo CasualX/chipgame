@@ -110,7 +110,7 @@ impl AppStuff {
 
 	fn set_title(&self, state: &chipgame::play::PlayState) {
 		if let Some(fx) = &state.fx {
-			self.window.set_title(&format!("{} - Level {} - {}", state.lvsets.current().title, fx.level_number, fx.gs.field.name));
+			self.window.set_title(&format!("{} - Level {} - {}", state.lvsets.current().title, fx.level_number, fx.game.field.name));
 		}
 		else if let Some(level_set) = state.lvsets.collection.get(state.lvsets.selected as usize) {
 			self.window.set_title(&level_set.title);

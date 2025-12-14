@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Default)]
 pub struct EditorEditState {
-	pub game: Box<fx::FxState>,
+	pub fx: Box<fx::FxState>,
 	pub tool: Tool,
 
 	pub screen_size: Vec2<i32>,
@@ -21,18 +21,18 @@ pub struct EditorEditState {
 impl EditorEditState {
 	pub fn load_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
-		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
-		self.game.hud_enabled = false;
-		self.game.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
-		self.game.camera.set_perspective(false);
-		self.game.pause(); // Unlock the camera
+		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
+		self.fx.hud_enabled = false;
+		self.fx.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
+		self.fx.camera.set_perspective(false);
+		self.fx.pause(); // Unlock the camera
 	}
 	pub fn reload_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
-		let old_cam = self.game.camera.clone();
-		self.game = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
-		self.game.pause(); // Unlock the camera
-		self.game.camera = old_cam;
+		let old_cam = self.fx.camera.clone();
+		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
+		self.fx.pause(); // Unlock the camera
+		self.fx.camera = old_cam;
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();
@@ -40,33 +40,33 @@ impl EditorEditState {
 		legend_map.insert(Terrain::Blank, 0); legend.push(Terrain::Blank);
 		legend_map.insert(Terrain::Floor, 1); legend.push(Terrain::Floor);
 		let mut idx = 2;
-		for &terrain in self.game.gs.field.terrain.iter() {
+		for &terrain in self.fx.game.field.terrain.iter() {
 			if !legend_map.contains_key(&terrain) {
 				legend_map.insert(terrain, idx);
 				legend.push(terrain);
 				idx += 1;
 			}
 		}
-		let data = self.game.gs.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
-		let mut entities = self.game.gs.ents.iter().map(chipcore::Entity::to_entity_args).collect();
+		let data = self.fx.game.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
+		let mut entities = self.fx.game.ents.iter().map(chipcore::Entity::to_entity_args).collect();
 		LevelDto::sort_entities(&mut entities);
 		let dto = LevelDto {
-			name: self.game.gs.field.name.clone(),
-			author: self.game.gs.field.author.clone(),
-			hint: self.game.gs.field.hint.clone(),
-			password: self.game.gs.field.password.clone(),
-			time_limit: self.game.gs.field.time_limit,
-			required_chips: self.game.gs.field.required_chips,
+			name: self.fx.game.field.name.clone(),
+			author: self.fx.game.field.author.clone(),
+			hint: self.fx.game.field.hint.clone(),
+			password: self.fx.game.field.password.clone(),
+			time_limit: self.fx.game.field.time_limit,
+			required_chips: self.fx.game.field.required_chips,
 			map: FieldDto {
-				width: self.game.gs.field.width,
-				height: self.game.gs.field.height,
+				width: self.fx.game.field.width,
+				height: self.fx.game.field.height,
 				data,
 				legend,
 			},
 			entities,
-			connections: self.game.gs.field.conns.clone(),
-			replays: self.game.gs.field.replays.clone(),
-			trophies: self.game.gs.field.trophies.clone(),
+			connections: self.fx.game.field.conns.clone(),
+			replays: self.fx.game.field.replays.clone(),
+			trophies: self.fx.game.field.trophies.clone(),
 		};
 		serde_json::to_string(&dto).unwrap()
 	}
@@ -74,7 +74,7 @@ impl EditorEditState {
 		self.screen_size = Vec2::new(width, height);
 	}
 	pub fn mouse_move(&mut self, mouse_x: i32, mouse_y: i32) {
-		let cam = self.game.camera.setup(self.screen_size);
+		let cam = self.fx.camera.setup(self.screen_size);
 		let ray = cam.viewport_to_ray(Vec2(mouse_x, mouse_y));
 
 		let plane = Plane3::new(Vec3::Z, 0.0);
@@ -113,19 +113,19 @@ impl EditorEditState {
 		});
 
 		if self.input.key_left {
-			self.game.camera.target.x -= 5.0;
+			self.fx.camera.target.x -= 5.0;
 		}
 		if self.input.key_right {
-			self.game.camera.target.x += 5.0;
+			self.fx.camera.target.x += 5.0;
 		}
 		if self.input.key_up {
-			self.game.camera.target.y -= 5.0;
+			self.fx.camera.target.y -= 5.0;
 		}
 		if self.input.key_down {
-			self.game.camera.target.y += 5.0;
+			self.fx.camera.target.y += 5.0;
 		}
 
-		self.game.camera.animate_position(self.game.dt);
+		self.fx.camera.animate_position(self.fx.dt);
 
 		if let Some(tool_pos) = self.tool_pos {
 			if tool_pos != self.cursor_pos {
@@ -139,9 +139,9 @@ impl EditorEditState {
 		}
 
 		render::drawbg(g, resx);
-		self.game.draw(g, resx, time);
+		self.fx.draw(g, resx, time);
 
-		let cam = self.game.camera.setup(self.screen_size);
+		let cam = self.fx.camera.setup(self.screen_size);
 
 		let p = self.mouse_pos; {
 			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
@@ -156,7 +156,7 @@ impl EditorEditState {
 				for x in 0..2 {
 					let terrain = TERRAIN_SAMPLES[y as usize][x as usize];
 					let pos = Vec3::new((x - 3) as f32 * 32.0, y as f32 * 32.0, 0.0);
-					render::draw_tile(&mut cv, resx, terrain, pos, &self.game.render.tiles);
+					render::draw_tile(&mut cv, resx, terrain, pos, &self.fx.render.tiles);
 				}
 			}
 
@@ -168,7 +168,7 @@ impl EditorEditState {
 
 			match self.tool {
 				Tool::Terrain => {
-					render::draw_tile(&mut cv, resx, self.selected_terrain, p, &self.game.render.tiles);
+					render::draw_tile(&mut cv, resx, self.selected_terrain, p, &self.fx.render.tiles);
 				}
 				_ => (),
 			}
@@ -196,14 +196,14 @@ impl EditorEditState {
 				}
 			}
 			let pen = shade::d2::Pen { template: ToVertex { color: [0, 128, 255, 255] } };
-			for conn in &self.game.gs.field.conns {
+			for conn in &self.fx.game.field.conns {
 				let src = cam.world_to_viewport(conn.src.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				let dest = cam.world_to_viewport(conn.dest.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				cv.draw_arrow(&pen, src, dest, 12.0);
 			}
 
 			let pen = shade::d2::Pen { template: ToVertex { color: [255, 0, 0, 255] } };
-			for ent in self.game.gs.ents.iter() {
+			for ent in self.fx.game.ents.iter() {
 				let pos = cam.world_to_viewport(ent.pos.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				if let Some(face_dir) = ent.face_dir {
 					cv.draw_arrow(&pen, pos, pos + face_dir.to_vec().map(|c| c as f32 * 20.0), 4.0);
@@ -249,10 +249,10 @@ impl EditorEditState {
 	///
 	/// Positive values = expand, Negative values = crop.
 	pub fn resize(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-		let brush = self.game.gs.brush_create();
+		let brush = self.fx.game.brush_create();
 
-		let new_width = self.game.gs.field.width + left + right;
-		let new_height = self.game.gs.field.height + top + bottom;
+		let new_width = self.fx.game.field.width + left + right;
+		let new_height = self.fx.game.field.height + top + bottom;
 		if new_width < chipty::FIELD_MIN_WIDTH || new_width > chipty::FIELD_MAX_WIDTH {
 			return;
 		}
@@ -260,14 +260,14 @@ impl EditorEditState {
 			return;
 		}
 
-		self.game.gs.field.width = new_width;
-		self.game.gs.field.height = new_height;
-		self.game.gs.field.terrain.clear();
-		self.game.gs.field.terrain.resize((new_width * new_height) as usize, self.selected_terrain);
-		self.game.gs.field.conns.clear();
-		self.game.gs.ents.clear();
+		self.fx.game.field.width = new_width;
+		self.fx.game.field.height = new_height;
+		self.fx.game.field.terrain.clear();
+		self.fx.game.field.terrain.resize((new_width * new_height) as usize, self.selected_terrain);
+		self.fx.game.field.conns.clear();
+		self.fx.game.ents.clear();
 
-		self.game.gs.brush_apply(Vec2i(left, top), &brush);
+		self.fx.game.brush_apply(Vec2i(left, top), &brush);
 	}
 
 	pub fn left_click(&mut self, pressed: bool) {
@@ -320,9 +320,9 @@ impl EditorEditState {
 		}
 		else {
 			// Sample from the existing entities
-			let ehandle = s.game.gs.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None });
+			let ehandle = s.fx.game.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None });
 			if let Some(ehandle) = ehandle {
-				if let Some(ent) = s.game.gs.ents.get(ehandle) {
+				if let Some(ent) = s.fx.game.ents.get(ehandle) {
 					s.tool = Tool::Entity;
 					s.selected_ent = ehandle;
 					s.selected_args = Some(ent.to_entity_args());
@@ -332,7 +332,7 @@ impl EditorEditState {
 			// Sample from the terrain
 			else {
 				s.tool = Tool::Terrain;
-				s.selected_terrain = s.game.gs.field.get_terrain(cursor_pos);
+				s.selected_terrain = s.fx.game.field.get_terrain(cursor_pos);
 			}
 		}
 

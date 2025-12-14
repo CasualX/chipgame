@@ -2,7 +2,7 @@ use super::*;
 
 pub struct EditorPlayState {
 	pub level: String,
-	pub game: Box<fx::FxState>,
+	pub fx: Box<fx::FxState>,
 	pub input: Input,
 	pub screen_size: Vec2i,
 }
@@ -34,7 +34,7 @@ impl EditorPlayState {
 			start: menu::KeyState::Up,
 			select: menu::KeyState::Up,
 		};
-		self.game.think(&input, false);
+		self.fx.think(&input, false);
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
 		g.clear(&shade::ClearArgs {
@@ -43,20 +43,20 @@ impl EditorPlayState {
 			depth: Some(1.0),
 			..Default::default()
 		});
-		self.game.draw(g, resx, time);
+		self.fx.draw(g, resx, time);
 	}
 	pub fn save_replay(&mut self) {
-		let replay_dto: chipty::ReplayDto = self.game.gs.save_replay(self.game.game_realtime);
+		let replay_dto: chipty::ReplayDto = self.fx.game.save_replay(self.fx.game_realtime);
 		let mut level_dto: chipty::LevelDto = serde_json::from_str(&self.level).unwrap();
 		level_dto.replays = Some(vec![replay_dto]);
 		self.level = serde_json::to_string(&level_dto).unwrap();
 	}
 	pub fn play_stats(&self) -> EditorPlayStats {
 		EditorPlayStats {
-			realtime: self.game.game_realtime,
-			ticks: self.game.gs.time,
-			steps: self.game.gs.ps.steps,
-			bonks: self.game.gs.ps.bonks,
+			realtime: self.fx.game_realtime,
+			ticks: self.fx.game.time,
+			steps: self.fx.game.ps.steps,
+			bonks: self.fx.game.ps.bonks,
 		}
 	}
 }

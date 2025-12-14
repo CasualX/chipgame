@@ -18,7 +18,7 @@ pub enum TimeState {
 #[derive(Clone, Default)]
 pub struct GameState {
 	pub time: i32,
-	pub ts: TimeState,
+	pub time_state: TimeState,
 	pub ps: PlayerState,
 	pub field: Field,
 	pub ents: EntityMap,
@@ -41,7 +41,7 @@ impl GameState {
 		};
 
 		self.time = 0;
-		self.ts = TimeState::Waiting;
+		self.time_state = TimeState::Waiting;
 		self.ps = PlayerState::default();
 		self.field.parse(ld, seed);
 		self.ents.clear();
@@ -90,13 +90,13 @@ impl GameState {
 		}
 
 		// Wait for the player to press any direction input to start the game
-		match self.ts {
+		match self.time_state {
 			TimeState::Paused => return,
 			TimeState::Waiting => if !input.has_directional_input() { return },
 			TimeState::Running => {},
 			TimeState::GameOver => return,
 		}
-		self.ts = TimeState::Running;
+		self.time_state = TimeState::Running;
 
 		// Check if the player has run out of time
 		if self.field.time_limit > 0 && self.time >= self.field.time_limit * FPS {
@@ -266,12 +266,12 @@ impl GameState {
 		}
 
 		self.events.fire(GameEvent::GameOver { reason });
-		self.ts = TimeState::GameOver;
+		self.time_state = TimeState::GameOver;
 	}
 
 	/// Returns true if the game is over.
 	pub fn is_game_over(&self) -> bool {
-		matches!(self.ts, TimeState::GameOver)
+		matches!(self.time_state, TimeState::GameOver)
 	}
 
 	/// Returns true if the game should advance one tick in step mode.

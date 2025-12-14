@@ -1,10 +1,10 @@
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum FxEvent {
-	Sound(chipty::SoundFx),
-	Pause,
-	Scout,
-	Unpause,
+	PlaySound(chipty::SoundFx),
+	PauseGame,
+	ScoutMode,
+	ResumePlay,
 	LevelComplete,
 	GameOver,
 }
