@@ -1,10 +1,10 @@
 {
   "level_name": "Debug File *",
-  "attempts": 2,
-  "realtime": 20.349052,
-  "ticks": 1069,
+  "attempts": 4,
+  "realtime": 20.349798,
+  "ticks": 1009,
   "steps": 78,
-  "bonks": 11,
-  "seed": "e125f5c471e61ab0",
-  "inputs": "eNq1k8EOgDAIQ2Exiwf//3uNWwbFwIZRe+LAyisicxNd2rsy9d/aQG0ulKYuvggfl7maD6zBaVGW2AaAIYh4T1ZHGDXoOexGxlAWxWBVH9ZEj8GQvQTkNMb75ISeqw+tNMyJXNUwZ5oEwYRd3qKT8XYn/IUe/VqUNNUbf8fWdQJB6hAI"
+  "bonks": 6,
+  "seed": "000cb8e3fe49ea3f",
+  "inputs": "eNrNU0EOwCAIK8sO/v/F20yUoqAsu6w3SaWlqMgDVJSf4Myhej5m1DqTevEGjQv3ot7d9wflxv0liNPp71PMiGBzIqoQWNv4Z47Z+5hPiQZY+W+kMf8mTPkgsGayXa4X1r9qus+qrRd8nPOk4nek/1RWtKfw0kfHBZH1DRU"
 }
