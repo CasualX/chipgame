@@ -3,6 +3,7 @@ use super::*;
 #[derive(Default)]
 pub struct PauseMenu {
 	pub selected: u8,
+	pub assist_mode: bool,
 	pub has_warp: bool,
 	pub level_number: i32,
 	pub level_name: String,
@@ -12,14 +13,29 @@ const MENU_WITH_WARPS: MenuItems = MenuItems {
 	labels: &[&"Resume", &"Set Warp Point", &"Warp Back", &"Restart", &"Options", &"Main Menu"],
 	events: &[MenuEvent::ResumePlay, MenuEvent::SaveState, MenuEvent::LoadState, MenuEvent::RestartLevel, MenuEvent::OpenOptions, MenuEvent::OpenMainMenu],
 };
-const MENU_WO_WARPS: MenuItems = MenuItems {
+const MENU_WITH_WARP_POINT: MenuItems = MenuItems {
 	labels: &[&"Resume", &"Set Warp Point", &"Restart", &"Options", &"Main Menu"],
 	events: &[MenuEvent::ResumePlay, MenuEvent::SaveState, MenuEvent::RestartLevel, MenuEvent::OpenOptions, MenuEvent::OpenMainMenu],
 };
+const MENU_WO_WARPS: MenuItems = MenuItems {
+	labels: &[&"Resume", &"Restart", &"Options", &"Main Menu"],
+	events: &[MenuEvent::ResumePlay, MenuEvent::RestartLevel, MenuEvent::OpenOptions, MenuEvent::OpenMainMenu],
+};
 
 impl PauseMenu {
+	fn get_menu_items(&self) -> MenuItems<'static> {
+		if !self.assist_mode {
+			MENU_WO_WARPS
+		}
+		else if self.has_warp {
+			MENU_WITH_WARPS
+		}
+		else {
+			MENU_WITH_WARP_POINT
+		}
+	}
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
-		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
+		let items = self.get_menu_items();
 		if input.up.is_pressed() {
 			if self.selected > 0 {
 				self.selected -= 1;
@@ -64,7 +80,7 @@ impl PauseMenu {
 			subtitle: Some(&"\x1b[color=#0f0]Paused!"),
 		}.draw(&mut buf, &top, resx);
 
-		let items = if self.has_warp { MENU_WITH_WARPS } else { MENU_WO_WARPS };
+		let items = self.get_menu_items();
 
 		draw::DrawMenuItems {
 			items_text: items.labels,

@@ -12,9 +12,12 @@ pub struct FxState {
 	pub render: render::RenderState,
 
 	pub game_objects: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
+	pub hidden_objects: HashMap<chipcore::EntityHandle, render::ObjectHandle>,
 	pub fire_sprites: HashMap<Vec2i, render::ObjectHandle>,
+	pub hidden_fire: HashMap<Vec2i, render::ObjectHandle>,
 	pub toggle_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub mirage_walls: HashMap<Vec2i, render::ObjectHandle>,
+	pub fake_blue_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub water_hazards: HashMap<Vec2i, render::ObjectHandle>,
 
 	pub level_number: i32,
@@ -25,6 +28,7 @@ pub struct FxState {
 	pub hud_enabled: bool,
 	pub is_preview: bool,
 	pub step_mode: bool,
+	pub assist_dist: i32,
 	pub darken: bool,
 	pub darken_time: f64,
 	pub events: Vec<FxEvent>,
@@ -52,6 +56,7 @@ impl FxState {
 		fx.hud_enabled = true;
 		fx.darken = true;
 		fx.darken_time = -1.0;
+		fx.assist_dist = 2;
 
 		// Parse the level data into the game state
 		fx.game.parse(level_dto, rng_seed);
@@ -72,6 +77,7 @@ impl FxState {
 					chipty::Terrain::HiddenWall => handlers::create_wall_mirage(&mut fx, pos),
 					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(&mut fx, pos),
 					chipty::Terrain::WaterHazard => handlers::create_water_hazard(&mut fx, pos),
+					chipty::Terrain::FakeBlueWall => handlers::create_fake_blue_wall(&mut fx, pos),
 					_ => {}
 				}
 			}
@@ -173,22 +179,25 @@ impl FxState {
 			self.events.push(event);
 		}
 
-		// Update invisible walls based on player proximity
-		for (&pos, &obj_handle) in &self.mirage_walls {
-			let Some(obj) = self.render.objects.get_mut(obj_handle) else { continue };
+		let fade_invisible = FadeValues {
+			near_alpha: 0.25,
+			far_alpha: 0.0,
+		};
+		let fade_visible = FadeValues {
+			near_alpha: 0.75,
+			far_alpha: 1.0,
+		};
 
-			let Some(player) = chipcore::ps_nearest_ent(&self.game, pos) else { continue };
-			if player.pos.distance_hat(pos) <= 2 {
-				if obj.anim.anims.is_empty() && obj.data.alpha < 0.5 {
-					obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.5, fade_spd: 2.0 }));
-				}
-			}
-			else {
-				if obj.anim.anims.is_empty() && obj.data.alpha > 0.0 {
-					obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.0, fade_spd: 2.0 }));
-				}
-			}
-		}
+		// Update invisible walls based on player proximity
+		fade_assist_dist(&self.mirage_walls, &mut self.render.objects, self.assist_dist, &fade_invisible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
+		fade_assist_dist(&self.hidden_fire, &mut self.render.objects, self.assist_dist, &fade_invisible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
+		fade_assist_dist(&self.fake_blue_walls, &mut self.render.objects, self.assist_dist, &fade_visible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
+		fade_assist_dist(&self.hidden_objects, &mut self.render.objects, self.assist_dist, &fade_invisible, |&ehandle| {
+			let ent = self.game.ents.get(ehandle)?;
+			let player = chipcore::ps_nearest_ent(&self.game, ent.pos)?;
+			let dist = player.pos.distance_hat(ent.pos);
+			Some(dist)
+		});
 	}
 	/// Process game events and update FX state accordingly.
 	pub fn sync(&mut self) {
@@ -283,4 +292,39 @@ impl FxState {
 		self.scout_dir_until = [0.0; 4];
 		self.scout_speed = 0.0;
 	}
+}
+
+struct FadeValues {
+	near_alpha: f32,
+	far_alpha: f32,
+}
+
+fn fade_assist_dist<T, F: Fn(&T) -> Option<i32>>(
+	map: &HashMap<T, render::ObjectHandle>,
+	objects: &mut render::ObjectMap,
+	fade_dist: i32,
+	values: &FadeValues,
+	f: F,
+) {
+	for (key, &obj_handle) in map {
+		let Some(obj) = objects.get_mut(obj_handle) else { continue };
+		let Some(dist) = f(key) else { continue };
+		if dist <= fade_dist {
+			fade_to(obj, values.near_alpha, 4.0);
+		}
+		else {
+			fade_to(obj, values.far_alpha, 4.0);
+		}
+	}
+}
+
+fn fade_to(obj: &mut render::Object, target_alpha: f32, fade_spd: f32) {
+	for anim in &mut obj.anim.anims {
+		if let render::AnimState::FadeTo(fade) = anim {
+			fade.target_alpha = target_alpha;
+			fade.fade_spd = fade_spd;
+			return;
+		}
+	}
+	obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha, fade_spd }));
 }

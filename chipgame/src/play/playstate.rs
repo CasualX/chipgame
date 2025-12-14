@@ -66,6 +66,7 @@ impl PlayState {
 			let menu_active = !self.menu.stack.is_empty();
 			if let Some(fx) = &mut self.fx {
 				fx.step_mode = self.save_data.options.step_mode;
+				fx.assist_dist = if self.save_data.options.assist_mode { 2 } else { 0 };
 				fx.think(&input, menu_active);
 			}
 		}
@@ -318,6 +319,12 @@ impl PlayState {
 						}
 					}
 				}
+				menu::MenuEvent::SetAssistMode { value } => {
+					if self.save_data.options.assist_mode != value {
+						self.save_data.options.assist_mode = value;
+						self.save_data.save(&self.lvsets.current());
+					}
+				}
 				menu::MenuEvent::SetStepMode { value } => {
 					if self.save_data.options.step_mode != value {
 						self.save_data.options.step_mode = value;
@@ -453,6 +460,7 @@ fn play_fx_pause(this: &mut PlayState) {
 
 	let menu = menu::PauseMenu {
 		selected: 0,
+		assist_mode: this.save_data.options.assist_mode,
 		has_warp: this.warp.is_some(),
 		level_number: fx.level_number,
 		level_name: fx.game.field.name.clone(),

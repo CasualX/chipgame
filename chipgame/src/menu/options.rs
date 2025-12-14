@@ -7,7 +7,7 @@ pub struct OptionsMenu {
 }
 
 impl OptionsMenu {
-	const ITEMS_COUNT: u8 = 8;
+	const ITEMS_COUNT: u8 = 9;
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -39,18 +39,22 @@ impl OptionsMenu {
 					MenuEvent::SetPerspective { value: self.options.perspective }
 				}
 				3 => {
+					self.options.assist_mode = !self.options.assist_mode;
+					MenuEvent::SetAssistMode { value: self.options.assist_mode }
+				}
+				4 => {
 					self.options.step_mode = !self.options.step_mode;
 					MenuEvent::SetStepMode { value: self.options.step_mode }
 				}
-				4 => {
+				5 => {
 					self.options.auto_save_replay = !self.options.auto_save_replay;
 					MenuEvent::SetAutoSaveReplay { value: self.options.auto_save_replay }
 				}
-				5 => {
+				6 => {
 					self.options.speedrun_mode = !self.options.speedrun_mode;
 					MenuEvent::SetSpeedrunMode { value: self.options.speedrun_mode }
 				}
-				6 => {
+				7 => {
 					self.options.developer_mode = !self.options.developer_mode;
 					MenuEvent::SetDeveloperMode { value: self.options.developer_mode }
 				}
@@ -79,6 +83,7 @@ impl OptionsMenu {
 			&fmtools::fmt!("Background music: "{get_flag(self.options.background_music)}),
 			&fmtools::fmt!("Sound effects: "{get_flag(self.options.sound_effects)}),
 			&fmtools::fmt!("Perspective: "{get_flag(self.options.perspective)}),
+			&fmtools::fmt!("Assist mode: "{get_flag(self.options.assist_mode)}),
 			&fmtools::fmt!("Step mode: "{get_flag(self.options.step_mode)}),
 			&fmtools::fmt!("Auto save replays: "{get_flag(self.options.auto_save_replay)}),
 			&fmtools::fmt!("Speedrun mode: "{get_flag(self.options.speedrun_mode)}),

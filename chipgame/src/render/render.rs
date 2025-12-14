@@ -346,7 +346,7 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 
 	// Collect and sort the objects by Y position
 	let mut sorted_objects: Vec<_> = fx.objects.values().map(|obj| &obj.data).collect();
-	sorted_objects.sort_unstable_by_key(|obj| obj.pos.y as i32);
+	sorted_objects.sort_unstable_by_key(|obj| if obj.model.is_solid() { -(obj.pos.y as i32) } else { obj.pos.y as i32 });
 
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;
@@ -362,6 +362,8 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 	for obj in &sorted_objects {
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
+		// Configure depth testing
+		cv.depth_test = if obj.depth_test { Some(shade::DepthTest::LessEqual) } else { None };
 		// Draw the object
 		draw(cv, resx, obj.pos, obj.sprite, obj.model, obj.frame, obj.alpha);
 	}

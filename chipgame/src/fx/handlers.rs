@@ -14,15 +14,16 @@ pub fn entity_created(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: c
 
 	let pos = ent_pos(&fx.game, ent, ent.pos, true);
 	let sprite = sprite_for_ent(ent, &fx.game);
+	let model = if pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
 	let mut obj = render::Object {
 		data: render::ObjectData {
 			pos,
 			sprite,
 			frame: 0,
-			model: if pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) },
+			model,
 			alpha: 1.0,
-			visible: true,
 			greyscale: ent.flags & chipcore::EF_TEMPLATE != 0,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: Vec::new(),
@@ -51,10 +52,10 @@ pub fn entity_created(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: c
 }
 
 pub fn entity_removed(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: chipty::EntityKind) {
+	entity_hidden(fx, ehandle, false);
+
 	let Some(obj_handle) = fx.game_objects.remove(&ehandle) else { return };
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
-
-	obj.data.visible = true;
 
 	// Object rises, fades and is removed
 	let rises = matches!(kind, chipty::EntityKind::Chip
@@ -65,6 +66,7 @@ pub fn entity_removed(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: c
 	let faded = matches!(kind, chipty::EntityKind::Socket);
 
 	if rises {
+		obj.data.alpha = 1.0;
 		obj.anim.anims.push(render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }));
 		obj.anim.anims.push(render::AnimState::MoveZ(render::MoveZ { target_z: 50.0, move_spd: 200.0 }));
 	}
@@ -149,8 +151,6 @@ pub fn player_game_over(fx: &mut FxState, ehandle: chipcore::EntityHandle, reaso
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
-	obj.data.visible = true;
-
 	// Update the player sprite
 	obj.data.sprite = match reason {
 		chipcore::GameOverReason::LevelComplete => chipty::SpriteId::PlayerCheer,
@@ -203,13 +203,25 @@ pub fn entity_hidden(fx: &mut FxState, ehandle: chipcore::EntityHandle, hidden: 
 	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
-	obj.data.visible = !hidden;
+	if hidden {
+		fx.hidden_objects.insert(ehandle, obj_handle);
+		// Instantly on game start, gradually otherwise
+		if fx.game.time <= 1 {
+			obj.data.alpha = 0.0;
+		}
+	}
+	else {
+		fx.hidden_objects.remove(&ehandle);
+		obj.data.alpha = 1.0;
+		obj.anim.remove_fade_anim();
+	}
+
+	obj.data.depth_test = !hidden;
 }
 
 pub fn terrain_updated(fx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: chipty::Terrain) {
 	fx.render.field.set_terrain(pos, new);
 	match (old, new) {
-		(chipty::Terrain::FakeBlueWall, _) => handlers::blue_wall_cleared(fx, pos),
 		(chipty::Terrain::ToggleFloor, chipty::Terrain::ToggleWall) => handlers::toggle_wall(fx, pos),
 		(chipty::Terrain::ToggleWall, chipty::Terrain::ToggleFloor) => handlers::toggle_wall(fx, pos),
 		(chipty::Terrain::ToggleFloor, _) => handlers::remove_toggle_wall(fx, pos),
@@ -227,6 +239,9 @@ pub fn terrain_updated(fx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: 
 
 		(chipty::Terrain::WaterHazard, _) => handlers::remove_water_hazard(fx, pos),
 		(_, chipty::Terrain::WaterHazard) => handlers::create_water_hazard(fx, pos),
+
+		(_, chipty::Terrain::FakeBlueWall) => handlers::create_fake_blue_wall(fx, pos),
+		(chipty::Terrain::FakeBlueWall, _) => handlers::remove_fake_blue_wall(fx, pos),
 		_ => {}
 	}
 }
@@ -235,7 +250,19 @@ pub fn fire_hidden(fx: &mut FxState, pos: Vec2i, hidden: bool) {
 	let Some(&obj_handle) = fx.fire_sprites.get(&pos) else { return };
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
 
-	obj.data.visible = !hidden;
+	if hidden {
+		fx.hidden_fire.insert(pos, obj_handle);
+		// Instantly on game start, gradually otherwise
+		if fx.game.time <= 1 {
+			obj.data.alpha = 0.0;
+		}
+	}
+	else {
+		fx.hidden_fire.remove(&pos);
+		obj.data.alpha = 1.0;
+	}
+
+	obj.data.depth_test = !hidden;
 }
 pub fn create_fire(fx: &mut FxState, pos: Vec2<i32>) {
 	let obj = render::Object {
@@ -245,8 +272,8 @@ pub fn create_fire(fx: &mut FxState, pos: Vec2<i32>) {
 			frame: 0,
 			model: chipty::ModelId::Sprite,
 			alpha: 1.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: vec![render::AnimState::AnimLoop(render::SpriteAnimLoop {
@@ -476,34 +503,14 @@ pub fn lock_opened(fx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 1.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: vec![render::AnimState::MoveZ(render::MoveZ {
 				target_z: -21.0,
 				move_spd: 200.0,
 			})],
-			unalive_after_anim: true,
-		},
-	};
-	let handle = fx.render.objects.alloc();
-	fx.render.objects.insert(handle, obj);
-}
-
-pub fn blue_wall_cleared(fx: &mut FxState, pos: Vec2<i32>) {
-	let obj = render::Object {
-		data: render::ObjectData {
-			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
-			sprite: chipty::SpriteId::RealBlueWall,
-			frame: 0,
-			model: chipty::ModelId::Wall,
-			alpha: 1.0,
-			visible: true,
-			greyscale: false,
-		},
-		anim: render::Animation {
-			anims: vec![render::AnimState::FadeOut(render::FadeOut { atime: 0.0 })],
 			unalive_after_anim: true,
 		},
 	};
@@ -519,8 +526,8 @@ pub fn recessed_wall_raised(fx: &mut FxState, pos: Vec2<i32>) {
 			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 1.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: vec![render::AnimState::MoveZ(render::MoveZ {
@@ -546,8 +553,8 @@ pub fn create_toggle_wall(fx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 			frame: 0,
 			model: chipty::ModelId::ToggleWall,
 			alpha: 1.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: vec![
@@ -563,12 +570,10 @@ pub fn create_toggle_wall(fx: &mut FxState, pos: Vec2<i32>, raised: bool) {
 	fx.render.objects.insert(handle, obj);
 	fx.toggle_walls.insert(pos, handle);
 }
-
 pub fn remove_toggle_wall(fx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = fx.toggle_walls.remove(&pos) else { return };
 	fx.render.objects.remove(obj_handle);
 }
-
 pub fn toggle_wall(fx: &mut FxState, pos: Vec2i) {
 	let Some(&obj_handle) = fx.toggle_walls.get(&pos) else { return };
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
@@ -589,8 +594,8 @@ pub fn create_wall_mirage(fx: &mut FxState, pos: Vec2<i32>) {
 			frame: 0,
 			model: chipty::ModelId::Wall,
 			alpha: 0.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: Vec::new(),
@@ -601,7 +606,6 @@ pub fn create_wall_mirage(fx: &mut FxState, pos: Vec2<i32>) {
 	fx.render.objects.insert(handle, obj);
 	fx.mirage_walls.insert(pos, handle);
 }
-
 pub fn remove_wall_mirage(fx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = fx.mirage_walls.remove(&pos) else { return };
 
@@ -616,8 +620,8 @@ pub fn create_water_hazard(fx: &mut FxState, pos: Vec2<i32>) {
 			frame: 0,
 			model: chipty::ModelId::Sprite,
 			alpha: 1.0,
-			visible: true,
 			greyscale: false,
+			depth_test: true,
 		},
 		anim: render::Animation {
 			anims: Vec::new(),
@@ -629,11 +633,43 @@ pub fn create_water_hazard(fx: &mut FxState, pos: Vec2<i32>) {
 	fx.water_hazards.insert(pos, handle);
 	fx.render.field.set_terrain(pos, chipty::Terrain::Water);
 }
-
 pub fn remove_water_hazard(fx: &mut FxState, pos: Vec2<i32>) {
 	let Some(obj_handle) = fx.water_hazards.remove(&pos) else { return };
 
 	fx.render.objects.remove(obj_handle);
+}
+
+pub fn create_fake_blue_wall(fx: &mut FxState, pos: Vec2<i32>) {
+	let obj = render::Object {
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: fx.render.tiles[chipty::Terrain::FakeBlueWall as usize].sprite,
+			frame: 0,
+			model: chipty::ModelId::Wall,
+			alpha: 1.0,
+			greyscale: false,
+			depth_test: true,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
+	};
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.fake_blue_walls.insert(pos, handle);
+	fx.render.field.set_terrain(pos, chipty::Terrain::Floor);
+}
+pub fn remove_fake_blue_wall(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(obj_handle) = fx.fake_blue_walls.remove(&pos) else { return };
+	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
+
+	// Walls are rendered first and Sprites just disabled depth testing
+	// So disable depth testing for the wall while fading out to ensure sprites get rendered
+	obj.data.depth_test = false;
+
+	obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.0, fade_spd: 8.0 }));
+	obj.anim.unalive_after_anim = true;
 }
 
 pub fn game_over(fx: &mut FxState, reason: chipcore::GameOverReason) {

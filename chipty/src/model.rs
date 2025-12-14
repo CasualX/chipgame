@@ -12,3 +12,10 @@ pub enum ModelId {
 	FloorSprite,
 	EndPortal,
 }
+
+impl ModelId {
+	#[inline]
+	pub fn is_solid(self) -> bool {
+		matches!(self, ModelId::Wall | ModelId::ToggleWall)
+	}
+}

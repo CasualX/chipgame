@@ -11,6 +11,11 @@ impl Animation {
 		self.anims.retain_mut(|anim| anim.animate(obj, ctx));
 		!(self.unalive_after_anim && self.anims.is_empty())
 	}
+	pub fn remove_fade_anim(&mut self) {
+		self.anims.retain(|anim| {
+			!matches!(anim, AnimState::FadeOut(_) | AnimState::FadeTo(_))
+		});
+	}
 }
 
 #[derive(Clone, Debug)]
@@ -20,8 +25,8 @@ pub struct ObjectData {
 	pub frame: u16,
 	pub model: chipty::ModelId,
 	pub alpha: f32,
-	pub visible: bool,
 	pub greyscale: bool,
+	pub depth_test: bool,
 }
 
 #[derive(Clone, Debug)]
