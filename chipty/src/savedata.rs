@@ -1,5 +1,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum LevelProgress {
+	/// The level is not yet unlocked, hidden from the level select screen.
+	#[default]
+	Locked,
+	/// The level is unlocked and can be played.
+	Unlocked,
+	/// The level is completed.
+	Completed,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug, Default)]
 pub struct SaveFileDto {

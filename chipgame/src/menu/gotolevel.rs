@@ -8,7 +8,7 @@ fn clip_offset(offset: i32, len: i32) -> i32 {
 
 struct LevelEntry {
 	level_number: i32,
-	state: play::LevelState,
+	progress: chipty::LevelProgress,
 	label: String,
 	trophies: Option<draw::DrawTrophies>,
 }
@@ -27,28 +27,28 @@ impl GoToLevel {
 		// Dummy entry for "Unlock level"
 		self.items.push(LevelEntry {
 			level_number: 0,
-			state: play::LevelState::Completed,
+			progress: chipty::LevelProgress::Completed,
 			label: "\x1b[draw_mask=0]🌟\x1b[draw_mask=1] Unlock level".to_string(),
 			trophies: None,
 		});
 		for level_index in 0..save_data.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
-			let state = save_data.get_level_state(level_number);
-			if !save_data.show_hidden_levels && matches!(state, play::LevelState::Locked) {
+			let progress = save_data.get_level_progress(level_number);
+			if !save_data.show_hidden_levels && matches!(progress, chipty::LevelProgress::Locked) {
 				continue;
 			}
 			let Some(level) = level_set.levels.get((level_number - 1) as usize) else { continue };
 			if save_data.current_level == level_number {
 				self.selected = self.items.len() as i32;
 			}
-			let prefix = match state {
-				play::LevelState::Locked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
-				play::LevelState::Unlocked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
-				play::LevelState::Completed => "🌟",
+			let prefix = match progress {
+				chipty::LevelProgress::Locked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
+				chipty::LevelProgress::Unlocked => "\x1b[draw_mask=0]🌟\x1b[draw_mask=1]",
+				chipty::LevelProgress::Completed => "🌟",
 			};
 			self.items.push(LevelEntry {
 				level_number,
-				state,
+				progress,
 				label: format!("{prefix} Level {level_number}: {}", level.name),
 				trophies: Some(draw::DrawTrophies::new(level_number, &level, save_data)),
 			});
@@ -160,7 +160,7 @@ impl GoToLevel {
 			else {
 				1.0
 			};
-			let alpha = if matches!(item.state, play::LevelState::Locked) && i != self.selected { alpha * 0.5 } else { alpha };
+			let alpha = if matches!(item.progress, chipty::LevelProgress::Locked) && i != self.selected { alpha * 0.5 } else { alpha };
 			let alpha = (f32::clamp(alpha, 0.0, 1.0) * 255.0) as u8;
 			let color = if i == self.selected { 255 } else { 128 };
 			scribe.color = Vec4(color, color, color, alpha);

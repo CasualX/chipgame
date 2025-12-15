@@ -2,16 +2,6 @@ use std::collections::BTreeMap;
 
 use super::*;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub enum LevelState {
-	/// The level is not yet unlocked, hidden from the level select screen.
-	Locked,
-	/// The level is unlocked and can be played.
-	Unlocked,
-	/// The level is completed.
-	Completed,
-}
-
 pub struct Scores {
 	pub ticks: i32,
 	pub steps: i32,
@@ -83,15 +73,15 @@ impl SaveData {
 		*attempts_entry
 	}
 
-	pub fn get_level_state(&self, level_number: i32) -> LevelState {
+	pub fn get_level_progress(&self, level_number: i32) -> chipty::LevelProgress {
 		let level_index = (level_number - 1) as usize;
 		if self.completed_levels.get(level_index).copied().unwrap_or(false) {
-			return LevelState::Completed;
+			return chipty::LevelProgress::Completed;
 		}
 		if self.unlocked_levels.get(level_index).copied().unwrap_or(false) {
-			return LevelState::Unlocked;
+			return chipty::LevelProgress::Unlocked;
 		}
-		LevelState::Locked
+		chipty::LevelProgress::Locked
 	}
 
 	pub fn get_time_high_score(&self, level_number: i32) -> i32 {
