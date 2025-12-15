@@ -23,16 +23,21 @@ impl EditorEditState {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
 		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
 		self.fx.hud_enabled = false;
+		// Initialize the camera far enough to see the whole level
 		self.fx.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
+		self.fx.camera.target = Vec3f(26.0 * 16.0, 20.0 * 16.0, 0.0);
 		self.fx.camera.set_perspective(false);
-		self.fx.pause(); // Unlock the camera
+		// Unlock the camera
+		self.fx.pause();
 	}
 	pub fn reload_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		// Reload the level but keep the camera position
 		let old_cam = self.fx.camera.clone();
 		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
-		self.fx.pause(); // Unlock the camera
 		self.fx.camera = old_cam;
+		// Unlock the camera
+		self.fx.pause();
 	}
 	pub fn save_level(&self) -> String {
 		let mut legend_map = HashMap::new();

@@ -492,9 +492,7 @@ fn play_fx_level_complete(this: &mut PlayState) {
 	}
 
 	// Update save data
-	let enable_records = fx.warps_used == 0;
-	let scores = if enable_records { Some(scores) } else { None };
-	this.save_data.complete_level(fx.level_number, scores);
+	this.save_data.complete_level(fx.level_number, Some(scores));
 	this.save_data.save(&this.lvsets.current());
 
 	// Auto-save replay if enabled or if a new high score was achieved
