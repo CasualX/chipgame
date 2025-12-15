@@ -3,7 +3,6 @@
 use std::collections::HashMap;
 use cvmath::*;
 
-use crate::menu::Input;
 use crate::render;
 
 mod event;

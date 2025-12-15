@@ -6,7 +6,6 @@ pub struct PlayState {
 	pub warp: Option<Box<fx::FxState>>,
 	pub menu: menu::MenuState,
 	pub events: Vec<PlayEvent>,
-	pub input: chipcore::Input,
 	pub lvsets: LevelSets,
 	pub save_data: SaveData,
 	pub metrics: shade::DrawMetrics,
@@ -51,26 +50,13 @@ impl PlayState {
 	}
 
 	pub fn think(&mut self, input: &chipcore::Input) {
-		{
-			let input = menu::Input {
-				a: menu::KeyState::w(self.input.a, input.a),
-				b: menu::KeyState::w(self.input.b, input.b),
-				up: menu::KeyState::w(self.input.up, input.up),
-				down: menu::KeyState::w(self.input.down, input.down),
-				left: menu::KeyState::w(self.input.left, input.left),
-				right: menu::KeyState::w(self.input.right, input.right),
-				start: menu::KeyState::w(self.input.start, input.start),
-				select: menu::KeyState::w(self.input.select, input.select),
-			};
-			self.menu.think(&input);
-			let menu_active = !self.menu.stack.is_empty();
-			if let Some(fx) = &mut self.fx {
-				fx.step_mode = self.save_data.options.step_mode;
-				fx.assist_dist = if self.save_data.options.assist_mode { 2 } else { 0 };
-				fx.think(&input, menu_active);
-			}
+		let menu_active = self.menu.think(input);
+
+		if let Some(fx) = &mut self.fx {
+			fx.step_mode = self.save_data.options.step_mode;
+			fx.assist_dist = if self.save_data.options.assist_mode { 2 } else { 0 };
+			fx.think(input, menu_active);
 		}
-		self.input = *input;
 
 		self.sync();
 	}

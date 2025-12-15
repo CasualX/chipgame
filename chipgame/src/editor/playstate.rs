@@ -24,15 +24,15 @@ impl EditorPlayState {
 		self.screen_size = Vec2::new(width, height);
 	}
 	pub fn think(&mut self) {
-		let input = menu::Input {
-			a: menu::KeyState::Up,
-			b: menu::KeyState::Up,
-			up: if self.input.key_up { menu::KeyState::Down } else { menu::KeyState::Up },
-			down: if self.input.key_down { menu::KeyState::Down } else { menu::KeyState::Up },
-			left: if self.input.key_left { menu::KeyState::Down } else { menu::KeyState::Up },
-			right: if self.input.key_right { menu::KeyState::Down } else { menu::KeyState::Up },
-			start: menu::KeyState::Up,
-			select: menu::KeyState::Up,
+		let input = chipcore::Input {
+			a: false,
+			b: false,
+			up: self.input.key_up,
+			down: self.input.key_down,
+			left: self.input.key_left,
+			right: self.input.key_right,
+			start: false,
+			select: false,
 		};
 		self.fx.think(&input, false);
 	}

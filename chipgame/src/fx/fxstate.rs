@@ -25,6 +25,7 @@ pub struct FxState {
 	pub game_start_time: f64,
 	pub game_realtime: f32,
 	pub game_over: Option<chipcore::GameOverReason>,
+	pub pause_pressed: bool,
 	pub hud_enabled: bool,
 	pub is_preview: bool,
 	pub step_mode: bool,
@@ -112,31 +113,23 @@ impl FxState {
 			self.camera.move_teleport = true;
 		}
 	}
-	pub fn think(&mut self, input: &Input, menu_active: bool) {
+	pub fn think(&mut self, input: &chipcore::Input, menu_active: bool) {
 		if menu_active {
 			self.scout_handle_input(input);
 			return;
 		}
 
 		if !self.game.is_game_over() {
-			if input.start.is_pressed() {
+			if input.start && !self.pause_pressed {
 				self.pause();
 			}
-			else if input.select.is_pressed() {
+			else if input.select && !self.pause_pressed {
 				self.scout();
 			}
+			self.pause_pressed = input.start || input.select;
 		}
 
-		let player_input = chipcore::Input {
-			a: input.a.is_held(),
-			b: input.b.is_held(),
-			up: input.up.is_held(),
-			down: input.down.is_held(),
-			left: input.left.is_held(),
-			right: input.right.is_held(),
-			start: input.start.is_held(),
-			select: input.select.is_held(),
-		};
+		let player_input = *input;
 
 		if let Some(_) = &mut self.replay_inputs {
 			if player_input.has_directional_input() {
@@ -249,20 +242,20 @@ impl FxState {
 		}
 	}
 
-	fn scout_handle_input(&mut self, input: &Input) {
-		self.scout_speed = if input.a.is_held() { 5.0 } else { 2.0 };
+	fn scout_handle_input(&mut self, input: &chipcore::Input) {
+		self.scout_speed = if input.a { 5.0 } else { 2.0 };
 
 		let scout_until = self.time + SCOUT_INPUT_HOLD;
-		if input.up.is_held() {
+		if input.up {
 			self.scout_dir_until[chipty::Compass::Up as usize] = scout_until;
 		}
-		if input.right.is_held() {
+		if input.right {
 			self.scout_dir_until[chipty::Compass::Right as usize] = scout_until;
 		}
-		if input.down.is_held() {
+		if input.down {
 			self.scout_dir_until[chipty::Compass::Down as usize] = scout_until;
 		}
-		if input.left.is_held() {
+		if input.left {
 			self.scout_dir_until[chipty::Compass::Left as usize] = scout_until;
 		}
 	}
