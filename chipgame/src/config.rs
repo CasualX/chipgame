@@ -10,13 +10,13 @@ pub struct ShaderConfig {
 
 pub struct TextureConfig {
 	pub path: String,
-	pub props: shade::image::TextureProps,
+	pub props: shade::TextureProps,
 }
 impl Default for TextureConfig {
 	fn default() -> Self {
 		Self {
 			path: String::new(),
-			props: shade::image::TextureProps {
+			props: shade::TextureProps {
 				filter_min: shade::TextureFilter::Linear,
 				filter_mag: shade::TextureFilter::Linear,
 				wrap_u: shade::TextureWrap::Repeat,

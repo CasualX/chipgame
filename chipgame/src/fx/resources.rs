@@ -24,11 +24,12 @@ fn load_png(
 	name: Option<&str>,
 	fs: &crate::FileSystem,
 	path: &str,
-	props: &shade::image::TextureProps,
-	transform: Option<&mut dyn FnMut(&mut Vec<u8>, &mut shade::image::ImageSize)>,
-) -> Result<shade::Texture2D, shade::image::png::LoadError> {
+	props: &shade::TextureProps,
+) -> Result<shade::Texture2D, shade::image::io::png::LoadError> {
 	let data = fs.read(path).expect("Failed to read PNG file");
-	shade::image::png::load_stream(g, name, &mut &data[..], props, transform)
+	let image = shade::image::io::png::load_stream(&mut &data[..])?;
+	let tex = g.image(name, &(&image, props));
+	Ok(tex)
 }
 
 impl Resources {
@@ -40,19 +41,19 @@ impl Resources {
 			g.shader_create(Some(name.as_str()), &vs, &fs);
 		}
 		for (name, texture) in &config.textures {
-			load_png(g, Some(name.as_str()), fs, &texture.path, &texture.props, None).expect("Failed to load texture");
+			load_png(g, Some(name.as_str()), fs, &texture.path, &texture.props).expect("Failed to load texture");
 		}
 		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 		for (name, font_config) in &config.fonts {
 			let font = fs.read_to_string(&font_config.meta).expect("Failed to read font meta file");
 			let font: shade::msdfgen::FontDto = serde_json::from_str(&font).expect("Failed to parse font meta file");
 			let font: Option<shade::msdfgen::Font> = Some(font.into());
-			let texture = load_png(g, Some(name.as_str()), fs, &font_config.atlas, &shade::image::TextureProps {
+			let texture = load_png(g, Some(name.as_str()), fs, &font_config.atlas, &shade::TextureProps {
 				filter_min: shade::TextureFilter::Linear,
 				filter_mag: shade::TextureFilter::Linear,
 				wrap_u: shade::TextureWrap::ClampEdge,
 				wrap_v: shade::TextureWrap::ClampEdge,
-			}, None).expect("Failed to load font atlas");
+			}).expect("Failed to load font atlas");
 			let font = shade::d2::FontResource { font, shader, texture };
 			resx.font = font;
 		}

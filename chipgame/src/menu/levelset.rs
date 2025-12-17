@@ -4,7 +4,7 @@ use super::*;
 pub struct LevelSetMenu {
 	pub selected: usize,
 	pub items: Vec<String>,
-	pub splash: Vec<Option<shade::image::AnimatedImage>>,
+	pub splash: Vec<Option<shade::AnimatedTexture2D>>,
 	pub ntime: i32,
 }
 
@@ -44,7 +44,7 @@ impl LevelSetMenu {
 			let rect = resx.viewport.cast();
 			cv.uniform.transform = Transform2f::ortho(rect);
 
-			let time = self.ntime as f32 / 60.0;
+			let time = self.ntime as f64 / 60.0;
 			cv.uniform.texture = splash.get_frame(time);
 
 			let ss = resx.viewport.size();

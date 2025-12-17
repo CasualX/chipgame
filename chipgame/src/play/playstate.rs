@@ -31,14 +31,10 @@ impl PlayState {
 				splash.push(None);
 				continue
 			};
-			let props = shade::image::TextureProps {
-				filter_min: shade::TextureFilter::Linear,
-				filter_mag: shade::TextureFilter::Linear,
-				wrap_u: shade::TextureWrap::ClampEdge,
-				wrap_v: shade::TextureWrap::ClampEdge,
-			};
-			if let Ok(texs) = shade::image::AnimatedImage::load_memory(g, None, data, &props) {
-				splash.push(Some(texs));
+			let props = shade::TextureProps::default();
+			if let Ok(animated_image) = shade::image::AnimatedImage::load_memory(data) {
+				let animated_texture = animated_image.to_animated_texture2d(g, &props);
+				splash.push(Some(animated_texture));
 			}
 		}
 		self.menu.stack.push(menu::Menu::LevelSet(menu::LevelSetMenu {
