@@ -73,15 +73,18 @@ impl SaveData {
 		*attempts_entry
 	}
 
-	pub fn get_level_progress(&self, level_number: i32) -> chipty::LevelProgress {
+	pub fn get_level_progress(&self, level_number: i32) -> Option<chipty::LevelProgress> {
 		let level_index = (level_number - 1) as usize;
 		if self.completed_levels.get(level_index).copied().unwrap_or(false) {
-			return chipty::LevelProgress::Completed;
+			return Some(chipty::LevelProgress::Completed);
 		}
 		if self.unlocked_levels.get(level_index).copied().unwrap_or(false) {
-			return chipty::LevelProgress::Unlocked;
+			return Some(chipty::LevelProgress::Unlocked);
 		}
-		chipty::LevelProgress::Locked
+		if self.show_hidden_levels {
+			return Some(chipty::LevelProgress::Locked);
+		}
+		return None;
 	}
 
 	pub fn get_time_high_score(&self, level_number: i32) -> i32 {

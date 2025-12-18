@@ -20,8 +20,7 @@ mod gotolevel;
 mod unlocklevel;
 mod about;
 mod scout;
-mod u;
-mod v;
+mod geometry;
 
 pub use self::event::*;
 pub use self::levelset::*;
@@ -36,8 +35,7 @@ pub use self::gotolevel::*;
 pub use self::unlocklevel::*;
 pub use self::about::*;
 pub use self::scout::*;
-pub use self::u::*;
-pub use self::v::*;
+pub use self::geometry::*;
 
 const FONT_SIZE: f32 = 1.0 / 20.0;
 

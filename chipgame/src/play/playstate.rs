@@ -183,7 +183,9 @@ impl PlayState {
 				}
 				menu::MenuEvent::OpenGoToLevel => {
 					// Start previewing at the current level
-					self.preview_level(self.save_data.current_level);
+					if self.save_data.get_level_progress(self.save_data.current_level).is_some() {
+						self.preview_level(self.save_data.current_level);
+					}
 
 					let mut menu = menu::GoToLevel::default();
 					menu.load_items(&self.lvsets.current(), &self.save_data);

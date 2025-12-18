@@ -33,11 +33,8 @@ impl GoToLevel {
 		});
 		for level_index in 0..save_data.unlocked_levels.len() {
 			let level_number = (level_index + 1) as i32;
-			let progress = save_data.get_level_progress(level_number);
-			if !save_data.show_hidden_levels && matches!(progress, chipty::LevelProgress::Locked) {
-				continue;
-			}
-			let Some(level) = level_set.levels.get((level_number - 1) as usize) else { continue };
+			let Some(level) = level_set.levels.get(level_index) else { continue };
+			let Some(progress) = save_data.get_level_progress(level_number) else { continue };
 			if save_data.current_level == level_number {
 				self.selected = self.items.len() as i32;
 			}
