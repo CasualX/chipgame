@@ -286,6 +286,10 @@ impl GameState {
 		if self.time < player.step_time + player.step_spd {
 			return true;
 		}
+		// When the player is trapped
+		if player.is_trapped() {
+			return true;
+		}
 		// Check terrain conditions
 		let terrain = self.field.get_terrain(player.pos);
 		if matches!(terrain, Terrain::Exit | Terrain::Teleport) {
@@ -294,7 +298,12 @@ impl GameState {
 		if !self.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
 			return true;
 		}
-		// What to do about BearTraps?
+		if !self.ps.flippers && matches!(terrain, Terrain::Water) {
+			return true;
+		}
+		if !self.ps.fire_boots && matches!(terrain, Terrain::Fire) {
+			return true;
+		}
 		return false;
 	}
 

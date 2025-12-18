@@ -357,7 +357,12 @@ impl PlayState {
 						// Restore FX state
 						let mut warp = warp.clone();
 						warp.resume();
-						warp.game.time_state = chipcore::TimeState::Waiting;
+
+						// Step mode already waits for user input
+						if !self.save_data.options.step_mode {
+							warp.game.time_state = chipcore::TimeState::Waiting;
+						}
+
 						self.fx = Some(warp);
 					}
 				}
