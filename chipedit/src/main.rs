@@ -123,11 +123,17 @@ impl AppStuff {
 	}
 }
 
-fn load_level(editor: &mut editor::EditorState, file_path: &Option<path::PathBuf>, app: Option<&AppStuff>) {
+fn load_level(
+	editor: &mut editor::EditorState,
+	file_path: &Option<path::PathBuf>,
+	app: Option<&AppStuff>,
+	saved_level: &mut Option<String>,
+) {
 	if let Some(fp) = file_path {
 		match fs::read_to_string(fp) {
 			Ok(contents) => {
 				editor.load_level(&contents);
+				*saved_level = Some(editor.save_level());
 				if let Some(app) = app {
 					app.window.set_title(&format!("ChipEdit - {}", fp.display()));
 				}
@@ -177,6 +183,7 @@ fn main() {
 	let mut app: Option<Box<AppStuff>> = None;
 	let mut editor = editor::EditorState::default();
 	editor.load_level(include_str!("template.json"));
+	let mut saved_level: Option<String> = None;
 
 	let mut shift_held = false;
 	let mut key_left = false;
@@ -204,7 +211,7 @@ fn main() {
 					built.window.set_title("ChipEdit - (unsaved)");
 					app = Some(built);
 
-					load_level(&mut editor, &file_path, app.as_deref());
+					load_level(&mut editor, &file_path, app.as_deref(), &mut saved_level);
 					last_frame_start = time::Instant::now() - FRAME_TIME;
 					tick_budget = FRAME_TIME / 2; // Start biased to avoid jitter-induced double ticks
 				}
@@ -223,7 +230,35 @@ fn main() {
 					}
 					editor.set_screen_size(new_size.width as i32, new_size.height as i32);
 				}
-				WindowEvent::CloseRequested => elwt.exit(),
+				WindowEvent::CloseRequested => {
+					let current_level = editor.save_level();
+					let has_unsaved = match &saved_level {
+						Some(saved) => *saved != current_level,
+						None => true,
+					};
+
+					if has_unsaved {
+						#[cfg(windows)]
+						if let Some(ap) = ap.take() {
+							ap.delete();
+						}
+						let result = rfd::MessageDialog::new()
+							.set_title("Unsaved changes")
+							.set_description("There are unsaved changes. Quit without saving?")
+							.set_buttons(rfd::MessageButtons::YesNo)
+							.set_level(rfd::MessageLevel::Warning)
+							.show();
+						#[cfg(windows)] {
+							ap = init_audio(&fs, &config);
+						}
+						if matches!(result, rfd::MessageDialogResult::Yes) {
+							elwt.exit();
+						}
+					}
+					else {
+						elwt.exit();
+					}
+				}
 				WindowEvent::KeyboardInput { event, .. } => {
 					let pressed = matches!(event.state, ElementState::Pressed);
 
@@ -252,7 +287,7 @@ fn main() {
 							}
 							if let Some(path) = dialog.pick_file() {
 								file_path = Some(path);
-								load_level(&mut editor, &file_path, app.as_deref());
+								load_level(&mut editor, &file_path, app.as_deref(), &mut saved_level);
 							}
 							#[cfg(windows)] {
 								ap = init_audio(&fs, &config);
@@ -277,6 +312,7 @@ fn main() {
 							}
 							if let Some(path) = dialog.save_file() {
 								let contents = editor.save_level();
+								saved_level = Some(contents.clone());
 								match fs::write(&path, contents) {
 									Ok(_) => {
 										file_path = Some(path);
