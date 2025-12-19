@@ -18,6 +18,7 @@ const FRAME_TIME: time::Duration = time::Duration::from_nanos((NANOS_PER_SECOND 
 struct AppStuff {
 	size: winit::dpi::PhysicalSize<u32>,
 	window: winit::window::Window,
+	cursor: winit::window::CursorIcon,
 	surface: glutin::surface::Surface<glutin::surface::WindowSurface>,
 	context: glutin::context::PossiblyCurrentContext,
 	g: shade::gl::GlGraphics,
@@ -105,7 +106,8 @@ impl AppStuff {
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
 
-		Box::new(AppStuff { size, window, surface, context, g, resx })
+		let cursor = winit::window::CursorIcon::Default;
+		Box::new(AppStuff { size, window, cursor, surface, context, g, resx })
 	}
 
 	fn set_fullscreen(&self, fullscreen: bool) {
@@ -176,7 +178,6 @@ fn main() {
 	let mut editor = editor::EditorState::default();
 	editor.load_level(include_str!("template.json"));
 
-	let mut current_tool = None;
 	let mut shift_held = false;
 	let mut key_left = false;
 	let mut key_right = false;
@@ -366,18 +367,18 @@ fn main() {
 						}
 						gamepad_start = pad_input.start;
 
-						let edit_tool = editor.get_tool();
-						if current_tool != edit_tool {
-							current_tool = edit_tool;
-							let cursor_icon = match edit_tool {
-								Some(editor::Tool::Terrain) => CursorIcon::Crosshair,
-								Some(editor::Tool::Entity) => CursorIcon::Pointer,
-								Some(editor::Tool::Connection) => CursorIcon::Alias,
-								Some(editor::Tool::IcePath) => CursorIcon::Crosshair,
-								Some(editor::Tool::ForcePath) => CursorIcon::Crosshair,
-								None => CursorIcon::Default,
-							};
-							app.window.set_cursor_icon(cursor_icon);
+						let tool_cursor = match editor.get_tool() {
+							Some(editor::ToolState::Terrain(_)) => CursorIcon::Crosshair,
+							Some(editor::ToolState::Entity(_)) => CursorIcon::Pointer,
+							Some(editor::ToolState::Connection(_)) => CursorIcon::Alias,
+							Some(editor::ToolState::IcePath(_)) => CursorIcon::Crosshair,
+							Some(editor::ToolState::ForcePath(_)) => CursorIcon::Crosshair,
+							None => CursorIcon::Default,
+						};
+
+						if app.cursor != tool_cursor {
+							app.cursor = tool_cursor;
+							app.window.set_cursor_icon(tool_cursor);
 						}
 
 						tick_budget += frame_dt;

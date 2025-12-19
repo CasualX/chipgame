@@ -17,7 +17,7 @@ mod tool;
 
 use self::editstate::EditorEditState;
 use self::playstate::EditorPlayState;
-pub use self::tool::Tool;
+pub use self::tool::*;
 
 #[derive(Clone, Debug)]
 pub struct EditorPlayStats {
@@ -331,9 +331,9 @@ impl EditorState {
 		}
 	}
 
-	pub fn get_tool(&self) -> Option<Tool> {
+	pub fn get_tool(&self) -> Option<&ToolState> {
 		match self {
-			EditorState::Edit(s) => Some(s.tool),
+			EditorState::Edit(s) => s.tool.as_ref(),
 			EditorState::Play(_) => None,
 		}
 	}

@@ -3,26 +3,13 @@ use super::*;
 #[derive(Default)]
 pub struct EditorEditState {
 	pub fx: Box<fx::FxState>,
-	pub tool: Tool,
+	pub tool: Option<ToolState>,
 
 	pub screen_size: Vec2<i32>,
 	pub cursor_pos: Vec2<i32>,
 	pub mouse_pos: Vec3<f32>,
 
-	pub selected_terrain: Terrain,
-	pub selected_ent: EntityHandle,
-	pub selected_args: Option<EntityArgs>,
-	pub conn_src: Vec2<i32>,
-
-	pub tool_pos: Option<Vec2<i32>>,
 	pub input: Input,
-
-	// State for the IcePath auto-tiling tool
-	pub icepath_last_pos: Option<Vec2<i32>>,
-	pub icepath_last_dir: Option<chipty::Compass>,
-
-	// State for the ForcePath auto-tiling tool
-	pub forcepath_last_pos: Option<Vec2<i32>>,
 }
 
 impl EditorEditState {
@@ -139,16 +126,10 @@ impl EditorEditState {
 
 		self.fx.camera.animate_position(self.fx.dt);
 
-		if let Some(tool_pos) = self.tool_pos {
-			if tool_pos != self.cursor_pos {
-				self.tool_pos = Some(self.cursor_pos);
-				match self.tool {
-					Tool::Terrain => tool::terrain::think(self),
-					Tool::Entity => tool::entity::think(self),
-					Tool::Connection => tool::connection::think(self),
-					Tool::IcePath => tool::icepath::think(self),
-					Tool::ForcePath => tool::forcepath::think(self),
-				}
+		if let Some(mut tool_state) = self.tool.take() {
+			tool_state.think(self);
+			if self.tool.is_none() {
+				self.tool = Some(tool_state);
 			}
 		}
 
@@ -180,16 +161,14 @@ impl EditorEditState {
 				render::draw(&mut cv, resx, pos, sprite, chipty::ModelId::ReallyFlatSprite, 0, 1.0);
 			}
 
-			match self.tool {
-				Tool::Terrain => {
-					render::draw_tile(&mut cv, resx, self.selected_terrain, p, &self.fx.render.tiles);
+			match &self.tool {
+				Some(ToolState::Terrain(state)) => {
+					render::draw_tile(&mut cv, resx, state.selected_terrain, p, &self.fx.render.tiles);
 				}
-				Tool::IcePath => {
-					// Preview straight ice under the cursor while using IcePath.
+				Some(ToolState::IcePath(_state)) => {
 					render::draw_tile(&mut cv, resx, Terrain::Ice, p, &self.fx.render.tiles);
 				}
-				Tool::ForcePath => {
-					// Preview a ForceRandom tile under the cursor while using ForcePath.
+				Some(ToolState::ForcePath(_state)) => {
 					render::draw_tile(&mut cv, resx, Terrain::ForceRandom, p, &self.fx.render.tiles);
 				}
 				_ => (),
@@ -244,9 +223,9 @@ impl EditorEditState {
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 
-		{
+		if let Some(tool_state) = &self.tool {
 			let text = fmtools::format!(
-				"Tool: "{self.tool:?}"\n"
+				"Tool: "{tool_state.name()}"\n"
 				"Cursor: ("{self.cursor_pos.x}", "{self.cursor_pos.y}")\n"
 			);
 
@@ -256,38 +235,27 @@ impl EditorEditState {
 
 	pub fn tool_terrain(&mut self, pressed: bool) {
 		if pressed {
-			self.tool = Tool::Terrain;
-			self.selected_terrain = Terrain::Floor;
-			self.tool_pos = None;
+			self.tool = Some(ToolState::Terrain(Default::default()));
 		}
 	}
 	pub fn tool_entity(&mut self, pressed: bool) {
 		if pressed {
-			self.tool = Tool::Entity;
-			self.selected_ent = EntityHandle::INVALID;
-			self.selected_args = None;
-			self.tool_pos = None;
+			self.tool = Some(ToolState::Entity(Default::default()));
 		}
 	}
 	pub fn tool_connection(&mut self, pressed: bool) {
 		if pressed {
-			self.tool = Tool::Connection;
-			self.tool_pos = None;
+			self.tool = Some(ToolState::Connection(Default::default()));
 		}
 	}
 	pub fn tool_icepath(&mut self, pressed: bool) {
 		if pressed {
-			self.tool = Tool::IcePath;
-			self.tool_pos = None;
-			self.icepath_last_pos = None;
-			self.icepath_last_dir = None;
+			self.tool = Some(ToolState::IcePath(Default::default()));
 		}
 	}
 	pub fn tool_forcepath(&mut self, pressed: bool) {
 		if pressed {
-			self.tool = Tool::ForcePath;
-			self.tool_pos = None;
-			self.forcepath_last_pos = None;
+			self.tool = Some(ToolState::ForcePath(Default::default()));
 		}
 	}
 
@@ -309,7 +277,13 @@ impl EditorEditState {
 		self.fx.game.field.width = new_width;
 		self.fx.game.field.height = new_height;
 		self.fx.game.field.terrain.clear();
-		self.fx.game.field.terrain.resize((new_width * new_height) as usize, self.selected_terrain);
+		let terrain = if let Some(ToolState::Terrain(state)) = &self.tool {
+			state.selected_terrain
+		}
+		else {
+			chipty::Terrain::Floor
+		};
+		self.fx.game.field.terrain.resize((new_width * new_height) as usize, terrain);
 		self.fx.game.field.conns.clear();
 		self.fx.game.ents.clear();
 
@@ -317,32 +291,34 @@ impl EditorEditState {
 	}
 
 	pub fn left_click(&mut self, pressed: bool) {
-		match self.tool {
-			Tool::Terrain => tool::terrain::left_click(self, pressed),
-			Tool::Entity => tool::entity::left_click(self, pressed),
-			Tool::Connection => tool::connection::left_click(self, pressed),
-			Tool::IcePath => tool::icepath::left_click(self, pressed),
-			Tool::ForcePath => tool::forcepath::left_click(self, pressed),
+		if pressed && (self.cursor_pos.x < 0 || self.cursor_pos.y < 0) {
+			self.sample();
+			return;
+		}
+
+		if let Some(mut tool_state) = self.tool.take() {
+			tool_state.left_click(self, pressed);
+			if self.tool.is_none() {
+				self.tool = Some(tool_state);
+			}
 		}
 		self.input.left_click = pressed;
 	}
 	pub fn right_click(&mut self, pressed: bool) {
-		match self.tool {
-			Tool::Terrain => tool::terrain::right_click(self, pressed),
-			Tool::Entity => tool::entity::right_click(self, pressed),
-			Tool::Connection => tool::connection::right_click(self, pressed),
-			Tool::IcePath => tool::icepath::right_click(self, pressed),
-			Tool::ForcePath => tool::forcepath::right_click(self, pressed),
+		if let Some(mut tool_state) = self.tool.take() {
+			tool_state.right_click(self, pressed);
+			if self.tool.is_none() {
+				self.tool = Some(tool_state);
+			}
 		}
 		self.input.right_click = pressed;
 	}
 	pub fn delete(&mut self, pressed: bool) {
-		match self.tool {
-			Tool::Terrain => {}
-			Tool::Entity => tool::entity::delete(self, pressed),
-			Tool::Connection => {}
-			Tool::IcePath => {}
-			Tool::ForcePath => {}
+		if let Some(mut tool_state) = self.tool.take() {
+			tool_state.delete(self, pressed);
+			if self.tool.is_none() {
+				self.tool = Some(tool_state);
+			}
 		}
 	}
 
@@ -353,21 +329,21 @@ impl EditorEditState {
 		// Sample from the terrain samples
 		if cursor_pos.x < 0 {
 			if cursor_pos.x == -3 && cursor_pos.y >= 0 && cursor_pos.y < TERRAIN_SAMPLES.len() as i32 {
-				s.tool = Tool::Terrain;
-				s.selected_terrain = TERRAIN_SAMPLES[cursor_pos.y as usize][0]
+				let selected_terrain = TERRAIN_SAMPLES[cursor_pos.y as usize][0];
+				s.tool = Some(ToolState::Terrain(TerrainToolState { selected_terrain }));
 			}
 			if cursor_pos.x == -2 && cursor_pos.y >= 0 && cursor_pos.y < TERRAIN_SAMPLES.len() as i32 {
-				s.tool = Tool::Terrain;
-				s.selected_terrain = TERRAIN_SAMPLES[cursor_pos.y as usize][1];
+				let selected_terrain = TERRAIN_SAMPLES[cursor_pos.y as usize][1];
+				s.tool = Some(ToolState::Terrain(TerrainToolState { selected_terrain }));
 			}
 		}
 		// Sample from the entity samples
 		else if cursor_pos.y < 0 {
 			if cursor_pos.y == -2 && cursor_pos.x >= 0 && cursor_pos.x < ENTITY_SAMPLES.len() as i32 {
 				let (kind, _) = ENTITY_SAMPLES[cursor_pos.x as usize];
-				s.tool = Tool::Entity;
-				s.selected_ent = EntityHandle::INVALID;
-				s.selected_args = Some(EntityArgs { kind, pos: cursor_pos, face_dir: None });
+				let selected_ent = EntityHandle::INVALID;
+				let selected_args = Some(EntityArgs { kind, pos: cursor_pos, face_dir: None });
+				s.tool = Some(ToolState::Entity(EntityToolState { selected_ent, selected_args }));
 			}
 		}
 		else {
@@ -375,19 +351,21 @@ impl EditorEditState {
 			let ehandle = s.fx.game.ents.iter().find_map(|ent| if ent.pos == cursor_pos { Some(ent.handle) } else { None });
 			if let Some(ehandle) = ehandle {
 				if let Some(ent) = s.fx.game.ents.get(ehandle) {
-					s.tool = Tool::Entity;
-					s.selected_ent = ehandle;
-					s.selected_args = Some(ent.to_entity_args());
+					let selected_ent = ehandle;
+					let selected_args = Some(ent.to_entity_args());
+					s.tool = Some(ToolState::Entity(EntityToolState { selected_ent, selected_args }));
 					println!("Selected: {:?} at {}", ent.kind, ent.pos);
 				}
 			}
 			// Sample from the terrain
 			else {
-				s.tool = Tool::Terrain;
-				s.selected_terrain = s.fx.game.field.get_terrain(cursor_pos);
+				let selected_terrain = s.fx.game.field.get_terrain(cursor_pos);
+				s.tool = Some(ToolState::Terrain(TerrainToolState { selected_terrain }));
 			}
 		}
 
-		println!("Tool: {:?}", s.tool);
+		if let Some(tool_state) = &s.tool {
+			println!("Tool: {}", tool_state.name());
+		}
 	}
 }
