@@ -7,6 +7,7 @@ pub struct MoveStep {
 	pub move_time: f64,
 	pub duration: f32,
 	pub jump_height: f32,
+	pub sprite_after: Option<chipty::SpriteId>,
 }
 
 impl MoveStep {
@@ -20,7 +21,13 @@ impl MoveStep {
 		let eased = 1.0 - (1.0 - fraction).powf(4.0);
 		obj.pos = self.start_pos.lerp(self.end_pos, eased);
 		obj.pos.z += self.jump_height * (4.0 * fraction * (1.0 - fraction));
-		return fraction < 1.0;
+		if fraction < 1.0 {
+			return true;
+		}
+		if let Some(sprite) = self.sprite_after {
+			obj.sprite = sprite;
+		}
+		return false;
 	}
 }
 

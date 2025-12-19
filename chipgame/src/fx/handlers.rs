@@ -109,6 +109,7 @@ pub fn entity_step(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 		move_time: fx.time,
 		duration: ent.step_spd as f32 / chipcore::FPS as f32,
 		jump_height,
+		sprite_after: None,
 	}));
 	obj.anim.anims.push(render::AnimState::AnimSeq(render::SpriteAnimSeq {
 		start_time: fx.time,
@@ -152,7 +153,7 @@ pub fn player_game_over(fx: &mut FxState, ehandle: chipcore::EntityHandle, reaso
 	let Some(ent) = fx.game.ents.get(ehandle) else { return };
 
 	// Update the player sprite
-	obj.data.sprite = match reason {
+	let sprite = match reason {
 		chipcore::GameOverReason::LevelComplete => chipty::SpriteId::PlayerCheer,
 		chipcore::GameOverReason::Drowned => chipty::SpriteId::WaterSplash,
 		chipcore::GameOverReason::Burned => chipty::SpriteId::PlayerBurned,
@@ -162,6 +163,14 @@ pub fn player_game_over(fx: &mut FxState, ehandle: chipcore::EntityHandle, reaso
 		chipcore::GameOverReason::TimeOut => chipty::SpriteId::PlayerBurned,
 		chipcore::GameOverReason::NotOkay => chipty::SpriteId::PlayerBurned,
 	};
+
+	// If Step animation is playing, set it as the sprite update field
+	if let Some(move_step) = obj.anim.anims.iter_mut().find_map(|anim| match anim { render::AnimState::MoveStep(move_step) => Some(move_step), _ => None }) {
+		move_step.sprite_after = Some(sprite);
+	}
+	else {
+		obj.data.sprite = sprite;
+	}
 
 	if matches!(reason, chipcore::GameOverReason::LevelComplete) {
 		handlers::effect(fx, ent.pos, render::EffectType::Fireworks);
