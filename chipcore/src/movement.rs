@@ -535,29 +535,34 @@ pub fn try_terrain_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut 
 
 /// Teleports the entity to the destination of a teleporter.
 pub fn teleport(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Compass) -> bool {
+	let mut tele_src = ent.pos;
 	let old_pos = ent.pos;
-	let mut teleported;
-	loop {
-		// Find the teleport connection
-		let Some(dest) = s.field.find_teleport_dest(ent.pos) else { return false };
-		// Teleport the entity
-		s.qt.update(ent.handle, ent.pos, dest);
-		ent.pos = dest;
-		teleported = ent.pos != old_pos;
-		// Force the entity to move out of the teleporter
-		if try_move(s, phase, ent, step_dir) {
-			break;
+
+	let teleported = loop {
+		// Find the teleport connection from the current source
+		let Some(dest) = s.field.find_teleport_dest(tele_src) else { return false };
+		// Skip teleport exits that cannot accept any more entities
+		if s.qt.capacity_at(dest) != 0 {
+			// Teleport the entity
+			s.qt.update(ent.handle, ent.pos, dest);
+			ent.pos = dest;
+			// Force the entity to move out of the teleporter
+			if try_move(s, phase, ent, step_dir) {
+				break true;
+			}
 		}
 		// Reflect the entity back if they're softlocked
 		// This happens when all destinations are blocked (including the source)
-		if old_pos == ent.pos {
+		if old_pos == dest {
 			// CCLP3: level 50 bug fix - only reflect player entities, requires a block to be softlocked on the teleporter
 			if matches!(ent.kind, EntityKind::Player) && !try_move(s, phase, ent, step_dir.turn_around()) {
 				return false;
 			}
-			break;
+			break false;
 		}
-	}
+		// Continue teleport chain from the current teleport tile
+		tele_src = dest;
+	};
 
 	// Teleport the entity if they actually moved
 	if teleported {

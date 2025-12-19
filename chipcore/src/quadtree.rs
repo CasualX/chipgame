@@ -60,6 +60,16 @@ impl QuadTree {
 		}
 	}
 
+	pub fn capacity_at(&self, pos: Vec2i) -> usize {
+		let index = (pos.y * self.width + pos.x) as usize;
+		if let Some(tile) = self.tiles.get(index) {
+			tile.iter().filter(|&&e| e == EntityHandle::INVALID).count()
+		}
+		else {
+			0
+		}
+	}
+
 	pub fn update(&mut self, ehandle: EntityHandle, old_pos: Vec2i, new_pos: Vec2i) {
 		self.remove(ehandle, old_pos);
 		self.add(ehandle, new_pos);
