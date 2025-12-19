@@ -197,10 +197,10 @@ fn main() {
 					let pressed = matches!(event.state, ElementState::Pressed);
 
 					match event.physical_key {
-						PhysicalKey::Code(KeyCode::ArrowLeft) => key_input.left = pressed,
-						PhysicalKey::Code(KeyCode::ArrowRight) => key_input.right = pressed,
-						PhysicalKey::Code(KeyCode::ArrowUp) => key_input.up = pressed,
-						PhysicalKey::Code(KeyCode::ArrowDown) => key_input.down = pressed,
+						PhysicalKey::Code(KeyCode::ArrowLeft | KeyCode::KeyA) => key_input.left = pressed,
+						PhysicalKey::Code(KeyCode::ArrowRight | KeyCode::KeyD) => key_input.right = pressed,
+						PhysicalKey::Code(KeyCode::ArrowUp | KeyCode::KeyW) => key_input.up = pressed,
+						PhysicalKey::Code(KeyCode::ArrowDown | KeyCode::KeyS) => key_input.down = pressed,
 						PhysicalKey::Code(KeyCode::Space) => key_input.a = pressed,
 						PhysicalKey::Code(KeyCode::Backspace) => key_input.b = pressed,
 						PhysicalKey::Code(KeyCode::Enter) => key_input.start = pressed,
