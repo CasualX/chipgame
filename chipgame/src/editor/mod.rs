@@ -236,6 +236,18 @@ impl EditorState {
 			EditorState::Play(_) => {},
 		}
 	}
+	pub fn tool_icepath(&mut self, pressed: bool) {
+		match self {
+			EditorState::Edit(s) => s.tool_icepath(pressed),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn tool_forcepath(&mut self, pressed: bool) {
+		match self {
+			EditorState::Edit(s) => s.tool_forcepath(pressed),
+			EditorState::Play(_) => {},
+		}
+	}
 
 	pub fn resize(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
 		match self {

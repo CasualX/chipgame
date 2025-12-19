@@ -293,6 +293,8 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
 						PhysicalKey::Code(KeyCode::KeyE) => editor.tool_entity(pressed),
 						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
+						PhysicalKey::Code(KeyCode::KeyI) => editor.tool_icepath(pressed),
+						PhysicalKey::Code(KeyCode::KeyR) => editor.tool_forcepath(pressed),
 						PhysicalKey::Code(KeyCode::ShiftLeft | KeyCode::ShiftRight) => editor.key_shift(pressed),
 						PhysicalKey::Code(KeyCode::Numpad8) if pressed => {
 							if shift_held { editor.expand_top(); }
@@ -371,6 +373,8 @@ fn main() {
 								Some(editor::Tool::Terrain) => CursorIcon::Crosshair,
 								Some(editor::Tool::Entity) => CursorIcon::Pointer,
 								Some(editor::Tool::Connection) => CursorIcon::Alias,
+								Some(editor::Tool::IcePath) => CursorIcon::Crosshair,
+								Some(editor::Tool::ForcePath) => CursorIcon::Crosshair,
 								None => CursorIcon::Default,
 							};
 							app.window.set_cursor_icon(cursor_icon);

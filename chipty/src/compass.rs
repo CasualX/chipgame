@@ -50,6 +50,17 @@ impl Compass {
 			Compass::Right => Vec2i(1, 0),
 		}
 	}
+
+	#[inline]
+	pub fn from_vec(v: Vec2i) -> Option<Compass> {
+		match (v.x.signum(), v.y.signum()) {
+			(0, -1) => Some(Compass::Up),
+			(-1, 0) => Some(Compass::Left),
+			(0, 1) => Some(Compass::Down),
+			(1, 0) => Some(Compass::Right),
+			_ => None,
+		}
+	}
 }
 
 impl urandom::Distribution<Compass> for urandom::distr::StandardUniform {

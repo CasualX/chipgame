@@ -16,6 +16,13 @@ pub struct EditorEditState {
 
 	pub tool_pos: Option<Vec2<i32>>,
 	pub input: Input,
+
+	// State for the IcePath auto-tiling tool
+	pub icepath_last_pos: Option<Vec2<i32>>,
+	pub icepath_last_dir: Option<chipty::Compass>,
+
+	// State for the ForcePath auto-tiling tool
+	pub forcepath_last_pos: Option<Vec2<i32>>,
 }
 
 impl EditorEditState {
@@ -139,6 +146,8 @@ impl EditorEditState {
 					Tool::Terrain => tool::terrain::think(self),
 					Tool::Entity => tool::entity::think(self),
 					Tool::Connection => tool::connection::think(self),
+					Tool::IcePath => tool::icepath::think(self),
+					Tool::ForcePath => tool::forcepath::think(self),
 				}
 			}
 		}
@@ -175,6 +184,14 @@ impl EditorEditState {
 				Tool::Terrain => {
 					render::draw_tile(&mut cv, resx, self.selected_terrain, p, &self.fx.render.tiles);
 				}
+				Tool::IcePath => {
+					// Preview straight ice under the cursor while using IcePath.
+					render::draw_tile(&mut cv, resx, Terrain::Ice, p, &self.fx.render.tiles);
+				}
+				Tool::ForcePath => {
+					// Preview a ForceRandom tile under the cursor while using ForcePath.
+					render::draw_tile(&mut cv, resx, Terrain::ForceRandom, p, &self.fx.render.tiles);
+				}
 				_ => (),
 			}
 			g.clear(&shade::ClearArgs {
@@ -200,8 +217,17 @@ impl EditorEditState {
 					menu::UiVertex { pos: pos, uv: Vec2::ZERO, color: self.color }
 				}
 			}
-			let pen = shade::d2::Pen { template: ToVertex { color: [0, 128, 255, 255] } };
+			let mut pen = shade::d2::Pen { template: ToVertex { color: [255, 255, 255, 255] } };
 			for conn in &self.fx.game.field.conns {
+				let terrain = self.fx.game.field.get_terrain(conn.src);
+				pen.template.color = match terrain {
+					chipty::Terrain::GreenButton => [0, 255, 0, 255],
+					chipty::Terrain::RedButton => [255, 0, 0, 255],
+					chipty::Terrain::BrownButton => [128, 128, 0, 255],
+					chipty::Terrain::BlueButton => [0, 0, 255, 255],
+					chipty::Terrain::Teleport => [0, 255, 255, 255],
+					_ => [255, 255, 255, 255], // Default color
+				};
 				let src = cam.world_to_viewport(conn.src.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				let dest = cam.world_to_viewport(conn.dest.map(|c| c as f32 * 32.0 + 16.0).vec3(0.0)).unwrap();
 				cv.draw_arrow(&pen, src, dest, 12.0);
@@ -249,6 +275,21 @@ impl EditorEditState {
 			self.tool_pos = None;
 		}
 	}
+	pub fn tool_icepath(&mut self, pressed: bool) {
+		if pressed {
+			self.tool = Tool::IcePath;
+			self.tool_pos = None;
+			self.icepath_last_pos = None;
+			self.icepath_last_dir = None;
+		}
+	}
+	pub fn tool_forcepath(&mut self, pressed: bool) {
+		if pressed {
+			self.tool = Tool::ForcePath;
+			self.tool_pos = None;
+			self.forcepath_last_pos = None;
+		}
+	}
 
 	/// Resizes the playfield.
 	///
@@ -280,6 +321,8 @@ impl EditorEditState {
 			Tool::Terrain => tool::terrain::left_click(self, pressed),
 			Tool::Entity => tool::entity::left_click(self, pressed),
 			Tool::Connection => tool::connection::left_click(self, pressed),
+			Tool::IcePath => tool::icepath::left_click(self, pressed),
+			Tool::ForcePath => tool::forcepath::left_click(self, pressed),
 		}
 		self.input.left_click = pressed;
 	}
@@ -288,6 +331,8 @@ impl EditorEditState {
 			Tool::Terrain => tool::terrain::right_click(self, pressed),
 			Tool::Entity => tool::entity::right_click(self, pressed),
 			Tool::Connection => tool::connection::right_click(self, pressed),
+			Tool::IcePath => tool::icepath::right_click(self, pressed),
+			Tool::ForcePath => tool::forcepath::right_click(self, pressed),
 		}
 		self.input.right_click = pressed;
 	}
@@ -296,6 +341,8 @@ impl EditorEditState {
 			Tool::Terrain => {}
 			Tool::Entity => tool::entity::delete(self, pressed),
 			Tool::Connection => {}
+			Tool::IcePath => {}
+			Tool::ForcePath => {}
 		}
 	}
 
