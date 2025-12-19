@@ -234,6 +234,8 @@ fn main() {
 						PhysicalKey::Code(KeyCode::ArrowDown) => key_down = pressed,
 						PhysicalKey::Code(KeyCode::Enter) if pressed => editor.toggle_play(),
 						PhysicalKey::Code(KeyCode::Delete) => editor.delete(pressed),
+						PhysicalKey::Code(KeyCode::KeyU) if pressed => editor.undo(),
+						PhysicalKey::Code(KeyCode::KeyY) if pressed => editor.redo(),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
 							#[cfg(windows)]
 							if let Some(ap) = ap.take() {

@@ -14,10 +14,12 @@ mod editstate;
 mod playstate;
 mod tiles;
 mod tool;
+mod history;
 
 use self::editstate::EditorEditState;
 use self::playstate::EditorPlayState;
 pub use self::tool::*;
+pub use self::history::History;
 
 #[derive(Clone, Debug)]
 pub struct EditorPlayStats {
@@ -320,6 +322,19 @@ impl EditorState {
 	pub fn delete(&mut self, pressed: bool) {
 		match self {
 			EditorState::Edit(s) => s.delete(pressed),
+			EditorState::Play(_) => {},
+		}
+	}
+
+	pub fn undo(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.undo(),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn redo(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.redo(),
 			EditorState::Play(_) => {},
 		}
 	}

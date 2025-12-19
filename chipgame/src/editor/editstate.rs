@@ -10,6 +10,8 @@ pub struct EditorEditState {
 	pub mouse_pos: Vec3<f32>,
 
 	pub input: Input,
+
+	history: History<String>,
 }
 
 impl EditorEditState {
@@ -23,6 +25,9 @@ impl EditorEditState {
 		self.fx.camera.set_perspective(false);
 		// Unlock the camera
 		self.fx.pause();
+
+		// Reset history to the freshly loaded level
+		self.history.clear(json.to_string());
 	}
 	pub fn reload_level(&mut self, json: &str) {
 		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
@@ -233,6 +238,23 @@ impl EditorEditState {
 		}
 	}
 
+	fn push_history(&mut self) {
+		let snapshot = self.save_level();
+		self.history.push_if(snapshot);
+	}
+	pub fn undo(&mut self) {
+		if let Some(prev) = self.history.undo().cloned() {
+			self.reload_level(&prev);
+			eprintln!("Undo");
+		}
+	}
+	pub fn redo(&mut self) {
+		if let Some(next) = self.history.redo().cloned() {
+			self.reload_level(&next);
+			eprintln!("Redo");
+		}
+	}
+
 	pub fn tool_terrain(&mut self, pressed: bool) {
 		if pressed {
 			self.tool = Some(ToolState::Terrain(Default::default()));
@@ -288,6 +310,8 @@ impl EditorEditState {
 		self.fx.game.ents.clear();
 
 		self.fx.game.brush_apply(Vec2i(left, top), &brush);
+
+		self.push_history();
 	}
 
 	pub fn left_click(&mut self, pressed: bool) {
@@ -302,6 +326,11 @@ impl EditorEditState {
 				self.tool = Some(tool_state);
 			}
 		}
+
+		if !pressed {
+			self.push_history();
+		}
+
 		self.input.left_click = pressed;
 	}
 	pub fn right_click(&mut self, pressed: bool) {
@@ -311,6 +340,11 @@ impl EditorEditState {
 				self.tool = Some(tool_state);
 			}
 		}
+
+		if !pressed {
+			self.push_history();
+		}
+
 		self.input.right_click = pressed;
 	}
 	pub fn delete(&mut self, pressed: bool) {
@@ -319,6 +353,10 @@ impl EditorEditState {
 			if self.tool.is_none() {
 				self.tool = Some(tool_state);
 			}
+		}
+
+		if !pressed {
+			self.push_history();
 		}
 	}
 
