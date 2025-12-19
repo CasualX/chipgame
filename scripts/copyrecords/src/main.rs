@@ -43,7 +43,13 @@ fn main() {
 			let test_path = format!("chipcore/tests/replays/{set_name}/level{level_id}.json");
 			let write_record = if let Ok(existing_content) = fs::read_to_string(&test_path) {
 				let existing: chipty::ReplayDto = serde_json::from_str(&existing_content).unwrap();
-				record.ticks < existing.ticks
+
+				// LevelComplete was changed to be one tick earlier to make it a nice round multiple of BASE_SPD
+				// Adjust for this to avoid massive number of replay test failures
+				// This is a terrible hack and I hope it won't bite me in the future :)
+				let existing_ticks = if existing.ticks % 12 == 1 { existing.ticks - 1 } else { existing.ticks };
+
+				record.ticks < existing_ticks
 			}
 			else {
 				true

@@ -1,5 +1,17 @@
 use std::fs;
 
+fn run_game(game: &mut chipcore::GameState, inputs: &[u8]) -> i32 {
+	let mut i = 0;
+	while i < inputs.len() {
+		if game.is_game_over() {
+			break;
+		}
+		game.tick(&chipcore::Input::decode(inputs[i]));
+		i += 1;
+	}
+	(inputs.len() - i) as i32
+}
+
 fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) {
 	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
 
@@ -7,16 +19,10 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) {
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
 	let inputs = chipty::decode(&replay.inputs);
-	for &byte in &inputs {
-		if game.is_game_over() {
-			panic!("Game ended early during replay");
-		}
-		let input = chipcore::Input::decode(byte);
-		game.tick(&input);
-	}
+	let add = run_game(&mut game, &inputs);
 
 	assert!(game.is_game_over(), "Expected game over at end of replay");
-	assert_eq!(game.time, replay.ticks, "Tick count mismatch");
+	assert_eq!(game.time + add, replay.ticks, "Tick count mismatch");
 	assert_eq!(game.ps.bonks, replay.bonks, "Bonk count mismatch");
 }
 

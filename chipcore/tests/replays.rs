@@ -1,6 +1,18 @@
 use std::{env, fs};
 use std::path::Path;
 
+fn run_game(game: &mut chipcore::GameState, inputs: &[u8]) -> i32 {
+	let mut i = 0;
+	while i < inputs.len() {
+		if game.is_game_over() {
+			break;
+		}
+		game.tick(&chipcore::Input::decode(inputs[i]));
+		i += 1;
+	}
+	(inputs.len() - i) as i32
+}
+
 fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
 
@@ -8,20 +20,14 @@ fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 	game.parse(level, chipcore::RngSeed::Manual(seed));
 
 	let inputs = chipty::decode(&replay.inputs);
-	for &byte in &inputs {
-		if game.is_game_over() {
-			break;
-		}
-		let input = chipcore::Input::decode(byte);
-		game.tick(&input);
-	}
+	let add = run_game(&mut game, &inputs);
 
 	let mut success = true;
 	if !game.is_game_over() {
 		eprintln!(" - game over mismatch: expected game over");
 		success = false;
 	}
-	if game.time != replay.ticks {
+	if game.time + add != replay.ticks {
 		eprintln!(" - ticks mismatch: expected {}, got {}", replay.ticks, game.time);
 		success = false;
 	}

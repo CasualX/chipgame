@@ -40,20 +40,6 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 		}
 		ent.face_dir = None;
 	}
-	if s.time >= ent.step_time + ent.step_spd && ent.flags & EF_NEW_POS != 0 {
-		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
-			ps_attack(s, ent.handle, GameOverReason::Burned);
-			return;
-		}
-		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
-			ps_attack(s, ent.handle, GameOverReason::Drowned);
-			return;
-		}
-		if matches!(terrain, Terrain::Exit) {
-			ps_attack(s, ent.handle, GameOverReason::LevelComplete);
-			return;
-		}
-	}
 
 	// Wait until movement is cleared before accepting new input
 	if s.time >= ent.step_time + ent.step_spd {
@@ -229,6 +215,21 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 
 	if matches!(terrain, Terrain::BearTrap) {
 		return bear_trap(s, ent);
+	}
+
+	if s.time == ent.step_time + ent.step_spd - 1 && ent.flags & EF_NEW_POS != 0 {
+		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
+			ps_attack(s, ent.handle, GameOverReason::Burned);
+			return;
+		}
+		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
+			ps_attack(s, ent.handle, GameOverReason::Drowned);
+			return;
+		}
+		if matches!(terrain, Terrain::Exit) {
+			ps_attack(s, ent.handle, GameOverReason::LevelComplete);
+			return;
+		}
 	}
 
 	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
