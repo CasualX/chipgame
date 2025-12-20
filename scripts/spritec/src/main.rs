@@ -2,14 +2,12 @@ use std::cmp::Reverse;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::{fs, io, path};
 
-use cvmath::Vec2;
+use cvmath::*;
+use shade::image::GridBinPacker;
 
-mod binpack;
+type Image = shade::image::Image<[u8; 4]>;
+
 mod config;
-mod image;
-
-use binpack::GridBinPacker;
-use image::Image;
 
 struct FrameAsset {
 	file: String,
@@ -19,6 +17,10 @@ struct FrameAsset {
 const SPRITE_FRAME_TIME: f32 = 0.0; // FIXME: set proper frame time
 
 const GUTTER: i32 = 2;
+
+fn area_with_gutter(image: &Image) -> i32 {
+	(image.width + GUTTER * 2) * (image.height + GUTTER * 2)
+}
 
 fn main() {
 	let root = path::Path::new("gfx/MS/");
@@ -31,7 +33,7 @@ fn main() {
 	);
 	let mut total_area = 0;
 	for frame in &frame_assets {
-		total_area += frame.image.area(GUTTER);
+		total_area += area_with_gutter(&frame.image);
 		println!(
 			"{} -> {}x{}, {} bytes",
 			frame.file,
@@ -45,11 +47,11 @@ fn main() {
 	let sheet_height = 512;
 	assert!(total_area <= sheet_width * sheet_height);
 
-	let mut sheet = Image::empty(sheet_width, sheet_height);
+	let mut sheet = Image::new(sheet_width, sheet_height, [0; 4]);
 
-	let mut packer = GridBinPacker::new(sheet_width, sheet_height, 32 + GUTTER * 2);
+	let mut packer = GridBinPacker::new(sheet_width, sheet_height, 32 + GUTTER * 2, 32 + GUTTER * 2);
 	let mut packing_order: Vec<usize> = (0..frame_assets.len()).collect();
-	packing_order.sort_by_key(|&idx| Reverse(frame_assets[idx].image.area(GUTTER)));
+	packing_order.sort_by_key(|&idx| Reverse(area_with_gutter(&frame_assets[idx].image)));
 	let mut packed_frames = 0;
 	let mut frame_lookup: HashMap<String, [i32; 4]> = HashMap::new();
 	for idx in packing_order {
@@ -60,7 +62,7 @@ fn main() {
 			.unwrap_or_else(|| panic!("sheet too small for {}", frame.file));
 		let draw_x = x + GUTTER;
 		let draw_y = y + GUTTER;
-		sheet.copy_image(&frame.image, draw_x, draw_y, GUTTER);
+		sheet.copy_with_gutter(&frame.image, Point2i(draw_x, draw_y), GUTTER);
 		let rect = [draw_x, draw_y, frame.image.width, frame.image.height];
 		frame_lookup.insert(frame.file.clone(), rect);
 		packed_frames += 1;
@@ -90,7 +92,7 @@ fn main() {
 	}
 
 	sheet.recover_alpha_colors();
-	sheet.save(path::Path::new("data/spritesheet.png"));
+	sheet.save_file_png(path::Path::new("data/spritesheet.png")).expect("save spritesheet png");
 	let emitted_frames = frames_meta.len();
 	let sheet_meta = chipty::SpriteSheet {
 		width: sheet_width,
@@ -115,10 +117,9 @@ fn load_unique_frames(root: &path::Path, sprites: &[config::Sprite]) -> Vec<Fram
 		for rel in &sprite.frames {
 			if seen.insert(rel.clone()) {
 				let frame_path = root.join(rel);
-				frames.push(FrameAsset {
-					file: rel.clone(),
-					image: Image::load_file(&frame_path),
-				});
+				let image = shade::image::DecodedImage::load_file_png(frame_path).expect("load sprite frame png").to_rgba();
+				let file = rel.clone();
+				frames.push(FrameAsset { file, image });
 			}
 		}
 	}

@@ -33,7 +33,7 @@ impl PlayState {
 			};
 			let props = shade::TextureProps::default();
 			if let Ok(animated_image) = shade::image::AnimatedImage::load_memory(data) {
-				let animated_texture = animated_image.to_animated_texture2d(g, &props);
+				let animated_texture = g.animated_image(&animated_image, &props);
 				splash.push(Some(animated_texture));
 			}
 		}

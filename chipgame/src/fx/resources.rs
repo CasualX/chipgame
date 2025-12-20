@@ -25,9 +25,9 @@ fn load_png(
 	fs: &crate::FileSystem,
 	path: &str,
 	props: &shade::TextureProps,
-) -> Result<shade::Texture2D, shade::image::io::png::LoadError> {
+) -> Result<shade::Texture2D, shade::image::LoadImageError> {
 	let data = fs.read(path).expect("Failed to read PNG file");
-	let image = shade::image::io::png::load_stream(&mut &data[..])?;
+	let image = shade::image::DecodedImage::load_memory_png(data.as_slice())?;
 	let tex = g.image(name, &(&image, props));
 	Ok(tex)
 }
