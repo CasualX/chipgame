@@ -13,12 +13,14 @@ fn main() {
 		// .arg(clap::arg!(-k --key [KEY] "Encryption key").required(false))
 		.arg(clap::arg!(--terrain [TERRAIN] "Terrain type to filter by"))
 		.arg(clap::arg!(--entity [ENTITY] "Entity type to filter by"))
+		.arg(clap::arg!(--"match-count" [COUNT] "Only show levels with exactly this many matches").required(false).value_parser(clap::value_parser!(usize)))
 		.arg(clap::arg!(--asc "Sort results in ascending order").required(false).action(clap::ArgAction::SetTrue))
 		.get_matches();
 
 	let path = matches.get_one::<path::PathBuf>("PATH").unwrap().clone();
 	let terrain: Option<chipty::Terrain> = matches.get_one::<String>("terrain").map(|s| s.parse().expect("Invalid terrain type"));
 	let entity: Option<chipty::EntityKind> = matches.get_one::<String>("entity").map(|s| s.parse().expect("Invalid entity type"));
+	let match_count: Option<usize> = matches.get_one::<usize>("match-count").cloned();
 	let asc = matches.get_flag("asc");
 	if terrain.is_some() && entity.is_some() {
 		panic!("Cannot filter by both terrain and entity at the same time");
@@ -68,7 +70,13 @@ fn main() {
 
 	let mut last = None;
 	for stat in stats.iter() {
-		if stat.quantity > 1 {
+		let display = if let Some(match_count) = match_count {
+			stat.quantity == match_count
+		}
+		else {
+			stat.quantity > 1
+		};
+		if display {
 			println!("Level {} has {} {:?}s — {:?}", stat.level_number, stat.quantity, label, stat.level_name);
 			last = Some(stat);
 		}
