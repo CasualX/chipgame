@@ -1,13 +1,11 @@
 {
   "level_name": "Suction Ride",
-  "attempts": 14,
-  "realtime": 80.6537,
-  "ticks": 1747,
+  "attempts": 19,
+  "realtime": 33.062386,
+  "ticks": 1746,
   "steps": 199,
   "bonks": 4,
   "seed": "17c4582d6a5e3037",
-  "inputs": "eNrF1M0OgCAIAGBS5zhw6Njj9uixls4mLqyU76hs8uNAvFm6wN9Qtp1QA+osi9uQ8Fu2lbaLfWVlzYrE6bqkSARmt2BwV3rUHwJUbeG4PQFjaI+IwkzRPYs5mrNTLo1p/JWkl48FrTHnxpN+NxrvewBhpO6jA1ZYGrQ",
-  "unpauses": 4,
-  "warps_set": 4,
-  "warps_used": 5
+  "inputs": "eNrF1M0OgCAIAGBS5zhw6Njj9uixls4mLqyU76hs8uNAvFm6wN9Qtp1QA+osi9uQ8Fu2lbaLfWVlzYrE6bqkSARmt2BwV3rUHwJUbeG4PQFjaI+IwkzRPYs5mrNTLo1p/JWkl48FrTHnxpN+NxrvewBhpO6bAzukGrI",
+  "unpauses": 1
 }
