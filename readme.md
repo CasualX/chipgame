@@ -18,7 +18,7 @@ Features
 - Smooth and responsive controls for a more enjoyable experience
 - Retro aesthetic: 2D graphics displayed as 3D models and sprites
 - Built-in level editor for creating and modifying levels
-- Includes community level packs: CCLP1, CCLP3, CCLP4, and CCLP5
+- Includes community level packs: CCLP1, CCLP2, CCLP3, CCLP4, and CCLP5
 - Supports additional levelsets in the game's native .DAT level format
 - Over 500 community levels available to play, thousands of hours of fun!
 
@@ -46,7 +46,7 @@ Other platforms must be built from source code.
 ### Publish from Source
 
 1. Run either `./scripts/publish.sh` or `scripts\publish.bat` on Linux/macOS or Windows, respectively.
-2. Find the packaged release in `target/publish/`.
+2. Find the packaged release in `target/publish/` and compressed to `target/chipgame.zip`.
 
 Controls
 --------
@@ -57,7 +57,7 @@ Controls
 | Confirm / Interact | Space | A |
 | Back / Close menu | Backspace | B |
 | Pause menu | Enter | Start |
-| Scouting mode (hold) | Shift | Select |
+| Scouting mode | Shift | Select |
 | Toggle music | M | - |
 | Toggle fullscreen | F | - |
 | Exit fullscreen | Esc | - |
@@ -68,6 +68,8 @@ Installing Additional Levelsets
 Visit [https://sets.bitbusters.club/](https://sets.bitbusters.club/) to download additional levelsets.
 
 Place the downloaded `.dat` files in the _levelsets_ folder.
+
+Note that some levelsets are made for specific engines and may not be fully compatible.
 
 Level Editor
 ------------
@@ -80,10 +82,14 @@ The game includes a level editor that can be used to create and play custom leve
 | --- | --- |
 | Load level | F2 |
 | Save level | F5 |
-| Pan camera | Arrow keys / WASD |
+| Pan camera | Arrow keys |
 | Select Terrain Tool | T |
 | Select Entity Tool | E |
 | Select Connection Tool | C |
+| Select Ice Path Tool | I |
+| Select Force Path Tool | R |
+| Undo | U |
+| Redo | Y |
 | Toggle Play ↔ Edit | Enter |
 | Toggle music | M |
 | Toggle fullscreen | F |
@@ -115,7 +121,7 @@ The game includes a level editor that can be used to create and play custom leve
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
-| Move Chip | Arrow keys / WASD | D-pad / Left stick |
+| Move Chip | Arrow keys | D-pad / Left stick |
 | Toggle Play ↔ Edit | Enter | Start |
 
 Community Resources
@@ -172,6 +178,7 @@ This remake is distributed with several community-created level packs.
 These packs were designed and maintained by the Chip’s Challenge community and are distributed freely for use with compatible engines such as Tile World.
 
 * [Chip's Challenge Level Pack 1](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_1)
+* [Chip's Challenge Level Pack 2](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_2)
 * [Chip's Challenge Level Pack 3](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_3)
 * [Chip's Challenge Level Pack 4](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_4)
 * [Chip's Challenge Level Pack 5](https://wiki.bitbusters.club/Chip%27s_Challenge_Level_Pack_5)

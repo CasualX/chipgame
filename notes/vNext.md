@@ -73,9 +73,18 @@ Player GameOver one tick earlier
 
 The Player moves ever 12 frames, but level finish triggers one extra tick later, let's fix this.
 
-* [ ] Trigger GameOver one tick earlier when the Player reaches the exit.\
-* [ ] Fix replay validation to allow an additional tick of input.\
-* [ ] Player Death sprite should appear after move animation completes.\
+* [x] Trigger GameOver one tick earlier when the Player reaches the exit.\
+* [x] Fix replay validation to allow an additional tick of input.\
+* [x] Player Death sprite should appear after move animation completes.\
+
+
+
+Visual indicator for BearTrap terrain state
+-------------------------------------------
+
+Playtesters have reported being very confused about the state of BearTraps.
+
+* [x] Improve readability for Inactive BearTraps.\
 
 
 
@@ -83,20 +92,25 @@ Miscellaneous
 -------------
 
 * [x] Improve WaterHazard terrain graphics.\
-* [ ] Fix crash when spamming Gliders into ForceRandom and Teleport grid.\
+* [x] Fix crash when spamming Gliders into ForceRandom and Teleport grid.\
 * [ ] DAT convert: Put monsters not in the monster list on Traps.\
 * [x] Editor: Show current tool and grid coordinates on screen.\
-* [ ] Editor: Center camera on level after level load.\
+* [x] Editor: Center camera on level after level load.\
 
 
 
-Intermission Screens
---------------------
+Prologue and Epilogue screens
+-----------------------------
 
-Display an intermission screen before or after certain levels to provide story context.
+Display story screens before or after certain levels to provide story context.
 
-* [ ] Add intermission entries to the LevelSetDto.levels structure.\
-* [ ] Design and implement intermission screen layout and style.\
+* [x] Add story entries to the LevelSetDto structure.\
+* [ ] Design and implement story screen layout and style.\
+* [ ] Add story to CCLP1 levelset.\
+* [x] Add story to CCLP2 levelset.\
+* [ ] Add story to CCLP3 levelset.\
+* [ ] Add story to CCLP4 levelset.\
+* [ ] Add story to CCLP5 levelset.\
 
 
 
@@ -106,7 +120,7 @@ Display Keybinds
 Players do not read the readme, so they are often unaware how to navigate the menus.
 
 * [ ] Add 'Enter' and 'Back' menu options to the Unlock Level menu.\
-* [ ] Support glyph-based fonts rendering.\
+* [x] Support glyph-based fonts rendering.\
 * [ ] Display keybinds somewhere in the Game itself.\
 * [ ] Display keybinds somewhere in the Editor itself.\
 
@@ -143,9 +157,9 @@ Implement an undo/redo system in the level editor to allow users to revert or re
 To keep things simple just snapshot the entire level state after certain actions.
 Keep a limited history of snapshots to manage memory usage effectively.
 
-* [ ] Implement a simple history stack to store level state snapshots.\
-* [ ] Add undo and redo commands to the editor interface.\
-* [ ] Add 'Are you sure you want to quit?' dialog when there are unsaved changes.\
+* [x] Implement a simple history stack to store level state snapshots.\
+* [x] Add undo and redo commands to the editor interface.\
+* [x] Add 'Are you sure you want to quit?' dialog when there are unsaved changes.\
 
 
 
@@ -155,7 +169,9 @@ Editor: Implement Toolbox Menu
 Create a toolbox menu in the level editor that displays icons for different editing tools on the left side of the screen.
 This will allow users to easily select and switch between various tools for level editing.
 
-* [ ] Tool: Autotiling for Force and Ice terrain.
+* [x] Tool: Autotiling for Force and Ice terrain.
+* [x] Tool: Refactor Tool State.
+* [x] Tool: Implement EntOrder tool to change entity ordering.
 
 
 
