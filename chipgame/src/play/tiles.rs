@@ -49,6 +49,6 @@ pub static TILES: [render::TileGfx; 50] = [
 	render::TileGfx { sprite: chipty::SpriteId::BrownButton, model: chipty::ModelId::Floor }, // Terrain::BrownButton
 	render::TileGfx { sprite: chipty::SpriteId::BlueButton, model: chipty::ModelId::Floor }, // Terrain::BlueButton
 	render::TileGfx { sprite: chipty::SpriteId::Teleport, model: chipty::ModelId::Floor }, // Terrain::Teleport
-	render::TileGfx { sprite: chipty::SpriteId::BearTrap, model: chipty::ModelId::Floor }, // Terrain::BearTrap
+	render::TileGfx { sprite: chipty::SpriteId::Blank, model: chipty::ModelId::Empty }, // Terrain::BearTrap
 	render::TileGfx { sprite: chipty::SpriteId::RecessedWall, model: chipty::ModelId::Floor }, // Terrain::RecessedWall
 ];

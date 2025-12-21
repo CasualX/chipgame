@@ -345,8 +345,9 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 	}
 
 	// Collect and sort the objects by Y position
+	// Some sprites are slightly offset in Y, so round to the nearest integer tile
 	let mut sorted_objects: Vec<_> = fx.objects.values().map(|obj| &obj.data).collect();
-	sorted_objects.sort_unstable_by_key(|obj| if obj.model.is_solid() { -(obj.pos.y as i32) } else { obj.pos.y as i32 });
+	sorted_objects.sort_unstable_by_key(|obj| ((obj.pos.y / 32.0).round() as i32, obj.model));
 
 	// Render the object shadows
 	cv.blend_mode = shade::BlendMode::Alpha;

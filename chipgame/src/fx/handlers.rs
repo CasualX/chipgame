@@ -251,6 +251,9 @@ pub fn terrain_updated(fx: &mut FxState, pos: Vec2i, old: chipty::Terrain, new: 
 
 		(_, chipty::Terrain::FakeBlueWall) => handlers::create_fake_blue_wall(fx, pos),
 		(chipty::Terrain::FakeBlueWall, _) => handlers::remove_fake_blue_wall(fx, pos),
+
+		(_, chipty::Terrain::BearTrap) => handlers::create_bear_trap(fx, pos),
+		(chipty::Terrain::BearTrap, _) => handlers::remove_bear_trap(fx, pos),
 		_ => {}
 	}
 }
@@ -679,6 +682,32 @@ pub fn remove_fake_blue_wall(fx: &mut FxState, pos: Vec2<i32>) {
 
 	obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha: 0.0, fade_spd: 8.0 }));
 	obj.anim.unalive_after_anim = true;
+}
+
+pub fn create_bear_trap(fx: &mut FxState, pos: Vec2<i32>) {
+	let obj = render::Object {
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: chipty::SpriteId::BearTrap,
+			frame: 0,
+			model: chipty::ModelId::Floor,
+			alpha: 1.0,
+			greyscale: false,
+			depth_test: true,
+		},
+		anim: render::Animation {
+			anims: Vec::new(),
+			unalive_after_anim: false,
+		},
+	};
+	let handle = fx.render.objects.alloc();
+	fx.render.objects.insert(handle, obj);
+	fx.traps.insert(pos, BearTrapState { state: chipcore::TrapState::Active, handle });
+	fx.render.field.set_terrain(pos, chipty::Terrain::Floor);
+}
+pub fn remove_bear_trap(fx: &mut FxState, pos: Vec2<i32>) {
+	let Some(trap) = fx.traps.remove(&pos) else { return };
+	fx.render.objects.remove(trap.handle);
 }
 
 pub fn game_over(fx: &mut FxState, reason: chipcore::GameOverReason) {

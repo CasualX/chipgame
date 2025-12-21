@@ -98,6 +98,8 @@ pub enum SpriteId {
 	Thief,
 	Teleport,
 	BearTrap,
+	BearTrapInactiveA,
+	BearTrapActiveA,
 	RecessedWall,
 	BugN,
 	BugW,

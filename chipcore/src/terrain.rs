@@ -8,7 +8,7 @@ pub struct TerrainPhase {
 }
 
 pub fn bear_trap(s: &mut GameState, ent: &mut Entity) {
-	if matches!(s.get_trap_state(ent.pos), TrapState::Closed) {
+	if matches!(s.get_trap_state(ent.pos), TrapState::Active) {
 		// Notify only if the entity is newly trapped
 		if ent.flags & (EF_TRAPPED | EF_RELEASED) == 0 {
 			s.events.fire(GameEvent::EntityTrapped { entity: ent.handle });

@@ -2,6 +2,12 @@ use super::*;
 
 const SCOUT_INPUT_HOLD: f64 = 1.5 / chipcore::FPS as f64;
 
+#[derive(Clone)]
+pub struct BearTrapState {
+	pub state: chipcore::TrapState,
+	pub handle: render::ObjectHandle,
+}
+
 #[derive(Clone, Default)]
 pub struct FxState {
 	pub game: chipcore::GameState,
@@ -19,6 +25,7 @@ pub struct FxState {
 	pub mirage_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub fake_blue_walls: HashMap<Vec2i, render::ObjectHandle>,
 	pub water_hazards: HashMap<Vec2i, render::ObjectHandle>,
+	pub traps: HashMap<Vec2i, BearTrapState>,
 
 	pub level_number: i32,
 	pub next_level_load: f64,
@@ -79,6 +86,7 @@ impl FxState {
 					chipty::Terrain::InvisibleWall => handlers::create_wall_mirage(&mut fx, pos),
 					chipty::Terrain::WaterHazard => handlers::create_water_hazard(&mut fx, pos),
 					chipty::Terrain::FakeBlueWall => handlers::create_fake_blue_wall(&mut fx, pos),
+					chipty::Terrain::BearTrap => handlers::create_bear_trap(&mut fx, pos),
 					_ => {}
 				}
 			}
@@ -191,6 +199,8 @@ impl FxState {
 			let dist = player.pos.distance_hat(ent.pos);
 			Some(dist)
 		});
+
+		self.update_traps();
 	}
 	/// Process game events and update FX state accordingly.
 	pub fn sync(&mut self) {
@@ -239,6 +249,30 @@ impl FxState {
 
 		if self.hud_enabled {
 			self.render_ui(g, resx, time);
+		}
+	}
+
+	fn update_traps(&mut self) {
+		for (&dest, trap) in &mut self.traps {
+			let current_state = self.game.get_trap_state(dest);
+			if trap.state == current_state {
+				continue;
+			}
+			trap.state = current_state;
+
+			// Animate the BearTrap sprite
+			if let Some(obj) = self.render.objects.get_mut(trap.handle) {
+				let sprite = match trap.state {
+					chipcore::TrapState::Active => chipty::SpriteId::BearTrapActiveA,
+					chipcore::TrapState::Inactive => chipty::SpriteId::BearTrapInactiveA,
+				};
+				obj.data.sprite = sprite;
+				obj.anim.anims.push(render::AnimState::AnimSeq(render::SpriteAnimSeq {
+					start_time: self.time,
+					frame_count: 5,
+					frame_rate: 40.0,
+				}));
+			}
 		}
 	}
 

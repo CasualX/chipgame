@@ -156,12 +156,12 @@ impl GameState {
 
 	/// Returns the trap state at the given position.
 	pub fn get_trap_state(&self, pos: Vec2i) -> TrapState {
-		let mut state = TrapState::Closed;
+		let mut state = TrapState::Active;
 		for conn in &self.field.conns {
 			if conn.dest == pos {
 				for ehandle in self.qt.get(conn.src) {
 					if self.ents.is_valid(ehandle) {
-						state = TrapState::Open;
+						state = TrapState::Inactive;
 					}
 				}
 			}

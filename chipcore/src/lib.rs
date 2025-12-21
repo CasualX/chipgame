@@ -41,10 +41,12 @@ use self::terrain::*;
 /// Game ticks per second.
 pub const FPS: i32 = 60;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum TrapState {
-	Closed,
-	Open,
+	/// Trap is Closed and will trap any entity stepping on it.
+	Active,
+	/// Trap is Open and will not trap entities.
+	Inactive,
 }
 
 #[derive(Default)]
