@@ -1,13 +1,11 @@
 {
-  "level_name": "Work Fast *",
-  "attempts": 5,
-  "realtime": 57.97886,
-  "ticks": 1334,
+  "level_name": "Work Fast",
+  "attempts": 7,
+  "realtime": 24.010262,
+  "ticks": 1333,
   "steps": 141,
   "bonks": 1,
   "seed": "e2bbdfafa4f2a0bf",
-  "inputs": "eNrtk0sOwCAIRNGw6DF6/1O2kX6eGlLamK58K6KIw4iqhuykghSWsWiE4bc6yEHyOVMkGyXWMJWHrAOeKwZ0XlKzz30+v6Lqnaq/eWINsX3ueCfoQ++cNBrqdfrPl6e9HArm8w28GWIOazL2fOtj07aGzJXJvzR/bgPQDg2o",
-  "unpauses": 1,
-  "warps_set": 1,
-  "warps_used": 4
+  "inputs": "eNrtk0sOgCAMRAvpwmN4/1NqqJ9XSWM1xJVv1UAp06GoGrJSGtKYxqIZht8aIBslZk+RarRY0zgPWQfcV0zoPKTWmPN8fYTrnarfeWINsX3uRCfoQ++cXDT4dfrPl6e9HArm8w2iGWIOazKOfOtj0zanzJWfb/FfbgHCZg2n",
+  "unpauses": 2
 }

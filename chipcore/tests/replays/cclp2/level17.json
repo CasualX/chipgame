@@ -1,13 +1,10 @@
 {
-  "level_name": "Double Trouble *",
-  "attempts": 3,
-  "realtime": 92.81626,
-  "ticks": 3163,
+  "level_name": "Double Trouble",
+  "attempts": 5,
+  "realtime": 52.680065,
+  "ticks": 3162,
   "steps": 257,
   "bonks": 15,
   "seed": "0983f649373cc0a7",
-  "inputs": "eNrtls0OxCAIhCnh4Ps/8f5kG3BLBzSh9tDvVkMQx0Eq8oU+tCxdJBnsCvvQMd6mcMP2SDrba0PQST0E65znnVM1HVB1FNKz0/9eew0AdHZ8R3Yh2qFEYVC1vfRWLL04vRO68VdcojkCz6czdEXbnIkEdOxxHGmDE+aNtZpCq7LfvAD1Se1jgKSWcka19Z2TnALuvOAwEoskV7LIi6zt1hZR1O998081KXh1fS+Oeyw/W7ZbUvw/Uzir7QH44Zq35gWCfyqR",
-  "unpauses": 5,
-  "warps_set": 1,
-  "warps_used": 1
+  "inputs": "eNrtls0OxCAIhCnh4Ps/8f5kG3BLBzSh9tDvVkMQx0Eq8oU+tCxdJBnsCvvQMd6mcMP2SDrba0PQST0E65znnVM1HVB1FNKz0/9eew0AdHZ8R3Yh2qFEYVC1vfRWLL04vRO68VdcojkCz6czdEXbnIkEdOxxHGmDE+aNtZpCq7LfvAD1Se1jgKSWcka19Z2TnALuvOAwEoskV7LIi6zt1hZR1O998081KXh1fS+Oeyw/W7ZbUvw/Uzir7QH44ZK35gVX7iqR"
 }

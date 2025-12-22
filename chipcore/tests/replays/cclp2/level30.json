@@ -1,13 +1,10 @@
 {
-  "level_name": "Chase Race *",
-  "attempts": 4,
-  "realtime": 176.33853,
-  "ticks": 6523,
+  "level_name": "Chase Race",
+  "attempts": 5,
+  "realtime": 108.68238,
+  "ticks": 6522,
   "steps": 552,
   "bonks": 0,
   "seed": "9b1e296ca56f1097",
-  "inputs": "eNrtWEESgyAMjJ0ePPqE/v+VnRGnTQsLWYRChb2pQGLcLCvL8oYA6Merg77vLXA7YBmjoCLey+BYbeURyjwHr3VcJo8dutbEQqhuGfDjFqs8+V5fvMoHjJviQHHWVUWJUvUHmjMTUZlAHP8HhnfXb8VUtx+AXoPM2TZeVyM+IUFf8lWE/Z7snoJo8WN5tFRSPnwCzD9QZ+W+9B0UQ09K7OnBMWLxZuKmhx0GmFt5H7miGlQTmUhv9mA5SEsr5PJi54+pj07rxwkrifQH/ZXgigUy8ZSnAuuEUaGI3tbMMypsdiU3BGYdZXsdafBHOQTIvp6w9pTk7BpjsxDXcDLMrpRZTntMum3Rp0FOykCcRIcEoGgLMdyb3fy0s+ZpvMeZ/eIJseJgGQ",
-  "unpauses": 10,
-  "warps_set": 7,
-  "warps_used": 3
+  "inputs": "eNrtWEESwiAMTB0PPfYJ/v+VjtLRKCxkKQgW9tRpgaTpZtmyLG8IgH68Ouj73gKXHZYxCiritQz21VYeocxz8FrHZXJ7QteaWAjVLQN+3GKVJ9/ri1f5gHFTHCjOuqooUar+QHNmIioTiOP/wPDu+q2Y6vYD0GuQOdvG62rEJyToS76KsN+T3VMQLX4sj5ZKyodPgPkH6qzcl76DYuhJiT09OEYs3kzc9LDDAHMr7yNnVINqIhPpzR4sB2lphVxe7Pwx9dFh/ThgJZH+oL8SXLFAJp7yVGCdMCoU0duaeUaFza7khsCso2yvIw3+KIcA2dcT1p6SnF1jbBbiGk6G2ZUyy2mPSbct+jTISRmIk+iQABRtIYZ7s5ufdtY8jfc487i+A1HJYBk"
 }
