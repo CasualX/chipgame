@@ -250,6 +250,12 @@ impl EditorState {
 			EditorState::Play(_) => {},
 		}
 	}
+	pub fn tool_entorder(&mut self, pressed: bool) {
+		match self {
+			EditorState::Edit(s) => s.tool_entorder(pressed),
+			EditorState::Play(_) => {},
+		}
+	}
 
 	pub fn resize(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
 		match self {

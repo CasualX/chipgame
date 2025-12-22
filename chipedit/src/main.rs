@@ -334,6 +334,7 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyC) => editor.tool_connection(pressed),
 						PhysicalKey::Code(KeyCode::KeyI) => editor.tool_icepath(pressed),
 						PhysicalKey::Code(KeyCode::KeyR) => editor.tool_forcepath(pressed),
+						PhysicalKey::Code(KeyCode::KeyO) => editor.tool_entorder(pressed),
 						PhysicalKey::Code(KeyCode::ShiftLeft | KeyCode::ShiftRight) => editor.key_shift(pressed),
 						PhysicalKey::Code(KeyCode::Numpad8) if pressed => {
 							if shift_held { editor.expand_top(); }
@@ -411,6 +412,7 @@ fn main() {
 							Some(editor::ToolState::Connection(_)) => CursorIcon::Alias,
 							Some(editor::ToolState::IcePath(_)) => CursorIcon::Crosshair,
 							Some(editor::ToolState::ForcePath(_)) => CursorIcon::Crosshair,
+							Some(editor::ToolState::EntOrder(_)) => CursorIcon::NsResize,
 							None => CursorIcon::Default,
 						};
 

@@ -16,7 +16,9 @@ pub struct EditorEditState {
 
 impl EditorEditState {
 	pub fn load_level(&mut self, json: &str) {
-		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		let mut level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		level_dto.normalize();
+
 		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
 		self.fx.hud_enabled = false;
 		// Initialize the camera far enough to see the whole level
@@ -30,7 +32,9 @@ impl EditorEditState {
 		self.history.clear(json.to_string());
 	}
 	pub fn reload_level(&mut self, json: &str) {
-		let level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		let mut level_dto: LevelDto = serde_json::from_str(json).unwrap();
+		level_dto.normalize();
+
 		// Reload the level but keep the camera position
 		let old_cam = self.fx.camera.clone();
 		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
@@ -38,7 +42,7 @@ impl EditorEditState {
 		// Unlock the camera
 		self.fx.pause();
 	}
-	pub fn save_level(&self) -> String {
+	pub fn save_level_dto(&self) -> chipty::LevelDto {
 		let mut legend_map = HashMap::new();
 		let mut legend = Vec::new();
 		legend_map.insert(Terrain::Blank, 0); legend.push(Terrain::Blank);
@@ -52,9 +56,8 @@ impl EditorEditState {
 			}
 		}
 		let data = self.fx.game.field.terrain.iter().map(|&terrain| legend_map[&terrain]).collect();
-		let mut entities = self.fx.game.ents.iter().map(chipcore::Entity::to_entity_args).collect();
-		LevelDto::sort_entities(&mut entities);
-		let dto = LevelDto {
+		let entities = self.fx.game.ents.iter().map(chipcore::Entity::to_entity_args).collect();
+		let mut level = chipty::LevelDto {
 			name: self.fx.game.field.name.clone(),
 			author: self.fx.game.field.author.clone(),
 			hint: self.fx.game.field.hint.clone(),
@@ -72,6 +75,11 @@ impl EditorEditState {
 			replays: self.fx.game.field.replays.clone(),
 			trophies: self.fx.game.field.trophies.clone(),
 		};
+		level.normalize();
+		level
+	}
+	pub fn save_level(&self) -> String {
+		let dto = self.save_level_dto();
 		serde_json::to_string(&dto).unwrap()
 	}
 	pub fn set_screen_size(&mut self, width: i32, height: i32) {
@@ -228,6 +236,10 @@ impl EditorEditState {
 			cv.draw(g, shade::Surface::BACK_BUFFER);
 		}
 
+		if let Some(ToolState::EntOrder(_state)) = &self.tool {
+			fx::draw_entity_order(&self.fx, g, resx, &cam);
+		}
+
 		if let Some(tool_state) = &self.tool {
 			let text = fmtools::format!(
 				"Tool: "{tool_state.name()}"\n"
@@ -278,6 +290,11 @@ impl EditorEditState {
 	pub fn tool_forcepath(&mut self, pressed: bool) {
 		if pressed {
 			self.tool = Some(ToolState::ForcePath(Default::default()));
+		}
+	}
+	pub fn tool_entorder(&mut self, pressed: bool) {
+		if pressed {
+			self.tool = Some(ToolState::EntOrder(Default::default()));
 		}
 	}
 

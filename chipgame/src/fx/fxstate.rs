@@ -355,3 +355,27 @@ fn fade_to(obj: &mut render::Object, target_alpha: f32, fade_spd: f32) {
 	}
 	obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha, fade_spd }));
 }
+
+pub fn draw_entity_order(fx: &FxState, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup) {
+	let mut tbuf = shade::d2::TextBuffer::new();
+	tbuf.shader = resx.font.shader;
+	tbuf.blend_mode = shade::BlendMode::Alpha;
+	tbuf.viewport = resx.viewport;
+	tbuf.uniform.texture = resx.font.texture;
+	tbuf.uniform.transform = cvmath::Transform2::ortho(resx.viewport.cast());
+
+	let size = resx.viewport.height() as f32 / 32.0;
+	let scribe = shade::d2::Scribe {
+		font_size: size,
+		line_height: size,
+		..Default::default()
+	};
+	for (&ehandle, &obj_handle) in &fx.game_objects {
+		let Some(index) = ehandle.index() else { continue };
+		let Some(obj) = fx.render.objects.get(obj_handle) else { continue };
+		let Some(pos) = camera.world_to_viewport(obj.data.pos + Vec3(16.0, 16.0, 0.0)) else { continue };
+		tbuf.text_box(&resx.font, &scribe, &cvmath::Bounds2::point(pos, Vec2::ZERO), shade::d2::TextAlign::MiddleCenter, &format!("{}", index));
+	}
+
+	tbuf.draw(g, shade::Surface::BACK_BUFFER);
+}

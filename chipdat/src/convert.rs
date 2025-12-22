@@ -7,8 +7,7 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 	for lvdat in dat.levels.iter() {
 		// Parse the tile layers
 		let (map, entities) = parse_content(&lvdat.top_layer, &lvdat.bottom_layer);
-		let mut entities = monster_order(&lvdat.metadata.monsters, entities);
-		chipty::LevelDto::sort_entities(&mut entities);
+		let entities = monster_order(&lvdat.metadata.monsters, entities);
 
 		// Build connections
 		let mut conns = Vec::new();
@@ -42,6 +41,7 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 			replays: None,
 			trophies: None,
 		};
+		level.normalize();
 
 		replace_block_cloners(&mut level);
 

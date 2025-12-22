@@ -9,7 +9,7 @@ impl EntityHandle {
 	pub const INVALID: EntityHandle = EntityHandle(0);
 
 	#[inline]
-	fn index(self) -> Option<usize> {
+	pub fn index(self) -> Option<usize> {
 		if self.0 == 0 {
 			return None;
 		}

@@ -5,12 +5,14 @@ mod entity;
 mod connection;
 mod icepath;
 mod forcepath;
+mod entorder;
 
 pub use self::terrain::TerrainToolState;
 pub use self::entity::EntityToolState;
 pub use self::connection::ConnectionToolState;
 pub use self::icepath::IcePathToolState;
 pub use self::forcepath::ForcePathToolState;
+pub use self::entorder::EntOrderToolState;
 
 pub enum ToolState {
 	Terrain(TerrainToolState),
@@ -18,6 +20,7 @@ pub enum ToolState {
 	Connection(ConnectionToolState),
 	IcePath(IcePathToolState),
 	ForcePath(ForcePathToolState),
+	EntOrder(EntOrderToolState),
 }
 impl ToolState {
 	pub fn name(&self) -> &'static str {
@@ -27,6 +30,7 @@ impl ToolState {
 			ToolState::Connection(_) => "Connection",
 			ToolState::IcePath(_) => "Ice Path",
 			ToolState::ForcePath(_) => "Force Path",
+			ToolState::EntOrder(_) => "Entity Order",
 		}
 	}
 
@@ -37,6 +41,7 @@ impl ToolState {
 			ToolState::Connection(state) => state.left_click(s, pressed),
 			ToolState::IcePath(state) => state.left_click(s, pressed),
 			ToolState::ForcePath(state) => state.left_click(s, pressed),
+			ToolState::EntOrder(state) => state.left_click(s, pressed),
 		}
 	}
 
@@ -47,6 +52,7 @@ impl ToolState {
 			ToolState::Connection(state) => state.right_click(s, pressed),
 			ToolState::IcePath(state) => state.right_click(s, pressed),
 			ToolState::ForcePath(state) => state.right_click(s, pressed),
+			ToolState::EntOrder(state) => state.right_click(s, pressed),
 		}
 	}
 
@@ -57,6 +63,7 @@ impl ToolState {
 			ToolState::Connection(state) => state.think(s),
 			ToolState::IcePath(state) => state.think(s),
 			ToolState::ForcePath(state) => state.think(s),
+			ToolState::EntOrder(state) => state.think(s),
 		}
 	}
 
