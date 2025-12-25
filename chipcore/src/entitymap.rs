@@ -15,6 +15,11 @@ impl EntityHandle {
 		}
 		return Some(self.0 as usize - 1);
 	}
+
+	#[inline]
+	pub fn from(index: usize) -> EntityHandle {
+		EntityHandle((index + 1) as u32)
+	}
 }
 
 #[derive(Clone)]

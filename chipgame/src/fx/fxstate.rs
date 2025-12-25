@@ -64,10 +64,11 @@ impl FxState {
 		fx.hud_enabled = true;
 		fx.darken = true;
 		fx.darken_time = -1.0;
-		fx.assist_dist = 2;
+		fx.assist_dist = 4;
 
 		// Parse the level data into the game state
 		fx.game.parse(level_dto, rng_seed);
+		fx.camera.master = fx.game.ps.master;
 
 		// Initialize the render field based on the game state
 		fx.render.field.width = fx.game.field.width;
@@ -127,6 +128,7 @@ impl FxState {
 			return;
 		}
 
+		// Handle pause/scout input
 		if !self.game.is_game_over() {
 			if input.start && !self.pause_pressed {
 				self.pause();
@@ -137,8 +139,8 @@ impl FxState {
 			self.pause_pressed = input.start || input.select;
 		}
 
+		// Handle replay inputs
 		let player_input = *input;
-
 		if let Some(_) = &mut self.replay_inputs {
 			if player_input.has_directional_input() {
 				self.replay_inputs = None;
@@ -147,7 +149,6 @@ impl FxState {
 		let replay_input = self.replay_inputs.as_ref().and_then(|inputs| {
 			inputs.get(self.game.time as usize).cloned().map(chipcore::Input::decode)
 		});
-
 		let input = replay_input.unwrap_or(player_input);
 
 		// Handle step mode
@@ -155,6 +156,7 @@ impl FxState {
 		if self.step_mode {
 			run_tick = self.game.should_tick_step_mode(&input);
 			// Reset input buffering to avoid stale inputs
+			// FIXME: This causes desync when replaying inputs
 			if !run_tick {
 				self.game.input_reset();
 			}
@@ -165,29 +167,12 @@ impl FxState {
 			self.sync();
 		}
 
-		if self.game_start_time == 0.0 && self.game.time > 0 {
-			self.game_start_time = self.time;
-		}
+		self.update_camera_master();
+		self.update_timer();
+		self.update_traps();
 
-		if self.next_level_load != 0.0 && self.time > self.next_level_load {
-			self.next_level_load = 0.0;
-			let event = if matches!(self.game_over, Some(chipcore::GameOverReason::LevelComplete)) {
-				FxEvent::LevelComplete
-			}
-			else {
-				FxEvent::GameOver
-			};
-			self.events.push(event);
-		}
-
-		let fade_invisible = FadeValues {
-			near_alpha: 0.25,
-			far_alpha: 0.0,
-		};
-		let fade_visible = FadeValues {
-			near_alpha: 0.75,
-			far_alpha: 1.0,
-		};
+		let fade_invisible = FadeValues { near_alpha: 0.75, far_alpha: 0.0 };
+		let fade_visible = FadeValues { near_alpha: 0.75, far_alpha: 1.0 };
 
 		// Update invisible walls based on player proximity
 		fade_assist_dist(&self.mirage_walls, &mut self.render.objects, self.assist_dist, &fade_invisible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
@@ -200,7 +185,6 @@ impl FxState {
 			Some(dist)
 		});
 
-		self.update_traps();
 	}
 	/// Process game events and update FX state accordingly.
 	pub fn sync(&mut self) {
@@ -249,6 +233,58 @@ impl FxState {
 
 		if self.hud_enabled {
 			self.render_ui(g, resx, time);
+		}
+	}
+
+	fn update_camera_master(&mut self) {
+		if self.game.field.camera_triggers.is_empty() {
+			return;
+		}
+
+		let Some(player) = self.game.ents.get(self.game.ps.master) else {
+			return;
+		};
+
+		let ehandle = self.game.field.camera_triggers.iter().find_map(|camera_trigger| {
+			let ehandle = chipcore::EntityHandle::from(camera_trigger.entity_index);
+			let Some(entity) = self.game.ents.get(ehandle) else {
+				return None;
+			};
+			if camera_trigger.player_pos != player.pos {
+				return None;
+			}
+			if camera_trigger.entity_kind != entity.kind {
+				return None;
+			}
+			Some(ehandle)
+		}).unwrap_or(self.game.ps.master);
+
+		if self.camera.master != ehandle {
+			self.camera.master = ehandle;
+			if let Some(entity) = self.game.ents.get(ehandle) {
+				self.camera.move_src = entity.pos;
+				self.camera.move_dest = entity.pos;
+				self.camera.move_time = self.time;
+				self.camera.move_spd = 8.0 / chipcore::FPS as f32;
+				self.camera.move_teleport = true;
+			}
+		}
+	}
+
+	fn update_timer(&mut self) {
+		if self.game_start_time == 0.0 && self.game.time > 0 {
+			self.game_start_time = self.time;
+		}
+
+		if self.next_level_load != 0.0 && self.time > self.next_level_load {
+			self.next_level_load = 0.0;
+			let event = if matches!(self.game_over, Some(chipcore::GameOverReason::LevelComplete)) {
+				FxEvent::LevelComplete
+			}
+			else {
+				FxEvent::GameOver
+			};
+			self.events.push(event);
 		}
 	}
 

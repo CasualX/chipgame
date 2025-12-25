@@ -14,6 +14,7 @@ pub struct Field {
 	pub height: i32,
 	pub terrain: Vec<Terrain>,
 	pub conns: Vec<FieldConn>,
+	pub camera_triggers: Vec<chipty::CameraFocusTrigger>,
 	pub replays: Option<Vec<chipty::ReplayDto>>,
 	pub trophies: Option<chipty::Trophies>,
 }
@@ -31,6 +32,7 @@ impl Field {
 		self.height = ld.map.height;
 		self.terrain.clear();
 		self.conns.clone_from(&ld.connections);
+		self.camera_triggers.clone_from(&ld.camera_triggers);
 		self.replays.clone_from(&ld.replays);
 		self.trophies.clone_from(&ld.trophies);
 

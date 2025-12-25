@@ -50,7 +50,7 @@ impl PlayState {
 
 		if let Some(fx) = &mut self.fx {
 			fx.step_mode = self.save_data.options.step_mode;
-			fx.assist_dist = if self.save_data.options.assist_mode { 2 } else { 0 };
+			fx.assist_dist = if self.save_data.options.assist_mode { 4 } else { 0 };
 			fx.think(input, menu_active);
 		}
 

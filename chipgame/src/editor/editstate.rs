@@ -72,6 +72,7 @@ impl EditorEditState {
 			},
 			entities,
 			connections: self.fx.game.field.conns.clone(),
+			camera_triggers: self.fx.game.field.camera_triggers.clone(),
 			replays: self.fx.game.field.replays.clone(),
 			trophies: self.fx.game.field.trophies.clone(),
 		};

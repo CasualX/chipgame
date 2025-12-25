@@ -42,7 +42,7 @@ pub fn entity_created(fx: &mut FxState, ehandle: chipcore::EntityHandle, kind: c
 	fx.render.objects.insert(handle, obj);
 	fx.game_objects.insert(ehandle, handle);
 
-	if fx.game.ps.master == ehandle {
+	if fx.camera.master == ehandle {
 		fx.camera.move_src = ent.pos;
 		fx.camera.move_dest = ent.pos;
 		fx.camera.move_time = fx.time;
@@ -120,7 +120,7 @@ pub fn entity_step(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	// Quick hack to flatten sprites on top of walls
 	// obj.data.model = if end_pos.z >= 20.0 { chipty::ModelId::FloorSprite } else { model_for_ent(ent) };
 
-	if ehandle == fx.game.ps.master {
+	if fx.camera.master == ehandle {
 		fx.camera.move_src = src;
 		fx.camera.move_dest = ent.pos;
 		fx.camera.move_time = fx.time;
@@ -134,7 +134,7 @@ pub fn entity_teleport(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	entity_step(fx, ehandle);
 
 	// When teleporting the player snap the camera
-	if ehandle == fx.game.ps.master {
+	if fx.camera.master == ehandle {
 		fx.camera.move_teleport = true;
 	}
 }

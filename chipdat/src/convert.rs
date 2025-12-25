@@ -38,6 +38,7 @@ pub fn convert(dat: &super::Data, title: String) -> chipty::LevelSetDto {
 			map,
 			entities,
 			connections: conns,
+			camera_triggers: Vec::new(),
 			replays: None,
 			trophies: None,
 		};

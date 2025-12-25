@@ -14,6 +14,20 @@ pub struct FieldDto {
 	pub legend: Vec<Terrain>,
 }
 
+/// Camera entity focus definition.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct CameraFocusTrigger {
+	/// When the Player entity is at this position, the camera will focus on the target entity.
+	pub player_pos: Vec2i,
+	/// Index of the target entity.
+	pub entity_index: usize,
+	/// Kind of the target entity.
+	///
+	/// When the target entity is not of this kind, the camera will not focus on it.
+	pub entity_kind: EntityKind,
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[derive(serde::Serialize, serde::Deserialize)]
 pub enum Trophy {
@@ -69,6 +83,8 @@ pub struct LevelDto {
 	pub entities: Vec<EntityArgs>,
 	#[serde(default, skip_serializing_if = "Vec::is_empty")]
 	pub connections: Vec<FieldConn>,
+	#[serde(default, skip_serializing_if = "Vec::is_empty")]
+	pub camera_triggers: Vec<CameraFocusTrigger>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]
 	pub replays: Option<Vec<ReplayDto>>,
 	#[serde(default, skip_serializing_if = "Option::is_none")]

@@ -20,6 +20,7 @@ pub struct PlayCamera {
 	blend: f32,
 	perspective: bool,
 
+	pub master: chipcore::EntityHandle,
 	pub move_src: Vec2<i32>,
 	pub move_dest: Vec2<i32>,
 	pub move_time: f64,
@@ -35,6 +36,7 @@ impl Default for PlayCamera {
 			position: Vec3f::ONE,
 			blend: 0.0,
 			perspective: false,
+			master: chipcore::EntityHandle::INVALID,
 			move_src: Vec2::ZERO,
 			move_dest: Vec2::ZERO,
 			move_time: 0.0,
