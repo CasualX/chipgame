@@ -3,8 +3,13 @@ use super::*;
 fn ent_pos(game: &chipcore::GameState, ent: &chipcore::Entity, pos: Vec2i, check_elevated: bool) -> Vec3f {
 	let terrain = game.field.get_terrain(pos);
 	let elevated = matches!(terrain, chipty::Terrain::CloneMachine);
+	let base_z = match ent.kind {
+		chipty::EntityKind::Socket => 2.0,
+		chipty::EntityKind::Thief => 1.0,
+		_ => 0.0,
+	};
 	// Blocks appear on top of walls
-	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if check_elevated && elevated { 20.0 } else { 0.0 };
+	let pos_z = if matches!(ent.kind, chipty::EntityKind::Block | chipty::EntityKind::IceBlock) { 0.0 } else if check_elevated && elevated { 20.0 } else { base_z };
 	let pos = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, pos_z);
 	return pos;
 }

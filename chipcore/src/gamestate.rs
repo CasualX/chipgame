@@ -41,7 +41,7 @@ impl GameState {
 		};
 
 		self.time = 0;
-		self.time_state = TimeState::Waiting;
+		self.time_state = TimeState::Running;
 		self.ps = PlayerState::default();
 		self.field.parse(ld, seed);
 		self.ents.clear();

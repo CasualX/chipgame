@@ -68,6 +68,7 @@ impl FxState {
 
 		// Parse the level data into the game state
 		fx.game.parse(level_dto, rng_seed);
+		fx.game.time_state = chipcore::TimeState::Waiting;
 		fx.camera.master = fx.game.ps.master;
 
 		// Initialize the render field based on the game state
