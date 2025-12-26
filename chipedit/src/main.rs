@@ -27,7 +27,7 @@ struct AppStuff {
 
 impl AppStuff {
 	fn new(
-		elwt: &winit::event_loop::EventLoopWindowTarget<()>,
+		event_loop: &winit::event_loop::ActiveEventLoop,
 		fs: &FileSystem,
 		config: &chipgame::config::Config,
 	) -> Box<AppStuff> {
@@ -35,7 +35,7 @@ impl AppStuff {
 		use glutin::context::{ContextApi, ContextAttributesBuilder, Version};
 		use glutin::display::GetGlDisplay;
 		use glutin::surface::{SurfaceAttributesBuilder, SwapInterval, WindowSurface};
-		use raw_window_handle::HasRawWindowHandle;
+		use raw_window_handle::HasWindowHandle;
 
 		let mut template = ConfigTemplateBuilder::new().with_alpha_size(8);
 		if config.multisampling > 0 {
@@ -45,25 +45,28 @@ impl AppStuff {
 		let size = winit::dpi::PhysicalSize::new(800, 600);
 
 		#[cfg(windows)]
-		let window_builder = {
-			use winit::platform::windows::WindowBuilderExtWindows;
-			winit::window::WindowBuilder::new()
+		let window_attributes = {
+			use winit::platform::windows::WindowAttributesExtWindows;
+			winit::window::Window::default_attributes()
 				.with_title("ChipEdit")
 				.with_inner_size(size)
 				.with_drag_and_drop(false)
 		};
 		#[cfg(not(windows))]
-		let window_builder = winit::window::WindowBuilder::new()
+		let window_attributes = winit::window::Window::default_attributes()
 			.with_title("ChipEdit")
 			.with_inner_size(size);
 
 		let (window, gl_config) = glutin_winit::DisplayBuilder::new()
-			.with_window_builder(Some(window_builder))
-			.build(elwt, template, |configs| configs.max_by_key(|c| c.num_samples()).unwrap())
+			.with_window_attributes(Some(window_attributes))
+			.build(event_loop, template, |configs| configs.max_by_key(|c| c.num_samples()).unwrap())
 			.expect("Failed to build window and GL config");
 
 		let window = window.expect("DisplayBuilder did not build a Window");
-		let raw_window_handle = window.raw_window_handle();
+		let raw_window_handle = window
+			.window_handle()
+			.expect("Failed to get window handle")
+			.as_raw();
 
 		let context_attributes = ContextAttributesBuilder::new()
 			.with_context_api(ContextApi::OpenGl(Some(Version::new(3, 3))))
@@ -197,7 +200,8 @@ fn main() {
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
-	let _ = event_loop.run(move |event, elwt| {
+	#[allow(deprecated)]
+	let _ = event_loop.run(move |event, event_loop| {
 		use winit::event::{ElementState, Event, MouseButton, WindowEvent};
 		use winit::keyboard::{KeyCode, PhysicalKey};
 		use winit::window::CursorIcon;
@@ -205,7 +209,7 @@ fn main() {
 		match event {
 			Event::Resumed => {
 				if app.is_none() {
-					let built = AppStuff::new(elwt, &fs, &config);
+					let built = AppStuff::new(event_loop, &fs, &config);
 
 					// Window title and initial level
 					built.window.set_title("ChipEdit - (unsaved)");
@@ -252,11 +256,11 @@ fn main() {
 							ap = init_audio(&fs, &config);
 						}
 						if matches!(result, rfd::MessageDialogResult::Yes) {
-							elwt.exit();
+							event_loop.exit();
 						}
 					}
 					else {
-						elwt.exit();
+						event_loop.exit();
 					}
 				}
 				WindowEvent::KeyboardInput { event, .. } => {
@@ -418,7 +422,7 @@ fn main() {
 
 						if app.cursor != tool_cursor {
 							app.cursor = tool_cursor;
-							app.window.set_cursor_icon(tool_cursor);
+							app.window.set_cursor(tool_cursor);
 						}
 
 						tick_budget += frame_dt;

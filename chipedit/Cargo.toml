@@ -19,10 +19,10 @@ urandom.workspace = true
 cvmath.workspace = true
 shade.workspace = true
 
-glutin = "0.31"
-glutin-winit = "0.4"
-winit = "0.29"
-raw-window-handle = "0.5"
+glutin = "0.32"
+glutin-winit = "0.5"
+winit = "0.30"
+raw-window-handle = "0.6"
 gilrs = { version = "0.11", default-features = false, features = ["xinput"] }
 
 soloud = "1.1"
