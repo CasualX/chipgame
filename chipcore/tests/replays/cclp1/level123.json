@@ -1,8 +1,11 @@
 {
-  "ticks": 3126,
-  "realtime": 52.9,
-  "steps": 249,
-  "bonks": 8,
-  "seed": "cb575989668f6a0f",
-  "replay": "eNrNVtESgyAMi8PjZNf//97duaGIaYmbD8urBUqaRJblK5jNb+THXyClaUVZbkEpZboXTWPPvunbAe9SG+LvEkfwJvH1tXDsG7QopfWU09KKmQAY6rmptqYF/MR8u+u+rc0RUHnFPpfoxFR552I7rAZ6niB4a2Ov0IPJAn66r0xAd3pmnFEhRtqgK3LO7Rwgn99102fkZ7sWXP448RJhL1HVbqxNJe27K3jew2W/xJpexVRPicJ/hfafUErV/cSoo37wPNpWW5AS4ArZPDuIV0xRLAzzs8hXtpFNghrUy1yWFZ/ewTn+z9/ZpR32kTALnDbONi9RshdoDuVinfBGuhDHn+CkTfPEWkhWCF6DyNKgfiCBQtyCQLrcMFl/FWc1j+38J/Gow5VZC3Y+PwhfVj4qMA"
+  "level_name": "The Very Hungry Caterpillar",
+  "attempts": 18,
+  "realtime": 70.16193,
+  "ticks": 2790,
+  "steps": 237,
+  "bonks": 0,
+  "seed": "be348bfcbd86226b",
+  "inputs": "eNrFVtESgyAMi54P/v8X706YtjSpgO7Wl+0U25CmgX0fD9TYjij/1//GgWE5ouDZn0bd4/JGfAmDzXzCfqsKq1XrlZ+MH4cEHRxC9H1uR74iywCvuitwj9Z/a9aP8x9xWhi23CaAWppSpdn1Zk1CVdjj7chctNlE9Fu33mMW/A87wy1+kLrEhUJf1n4ieO9onLJCqhPEKI9tFsVeq1i27syGH/jJOXiGq6jPGuWhfd3TwdzJ5xwm9FT0hflPPN1Cp8gsx7ocp/Ar61Eg6Tv1idb/5/WAOFP2BXe94blTG1i9rnhE/nMNT51ozy8m6ixQ0pZnh5BM7Is8d0QtpLcC15h2NIkloOf2GBwgGZcwxosiqgJtyn0AoaAa4A",
+  "unpauses": 1
 }
