@@ -53,8 +53,17 @@ Validate CCLP2 levels
 Play through all CCLP2 levels and check the levels can be reasonably completed.
 
 * [x] Add CCLP2 replay tests.\
-* [ ] Identify and fix levels that cannot be completed.\
+* [x] Identify and fix levels that cannot be completed.\
 
+
+Validate CCLP3 levels
+---------------------
+
+Play through all CCLP3 levels and check the levels can be reasonably completed.
+
+* [ ] Reprocess CCLP3 levelset to take advantage of new conversion features.\
+* [ ] Add CCLP3 replay tests.\
+* [ ] Identify and fix levels that cannot be completed.\
 
 
 [You Can't Teach an Old Frog New Tricks](https://wiki.bitbusters.club/You_Can%27t_Teach_an_Old_Frog_New_Tricks)
@@ -62,9 +71,9 @@ Play through all CCLP2 levels and check the levels can be reasonably completed.
 
 This famous level is known to not work correctly in my implementation.
 
-* [ ] Walker room: Timing of Tanks does not line up with official solution.\
+* [x] Walker room: Timing of Tanks does not line up with official solution.\
 * [x] Glider room: Teeth stuck in Trap should retain momentum when released instead of turning.\
-* [ ] Timing of Fireballs is precise due to higher tickrate, making splitting them up harder.\
+* [x] Timing of Fireballs is precise due to higher tickrate, making splitting them up harder.\
 
 
 
@@ -132,22 +141,6 @@ Startup Performance
 Loading the audio assets causes a long delay before the game starts.
 
 * [ ] Load audio assets in the background after initial startup.\
-
-
-
-Reprocess the levelsets
------------------------
-
-The levelsets were converted from DAT files a long time ago, and the conversion tool has improved since then.
-Reprocess the levelsets using the latest conversion tool to ensure consistency and take advantage of any improvements.
-
-* [ ] Reprocess levelset CC1.\
-* [ ] Reprocess levelset CCLP1.\
-* [ ] Reprocess levelset CCLP2.\
-* [ ] Reprocess levelset CCLP3.\
-* [ ] Reprocess levelset CCLP4.\
-* [ ] Reprocess levelset CCLP5.\
-
 
 
 Editor: Undo/Redo System

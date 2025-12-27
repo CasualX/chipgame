@@ -51,6 +51,8 @@ Other platforms must be built from source code.
 Controls
 --------
 
+Playing with a Gamepad is recommended for the best experience, but keyboard controls are also supported.
+
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
 | Navigate menus / Move Chip | Arrow keys / WASD | D-pad / Left stick |
