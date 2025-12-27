@@ -321,26 +321,6 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 		}
 	}
 
-	// Slap code
-	if matches!(mover_kind, EntityKind::Player) && s.ps.last_step_dir == Some(step_dir) {
-		if matches!(step_dir, Compass::Up | Compass::Down) {
-			if s.ps.inbuf.is_any_dir(Compass::Left) {
-				slap(s, phase, ent.pos, Compass::Left);
-			}
-			if s.ps.inbuf.is_any_dir(Compass::Right) {
-				slap(s, phase, ent.pos, Compass::Right);
-			}
-		}
-		if matches!(step_dir, Compass::Left | Compass::Right) {
-			if s.ps.inbuf.is_any_dir(Compass::Up) {
-				slap(s, phase, ent.pos, Compass::Up);
-			}
-			if s.ps.inbuf.is_any_dir(Compass::Down) {
-				slap(s, phase, ent.pos, Compass::Down);
-			}
-		}
-	}
-
 	// Check entities from swapping places in the same movement phase
 	if phase.steps.contains(&(new_pos, ent.pos)) {
 		return true;
@@ -427,35 +407,6 @@ fn flick(s: &mut GameState, phase: &mut MovementPhase, pusher: EntityKind, &new_
 
 		if allowed_pusher {
 			if try_move(s, phase, &mut ent, step_dir) {
-				s.events.fire(GameEvent::PlayerPush { entity: ent.handle });
-				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
-			}
-		}
-
-		s.ents.put(ent);
-	}
-}
-
-fn slap(s: &mut GameState, phase: &mut MovementPhase, player_pos: Vec2i, slap_dir: Compass) {
-	let pos = player_pos + slap_dir.to_vec();
-
-	// Slap the terrain
-	match s.field.get_terrain(pos) {
-		Terrain::RealBlueWall => {
-			s.set_terrain(pos, Terrain::Wall);
-		}
-		Terrain::HiddenWall => {
-			s.set_terrain(pos, Terrain::Wall);
-		}
-		_ => {}
-	}
-
-	// Slap blocks
-	for ehandle in s.qt.get(pos) {
-		let Some(mut ent) = s.ents.take(ehandle) else { continue };
-
-		if matches!(ent.kind, EntityKind::Block | EntityKind::IceBlock) {
-			if try_move(s, phase, &mut ent, slap_dir) {
 				s.events.fire(GameEvent::PlayerPush { entity: ent.handle });
 				s.events.fire(GameEvent::SoundFx { sound: SoundFx::BlockMoving });
 			}

@@ -156,7 +156,6 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 				}
 			}
 		}
-		s.ps.last_step_dir = ent.step_dir;
 	}
 }
 

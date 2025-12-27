@@ -36,8 +36,6 @@ pub struct PlayerState {
 
 	/// Current player activity.
 	pub activity: PlayerActivity,
-	/// Last step direction for block slapping.
-	pub last_step_dir: Option<Compass>,
 	/// Total steps taken (for high score).
 	pub steps: i32,
 	/// Total bonks into walls.

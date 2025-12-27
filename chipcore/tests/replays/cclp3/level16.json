@@ -1,8 +1,13 @@
 {
-  "ticks": 3738,
-  "realtime": 63.266666,
-  "steps": 328,
-  "bonks": 15,
+  "level_name": "Two Sets of Rules",
+  "attempts": 130,
+  "realtime": 207.31908,
+  "ticks": 3537,
+  "steps": 272,
+  "bonks": 0,
   "seed": "108600548454883e",
-  "replay": "eNrtl9sOgyAQRBeXEB/4/++tiWmlsLMXqGnS9DwqIszODrrvLjKEwBN0sAlwkthjHHMnBIVmwhvLm0kpMU18CnUsizVQ62uhjY7j3VzvoBerGGKeCNuYNhI0D4MSHDIFnESNqgytk+cQqvQRrkXjvfpeGWmU+6lVqvrbHqGUTSGNRmXG9Vb3TidJhVxcXjXHwKHavZFL5DPMJPrkWbWtrD+WV076hYzAMG9+FEOI7WbPIoQW6c5vrofWLmekNNVg9I6ktpfrPB18Pda+HUE54gPXEc2KJbTIeOEXOf7EXbSp9rxSjBNm9PWc8pJlmWPNit8caG1yfRjMJwo8DyzP/vl1vp8AFmt/LEQPp/Uwyw"
+  "inputs": "eNrdVkESgzAIJKkHn+HT+9S26pglsEisJ/fkEMAskE3mOYWJQkiEfFEdvIqHeRyyok8kO1gQBi8/7CxW4HeNIOgPtYh/rjaeyT9ILlUw3Comne9F49hzEQ97BKmneEQgKfqAXRXa+CwL2zf+HLfM+uQeC98Ou9Cxx7cQu59TV4K2ku+zz+TOoYll9tugGs+7HR9DZwp6aoX7qCnbVzGzHW89OduXkQvjM6nMzcdjYbocF8IrKytWJexZa7AzuJDRhZKESEIrT4e112Ujg8IyoRMuEKlR6oQU6hCafxssK2VGx0uKyxQJhJN/cuvGZfmkM2gY6fbpcR6d3OiGCqaxXsU/sYqamcmfOTzxB19j8q9VUlJ2p6ZPc+Hy4Ofx9aS//AfQ5nB5Mt6PZpeGeS1eBH+1nr9rozW+eu1dvvl/ALMkX4g",
+  "unpauses": 14,
+  "warps_set": 11,
+  "warps_used": 12
 }
