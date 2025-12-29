@@ -1,8 +1,12 @@
 {
-  "ticks": 2817,
-  "realtime": 47.633335,
-  "steps": 230,
+  "level_name": "The Monster Cages",
+  "attempts": 12,
+  "realtime": 110.63914,
+  "ticks": 2268,
+  "steps": 189,
   "bonks": 0,
-  "seed": "d6f912ef34c851f1",
-  "replay": "eNrVltsKxCAMRKdGxEL+/3t3HwrWbrI18UJ7HhU0GcfREDwQbSayAnN0kCZWupFNiZSMxSMbiW7Sf6Go6+huC0sHcRDMZWtUM8VO4mjlMu5QPMzD6lIX+aUA3o4prGGcy6Ps7AVYo1hKF3Pa7vvkNLSqYPQXLb3kt2KhSRO9wgHhggvl4ftBXAcS+raA1guuYnzXqVPlTLvHmEc454lRpqZYy6N55MdZHd/vzvGT6egQH7kKKYA"
+  "seed": "671d8580dc2ddd89",
+  "inputs": "eNq1VUEOwzAIc6cc9v8Xb9rayhBCTJv6FKHgUrBJaxbY8Zbxv99EGP7gvHUI64GtM851/zLgX4Yf/6uC4v2zz+Ceu/64nnCcc7u446GZjuLpgFNtQNWM0J+EvyhhWcMHf2FsU+1hxGlr6+bOZ07h5Ip+M6/JNT8C3PFvWCcCHw3WFTiFz3yzn5HiEecptw9TbyY6n3qwPT27W/NSpTp5O3QqVfObpPklvlu3r9wO9zzVrnP2lXqsp6JcSD1B9t1v/AN3bxfX",
+  "unpauses": 3,
+  "warps_set": 3
 }

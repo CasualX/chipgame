@@ -1,8 +1,13 @@
 {
-  "ticks": 4299,
-  "realtime": 76.618935,
-  "steps": 344,
+  "level_name": "Habitat",
+  "attempts": 70,
+  "realtime": 162.2961,
+  "ticks": 4296,
+  "steps": 334,
   "bonks": 2,
   "seed": "5af947e07d9be3ab",
-  "replay": "eNrllksOgzAMRE2DokTKocr9L1VURCvUmPEkDiz61pj4O3ZKI5iMwO8fNxEmGr/HY5zPoetRZkisujLTRByT4qQlQNab7lrUKi1KiHRSwDsNsANY72AR1ynfCPp8ff4oio1pHHM2tXuh3OfGq3RopSRHSrtWqAiXlKo7uJc41RqkBScKzEqTOvqR+n8hg4I7RJ+LrA6DtK+XQ0pWOtfzG1jEnbp5ODODmh2C6zVwKJeMoWVoIrqQeu4YdkkaCpIdNXQn/SEyXUpTb7ocePdwXWT4dBK8tgVtbc/b9dCGGxbzZbE+9Fz5qmLLRSNa8rAIKxHWwrSp+u9x7d4uo8UGn4ew89ZEvABjzkM8"
+  "inputs": "eNrdV1sSgzAIRMcPj+H9T9np2CoJLAES7dT90gxJeC2QdR0I2sF/ph3nN8n1+Y1ynYFOmTsB9dmVUpXs1vM4hhYNxzr3sz8yiwldf1Mf4yhkGEgZkjYu0MagPj1xQTmAzoS+aulAdr5FIXn3+eY+t7iG4qVFT94FOD5jG2N1QJWpckzP20Kmusuyxc+vKDcpepezCqdrxQV6FrFAe7/n17UiXn8C9a3FfnROw0bHvbY8imrErkydrGKhMizXXyQJRzVqTv5GTRZziBmXYXq6arvQcxuGgYxR5re+7ppi7SUV7kmQnXD7Z6AWN92BzAjc03Z+Dy8xh93mCEBy7ErkiT2e3JZvDhH0XCvE0BMc+WqrHed7C/QPrLznejZwV7wAtDBVNg",
+  "unpauses": 10,
+  "warps_set": 9,
+  "warps_used": 9
 }

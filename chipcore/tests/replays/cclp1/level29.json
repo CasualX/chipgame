@@ -1,8 +1,13 @@
 {
-  "ticks": 3841,
-  "realtime": 64.833336,
-  "steps": 279,
-  "bonks": 8,
-  "seed": "5985c8763607cb34",
-  "replay": "eNq1V9ESgzAIo9bzdOf/f+92OtvaAoFa8zixXSAEnKYTywyw/zH3Y99XE+Q7aMKgFlxYjOFEDsMMaB0PkpDSZjsmhERISUWB9EKIKT68DcLlw1y3A6MK8ETSPV0gshqYZXcS4OWlcqB0FbWRWoU63tLwh2pQ46odlp/fmeWnrVrszMre5DPrs4j6dyvf+rTZmLPWWvGNnGp4H27dqJad1ebvd9rewRrhostcelQmZcw3HlNvmAcXrzDqgNUhaqV6OoLLN4k6OGd5mubiaf32FxkdtWzx9jRqX8BuGJ3wnGjz4+UHzzDM1VVK6XRN/4QrGXzK2WRYEXCFrw16fRVS5yrhhv7dmpCL9wJnsLtS2gcAyX6OakWKunnnIeDAo7czck5yy39q48F+pjgtsVVgvqmeL6c0Zq3F+AIuUTgp"
+  "level_name": "Sky High or Deep Down",
+  "attempts": 25,
+  "realtime": 156.93591,
+  "ticks": 3006,
+  "steps": 247,
+  "bonks": 0,
+  "seed": "4292c31573800fdb",
+  "inputs": "eNqtVtESgzAIQ84HP2P//5W7U+eggZK25mVdDwslCaqqKjc2Bmek6v+xdluJw66QA3GfuTuID7//qslW54qSxSjL9/nVnx/V/x5k9DLY2qduA579PnuQ7XPimC/XZDT7rhDTGnudTgcX6pGann573TEZmzJISMWOPLAiEkIsEim+BDkAyJaPOVo8rg1L0fWzYj+bKLl8PMFyroV0liNy95qE2mx2CHEOnUNXw0HR9o6K751sn9b8YLhUCp6eFQdyRFAqo0Kk51IgxW0NC/0RGeSXTIVeQK5xHUxupp9gJOClKNReDte8pzBvpgf8iMpimDnWevn3QLbOSLWG63sz13nmhZbfLH5qvgXvx/q7bXaeZBr4AofpMa0",
+  "unpauses": 8,
+  "warps_set": 7,
+  "warps_used": 7
 }

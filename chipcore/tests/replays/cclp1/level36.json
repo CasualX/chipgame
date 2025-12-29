@@ -1,8 +1,13 @@
 {
-  "ticks": 2122,
-  "realtime": 36.016666,
+  "level_name": "Rhombus",
+  "attempts": 33,
+  "realtime": 69.98831,
+  "ticks": 1956,
   "steps": 162,
-  "bonks": 3,
-  "seed": "b1e3ea55ad3b40e7",
-  "replay": "eNrVlOsKgCAMheeFobD3f95IjLzNtHTQ96/0iO5sx9oA5OhI8ksF4oeLNCSVsL09V8AANqFavM5XCbxcBtSzIPYeqcTwbhfeK94iEHaMytv1G1BLYH5u8AlxBYeuimjllD25iJhPWzp3Ww3e7XCzyH59UzB+jcY40YsGWgYMp/CicGdcb1XoXjVmPihM5HvIlJ5h780ABxM/GSc"
+  "bonks": 1,
+  "seed": "d12329b63ff4cdc6",
+  "inputs": "eNq9lUEOwCAIBLeGQ///4qaaVKxCgQbn5MFFZEGJbjBRKm19VNr6bKj7Ofr+hUCAqCfKQ/LcdC1+Qw9jDjx+sdO14HdJZvQlgeEur7rlgakzXF7ESfYOm/zSK6op4TUJlpJK4mwjd8/dd/tEGsBkzDqs29TQoGI9Rfq5vrGGbTKFoILY8rQYXwTz34ELWuMUgA",
+  "unpauses": 2,
+  "warps_set": 2,
+  "warps_used": 3
 }

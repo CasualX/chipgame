@@ -1,8 +1,10 @@
 {
-  "ticks": 1225,
-  "realtime": 20.398447,
-  "steps": 101,
-  "bonks": 1,
+  "level_name": "Switcheroo",
+  "attempts": 53,
+  "realtime": 36.967632,
+  "ticks": 1260,
+  "steps": 105,
+  "bonks": 0,
   "seed": "ada63e171e98ff3a",
-  "replay": "eNqtk8EOgCAMQ8tGCAf+/3s1GpfJwfiUdyUdbQe9A1RO3O2gtZpoNvN0lnAvGNUfGOODvSVOm2HCqhT3js6g7l7nCSMSrTaE4p0kg7t+mkhAW8fT8fMYUBcLk2Ck67/ftTxXqt9tMRvJLBGc"
+  "inputs": "eNqtkkEOgCAMBFckhoMn/v9YRQLZooFu4pw4tDB0m/NNcBEdaNUxnqkB9NZ985CoFUHjIAWgXwkkCVTmnrXG72bufM7Ns6B4rd2myohujJvxHM/8x496yRmy52isBM7zpHeh5jtPXsl9/ff3nD31vIj+WLhXmq0Nkff2x9kWLvsyD7s"
 }

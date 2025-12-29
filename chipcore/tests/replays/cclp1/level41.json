@@ -1,8 +1,13 @@
 {
-  "ticks": 2646,
-  "realtime": 44.088314,
-  "steps": 130,
-  "bonks": 0,
-  "seed": "96b5638f773e1bca",
-  "replay": "eNrVlFEOgCAMQwvxYybc/7xiQgyKExdgjHcAWNd2RFIgh5RBZ1wB8/HG4TOgC81g6vAwgWTeMmAuvsCFCUqyl07Oo7zZNscIuztU32qrEaeoPSKfNCT0SvMWb0MJ+RUf1Aso9YGpd+gqdc3SMtWNq/dKsNc31dt9AtNcB2QQOABgLCJY"
+  "level_name": "Descending Ceiling",
+  "attempts": 118,
+  "realtime": 199.81412,
+  "ticks": 2449,
+  "steps": 136,
+  "bonks": 12,
+  "seed": "964e488f64709402",
+  "inputs": "eNrVldEOgCAIRbH54Gf4/1/ZEtsQRM3C2XlqjSHI5RrCBIDEBmE1uSaXwG+fwO96tNKDE2DwcQEkIdCDbqB6omnXjDd54m48bUOZHRuSqowhdZs18KUm5isWS2ShaDKWhoZ5DJ1csW50psNGYbyqoPqQ1ozndw40XlE2+lK2po4B1lehzKPV5nlt4v/I/f/Bl5btqFVj4tWyRjVZJrGaQQs9b/gKFdLodzJFynkCmP906A",
+  "unpauses": 14,
+  "warps_set": 14,
+  "warps_used": 17
 }

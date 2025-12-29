@@ -1,8 +1,13 @@
 {
-  "ticks": 4924,
-  "realtime": 83.0,
-  "steps": 280,
-  "bonks": 6,
+  "level_name": "Ruined World",
+  "attempts": 30,
+  "realtime": 198.06723,
+  "ticks": 1694,
+  "steps": 140,
+  "bonks": 1,
   "seed": "7fcd4e8d4772e7ce",
-  "replay": "eNrNWO0OgyAMBCSEJbz/8y5zfpTST8Vl93NWvV7boy4lASHuCCfyilY3hIAjMsJ5ZYuEb0AxkUDoOZExMIpmcbIZsmRjObQj+1pbnoEP4yogCPf1YFUopSQDxEr8DN/Ogox6dkQ4VmwSC8gEa6SpL/06diOsVxAqMwvRXOJVA8EZkgtanr5HASIOnWCP6JOp1feRSrinTu98JdM76ivcx7E8IqoVfQbhr7BzfL14FfAkw+vV6GDpsi9w92kF9JwZcq9J/R50Q2e04fsO8tvLI88Vq71zMokWrTPRmrYF+KBvFXccjfLcKw43VicawXukf0uzZc5Pq2+OKIWUyXtsX/Do5dpfFEfyeBp+ysgcdVLk4+pgGrbu/HaXfM9xRXB7+SS1zgq9wVL16E/0XmNZfb0odFr8XPYB92ZInpy1I9QvYId/K4xt+yZdZcmGqPzVE8v13aS7qg/8eVEfAOdjRp8TVSU3XeHt431W7vmSAZds/zcEY4kTsKSfoWyY/+QFS/EGQD8orw"
+  "inputs": "eNrFVEsShSAMix0WrjmB9z/le46IARo+bsyqw7RNGwIxRrsAmOUQIeEf4jkF9oQz3lqgzncTQFzG2WVtoCHCK+Dpk/rz/DMNFmiKfd0dNWj3Vgc+Z0Yu5hxW276G7xNlnbyj9InjGdVL0ewOMJqz8o8CJvZ1cvLu1AbKZiP+kbeHfVDexV3R16SjeVXANCsaSq5Kt7VXd/e54uNgQmYQxVDyThDLG555Ks6LV7/vmirOuO6v3PHW9gLtvwf8AIjRD1o",
+  "unpauses": 9,
+  "warps_set": 6,
+  "warps_used": 7
 }

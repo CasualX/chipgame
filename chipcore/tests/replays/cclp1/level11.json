@@ -1,8 +1,13 @@
 {
-  "ticks": 1453,
-  "realtime": 25.2,
-  "steps": 119,
+  "level_name": "Basketball",
+  "attempts": 64,
+  "realtime": 79.58227,
+  "ticks": 1428,
+  "steps": 117,
   "bonks": 2,
-  "seed": "b3146409cc7d8caf",
-  "replay": "eNq9lN0OwBAMRksXUfH+zzuLn2xsGmvjXCLVni943xMLfgeU4Y4F+4rLWCUwYX6C+NnicTH3mXQfK6yHw98QJyGl+ThxiGjVKNL4VukWAU0HKGdoyRoZDeiRQ5sC2iIIXMzReRtOUD2MMqEyFKwbTJ67gjPiPrqvTlQf4AQjDxo2"
+  "seed": "064692994c2cda5f",
+  "inputs": "eNq1VEEOwCAIQ+PB/7942XQRpIiyrCeSIdDSUesEaigPWlx/Qm9F6QbBXm8KZQX9ln8AcTZilZOWgPNw1QhTGVzKLkQhK64jlvVXeprNlLYzcbiLLzAGAtyteXaMBhbj1U+eD/hOkzGc+o+ghiS1BW46lHPfY473TvfI2Wtftayhg+zF34ZuSADO/QletKBXe84FCusRhQ",
+  "unpauses": 4,
+  "warps_set": 4,
+  "warps_used": 6
 }

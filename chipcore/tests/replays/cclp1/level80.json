@@ -1,8 +1,13 @@
 {
-  "ticks": 4939,
-  "realtime": 84.6,
-  "steps": 367,
-  "bonks": 1,
+  "level_name": "Flipside",
+  "attempts": 17,
+  "realtime": 280.16144,
+  "ticks": 3804,
+  "steps": 317,
+  "bonks": 0,
   "seed": "5d12656d87801f81",
-  "replay": "eNrNl1kOgzAMRAOBiEi+/3lLFwoVWWZsjPr+43iZ2M6y6MjDxczzPJlIoyupfKt0MyVkHCLLX0BVOFcYvMkZDEcgoMRAEYYv0w2E4KBtlR84CgO1UrwSvgaCn2TeqbGzpGTLb3K7AJa8C8/L/Zp3XLE2l9iwfxQX1yiv78IfN5jsHA63dHXEOkCrIiUkKJM/usJy6iml2uo3VqAYmZcRG+hORZ3J4rgXubbqb6vAW9o8ZYf89pTu2gD39SRGRBr8+lW6FX07ZCtEKM5+MqagWqZU46ZSFYUlSy57i1pteGN29B70Ul73+LyGMx6cBd77yOTimzMMjHpM7VQFGkQA8CqPOQtbOemAs7efsv1gRleQCNjoWzsXFk4q1pNWc2ivws1/dO6CNzif0v326Qc2FEGN"
+  "inputs": "eNrFVkkSwyAMczI59AH8/609JAGxGCwwrU5tWCwLkB1CCFeCvLgyxM/y+QveuDeHo4OcJ8zXvluQ1kYdqIU93dKUQvMJ/YfcLLGmIecMTHycOFN32KRVnIPp4BgmiUtIeYTN0rClLGklOzyh0Fw4rexqpjdC+cDzgPAP0m6+Qe33wUbN47IJ73ubu0F69aOWIa1svhdPjGDx4R13e9EPi31ceJJ1cyhbVseRN5oyXx/bAbV0NHaa0Bbnq3uee6y3zyguksYBLefKG00+X3sg1sfD6eBPZ6xzK2rBb9phaXkjyUG8cvc4L74nYfvGPfenl5KmisZ0xVpRH/aotLfMnjfb51nr9az+X0HdK5U",
+  "unpauses": 10,
+  "warps_set": 9,
+  "warps_used": 7
 }

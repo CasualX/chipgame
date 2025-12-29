@@ -1,8 +1,13 @@
 {
-  "ticks": 5899,
-  "realtime": 102.51667,
-  "steps": 344,
-  "bonks": 16,
+  "level_name": "Blobs on a Plane",
+  "attempts": 30,
+  "realtime": 285.41754,
+  "ticks": 3221,
+  "steps": 252,
+  "bonks": 1,
   "seed": "385fca3eb682af8b",
-  "replay": "eNrtWO2SgjAMDNRh6E3f/3lP7xAakk2TgugP95eDJc3nZnUY/pDnDXkIgvR301iDQri5QVTfsHkizchbRgWTvKA2KxDx9RCKnuXMIh5dSLiUa7CPT9rX623snSdY9tWqbl6CzJHWit7Itk5D0VGjniJ22ls3La9Nx3rR47XqSXYOYzZjqQErD/OHZnQ57WGFrN0TpITLINtwnkvntBbXi4CVpvZZOY11vbwM2rgSeMF77Bi5SUaeACU8btsx9mRQPClboddXdm+6AzABJiVCE4rzWs+ixbLuZR3eC5VH5dnP/8+UVOsGTO70ufvTZETowvqc5z+Dg5Y3LZWyrzAF9i6fgATItJfVXAGJsKrSfXEC2vtaXzWVym3LQ4MrbUXu7hCgBdD+wF5ojEguRqhZcXarn6vq259JfvrjxRJvAId8QGTT+u3wiiqpPVw9kR75dyvNEQVo58uefI0MikIHZdnexTUtt48HU4tq500LmpZgPqK/n1d+tzAcg8YLjkF7A/+dEq6JhLVsCttasPe/n5c0HRUff30D9HsFev1I25w92kXKoXa3RbYssnWk2/3Z8UWCbNqj3qc/GqRxFaXfuVpo1KiBvQnrv12GXzrJNNU"
+  "inputs": "eNrNVkEOgzAMK1MPPIAH7P+vnDRQcWu7Jd2m4RNjwTGNk7BtWy5IJ3KD4/bjjePHuoPjOzy5ug+kOr7wrB4lBsVxriAqzp11UYAYjJWaj/vLBGpOPn/3ACq6HB/XSfyYF2Mw2fP+CLy2sSM7Y8TTHllrqxS2NVsBOY3zK6u59kDN+A/yixhio9YVswT1oI0CbUyjASvG/AvFiDrWNR23gal7CsavpA2D9EDyI2wwqsy7mxibq19H7fILPle95tfGcLQlsd4Q0bGIivC6GTVjE9syiTbng5zaNK59BuVAPe4Yh2Ot0TC1xTPr7461u+M76+b3OO39j9RNmcUH0SfblBaT+wC0j7rWldbU1yXvRf36AzlqO5+rwyk2br/90gtc0TOe",
+  "unpauses": 11,
+  "warps_set": 10,
+  "warps_used": 14
 }

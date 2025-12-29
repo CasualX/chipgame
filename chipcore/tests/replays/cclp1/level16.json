@@ -1,8 +1,13 @@
 {
-  "ticks": 5044,
-  "realtime": 84.11667,
-  "steps": 374,
-  "bonks": 3,
-  "seed": "941f16a6d080dd26",
-  "replay": "eNrVl9sShCAIhmltGpvpsvd/1p2aDkKAiFa732UlIMgvzXP/wwyfPLDxKQOgs7HYdgW/RxSCaBsFtD4Zx3iQmFqJCba49cCB5VwdGZBJlFDdLrP6Al+orhpwl9AWoRyl5rfkYMY8pLK0ai1yeFfu9j45PCnbxFGkn9bv0XiSQDvpWyiiJAUxp+fn1B8GeTaKnSJB4BJFldgGWZyYqqBVyRuvs5KLhIlOtTFYO4J6aZREHZI50M5EuF5gy9NQfBcXbq7LSkWqEo6Meaqv5jPgNYrExPcAH9nOB1nH5DmkiMdTNeXHPz1fYjb8SMdW1jZBuICRUuvtiGwzKsFOjHfMZSR6qJkoQZgyckIxDP0DwIuaMU310Uun09ZNaZ1dF3gjWnczz2QQcH1+vIgy2UFhxyNzF8+m66BND3DO1FMSLROO/BdA6876JGXQsnGnPrzVFtAc++9k979k5ucvVRo7xA"
+  "level_name": "Tetragons",
+  "attempts": 11,
+  "realtime": 119.56433,
+  "ticks": 4474,
+  "steps": 376,
+  "bonks": 0,
+  "seed": "11853ac6e12f6495",
+  "inputs": "eNrVV8sShDAIQ8eD///Fe3BUWiCEVmd3c3SEhvBqt+23sVrIgXUIh+3CQE5U+PrcTk/ROZGjKPaA6B5CbmhPAf3GRp+hvS0kAhV90oqn1cGSI+XH+tdQroiU3Ip1vkxbjZ4IYy4SotOcmGy6lcu+DJZ30JZe0xf6VGn1T/v6culNDnpexbF7HO5+KcSN9RgHoGL0zkoDzbAxKVHz0VXtHlCVyGiCdkM7sWEsmOYYy8C071wpOq9KbXRzvvcFvX8FMnRveBppS5sbATVFpJ9xIAmUm13ybHqzaiY3TPZyZQ+iXC3bTaJjiQyI9ApTipGxPgz9j24xCYd8N/Hdkt/+QsOLTfelHWKRyvOvjhmwGVE1lXZBbwpHPU6upSAUhbcnJM6X2PVNzL/ep/tKCdfWePWLEK9BMelIZol5aeQXKSaU8opKyn/5WwhU8wODFDLf",
+  "unpauses": 4,
+  "warps_set": 4,
+  "warps_used": 1
 }

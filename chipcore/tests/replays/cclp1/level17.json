@@ -1,8 +1,10 @@
 {
-  "ticks": 619,
-  "realtime": 11.283334,
+  "level_name": "Tiny",
+  "attempts": 36,
+  "realtime": 12.315682,
+  "ticks": 618,
   "steps": 51,
   "bonks": 1,
-  "seed": "4d9243166709ac25",
-  "replay": "eNql0VEKwCAMA9DUSXD3v/AcAy1To+L7FFrb1KyBLCpIwqgmdJGjT2rHb6or85XwI9/pBGwL3P5vVnUXxgm42vIYFtm2yR1/OYuARB9ST43iAbOWCTk"
+  "seed": "3383bd5d3b6831c9",
+  "inputs": "eNqVkEEOgDAIBHdND/3/i02jDYsg6JxIA3RYMoDFuLAaCPVcaD2hs8bdczwA8v64HRA1N2zP2+Effj/zW6KDk2ABkqzUf1S85Lanyf7nfnuT2wfNwlOET6veBpo"
 }

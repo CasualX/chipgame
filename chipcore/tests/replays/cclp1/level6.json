@@ -1,8 +1,10 @@
 {
-  "ticks": 949,
-  "realtime": 16.433332,
-  "steps": 79,
+  "level_name": "When Insects Attack",
+  "attempts": 42,
+  "realtime": 15.378717,
+  "ticks": 924,
+  "steps": 77,
   "bonks": 0,
-  "seed": "b8c3c70dd5279294",
-  "replay": "eNq90dEKwCAIBdClQwr8/+/dKGJ3WzEn0nkUKfUSvXGy2rKL7gFUv/9pnuXSZef44/nhGCWFGL7IFaR1qs2QoCCKJDLbeVHsM31be//PzdmbIobV4rpXrLe+HMubDzI"
+  "seed": "24cdec1b135a1654",
+  "inputs": "eNrN0rEOwCAIBNBTDLnB///eDk0jNdCGlKFvNSockBugpaA7APrmKMM36y/bEz8J6582wlbCf1FMzHK/sA5Ur7q0F1Kn2c34BZh1zrcp0UTklB/lc5yRA6m8DU8"
 }

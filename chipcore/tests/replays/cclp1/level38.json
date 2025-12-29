@@ -1,8 +1,13 @@
 {
-  "ticks": 12403,
-  "realtime": 207.56667,
-  "steps": 837,
-  "bonks": 10,
-  "seed": "49bca6061c3b33e1",
-  "replay": "eNrVWu2SwjAIpMbJWCfv/7w33p3XpuEb0nr7Uy0QYBfauiw/gEc+1nUhALc3Svn7bAfM2uvzO4HNHmWxuxZG4NdwYIwZYfXcZai1dtei3qagaspyQDmceJ9LvJu2GnWdRP7e37aLADici6nOQ64kZ8cKi18rEuM8cI2o96IDynATwHEyV6YVfuIFNJ6ly6KGHr3eoNFD/72biQDgFiWg2IoqWJVHAyQiMjv80bAD0K02XZIOvCRKAwBaLR2+WayeyM4mdIO7htYaP4MDqjpR7T8N0enjz1TUs07vM7JzTk7Uw3T6iskp+3YXENsbCO1gNtKX5ew7Kd0ulLpKgmXHyXGbp2beeMbmsFWe7rIxIqrbsN/yNydjrZx7sELz4jXCLfd2Kf9UR8rxYhHnsuWYRbRvJqjmzjO9pRst7uJv2lDLYoBymnDqyz54Wmm1xxjPs526N+kUQ2Q+95xgtq7FPWeqK5NrsCirtpN1dfWIZl/feFmyJmBsH4z4p3ofvfcTqiZtedhdO7+BaSdjCz2RkrCysjJWDtN3+qkMdfZ2Px8j92WU23TMeNnRzZ+UNhH1rbDgrkLdWYZftAJFc2TzTJ5RBYS+P9Bw8UoeRbqrFH9yNFnBdoKpjH+mcfsKGcVRa72dBEoz8rrve5YrzlMrz5DlBPSa1HYFMSeVVeqZeOdx9ih0UexyjsHk7HvYhN1J5axTwR4Q5+FQXrS+7RenSKdbZ15xfvLkcHaJEddo1n4zzNUVuqRP92IhdbKvjUarUr2B7HAJsX3BqHFFb3fsvvhRpIjXDgHi7CB78pqPTJdLBu638p+5BOx6Qw6saWeTXnvXxz+EoiT4dAThn4DeXHmJWPzBELSbMeWqp6uV+4zl5ddWxcy3Aby3mI1N0+ZvFfymO0L+99UWvckb+h9mSqGk7WCcrf5NAGfdeLonWhP6LcX4tlj3vpi3b2cAzQLcvy0C2XcmK3nt6LtHrXp9F34BPsOHVw"
+  "level_name": "Heat Conductor",
+  "attempts": 27,
+  "realtime": 392.64667,
+  "ticks": 8268,
+  "steps": 689,
+  "bonks": 0,
+  "seed": "f2f22426a32485de",
+  "inputs": "eNq9WMuSwzAII5keesz/f+0+ptvasQTCxstpt0McEELgHMev2Y89a+33zONm9rLzZZ2P9dae8+js49M+2hxJz2ltzn/42dqYEAZj/J8Hzjqj77pjfnuiA799RKzpDbZaAh2QQG38jD19Lq2xB7L+bpzYPD5AQ/1SnJeMm58vIQE4ckVPFjoD08eu6/NPE+bJ1OEvfpP1Ias/hDLG+p1xjPlDiXLoJ2sa4AnI91TxVDrjLDX2XkU/F/rdbZ3/kFvCpGFeO4ILxzPmMfb1NeydcQh5GD+bxV1RW1zImR16D9nG3idya6N+xiM9WA2MnGNn8qRR3N0esWzBlKGY3TnrG4bHjzYUpm9M/kV/fz+ZxF9hAYMlHitBX5i5fRHsLQ/Vf6wRyh2fz/qi9XGvVjE+cD66u5bG0FRfWLqOdZbhbVbH5m5WGy45/e5zLFuMA30Zx5AEZzoPs1D7eU2ANVm7ZGE4Tfb0URFpQv4s0tMFpVM7rsP1/VzVt/UVLc/d6Xfmnbhz+ddBU1JW6lWTtdbAKX9xesizu2CQVKC0Mc4n2s3e4ai8QMub5RniUXsCQ2n+LolDvyaX6k8vjWwn96Nb10Z2R547SN5jld7fugfu1QQhd11O9PtF3bIbqJufY92KPRXcVos42TLgHeflFP62nCn97r47UY1pEBMKtVykpQsbwY1HD3QVfMcYPqw/yQPMP5hfKL7N92JMY3ePAt/EGKDTW0MH33X5ezu/18DvdU59LVlfWne0t2fvX/du+/77C6D3WrI",
+  "unpauses": 19,
+  "warps_set": 16,
+  "warps_used": 16
 }

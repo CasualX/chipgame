@@ -1,8 +1,13 @@
 {
-  "ticks": 1546,
-  "realtime": 25.752188,
-  "steps": 104,
-  "bonks": 10,
-  "seed": "f6210162658becb1",
-  "replay": "eNqtk0EOwCAIBBFN4/9fXD1YUAGRdC5NTNcFXFKaASdJJK4U1NJ57ciXAGBn/NY/SCcS1YlVcyNnJMbdpfFZlJ2YFe9216Yg6ATCDjcFuE1oBHywLCSMcTmJJ8tyhZwcK+ugd6fH8LRIboHtBOYqUs92NrK+01J5s8+aM2XPMMD5aY+hh3UYD/6MJ+yeAj39yI5N/AI38A06"
+  "level_name": "Chance Time!",
+  "attempts": 36,
+  "realtime": 40.19818,
+  "ticks": 986,
+  "steps": 80,
+  "bonks": 0,
+  "seed": "2fa9aebdccb9338b",
+  "inputs": "eNqlkksOgDAIRKfEhcfw/qc0tmJaYRTatykh/IZSigLoe2HtNDV3f1GdmwI3pgU5fQFec3JOzZVvSP2FXY1aTB3TlmhnmJ2k9tb8B6X7PAQWRzv0c/QqhciXOOOh+Qw1H/ueIa5RsmP9XQqw3Bc4ARJ3Cvc",
+  "unpauses": 3,
+  "warps_set": 3,
+  "warps_used": 2
 }

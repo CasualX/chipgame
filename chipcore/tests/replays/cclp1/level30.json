@@ -1,8 +1,13 @@
 {
-  "ticks": 2082,
-  "realtime": 34.683445,
-  "steps": 168,
-  "bonks": 1,
-  "seed": "b3a6cb26f756516c",
-  "replay": "eNq1lEsOwCAIRMdqjIve/7xt0qipgoCft3QxyDCQksQdtODlWgL4ai4LjUogdwbHQpVXm1BV0kn2ecS0Yq7raS8ZGXeGYbAIpIFGs52ejxXozFgnP2NBm/5WM5xAzrA0zvLhyTjA0tjPHqwy17C8Od3EailVaLkM7IgAcGqvVfnORO1v6cjQmkW0fxkuNXbAHwHY7plAey7wADTpG4o"
+  "level_name": "Button Brigade",
+  "attempts": 34,
+  "realtime": 90.53301,
+  "ticks": 2065,
+  "steps": 166,
+  "bonks": 0,
+  "seed": "5c152bd1b90d5e50",
+  "inputs": "eNq1lFESgCAIRKnpw2N4/1M2lU2rsJqK78tpDNhFCKGKXBwW8o/9pvcmJE/ffRAdXjaFnfet82CAFowTFpH7Nu8Kk0PSMn9sM7UNhVdOME9YKxotxa52vjFWG8vR3fq2Dby6AR+GaAuzzPrmCC/FB7yDP6izdGiSImU6xwlQXn3d1B4ybZVg4at66DWijZUhS9YxKGDeYiwMi+L1iszyKv+jE+r94Ngb4zHTYdR+As+jJpE",
+  "unpauses": 8,
+  "warps_set": 8,
+  "warps_used": 4
 }

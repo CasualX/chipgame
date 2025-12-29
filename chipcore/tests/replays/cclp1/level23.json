@@ -1,8 +1,12 @@
 {
-  "ticks": 1615,
-  "realtime": 26.903091,
-  "steps": 132,
+  "level_name": "Circles",
+  "attempts": 49,
+  "realtime": 26.517828,
+  "ticks": 1537,
+  "steps": 126,
   "bonks": 0,
   "seed": "d4e911a476162b51",
-  "replay": "eNq1lEsOwCAIRMdPDAvuf94uahNrRRDt2xIGAgM5z0B8gEw8QSv4aqHGS1ZgGhPGdFVkyIhBinkx4d4BXMXa5YkEGZgnZKKUsukQQVgJG11CcNmEPHCFdpD6PdQIwpR6k4Oj7Brg8bwU+RN8J4G/qqakWDd55JIxa/0l6XPAou3qwwAuwpoXwQ"
+  "inputs": "eNrFlM0KwCAMg+MP4sHL3v9ldxiKY7amVNh3lTS1LclZA7EDmehmrvZxLlmntSqAIDOMGCrJ1JRZYbJu+565tZyYDsWBK+m86tJnos4Tnjthd/036/8pbwNtG6UsJg8EE9cDL0jDPwUPAJUWO/EUgoROzCvY4gdmhwU35QgXzA",
+  "unpauses": 1,
+  "warps_set": 1
 }

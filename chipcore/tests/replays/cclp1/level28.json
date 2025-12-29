@@ -1,8 +1,13 @@
 {
-  "ticks": 6987,
-  "realtime": 116.86667,
-  "steps": 575,
-  "bonks": 2,
-  "seed": "4ccbcccd8da182c0",
-  "replay": "eNrFWO1uxDAIox+q7kff/3k3TbquARtDr9Xxb2tICNiG3DT9mb3tddjvHyu23y8zNpv6Zg8YOudFzMaLHpfbttO/YnriJt81meVXaj4LpMAIC8jc5/M5Y+Ux2lC6n0kbhjEuNSXEXbYRVtnAlfa28y22LB06X49j+oKZoseBwHq+PNILuAMoLCNYyAAiZ2CvP5oU9bzUn4llgKtGngDRbkiyuGrw872vjxUWJcVKgZjvPfbKwij0DBH+7n6X6B1zRfVdUL/CIt2RGFdwKPHO43pCc3kGqUUE39ZX2orDWXGXnhQfy/lKgz1ZqKEYPTJijPmsYaWKEHzDT7qdnqgylcV4Vaq04tyBS/Y6Ce8dNZ3xUjPuG12jk4sDaguTtWK1xl1M6X4sCif8OYouEsRlWCRJLn0yuVfW2i31l1Ifoyqr6liNpJYwl1fUwQrzSZYR5IrQxFUpobv1bpdzKKER74pUvlUn1O9AVhCmTfzBnXjCCMSrsTFmf/iyaHY13CF96+Q9tYunI0sBBv+74lXZBEojoi0N+auKZlFkaWmqR/BikaLvqFXCCcjqJtizSgZk6NeyQMPNZ45+25xvNisKWuU2pgoX4cd24+KevFMr2My6XDKh9tLEzYWkHVNNoT2JA00EFO5nGWhF4mnV7drMXkPy9JCd8QGfle6n/iG2Sy8wiiKGvLvFYV4fsFq/6QwIVyP57Nh9756yr3fYflPWMFOWE5yTX1SKJ9gPezVCfA"
+  "level_name": "The Last Starfighter",
+  "attempts": 28,
+  "realtime": 126.477325,
+  "ticks": 5856,
+  "steps": 569,
+  "bonks": 0,
+  "seed": "c6af610867eb71d6",
+  "inputs": "eNq9WMtywzAIXGd88LH//7WdttMIwS5CthSODi/Bskg5jh/Br1zXhX85e3l/fwX5+36MBatE+b289Gcx+bfvvan3g49KpXiXFLjeiX7R/nbOu3zsL8Q9dpRJpAx14nOPSMjbds3mIMdoTgqIacmpPBZEWCzADM6nSgV82QgTdgGZSWUYf1rbrqpGM3hv/oExxrIT+ShSk1Ve8EmYfU45pJsgVFMZmJiPWFCQWAp1OPrd5/eFcXqXk5vXEKuG6kA0VluRUVxesdGqgjZutkZes0T2kE/cPhrVfF6SfWQVFAY2sniKPT1r/D6gzm291tP3s/c+i+BMq08iBp3cZ15Yycm+s4qEQma1ToHY8amM+k1zpJP7VHCJLMTuXQ45vObEY3UqeU9j3wN/kj6S2Qw+TyT3CuSPBrZZDl+xlBnKm66Lpjk8mevBxFV8bry48UKfIkPyXeqXo5lkPYYk10h4xsIjGnuzgXolWGl1iepB3QmVJ34ZJlhNjWpPRnXtfgrJicVxc4XPPfloT1MIVJifxVL4ocFILMaH8uLtovRmoqdDW2I0iCXxk46utXx8rxOvx9WvabWDYh+tRa5fP9iuvzZYxA3/6ix7QRQYYJDM7aCjsIQrVhVwRc3oRECj189xJco3vG01mA",
+  "unpauses": 6,
+  "warps_set": 6,
+  "warps_used": 1
 }

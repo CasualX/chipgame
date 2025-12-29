@@ -1,8 +1,13 @@
 {
-  "ticks": 5421,
-  "realtime": 93.583336,
-  "steps": 396,
+  "level_name": "Sea Side",
+  "attempts": 5,
+  "realtime": 74.402176,
+  "ticks": 2694,
+  "steps": 244,
   "bonks": 0,
-  "seed": "97f31397000722f4",
-  "replay": "eNrll+uOxCAIhVEbo0nf/3l3M52pN5DjZXYm2e9nSxUOCNbaC3piHpCVeFnUkPwJi7u/E1BXoGIFzsL7o6C0em2U3ibCgxhNtkcYJKnZatX/6tjDhM/X/hzM4g2mi5hp0mzK93YDbWS0CB4tiqR1L2cGQM/tRKFJLFYetMfXI5ffnZPs1ajanUwPiA9UCzMD8tj8Qnc6f7keey+d0zxWlxmMyWXM3Bkpixlbr9Ds+GO83U2hQZqNiIZ3MoSTr981sLafT/xhAZz5FFVtKca3ZaxPQ3fahUX29sS5u09eKe1q1G0CclxoHUtK9NuOpmk/c7JXpRK83/Vq6PzGp24tlBgJv3N4N8uzGm8fSv9wDsnrpnZC3J9SZQVH5hVmtKpZ9QXfCd/vsjQx/BvO+Zs+IeePHXit/UAHSZ5la4Ce43On7VXn8WbgP0Spb813Ovoa7Ab85rR86GjG9kaizx7dW/kGk/7Q8P8meELpQY7x7Oo7fYytTj8oJT1G"
+  "seed": "96c42f57889e6390",
+  "inputs": "eNrNVlsOwyAMcxEfu/+Jp2maMMubwVR/VS0kruMEWvsBGLgE3u/bRkS5Hi7mva/n/kG0F3Ivf2ESGQ59DYn4BwAflweYHhA6IA1ez+HKDhQxpdysgZb3FlD56NUxC/JtY9+k2zQYJDlk6Cv9rwrGrMTVpke0HsrEsPx3qDFLiOfOrEN+ItH6RGHAuRD2Wq7Uus4rPhG6/au/B9FiWiG//VuJg3fPUeKW5ew51qUSFRJGv8T9VbiZiF7jIhRuCKs3jZkxU9gyWKHFxxPAPx5i",
+  "unpauses": 2,
+  "warps_set": 1,
+  "warps_used": 1
 }

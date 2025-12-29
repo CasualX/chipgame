@@ -1,8 +1,12 @@
 {
-  "ticks": 2497,
-  "realtime": 42.633335,
-  "steps": 208,
+  "level_name": "Square Dancing",
+  "attempts": 42,
+  "realtime": 43.99923,
+  "ticks": 2400,
+  "steps": 200,
   "bonks": 0,
   "seed": "34990560f0200f52",
-  "replay": "eNrVlkkKwCAMRZ0IWrz/eVtBuig1MVOhb6tJzM+ApcjpvVL0wbi6vtIwqoy+wMxTNeRONu4iFabptJ61/BgASGuuUzCL9ObfISNm97BVx/RKKaMkNVkA6ZQsM2jf9wiGwlSEbacMPtKJjjRiyajMBQ6VIO131H/htKADFlEyk7M9w0Q/1Pb4zFDbrOL+L+MEHZMuNQ"
+  "inputs": "eNrFlTsSwCAIRFEsLGwyY5H7nzSTZNIFBdbP6+WzwlLrTUIouQtR6JF3YuyYnGmg1v8l9JbSLKgRNcGg49YggoytRhSRFI+nyC9uJ+k1YnmF4xw46OH+ZyIpR41O3IUwqWSQ+HgJFjCX8vkYTx00tYe7orGpvEEiFu91/zgfFt5htzOvs6QLq4woAw",
+  "unpauses": 3,
+  "warps_set": 3
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 9766,
-  "realtime": 165.25,
-  "steps": 657,
-  "bonks": 5,
+  "level_name": "Corral",
+  "attempts": 10,
+  "realtime": 400.68826,
+  "ticks": 4458,
+  "steps": 371,
+  "bonks": 0,
   "seed": "0c2033e071bee679",
-  "replay": "eNrVWNuWgzAIjKbHY/b4/9+724s1CmGAoNvOU1vTSLgMQ263J1KaX0hfhtGLPPRjc1vRLM8r6KNSynwVltvpsIYled5BccpRKsf9QV68YO/7M9aBu1OCskYqtoQLJShIZKP1yxqh2Ly8HD/ztVDx1oui4jbMagzRKE6mLSXKgpw9oS8V4Ar+6XCGMylP8PVKuOTQvluN/e/Ti0JmKFF2r9wtb/SLdfOE25KC2cn5m9xb0dRSm+mWIUdqhbJJofaOYWnRcbtfvK1DTlCwfYdGQ41HIyl3W0yTTOLTBq0Y3aBcdoBgyr8Ku7sFPa3eJVNUA4NWOlpzUKq31ssSoDS/Lt5OaxbTlC1mbJVuOJPnuMQ3DSHYei6gluhlQwnroXKV+2Q+jh7jv75jdKpppO7aQs0ehuzypanUEv3V6hCcIRO0hGOifQ0INwMPnC+MrQocD97UHyPWdBoYvWEQN54bCNWrO96UcKbZXOPqYqiFD1FI6hNoqjkFRFbumbFFJk6TQVguuGyM06qffW1zxgS/9ZvIG5eteSVVehaVhsYEUBwaIVqLfVbOtCnNV0vyNDcplArpIgvHteyVjhlIC3QAzvfP5+j00/iZ0Hl2H53qe0fM1BO7MKNyAwo3DRWyDp+37yyVlex8WueqJ9cD3W6KvTl+LBOBDYweUUYC3hSgKY+zNX0hRsLxtRcy65tNL9SVhTOBdno8FDD3FsnfAoeLERmh8Z3B9Tmyks1ZfxgvSrJBP+mUQG0hHG0MQwudQFo3IMacYFihHTmcB1ysjn1q87VuF+mU2djxW5VKn9nzej8N8z3B2xeR77+RsLko19NhFnjAVueP//wCd7pt7g"
+  "inputs": "eNrNV0kShCAMZCwPXPnB/P+VU+PaRRJIs1j2SYV09oAppfS5EC7gN1zG57gj21/Gyb+245DdeZY/ejgP2QjOaOsm//kdecz9ZTsxnihQs/kGxGQyZJ34ch91BHRhAGfdtgb7WbsK/mKZBHwjOMXzd4OlR+ncKvq6NYuANTGyrpFd0JUpweOpbavckdTTINitbHMRusa1M+R6rN6cH2PSUGNMPTg6Uat8SrY6+X2nECdr2+adPKx1+AHXkFk5xYonOBsidy76kNcqOzKDuCEQXs7u8zgTxIk279y9YxjaZ4Vqv8av6qrqLeRCygq/nkFhLtVqiZpp6h4R5/UpEHHu/KNBH8XN36N4eR3uvM+bMMNmi7iHoB+YJqvfrb5go9V2h7FkuT8LTRz1enzwxLkn4aW7YjDndn2ea3FGx5S8XzzOmbzt+QGu3jVM",
+  "unpauses": 14,
+  "warps_set": 14,
+  "warps_used": 5
 }

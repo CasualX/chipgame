@@ -1,8 +1,13 @@
 {
-  "ticks": 5414,
-  "realtime": 91.75,
-  "steps": 408,
-  "bonks": 11,
-  "seed": "348b7fa1254f27c3",
-  "replay": "eNrNmFuOwzAIRXE9ihzJi56ljzppGmwDxkDUns82pZeHL1ZKkQCaRwdAOsEfb9vPGs/YaQYUDZTMf/IZJ1tVGjS3eOQ/uSLlVwa+FIaEkglQ5sUnhvtxTBpKNXsma5mywDwnYQxDAHBqRXJsRW6ibuK3AJOKS/M3CM+zU9VmDCG1ZMY4jyotgwqKX9c6lov3iX33THGIown/kYfps51v3e7Baui6nRnvu6ZuGhc4zOx6jtyy/E9cvqN1God55NQvVUMHcUThsUr4RLMbsJ6lBoZ7PLXbXjwiASWKGOhSc3H6IomrqlVN+Si1ev3oGwC041Czmets+TpW76UQXsF0AzOVK4bx9sMcnY3CXtjHZ45lc2O9t0nFJRfLbdshv7HPYLtZP3QSUbu5Do496lZL6GHs54uaX1WHYm5KwXMTc30Ilx9YB+aFiuOcUNhe76gnlt2pq36ml2SBi9OpMZVA8vnfA/FqCnfRWr50hAgL+AMFYVDB"
+  "level_name": "Mystery Wall",
+  "attempts": 18,
+  "realtime": 199.4176,
+  "ticks": 4536,
+  "steps": 378,
+  "bonks": 0,
+  "seed": "4fd24fb26af449ee",
+  "inputs": "eNrNV8sSgzAI3GQ85Oj/f23HRysYQoDEsXvUSGCBBUtRgQ25wv447bje48BixnF+XZOC02gxuCn4KTuavY5yl9cNyYp+ALB4v1uij5dRnNcixWBIDGDMy/fInMB6ERcjms63oMSbA2ZgoJ+VBP2cGhOKntp3kTIHvxBhydgTN3u7JP8LUKUOamcDL+S3n3inzGA6g3Hl09xESFJ4uqJDCpImiId4MlKlw7kqMbTyKBSlSlBoXmhuulu5twQQN1V+4Jzvhgkf5K29Qdx0YIQ2zpuq1GgXVibhenQJNh0wtPXY3pLvjRFYyQQ+9cHHu0shc1jmYeRZ41/YjRs260mm3jum27J9kjcYNdzbg+MDXjwTXGonD3Ktl/mqNYkfTVt81EbFNlQPFxEPbJOGXLy777EKCK91PY21Twi3VvPJ5vgvaPyjZXWZoB/XoR9nPpvgOu4",
+  "unpauses": 6,
+  "warps_set": 6,
+  "warps_used": 7
 }

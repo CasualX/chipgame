@@ -1,8 +1,13 @@
 {
-  "ticks": 11218,
-  "realtime": 187.76666,
-  "steps": 737,
+  "level_name": "Steam Cleaner Simulator",
+  "attempts": 34,
+  "realtime": 143.53365,
+  "ticks": 2616,
+  "steps": 241,
   "bonks": 0,
   "seed": "a5313ed80135d9db",
-  "replay": "eNrdWe1yhDAIjN7VsY7v/7z9sFWjLCyIp+3+6pyRELIsYPt+QhHQiHi0BMpTQ+lNoN2bUi0q2G/52ezgssHnn4LJZvXYjEppPVhsTdGoYJ5OPo9ofu3v7gVtUQrIYyj36YyFSuHaonSbBcYQhau2zVy4enEudE8WVkILdK4Jegyu+8I+i7fn9rAQ0iNiaI9DSY516JtcbJMsATjucbUAzre56LpnPpKjK0VbVjNSVjmM+EbXFJau2qRglQL2KqSZtm5MnkV4MeFSHl3CLqbpCtwBqQQ+/lftG+ED1qecoovtGK2nE9oO0h3Zrfk4Rjny/o1Xl043Hs0lQJ2MxGWvRbZmrt/NEgbX8JfVI1EnlVfjqHNKJTkEt4W+01pIaZ9/xjgL047DwNeTYniq3MgccBeNzPbU+rbw5T2Kc2bF1SkRLVRb9mlMkdxidnjBOJiM6DzshlohbdYbLD6538yHzfaj0OrB3Lmo9eN48i7h28314fNQQuwup/IZnLXE/YXB1Lq7AHyD0k8JjBhpNnXUVB/oGVOc06y3f/h5ZeBTZRzrk7MM4eUpKl9bIcAeKTpN+HBUXH9tv3mmBuXx9vYZmbJymS8tZ01dWKRiGdV1kVyKDz+woTjcXWrJzhd/Ri1u0er9CZwcKaTxhprO7BEz2C4cKPfpycFWnhRtuAdqP49W5r3wgZ+rJyk7htkZiVTaAD4+LwTMPFsxCIue2BJN+mrd3p/yr4C/QunqIjE6wgP5dyphgNYjbdnbA0/6dJTkLrD4ok6IJcUSZgcptZpTYQoozajtw5cKYlIm77doL4DukZnQIGnX/5axIrA1q8ds/6vloSoUgTOK515zuDIfmYq8RIKuPj6xSzzvhnwi4JUBSlogumlrvgZeMqYit1XH/VYzwfJl4SQN/QCRbF3M"
+  "inputs": "eNq1VlsSgyAMXB0+uP+J2wqWhSQ0gbofmmFiHstCzLkAbxw3yP6snxW6jQvpApmJ1osJSgUyzfXUYOVCq1KLI2NSW61fD27/2gvzwDG5ToVDGPY5rnvrrOV0pJ+bGGLGMPAzS2P1o3EY3Cpr3w2fZaDnKs6byz8Wc3aOkjyPnpo1rr6twyMoTfOm8Ix99+nK1wvnC0rbpRnF/x96yx0/GxrueV6Lw9/yLpWnTHdswtQbpncFpHN5z9PIm788mT62+evf94U2Aa2JKW8YjuYQLPTVyA2wNguiU4M5sv4ixClWlCCjs4PF5M60nFa1D4SKGRh7oBy8AGyzHRI",
+  "unpauses": 11,
+  "warps_set": 7,
+  "warps_used": 5
 }

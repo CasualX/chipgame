@@ -1,8 +1,10 @@
 {
-  "ticks": 1021,
-  "realtime": 18.1,
-  "steps": 85,
+  "level_name": "Under Pressure",
+  "attempts": 59,
+  "realtime": 16.583324,
+  "ticks": 996,
+  "steps": 83,
   "bonks": 0,
-  "seed": "17ef95d8cbfe918b",
-  "replay": "eNqtk1EOwCAIQ7tpCB/c/7zLEp1Mqbpk79MglFpVRw7C6UC+eV2zTKm3RFgFwKbiGcBKktMlSw0jifSNBmu8su05ISsbqDtEeaE/B7yc1sdMv0I2VyeprXNOSczoufs+j8GuI7V0fzqAyXN1sdKfCBLO/17VuZPndbILFxoVDsA"
+  "seed": "b4f7bc013aee1ad6",
+  "inputs": "eNqtktsOgCAMQwuShQf+/3tVgjCxm5d4Hglb1245E4BwJSoApEopoypR4kyyYKIbfahgsLTGkhwAs37us/ujDkTOEjox/myF4hIt2Ca2VTSlolqU/IEeEPQlYLi/HbDOE96g5PkmXBb631YD3MCni8l/Qhx7uRyTijxLwg15BYFDDgQ"
 }

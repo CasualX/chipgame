@@ -1,8 +1,10 @@
 {
-  "ticks": 2414,
-  "realtime": 41.3,
-  "steps": 153,
+  "level_name": "Dig and Dig",
+  "attempts": 4,
+  "realtime": 31.683722,
+  "ticks": 1212,
+  "steps": 101,
   "bonks": 0,
-  "seed": "4c000b1e1c7fe2f9",
-  "replay": "eNrNVlsOgzAMCxRF68T9zzsNVEbbPNzHJPxLkjqOm7Ku46DXF3GBQUoh3jycRz0K74N6CAFqPWpl9n2bAErS0qU1tQ+UOVVLOGsFxAxZZj+H0gxkoOj9YiFn2vXyM8ftgcz1rpV6Z0w4M6Fykno97WvqR85yVQDdiwHVnoYBrT9CuWgzqRuTGUjBeYyvmd0jrsx9+fXl/rK9WKrirN3FLG5EgSl+2byLWH/Gvdlo/knQ3FDxXGYiHme25QTk2emA9mL/8R/jA7baGwg"
+  "seed": "ffbfa553f7d3429f",
+  "inputs": "eNrFk1EKwCAMQ6P44f1PvE02SIm1dTD2vkopoWm0NQEXfTBKUBvlBDc9xzMO0Z/0J6sMqkJ9V0f2r0tUp2SAv6fxrjPgMRYLVhRfWredjILwbBrlDdZ7pLPKfXkWXpTlWJdrdplx4IXBF3Kev8m3/8buZeOzZz7GFy4O45gPIw"
 }

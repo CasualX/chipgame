@@ -1,8 +1,12 @@
 {
-  "ticks": 5029,
-  "realtime": 83.804184,
+  "level_name": "Graduation",
+  "attempts": 96,
+  "realtime": 89.767715,
+  "ticks": 5016,
   "steps": 428,
-  "bonks": 2,
-  "seed": "23529741c48ea066",
-  "replay": "eNrNVtkSgzAIxNLJpI7//73tQ8ccBlkQj32MEciyHDk7Mb/uxZwfjbvpeR6ly/tkLH9HB81Y3kQTisLyFAw5n6z+S+LLTJRQ4QG7hcexDYjgpBBsswcJjALyIYe7FXqNrjnl+jQlm8ZBJzqpoL9B6omApH/qH6RoyxU25soacxU8mqYakGgvbZmYKMbsCBQkxXwCNbiVixlRA+VOnCMBTb6PAeslBwmKi4yATm2ZS32bElvGERqoKTxreOozkX1C6NeLW2MpVLZNp1CnMb637auvchSVFDG4+Jod5Dy4zZh5VnQIaSY56ovKkkq7h20dtLKoPzVfxpa6kiLJmOS9Pc85w/eh3QtY8sJ1iCGmz4Gdj3k6BRxCnVgQEbtHP9b4h50J7cgRqdMSUYEpnx4lWqMXejV7Ff0F4DVLNA"
+  "bonks": 1,
+  "seed": "0fac0fb4ea3d8de3",
+  "inputs": "eNrNV0ESgzAIRKeHHP3/a3uo0wmGzUKIGk6dRhEWdiGlRE3+tr9nZwRlSVsAn1FA5V5QPneZqPjP3xlHUS5sDxvqMUc4KMUaNA8KOnf4hh2QBL7Qi0jjz30K6g3MWd5LJLZMP3tIWwNaHyCntputhZAceDLw1qWgxrVjNryrg5SKINZw9YxRzUBWUvGP5QvT8VPk94qfUxdam9olQeNc8tkyC8QztV5yDzmOltlAkvkYlGawMfVx9YF/0A7joPtXkSKzmLoUFi3ZfbbRfOP6RkdWu7f4pwsrnRDluvTYqHr06jKbs2BnmKI52X3YStg1EsN3Ul0vacZQ3TXN/+dJ7cvws/PnS9A/fL7w52P9iSGf1ZRjjExqnUv5Jl3pzO1iFm65eyu/H6Ek6iBGKgT1wbi/9LfpWZqJig2zQc1hf7h7o4BoyRfRhz2R",
+  "unpauses": 3,
+  "warps_set": 3
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 13169,
-  "realtime": 221.58333,
-  "steps": 929,
-  "bonks": 30,
+  "level_name": "Badlands",
+  "attempts": 35,
+  "realtime": 566.8329,
+  "ticks": 9784,
+  "steps": 771,
+  "bonks": 0,
   "seed": "a9048e075af2bd03",
-  "replay": "eNrtWltywyAMhOBhQodD9f6n6rSuYx6SkDDCdib7GT8AsVotiq1dEZ4HYFYsfzAVLBvr/czh4DGzNz0ApM8VyIaPcfuVF4JkFdmVEIBVNpaVzce0opBHr8TzbEQ81Bg7wI2bgD3y0ie9x9i/AWNgfR1jLRAdZ5HNt8AFkED7juiyQH9LXZs/2y5NWC8PXwpx8AsBY+CAFcqz4Ix0iHKfHcppmuFZsQXYuP8WnpeEaggdUfXr6NZ8ihGqHnze7jM4P/O/HteGcw2f1qjuZTbkSROvyf47bZJbd2jbB2OYvgPx3KAYUB4ZHMBfq7a+YV52S2xRo2PkeYTdL8WbJC1V3fZIpPWXDAWSAFDwDXY/Nh3C95vGCZk62nHP22edsRIJc1YASNEGAVVM6WsozjTsNNDTwKkc7By4xwdzQTVwoM5VekOUSlmiTbJn5TkCORO6b4X16aQdLrOMBcdpHdt9aEz98igkjx/NfLwedK/efHBvJBlAc+dg+fJSEZjmhkOYV8mljmwk0H1ny2t+uuV12IrOETfsbeIWgzSO2sNlbcRbOYtn1kqGKeitlSyCZ23/AwVKtXt7qtD2zhk76AJDCCUAflhGvsclIZdZ/kLwCLbvOA89SdXiSsZq8cEIt/tprFXcwKl5zXlTnn0x+V1W6KEKSfxdrQzJZyq9ZuYYA9UEqWG98ZpuaJlH8mZ9rrni/uUomtTEIbIZUOuFGpAPnkZIH5/5A3OSnWecqy1daR070lEck8ntCL9KVFKjvJ9TrY9m16+T0WF3PjuP1GJgf6toZu/xU8/ucxEglZK2hGUZf4LDntqiqNQiSHw6xNDy4kEzyjwpyStw3nI2DA1+hShY8EzuqiDRTbc08DmLPWlcOLopIhy4u0qlvNIqIBjvJFW27JR1FQrxPv9fQzMjxfeKPgoRllpwdEM/2yly3shnQRrHXvhFCT5b1A3pPhxBPnoIpUzjcEM+AHA6fyy4BPWQqsYg9LeAfwDTvLEu"
+  "inputs": "eNrtWstywzAI3GRy8LHHHPv/X9nJYxJJsBJI4MadcnI8tiRgWR7O9Xrd7gLgdBfcZfPJ4yUUC4A8c7kJe6Ra57nQ+SbV/VKqhd4bPPe4FD/YZlatAd/ze0ilY6msZsNSIJ1xTpThefqvotRL1+SNjQS/+M5cn0ecjb1TOq/VPR9tKxgAdBxKTFoWYjEusZTi62RbrejO45rZX30Gv89dCOIc7zqgeYTircS2uheg4v/FS9vnSxqefV5RbU44RHKs5N7D2D+bW4TB13hJ+Eu8U/pM4agD+mV3Hy0JY7UyRjROa25XdfVx/fXQQSsZxnULz6em+ke3G3rrkHQEHYWjXNauw/lXPp7FPpaTT1UIDWLZmsyS5c8yhxuKBS0rnUjl31T1MhKJfTqsC9oleRHe1i9Dxmv2VbDmQ6k9y1SHGEbiZcUK9SRBYdHQzaICjO2QnRq9GmfQy2BSNKXY978cV6wB1ktOY7C6SWHH0gqTRDyRmBGz19rZMGjd0RYiY18oCbtXcCwmvOyxplDOCaWRHUQholx/bCuljZU/gccUrJLrmovavsfQcmhtEospvtciKMszaNdbtZd+3zX69HJCACsH8d5XZ0wZM6CfavPE+u7SGb6WzJa5RKZ4hZhGTeQLBEs3y52AeU2bQbqfW8l0VU4C4noeQh1HnNj2g1vy6Rz4vShnIWkvPLqdlb8InPqGWsWj+T0ylonG7fnP4hbaPzlWbJjR5wc3YmZFko+8nOYipx4OrKiUshNYlUYJpimzrcHPbGbjABXX2lus/gMBrM3J",
+  "unpauses": 25,
+  "warps_set": 21,
+  "warps_used": 19
 }

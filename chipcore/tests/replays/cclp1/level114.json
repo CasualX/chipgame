@@ -1,8 +1,13 @@
 {
-  "ticks": 3952,
-  "realtime": 66.63333,
-  "steps": 302,
-  "bonks": 2,
+  "level_name": "Comfort Zone",
+  "attempts": 14,
+  "realtime": 352.61395,
+  "ticks": 2484,
+  "steps": 201,
+  "bonks": 6,
   "seed": "860217538ce71d37",
-  "replay": "eNrtltsOgCAIQClbi83//95WWrMmXlAWa57XJinCwW0bCGDtMpAD5oEUxpjp5yDm+hcEftoolBNNjkOPhD1b9bl69CjLX6DEXDgO2tTvDj0KWm902c3VuxaHdes87KEsyzYUZGULD65VwmT3wSOSuc/eThw99s9A+RSx5J5YLoDcKYsDvQqmcjsVuWudLKkz8d88QMaDqqBhbWCZDOhmneiiS/skFiNYS833xLeAHfALOTk"
+  "inputs": "eNrNVrsSwyAMUzgG/v+L22t6wQT5RRiiiSHIsiwCrdnAF30FVBvo359bfHbgMIA/WhxIao7o7zwAX9eh1rSetdn6fUcIDwY/s75NTLKvvM4udVdf9XXomksGNDMLPAMjzWEs5+45ak/8l31xntvcibbL54T+NtdanJdhetkIwP8fslOzg+d+DCmh0m80byQPv82ystQh11KJqrPE5ovQ/wR+bskerdzxEixmY+FOAWI+n75J1+V2+k7gmVHzc81R6z39xkjeR+Sd8ORe/gDuFh7Z",
+  "unpauses": 9,
+  "warps_set": 9,
+  "warps_used": 8
 }
