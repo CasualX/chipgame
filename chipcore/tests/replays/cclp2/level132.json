@@ -1,10 +1,13 @@
 {
   "level_name": "Captured",
-  "attempts": 8,
-  "realtime": 89.5989,
-  "ticks": 3106,
-  "steps": 253,
+  "attempts": 14,
+  "realtime": 130.0695,
+  "ticks": 2835,
+  "steps": 237,
   "bonks": 0,
   "seed": "c3df44ccc13731a0",
-  "inputs": "eNq9VlsOwzAIo1E+dozd/5TTonY1YAhpq/mrzdMBx2TbbkK+aDvGj2DPS0MOkNnjuw+Ia492xnWxo63gt++Jg2c0nu7FeSq+anAchuXzYoBxBoYdz4bZ6BOQPLKUypJkaN7D7bWWzvFS5dYLG7RrYOtLsibEqqRzHTSuE3cLU/mE6hldVjxWJ0aHfY40RzxrhB1spQMLzbDGRq9HjaY8pQ3rFZiiUInuvCEHmfunyp1vxyChVjB6npsA8P8dItds0B5xxwCKzLRvPAC+ja/kHsZvbc1BM1dz1zNwrDDGlfLpmhcte+ZJd+Yyi3drivU/mZ9374gk5kPYsBm9j8U7lRoru9chrmSk5ZvEaaeOVF3V0QbzDHMvdwleM+GsmRNYN9z+D8eNlNPK6yd2MpNy8vrUUqi+Kpzje24f9SQjzg"
+  "inputs": "eNqlVksShTAIo46LHsP7n/KNtb4JDcFWWWmlfEIAS/kodsrWpb0Yfqle7JbgdnvemxidK89oFz9sS9LddtcqhoOTnArUR/zXV3ZM2DFIGHRMnCNAXQcT4/NEuJBZUSdJExU+iyCNIcmF8REqi6RxnDdh0ubNKJQIsVW0C1c8ZZRrrSG7JyQDCOqsyNiqGg0NC67ydSHvAsWQSy309YIVNOYsZ+AY5zSLbpuDPvpamVRFTQzo9suCnmnledaxHQffviw+tiJQ3YPsjgMCCusPEdE5ZoYQIp7R+YjW+xXsM4vWYry0FdcSDq5sP5uYvkEZEWeMAeuiZpviRdqXxNB8un+SoHtwCKoLQWeI2RDsh6FrnwhF+8fzc+RbDXYIOec+mvnr4QTUvsp/I0f7cd+dzz979Rb6",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 4
 }
