@@ -2,7 +2,7 @@ use super::*;
 
 /// Kinds of an entity.
 #[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum EntityKind {
 	Player,
 	PlayerNPC,

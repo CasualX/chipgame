@@ -7,5 +7,7 @@ edition = "2021"
 clap.workspace = true
 dataview.workspace = true
 chipty = { path = "../../chipty" }
+chipdat = { path = "../../chipdat" }
 cvmath.workspace = true
 serde_json.workspace = true
+pupil = "1.0"
