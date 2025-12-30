@@ -491,7 +491,7 @@ pub fn teleport(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 
 	let teleported = loop {
 		// Find the teleport connection from the current source
-		let Some(dest) = s.field.find_teleport_dest(tele_src) else { return false };
+		let dest = s.field.find_teleport_dest(tele_src);
 		// Skip teleport exits that cannot accept any more entities
 		if s.qt.capacity_at(dest) != 0 {
 			// Teleport the entity
