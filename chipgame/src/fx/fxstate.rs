@@ -158,9 +158,9 @@ impl FxState {
 			run_tick = self.game.should_tick_step_mode(&input);
 			// Reset input buffering to avoid stale inputs
 			// FIXME: This causes desync when replaying inputs
-			if !run_tick {
-				self.game.input_reset();
-			}
+			// if !run_tick {
+			// 	self.game.input_reset();
+			// }
 		}
 
 		if run_tick {

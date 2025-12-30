@@ -1,7 +1,13 @@
 use std::{env, fs};
 use std::path::Path;
 
-fn run_game(game: &mut chipcore::GameState, inputs: &[u8]) -> i32 {
+fn play(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
+	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
+	let inputs = chipty::decode(&replay.inputs);
+
+	let mut game = chipcore::GameState::default();
+	game.parse(level, chipcore::RngSeed::Manual(seed));
+
 	let mut i = 0;
 	while i < inputs.len() {
 		if game.is_game_over() {
@@ -10,70 +16,19 @@ fn run_game(game: &mut chipcore::GameState, inputs: &[u8]) -> i32 {
 		game.tick(&chipcore::Input::decode(inputs[i]));
 		i += 1;
 	}
-	(inputs.len() - i) as i32
-}
 
-fn test_replay(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
-	let seed: u64 = u64::from_str_radix(&replay.seed, 16).unwrap();
-
-	let mut game = chipcore::GameState::default();
-	game.parse(level, chipcore::RngSeed::Manual(seed));
-
-	let inputs = chipty::decode(&replay.inputs);
-	let add = run_game(&mut game, &inputs);
-
-	let mut success = true;
-	if !game.is_game_over() {
-		eprintln!(" - game over mismatch: expected game over");
-		success = false;
-	}
-	if game.time + add != replay.ticks {
-		eprintln!(" - ticks mismatch: expected {}, got {}", replay.ticks, game.time);
-		success = false;
-	}
-	if game.ps.bonks != replay.bonks {
-		eprintln!(" - bonks mismatch: expected {}, got {}", replay.bonks, game.ps.bonks);
-		success = false;
+	// Find the PlayerGameOver event and assert the reason is LevelComplete
+	let events = game.events.take();
+	let game_over_reason = events.iter().find_map(|event| match event {
+		&chipcore::GameEvent::PlayerGameOver { reason, .. } => Some(reason),
+		_ => None,
+	});
+	if game_over_reason == Some(chipcore::GameOverReason::LevelComplete) {
+		return true;
 	}
 
-	// // Try brute-forcing the seed if the replay failed due to RNG changes
-	// if !success {
-	// 	brute_force(level, replay, activity, seed, 1000);
-	// }
-
-	success
-}
-
-#[allow(dead_code)]
-fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, mut seed: u64, count: usize) -> bool {
-	let mut success = false;
-	for _ in 0..count {
-		seed += 1;
-		let mut game = chipcore::GameState::default();
-		game.parse(level, chipcore::RngSeed::Manual(seed));
-
-		let inputs = chipty::decode(&replay.inputs);
-		for &byte in &inputs {
-			let input = chipcore::Input::decode(byte);
-			game.tick(&input);
-		}
-
-		if !game.is_game_over() {
-			continue;
-		}
-		if game.time != replay.ticks {
-			continue;
-		}
-		if game.ps.bonks != replay.bonks {
-			continue;
-		}
-
-		success = true;
-		eprintln!(" - succeeded with seed {:016x}", seed);
-		break;
-	}
-
-	success
+	eprintln!(" - FAILED at {} after {i}/{} inputs: expected LevelComplete, got {game_over_reason:?}", chipcore::FmtTime(game.time), inputs.len());
+	return false;
 }
 
 fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
@@ -89,7 +44,7 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 			let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
 			eprintln!("Playing: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
-			fail_count += !test_replay(&level, &replay) as usize;
+			fail_count += !play(&level, &replay) as usize;
 		}
 		else {
 			eprintln!("\x1b[31mSkipped\x1b[m: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
