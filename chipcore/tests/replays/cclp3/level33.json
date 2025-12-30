@@ -1,8 +1,13 @@
 {
-  "ticks": 2408,
-  "realtime": 44.233334,
-  "steps": 152,
-  "bonks": 6,
+  "level_name": "Vague Dream",
+  "attempts": 53,
+  "realtime": 147.41846,
+  "ticks": 1610,
+  "steps": 126,
+  "bonks": 0,
   "seed": "2f41ac8af46dadd9",
-  "replay": "eNqtlUkWhCAMRCOyiO9x6D5624pRsDJg+3cCJpWBwLxT8g6lCrkw4reRb2znUw82O61cv6sF1dv+B+buFHk7PKIzp3xN69QLFkME1VqIAskbK1Ag4lkWU284KzUCWmo+1HPHaoJQ0JtVxVuMHID0nvDRNHMQ3abn0dokvw+1mHFxzg4J5AiVUAJeXAWaBB0a5x9TbeyXYhYJmB9S8hjGqNUVj7JZc/JkSPusoNNWGXBhohdqoLE98dVnWXHGV5P+8ZHlNxpuXDQydAVtgwT7S1LQJmf8hsaf417rY0yd8yvvR4xFcHx+Aey0G2k"
+  "inputs": "eNqlVEEOwyAM8xAHnsCx/3/ltrYUh8SAVJ9QFRxiO621lgtAbgCQbvyOKBFA9Zlv9rsd52d8Lpxnro+4qT4CGsJGDz+If8E5MhoeM56Y0T8jT8E8TpLZ7NGjY4+snEZ/VeR18zyHANclMRiL+L+jhlK+ck3vzKx7Cdp1MrlM9K78NK7gBixdpO3Ku1blPZpnaxnOxhOopsLqNj9UEINX63yq3YRbEbiIbCjijRi8WCtl/S1vgFGfaTgR7JTQeUpj/oHHFtQN1ecLg6EclA",
+  "unpauses": 15,
+  "warps_set": 15,
+  "warps_used": 8
 }

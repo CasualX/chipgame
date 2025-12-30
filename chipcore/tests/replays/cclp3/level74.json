@@ -1,8 +1,13 @@
 {
-  "ticks": 6893,
-  "realtime": 119.65,
-  "steps": 508,
-  "bonks": 3,
+  "level_name": "Niche",
+  "attempts": 55,
+  "realtime": 356.34012,
+  "ticks": 5058,
+  "steps": 418,
+  "bonks": 2,
   "seed": "6211c81d92bbcf8e",
-  "replay": "eNrdmFtywyAMRfFjGNNhUV1all43ppiHJCRB7STnMxNjIV2Ji+d5x+xMERPZAgZgqjAk85P8sfiCHGKVtSBd+4T79LkCj2yrG0UdEwAc0Eqkr7lHLIP50uUqcAxwYUICgDjis8KcAFJiiESAK+UZ4pzVwIULmdMtuUzDQLUZwrZI/pf4k10v5wza7+RhDswNCydX11T2BUWaXiuURF7cI1MDsl/F5vu67R/auAtkVjrnBmsnNtFCqbZj9uRKspya3sUC7Nf2jAjcfGjGISEOkbfZPg50rPBON6pMrXRVXq1thRi+KC0j/l/hUc+eqXWMfN/8YjQ9nvLEZR25QKkAa187iVeYheNnqV6Z2FxVmc13GmsdfVtfAHXU4aS/OeIUa9/CizY1MmN5+Rnjmw4Yivls/qQBfLau57jrN8IAxnFY92v8F/vrSqd1u/dmd5/7kt3qZCK3lmnBFUbr+xeOMigbZxg7tZJrRGsjrKLIhctxuqzhK5qTyODomhuQo7JDR6ulBszf2Fe2k/SGb/htuqOJ6As/5QJduRQ1x17InlKSL1N/Q7qQQ2KPA8an/7ZkPPfAhCEblfH8o9hLtk/JBk3qvNpNYYijH098D4AYUeE9H/gBC79mew"
+  "inputs": "eNrVWFsSgzAIXB0/+t0T9P6n7IxahcDSkPgY+UqrELIsj/h+j4sAGFbBvsa+npd4LSLX849pFvuOUFXr35677qJdY2f3eFuP8j9pc5IGC135zPm/VH7FIu2L865eS/tDKXUbRNsqU9LvsU1cHCZUWNQ4m7gM7QJ2eouz5ACo154/KhQ+l64RzX8nAs149sRi003yE7UMgk0dJ6Z5LN0Uz5wFCHDryN9T5ARuOPWT6Y49InCWQQpxRjc3wNyQZ/s4Ij0QBhVlGNKsx9K65XNQ2bmQXoufoL6xPm8KbKK7XCg8dsRPwsFcTlAM12ftDK+uB8X78Sx2KJc6cMs0FG/2bO/S3XONAt2MNUfh/BCRtZ9E3+WnjWnJ27jeH1EvbilQzt0Id86tKit+cWzNEZyUX4+gfwrpFGlSNhHcBek3AHWcsp92zIne/T5Zz+m+ys+KGOE/3+Jp3Bmp63M2Qr+/vsEnIvCIPELpp44AneudgUSDWRhRNwFnaiRfzOwGduKhncwc9Qtf9UU1",
+  "unpauses": 13,
+  "warps_set": 11,
+  "warps_used": 13
 }

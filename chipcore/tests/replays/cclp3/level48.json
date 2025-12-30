@@ -1,8 +1,13 @@
 {
-  "ticks": 8313,
-  "realtime": 200.98068,
-  "steps": 565,
-  "bonks": 29,
+  "level_name": "All About Buttons",
+  "attempts": 37,
+  "realtime": 212.9505,
+  "ticks": 7877,
+  "steps": 561,
+  "bonks": 47,
   "seed": "82a2152683adb044",
-  "replay": "eNrFWVtygzAMVIFh6AyH6gcHy9GbAo5fK1mSnWa/WmIbS1rvysmyLMu+byy+b2wqPAd+PUEBy4V1nYwIM0chCZFbOn9/xJcLtJkQ3xKzZod5r2Sty9ReUrlVY4Js6OKKt+Qppv9AY586Ir21Dk94MzjL/KMcxWlieG1Pg5BCxaH+MAk9WkUhd6tr126a9Al+XvCUDt1pTJZO+BZeK3pEMnXGI7jDQkOkLLOzuOJuFeefP4iuRS/22BWRzLXGGSdqnGGNlxPuAUqVISnd8zzXddytAfIoRwnhPC7k8402UlJ1GQAuNPkg5k1l+w0al7nQL6GRHqhYIO4wb5QEVmd+0ooz4oQrB6LUQS55O4J1XZOEMmK6DaWsy4zuJ7vSA4k62j0tS7sMPoQYK2Hoh7qi92WGX7PpVLqUKsICXZbVEnqlIByXfRsIRmAJmg4SmUlhAKWOgna/WOLxwBuofCTuiPdawYfgTM6zKm+wWb5ua3WnIvYQaud9dUVayVB9c0Jtr3FQ0tFPCRh8TRnpMQxSRl9JPLt3ihQ5/6Xzj+Jucz8/h5Aqe8dR2IHSr9xKb7eG90IIn02GMEqo8HHcyWYIITR3gNBMeeEckMvi5kZcz4setxUKl65dUeF0MG9DWZJjqhbLX1qsB7Y8fQww4PxB5STINLNPyigl2mWeAFcqnkzNlWEpJEZAbgrEkZhcjy8e2/TIKl228a69cEZOboger3LgLgitg+kO5fJmpmc0lsbBFDTb2nAYrnEDYVx++wByTkubgPtkhaYeArOwyZKOb2IgW+2kMoJdxXg1mHbmOI5kFn7jPi/eNHDVskiyISg6zRcm67DD1vcDUS5hgSgJVRrz+7uRX68sd9w"
+  "inputs": "eNrFWUluwzAMZGRDcAEd+qSi6MPy9Ca2ZW0kRVJKMqck1sZthnLWdV1D2Eh8ndhEeAy8PQAR6wHvnRJx5ixkJlJLl/sn3EyATYW0S/KaHuqzgjYurr+k8KhKB+kwlCvWkOdw70DnnLJEemkcHrB6cOHzD0pU1UTktd4NjAsFRf3hJLRwFUTfedOpzWkyRvhlwPN0GHZjtnSWb3FbViOyqQs+gioWmEJlhZylFYOWnH+eYFULruzRMyKoY417HKBTwxItB7wHqFkGOHcvy9LGMWgNpFGPYsy5HyjnK2WkTtV1AijT+EIsm8r+DhKVOTBOoSk9sGAhdsd5syiwqXknJWcsJ0w+YKkOzSVrR+C9zxxKkOk2NWVNYnT+EoQaCDDQ7kmzdEjgo4kpEop+aMh6m2foNbtKJXOpwCyky9JKwigVxHIJ20QQBAuo6GAk4wQCUPMo0u5XS9zv+AEaHUknorWW0SF0JqVZjTboJF92tLZTYXsIsfJeXZGUMkRvTqCvNYaUNPRTDCZfU2ZqDIE8ow8n7t07pBTZv8L+obrbnL/vQ0Dkvb+/Sg5ct6JEFebeBWgVjR57HZcfPBZIqkMrnxYUUnFKVf49i2pCAr7Rrg5R7FB8k3XqlV2BbiYauRS0sR8BHUfR+4hirXQ1aXexboC31MWSTZjCm3oWDsWfCNcNgI6Dp+bagwqCpqaeRih0XyOBpgE0vygqMaic4EWJoLpxVWJBuv77BON0g76ruprMMNl1phup7RVIweuQg3r7gIX4ehhCEJ+wL3n4FQr6JxvzneQOLRmeZeii7W4DnmmEjQK+nJfUT9xeAYZBf08wLPsPB094ng",
+  "unpauses": 10,
+  "warps_set": 8,
+  "warps_used": 15
 }

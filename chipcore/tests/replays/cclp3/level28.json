@@ -1,8 +1,13 @@
 {
-  "ticks": 5102,
-  "realtime": 88.11667,
-  "steps": 403,
+  "level_name": "Pac Man",
+  "attempts": 7,
+  "realtime": 90.400215,
+  "ticks": 5099,
+  "steps": 407,
   "bonks": 0,
   "seed": "42135bdeeda5d001",
-  "replay": "eNrtmOsOgyAMhWs1hCW+//PuZiIypO0pOJbs+7sJ9HIO1Rhf0CRCFHHoQXHR/Q/TQBBxlRCWCtLTzGe5fKaJVVBCPfHaiFU1xMlTdEp5s/2c9s28IM2ujesThpjxZgfE3ENzPAiWznB5osNLrTEp5C9p5tIaAI49Xs+kZZrRtF/Rh8soBIXPpRgqlN+UWeIJ9Tqdkx/mheSH4KitJqGox8U/BjfuebX1db/a/Chbk26HFqu8ld9mjlAsozIWXH1cndlbzFKtetsR49Zd35bnenLudZWFbc9uD6Uez3F8u8nvmfL9Mda7tR9yDXthg38AREDOOV+NLy5lDDdNnNYMoVM0OpsLnyZs31G2MsqOXcr7HeoaRrQ"
+  "inputs": "eNrtmMcSwyAMRGXZw3Dg/783dcZAKCsJHA5+1yQUldUS79/Q1oXI66EnxUXPL2wLQcRNnDsa9H7NXIvlK0wMQRHtwKM3hnKoJw9RlfJm5znlm1nRFDt6r19Yxa4vdkUzz+g5XgRJZZg00aCl0jsB7d/rmUtzoFDs9WomTtOuDfsVdXisggN0LkaQoXxSZoEnrdZhSp74hegDZ8gtElCtxvkbgRrPHG1z1a/lH/vShO0wYpVP54/xEcAykLDou4+bnn2ElxpV24Y7fqvr3+0ZKucOod/Y8ujO6NT0HOnrJp8z5fmx1tvaDk03e07gSCSKAI5WicM3vq7QiEt86llvxjQAewVvp9oeJNfDhpVME9z/66YuXipZpgeheUaV",
+  "unpauses": 2,
+  "warps_set": 1,
+  "warps_used": 1
 }

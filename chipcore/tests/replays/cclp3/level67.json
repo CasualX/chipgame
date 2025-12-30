@@ -1,8 +1,13 @@
 {
-  "ticks": 5672,
-  "realtime": 94.515854,
-  "steps": 440,
+  "level_name": "The Haunted House",
+  "attempts": 46,
+  "realtime": 211.24275,
+  "ticks": 4170,
+  "steps": 336,
   "bonks": 2,
   "seed": "a36aaad3d886c5be",
-  "replay": "eNrNWNEOwyAIpKUhfej/f++WNVHUQ9Hq0nukDhThDrfvJYg2D6iJo44kJJ03yBXdE4oo+g+2fQCbH0P+cahg4w1ZtVlHZbQ29aE/ZF8mgaN/EVFX8o3HaNUaiFl6IvavlmRkBs7lONYjY5rY+Br1ru+LAQtDKovvb6J3OS3BNKcS1I60R4KR9GJoLXaV5PhS63SSo/lCxjO7JrPK9O7aP8iugl6JInEnOtWJz0Q0LiLPqGt/Dd51Ajn+CwEsNQEdNGZQbChM5pyV9bLLG4UW3KsvZ+sktJhfqZV3cFEJ2mIwWNdj5OYaxy1hnzNq1NPv3PN4qc3brdFyWrF7hDixO5SYDltZoby3OeYZ03KlyLO5b4ZcOjfT80656efyUuC7UW9rZAUdZ7SiuzMdxNJ8EfxjMKlxZsm4Mxij7zHBnVWv/lVg7Iaxc7LolA37rFcvxde9hEGFn3mn4DLXTlx/1rEc29cToDoAft6BVu2W/77SSAYr8/+TysyKVU3rjjVFYrkj4xlpqGBr/HguI/LDmL75pil4yV4i0rNltxR8APvBSeo"
+  "inputs": "eNrFVksWgjAMHNHnc+HCI3j/U6oPlcmvpCVoVlDSaTKThE6TNeCQMXy8XzbRy6lhgPCvt2TwOguLs3jIaGmrWD9GkNFhiJAO1UboRowVGup0aVUD569XKMi/GHDZbuspNE5pNlTWnizenka8G2FYBupiXRrnr7vSbJgbbBQIDs8cDh3AQSJiH5EuUOcuLHH+pBftvgo5gnVxmv9B+F99b8kuxUk6mWXQFkpL4uwwr7FF+ml/+86o4fKs5231P1tqekonTp/9710W4XApy2r0K3v+zHGwkJxRMI4qJr6GdOO8yHW/AZ2sBErUx9AsyC9MpOVqJszw9vYaudWpLiruCq9Hm/jN+vmV6ai1FkXw4LdoQvEz77dTrKO3V0ZXUARhoehlMZCiQMf8LUG9vDs5+vhI4Mti1bdn0cwLosAUPplWsvFvbGBvEDsJ5ceavs704IT+pnkS/8Xa3zvmu3rmWmE1tRrdx6xvLgIPZmpBOA",
+  "unpauses": 12,
+  "warps_set": 12,
+  "warps_used": 11
 }

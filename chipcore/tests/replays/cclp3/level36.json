@@ -1,8 +1,13 @@
 {
-  "ticks": 7688,
-  "realtime": 158.71666,
-  "steps": 480,
-  "bonks": 14,
+  "level_name": "Zelgon's Lair",
+  "attempts": 47,
+  "realtime": 464.91968,
+  "ticks": 5659,
+  "steps": 438,
+  "bonks": 11,
   "seed": "a1d54594d2c3e0b2",
-  "replay": "eNrVWVtywyAMFMZhTIZD9f6n6kypAxg9AafN/sXGILRiJZF9lwAFWwZccWS8fruM5mV0GM4pM0IgLDhOpHQ+DNs4vJNR1myRDQBq6kA7Mti+oQzQI+33oKG5REEfLyUWupBBBztHjBZwGvZw3Qw7864ZwK1f7f2hsrBblBqIn6erXds6eO/tPtZGBR/e0GylDu/nL9rwxZ7qR/Zvn1eZonTs6KXufL7RhAnuG6IxGA8muv944ngjokJhid3Wu0gpK34I2yQAVm2tFq+ZvFT0xjm/JmcxBxZkBwB1sK2uvjm2klCmqBQMluN9K0wfhp9EgIcOmaWmDt+4T9rvqsMzNY8N23+Ct9Sr4JYBLJoxUlXiWuvuRp312bLgaQ49qd7oBwOZKzQwbBqo3GapAYcVDGagLTC8N/lS4YMPgLqGuRMdy/qOQxFh6ORDfeMa0OvPGubwDptpwcSScyL2reFk2Pwi/vgaWCCvt4DnlSFllN8CkbW/LEC892I3ohKpWb6/MvQf2NqMVDUaSXVE2hItKpuYlN4rz2PipuKYz830FUTN6AxtimsHoqgtfMDIlQxIjVbsrPRi0w/o/UDtkWTq0ltVxnlQbFwlPkDdbTR8VmdMZT9fvbIldM2cUj65dWKUWiPZIgWqv0QobjziaePF4Ui79hJgTj6mZr+7hq1ytbVgQjL9xaZeJBXq1UGRo6Zw9aW+Uxy+YijlA1z8TCUXcTEgqDNcHzaSAKP1Nf0p8+39Z1WBb9LQVJk"
+  "inputs": "eNrtWEmSwyAMlCkfeIb//8rxxOUgkFqLIZVL+uAi2AgktLSy7x6Iyonr+RqcqP+gC9sL9J6nbv7GPUtNyIlxpxtcPn9TclBPop+rCrAT4t0VLZ5/X59A2ArdYgZ8yXi/mmW4NfmG3Mh8LbcxH6O1XAchs9ddnNlcW0kfk1zLXYrL5+OjoUyhXcUQPt6lhS4b7aY4rzCJmK+h+QLkFFeOkjcODifiLNtSIPl1PhAOSpR5JiLdyatd7vW1wrHDbYROoegi5stKKHUB2RapHLFtIpObB60fg183kS6kBU8aXBYqMdkct8VzXCyhpSQvck3HGqiezBeI3P2tikQrCymBZXKwAJD8aMYL5HlNPq06v6qN0AuNWdbtv7+ekkOqLOV6+34iDiP5jHy7BcaGlxuZ9vhBTbktmdDdkPEZkWm6H2JMYFzApblBoCSAoRxlNI4UQUHL5D5jJWhHQVlKcj3Z3wC+PwGLMdIEY7w1EAwtkaQSvTCovpFq5+kYYuxqxUUdH59HR5Lf6B0iZW3i1Bq0PMpIR1/S2zMZRnGZZq1Ha/f4PzmerXId0wzTMe1DwJcCnGQRb3lMdnA3MfwbFeF7ygXb3My/U8i7Ap2gE0Zot93u/ixbPfWx7/lAwEX+ABsod3U",
+  "unpauses": 37,
+  "warps_set": 35,
+  "warps_used": 40
 }

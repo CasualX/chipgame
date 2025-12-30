@@ -1,8 +1,13 @@
 {
-  "ticks": 11576,
-  "realtime": 192.92194,
-  "steps": 627,
-  "bonks": 47,
+  "level_name": "Get a Clue",
+  "attempts": 37,
+  "realtime": 439.66916,
+  "ticks": 4561,
+  "steps": 367,
+  "bonks": 5,
   "seed": "93bbc4794f670931",
-  "replay": "eNrtWulugzAM9qBDROL9n3ebyhGD7fgK7aR+P0sIPj5faea5A5blkQcYNkzrL9PAYtoxKDGOX2Y8RQIwWmBSi7SCfkRKtH63lP2nYvUZ77VlsTKgkkMJSlvOPqQFaOwvOZ6eFylW1aIdCkGDSTW5hUBggC1w+AASsTJkIzKKL9+OzRhTrsbrCDtduFmvrVe3WAiiV7hIAFocxKtrFtN7vw9M2dBXI6JlgYy5IBRJaMzZRqxHIK4AsOUIHX8oxkacY5H6AbyufD6WGQtvA1kqOVugJf1EJBzIVnZ/dKFKasv/MmODciXCavjhLkA7qrE00FyFdwK2Vsa1zaT63AXLIvXPjtKWrhnqyPFaIRa1QwR0iaBHDxhmQ4KHrJOSE0kpJZz2T2oHE8htZM7JC9z3m9X2AxO5PpbQW+v7F7rM17MCunCRJbsXkrSlmNacwcwJLjzl5sukPxzi2na9A8g3K2fSKpuEaZ2RAqu0qSooJ8yJOZo9Tl/or7ZOjKksaauWSnM1qmyLu6CQxhpD5sa5tHvNjrVmvh3lyhXzHurT0G1vTb4Eak6IZEOrUip89YGbQP4Ne4rWYbhU1e3e43zIVSjUICSD3TO4A/B8cZsHrV/k/AX3Q+Q2r93b9MDuSJRn73PQZn/93N+0Q1HbrSyh9H5DtVVapyPkALAVKKfi51CLngb9xzh8Ndiq0bEy+9GY2/zRgC+SoPsX/tjgeBp51zF7900j7hRocE5gh6oNZG7nVBvuzdDlf/K/iyXPDZEX3ycynEFPDE7n59YsTBxeoMthuBgcJqepjW70jGPilQp3LI+VOjr618dV5mwlepI4W0IevvQTxnItlPGrBTIvV1JWSBinhxyE0v+ZSpFLOWFM+VVkeomqkzqG1A1jtJ7xlG2bQWdqIix/APfbaRg"
+  "inputs": "eNqtWEGSAyEIxFQOPiP/f+XWlklsgUbQcHKMwyA0DaT3jYhIr4pMeebke/5xLUNP+xemU9k212Mfr3F2L9Sz6tTqUC+uW5s3aPCAVjRfvP3oPLpK9p61esy7H/+ofViLXqMm/Bj5lKBFmVjg2zouKqbGNhTmuZYWawP+EGOpzzOLPTR2rk4RhUkPh++nFz4YI966GOhx3yQnBWWctMyjjIYMCBKg/+y/phg8Syruxm34A8sxBkPFAy5XJKjRhkUyYYl5A8MecvLGPxYyD2H8HJUfcz4VLwl5qR+JjR3m4HGBW+FZEIdtLm5n76o9VuwESv1CuxQehSubDYo8BjgxtAqTjA+ruDv0QwRkYXcei+G7iMh/hQHHHr3j1mshdXk53yS5ZryH6yWlbS2Og5KJm2nmnuNBE9mvczpFGaQ88HHi1FrTKqlJgLxBJ6JUaWTtJqHpTRoHQwt7i5dqp5W/ntWYz3flH9IAfcw+w6ZD43PdCsU0RSO7GRgYRNL9cJmy94MTQ/ta2lsxI4bm3XlJCsM/+wvCNM292riXG0c2MHuojrAV4opx1R9jXzUo",
+  "unpauses": 28,
+  "warps_set": 21,
+  "warps_used": 17
 }
