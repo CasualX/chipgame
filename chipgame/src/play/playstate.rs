@@ -393,6 +393,10 @@ impl PlayState {
 			fx.hud_enabled = self.menu.stack.is_empty();
 			fx.draw(g, resx, time);
 		}
+
+		g.begin(&shade::BeginArgs::BackBuffer {
+			viewport: resx.viewport,
+		});
 		if self.fx.is_some() && !self.menu.stack.is_empty() {
 			menu::darken(g, resx, 168);
 		}
@@ -424,6 +428,7 @@ impl PlayState {
 				}.draw(g, resx);
 			}
 		}
+		g.end();
 	}
 }
 

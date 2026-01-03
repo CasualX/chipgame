@@ -39,6 +39,8 @@ pub struct RenderState {
 	pub field: RenderField,
 	pub effects: Vec<Effect>,
 	pub tiles: &'static [TileGfx],
+	pub shadow_map: shade::Texture2D,
+	pub light_matrix: Mat4f,
 }
 
 impl RenderState {
@@ -53,36 +55,42 @@ impl RenderState {
 		self.objects.retain(|_, obj| obj.update(ctx));
 		self.effects.retain(|efx| ctx.time < efx.start + 1.0);
 	}
-	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup, time: f64) {
-		{
-			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
-			cv.viewport = resx.viewport;
-			cv.depth_test = Some(shade::DepthTest::LessEqual);
-			cv.cull_mode = Some(shade::CullMode::CW);
-			cv.shader = resx.shader;
-			cv.uniform.transform = camera.view_proj;
-			cv.uniform.texture = resx.spritesheet_texture;
-			cv.uniform.pixel_bias = resx.pixel_art_bias;
-			render::field(&mut cv, self, resx, time, 1.0);
-			cv.draw(g, shade::Surface::BACK_BUFFER);
+	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera, time: f64) {
+		g.begin(&shade::BeginArgs::BackBuffer {
+			viewport: resx.viewport,
+		});
+
+		self.draw_field(g, resx, camera, time, false);
+		self.draw_effects(g, resx, camera, time);
+
+		g.end();
+	}
+	pub fn draw_field(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera, time: f64, shadow: bool) {
+		let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
+		cv.depth_test = Some(shade::Compare::LessEqual);
+		cv.cull_mode = Some(shade::CullMode::CW);
+		cv.shader = if shadow { resx.shader_shadowmap } else { resx.shader };
+		cv.uniform.transform = camera.view_proj;
+		cv.uniform.texture = resx.spritesheet_texture;
+		cv.uniform.pixel_bias = resx.pixel_art_bias;
+		cv.uniform.shadow_map = self.shadow_map;
+		cv.uniform.light_matrix = self.light_matrix;
+		render::field(&mut cv, self, resx, time);
+		cv.draw(g);
+	}
+	pub fn draw_effects(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera, time: f64) {
+		let mut cv = shade::im::DrawBuilder::<Vertex, Uniform>::new();
+		cv.blend_mode = shade::BlendMode::Solid;
+		cv.depth_test = Some(shade::Compare::Always);
+		// cv.cull_mode = Some(shade::CullMode::CW);
+
+		cv.shader = resx.shader;
+		cv.uniform.transform = camera.view_proj;
+		cv.uniform.texture = resx.effects;
+
+		for efx in &self.effects {
+			efx.draw(&mut cv, time);
 		}
-
-		// Render the effects
-		{
-			let mut cv = shade::im::DrawBuilder::<Vertex, Uniform>::new();
-			cv.viewport = resx.viewport;
-			cv.blend_mode = shade::BlendMode::Solid;
-			cv.depth_test = Some(shade::DepthTest::Always);
-			// cv.cull_mode = Some(shade::CullMode::CW);
-
-			cv.shader = resx.shader;
-			cv.uniform.transform = camera.view_proj;
-			cv.uniform.texture = resx.effects;
-
-			for efx in &self.effects {
-				efx.draw(&mut cv, time);
-			}
-			cv.draw(g, shade::Surface::BACK_BUFFER);
-		}
+		cv.draw(g);
 	}
 }

@@ -27,14 +27,16 @@ pub struct TileGfx {
 }
 
 pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
+	g.begin(&shade::BeginArgs::BackBuffer {
+		viewport: resx.viewport,
+	});
 	let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
-	cv.viewport = resx.viewport;
 	cv.depth_test = None;
 	cv.cull_mode = None;
 	cv.shader = resx.shader;
 	cv.uniform.texture = resx.menubg;
 	cv.uniform.pixel_bias = resx.pixel_art_bias;
-	let info = g.texture2d_get_info(resx.menubg);
+	let info = g.texture2d_get_info(resx.menubg).unwrap();
 	let tex_w = info.width as f32;
 	let tex_h = info.height as f32;
 	let vp_w = resx.viewport.width() as f32;
@@ -56,8 +58,9 @@ pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
 			render::Vertex { pos: cvmath::Vec3(-1.0,  1.0, 0.0), uv: cvmath::Vec2(0.0, 0.0),   color: [255; 4] },
 		]);
 	}
-	cv.draw(g, shade::Surface::BACK_BUFFER);
-	g.clear(&shade::ClearArgs { surface: shade::Surface::BACK_BUFFER, depth: Some(1.0), ..Default::default() });
+	cv.draw(g);
+	g.clear(&shade::ClearArgs { depth: Some(1.0), ..Default::default() });
+	g.end();
 }
 
 struct SpriteUV {

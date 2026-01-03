@@ -118,13 +118,6 @@ impl EditorEditState {
 	pub fn think(&mut self) {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
-		g.clear(&shade::ClearArgs {
-			surface: shade::Surface::BACK_BUFFER,
-			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
-			depth: Some(1.0),
-			..Default::default()
-		});
-
 		if self.input.key_left {
 			self.fx.camera.target.x -= 5.0;
 		}
@@ -152,14 +145,19 @@ impl EditorEditState {
 
 		let cam = self.fx.camera.setup(self.screen_size);
 
+		g.begin(&shade::BeginArgs::BackBuffer {
+			viewport: resx.viewport,
+		});
+
 		let p = self.mouse_pos; {
 			let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
-			cv.viewport = Bounds2::vec(self.screen_size);
-			cv.depth_test = Some(shade::DepthTest::Less);
+			cv.depth_test = Some(shade::Compare::Less);
 			cv.shader = resx.shader;
 			cv.uniform.transform = cam.view_proj;
 			cv.uniform.texture = resx.spritesheet_texture;
 			cv.uniform.pixel_bias = resx.pixel_art_bias;
+			cv.uniform.shadow_map = self.fx.render.shadow_map;
+			cv.uniform.light_matrix = self.fx.render.light_matrix;
 
 			for y in 0..TERRAIN_SAMPLES.len() as i32 {
 				for x in 0..2 {
@@ -188,18 +186,16 @@ impl EditorEditState {
 				_ => (),
 			}
 			g.clear(&shade::ClearArgs {
-				surface: shade::Surface::BACK_BUFFER,
 				depth: Some(1.0),
 				..Default::default()
 			});
-			cv.draw(g, shade::Surface::BACK_BUFFER);
+			cv.draw(g);
 		}
 
 		{
 			let mut cv = shade::im::DrawBuilder::<menu::UiVertex, menu::UiUniform>::new();
-			cv.viewport = Bounds2::vec(self.screen_size);
 			cv.shader = resx.colorshader;
-			cv.uniform.transform = cvmath::Transform2::ortho(cv.viewport.cast());
+			cv.uniform.transform = cvmath::Transform2::ortho(Bounds2::vec(self.screen_size).cast());
 			cv.uniform.texture = resx.spritesheet_texture;
 
 			struct ToVertex {
@@ -234,7 +230,7 @@ impl EditorEditState {
 				}
 				cv.draw_line_rect(&pen, &Bounds2::new(pos - Vec2::dup(4.0), pos + Vec2::dup(4.0)));
 			}
-			cv.draw(g, shade::Surface::BACK_BUFFER);
+			cv.draw(g);
 		}
 
 		if let Some(ToolState::EntOrder(_state)) = &self.tool {
@@ -252,6 +248,8 @@ impl EditorEditState {
 
 			menu::draw_overlay(g, resx, shade::d2::TextAlign::BottomRight, &text);
 		}
+
+		g.end();
 	}
 
 	fn push_history(&mut self) {

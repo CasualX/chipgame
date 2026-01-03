@@ -46,7 +46,6 @@ impl GameOverMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
@@ -95,6 +94,6 @@ impl GameOverMenu {
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &bottom, resx);
 
-		buf.draw(g, shade::Surface::BACK_BUFFER);
+		buf.draw(g);
 	}
 }

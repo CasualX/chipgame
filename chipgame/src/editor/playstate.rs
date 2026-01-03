@@ -37,12 +37,7 @@ impl EditorPlayState {
 		self.fx.think(&input, false);
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &fx::Resources, time: f64) {
-		g.clear(&shade::ClearArgs {
-			surface: shade::Surface::BACK_BUFFER,
-			color: Some(Vec4(0.2, 0.2, 0.5, 1.0)),
-			depth: Some(1.0),
-			..Default::default()
-		});
+		render::drawbg(g, resx);
 		self.fx.draw(g, resx, time);
 	}
 	pub fn save_replay(&mut self) {

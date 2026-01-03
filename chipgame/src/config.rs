@@ -17,10 +17,13 @@ impl Default for TextureConfig {
 		Self {
 			path: String::new(),
 			props: shade::TextureProps {
+				mip_levels: 1,
+				usage: shade::TextureUsage::TEXTURE,
 				filter_min: shade::TextureFilter::Linear,
 				filter_mag: shade::TextureFilter::Linear,
 				wrap_u: shade::TextureWrap::Repeat,
 				wrap_v: shade::TextureWrap::Repeat,
+				..Default::default()
 			}
 		}
 	}
@@ -109,8 +112,8 @@ impl Config {
 							}
 							"Wrap" => {
 								let wrap = match value {
-									"ClampEdge" => shade::TextureWrap::ClampEdge,
-									"ClampBorder" => shade::TextureWrap::ClampBorder,
+									"Edge" => shade::TextureWrap::Edge,
+									"Border" => shade::TextureWrap::Border,
 									"Repeat" => shade::TextureWrap::Repeat,
 									"Mirror" => shade::TextureWrap::Mirror,
 									_ => panic!("Unknown texture wrap mode: {}", value),

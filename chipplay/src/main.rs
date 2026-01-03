@@ -104,7 +104,7 @@ impl AppStuff {
 		});
 
 		// Now that GL is ready, create graphics and resources
-		let mut g = shade::gl::GlGraphics::new();
+		let mut g = shade::gl::GlGraphics::new(shade::gl::GlConfig { srgb: true, ..Default::default() });
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
 
@@ -252,10 +252,8 @@ fn main() {
 							}
 						}
 
-						app.g.begin();
 						let time = time_base.elapsed().as_secs_f64();
 						state.draw(&mut app.g, &mut app.resx, time);
-						app.g.end();
 
 						state.metrics = app.g.get_draw_metrics(true);
 

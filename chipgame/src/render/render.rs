@@ -36,19 +36,29 @@ unsafe impl shade::TVertex for Vertex {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Uniform {
-	pub transform: Mat4<f32>,
+	pub transform: Mat4f,
 	pub texture: shade::Texture2D,
 	pub pixel_bias: f32,
 	pub greyscale: f32,
+
+	pub shadow_map: shade::Texture2D,
+	pub light_matrix: Mat4f,
+	pub shadow_bias: f32,
+	pub shadow_tint: Vec3f,
 }
 
 impl Default for Uniform {
-	fn default() -> Self {
+	fn default() -> Uniform {
 		Uniform {
 			transform: Mat4::IDENTITY,
 			texture: shade::Texture2D::INVALID,
 			pixel_bias: 0.25,
 			greyscale: 0.0,
+
+			shadow_map: shade::Texture2D::INVALID,
+			light_matrix: Mat4::IDENTITY,
+			shadow_bias: 0.002,
+			shadow_tint: Vec3(0.75, 0.80, 0.90),
 		}
 	}
 }
@@ -59,6 +69,10 @@ impl shade::UniformVisitor for Uniform {
 		set.value("u_tex", &self.texture);
 		set.value("u_pixel_bias", &self.pixel_bias);
 		set.value("u_greyscale", &self.greyscale);
+		set.value("u_shadow_map", &self.shadow_map);
+		set.value("u_light_matrix", &self.light_matrix);
+		set.value("u_shadow_bias", &self.shadow_bias);
+		set.value("u_shadow_tint", &self.shadow_tint);
 	}
 }
 
@@ -156,41 +170,6 @@ fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources
 	});
 	p.add_vertex(Vertex {
 		pos: Vec3(x + spr.width, y, z2),
-		uv: spr.top_right,
-		color,
-	});
-}
-
-fn draw_shadow(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, skew: f32, frame: u16, a: f32) {
-	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
-
-	p.add_indices_quad();
-
-	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
-
-	let x = pos.x - spr.origin.x;
-	let y = pos.y - spr.origin.y;
-	let s = skew;
-
-	let color = [0, 0, 0, (a * 128.0) as u8];
-
-	p.add_vertex(Vertex {
-		pos: Vec3(x + s, y, 0.5),
-		uv: spr.top_left,
-		color,
-	});
-	p.add_vertex(Vertex {
-		pos: Vec3(x, y + spr.height, 0.5),
-		uv: spr.bottom_left,
-		color,
-	});
-	p.add_vertex(Vertex {
-		pos: Vec3(x + spr.width, y + spr.height, 0.5),
-		uv: spr.bottom_right,
-		color,
-	});
-	p.add_vertex(Vertex {
-		pos: Vec3(x + s + spr.width, y, 0.5),
 		uv: spr.top_right,
 		color,
 	});
@@ -327,7 +306,7 @@ pub fn draw_tile(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Unifo
 	draw(cv, resx, pos, tile.sprite, tile.model, 0, 1.0);
 }
 
-pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, resx: &Resources, time: f64, shadow: f32) {
+pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, resx: &Resources, time: f64) {
 	// Render the level geometry
 	cv.blend_mode = shade::BlendMode::Solid;
 	let frame = (time * 8.0) as i32 as u16;
@@ -349,22 +328,13 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 	let mut sorted_objects: Vec<_> = fx.objects.values().map(|obj| &obj.data).collect();
 	sorted_objects.sort_unstable_by_key(|obj| ((obj.pos.y / 32.0).round() as i32, obj.model));
 
-	// Render the object shadows
-	cv.blend_mode = shade::BlendMode::Alpha;
-	for obj in &sorted_objects {
-		if matches!(obj.model, chipty::ModelId::Sprite | chipty::ModelId::FlatSprite) {
-			draw_shadow(cv, resx, obj.pos, obj.sprite, 10.0, obj.frame, obj.alpha * shadow);
-		}
-		if matches!(obj.model, chipty::ModelId::ReallyFlatSprite) {
-			draw_shadow(cv, resx, obj.pos, obj.sprite, 2.0, obj.frame, obj.alpha * shadow);
-		}
-	}
 	// Render the objects
+	cv.blend_mode = shade::BlendMode::Alpha;
 	for obj in &sorted_objects {
 		// Grayscale the template entities
 		cv.uniform.greyscale = if obj.greyscale { 1.0 } else { 0.0 };
 		// Configure depth testing
-		cv.depth_test = if obj.depth_test { Some(shade::DepthTest::LessEqual) } else { None };
+		cv.depth_test = if obj.depth_test { Some(shade::Compare::LessEqual) } else { None };
 		// Draw the object
 		draw(cv, resx, obj.pos, obj.sprite, obj.model, obj.frame, obj.alpha);
 	}

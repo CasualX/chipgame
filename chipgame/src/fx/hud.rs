@@ -14,11 +14,10 @@ impl FxState {
 		let mut pool = shade::im::DrawPool::new();
 
 		let cv = pool.get::<UiVertex, UiUniform>();
-		cv.viewport = resx.viewport;
 		cv.blend_mode = shade::BlendMode::Alpha;
 		cv.shader = resx.uishader;
 
-		cv.uniform.transform = Transform2f::ortho(cv.viewport.cast());
+		cv.uniform.transform = Transform2f::ortho(resx.viewport.cast());
 		cv.uniform.texture = resx.menubg;
 
 		// Draw the backgrounds for various UI elements
@@ -218,7 +217,7 @@ impl FxState {
 			self.darken_time = time;
 		}
 
-		pool.draw(g, shade::Surface::BACK_BUFFER);
+		pool.draw(g);
 	}
 }
 

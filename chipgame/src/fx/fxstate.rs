@@ -229,11 +229,16 @@ impl FxState {
 		self.camera.animate_position(ctx.dt);
 		self.render.update(&ctx);
 
+		self.draw_shadow_map(g, resx);
 		let camera = self.camera.setup(resx.viewport.size());
 		self.render.draw(g, resx, &camera, time);
 
 		if self.hud_enabled {
+			g.begin(&shade::BeginArgs::BackBuffer {
+				viewport: resx.viewport,
+			});
 			self.render_ui(g, resx, time);
+			g.end();
 		}
 	}
 
@@ -356,6 +361,62 @@ impl FxState {
 		self.scout_dir_until = [0.0; 4];
 		self.scout_speed = 0.0;
 	}
+
+	fn draw_shadow_map(&mut self, g: &mut shade::Graphics, resx: &Resources) {
+		const SIZE: i32 = 2048;
+		self.render.shadow_map = g.texture2d_update(self.render.shadow_map, &shade::Texture2DInfo {
+			format: shade::TextureFormat::Depth24,
+			width: SIZE,
+			height: SIZE,
+			props: shade::TextureProps {
+				mip_levels: 1,
+				usage: shade::TextureUsage!(DEPTH_STENCIL_TARGET | SAMPLED),
+				filter_min: shade::TextureFilter::Linear,
+				filter_mag: shade::TextureFilter::Linear,
+				wrap_u: shade::TextureWrap::Border,
+				wrap_v: shade::TextureWrap::Border,
+				border_color: [1.0, 1.0, 1.0, 1.0],
+				..Default::default()
+			},
+		});
+
+		let viewport = cvmath::Bounds2i::c(0, 0, SIZE, SIZE);
+
+		let light_target = self.camera.target;
+		let light_pos = light_target + Vec3f::new(-300.0, 300.0, 300.0);
+		let view = cvmath::Transform3f::look_at(light_pos, light_target, -Vec3f::Y, Hand::LH);
+		let near = 10.0;
+		let far = 1000.0;
+		let projection = cvmath::Mat4f::ortho(-500.0, 500.0, -500.0, 500.0, near, far, (Hand::LH, Clip::NO));
+		let view_proj = projection * view;
+		self.render.light_matrix = view_proj;
+		let inv_view_proj = view_proj.inverse();
+		let camera = shade::d3::Camera {
+			viewport,
+			aspect_ratio: 1.0,
+			position: light_pos,
+			view,
+			near,
+			far,
+			projection,
+			view_proj,
+			inv_view_proj,
+			clip: Clip::NO,
+		};
+
+		g.begin(&shade::BeginArgs::Immediate {
+			color: &[],
+			levels: None,
+			depth: self.render.shadow_map,
+			viewport,
+		});
+		g.clear(&shade::ClearArgs {
+			depth: Some(1.0),
+			..Default::default()
+		});
+		self.render.draw_field(g, resx, &camera, self.time, true);
+		g.end();
+	}
 }
 
 struct FadeValues {
@@ -393,11 +454,10 @@ fn fade_to(obj: &mut render::Object, target_alpha: f32, fade_spd: f32) {
 	obj.anim.anims.push(render::AnimState::FadeTo(render::FadeTo { target_alpha, fade_spd }));
 }
 
-pub fn draw_entity_order(fx: &FxState, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::CameraSetup) {
+pub fn draw_entity_order(fx: &FxState, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera) {
 	let mut tbuf = shade::d2::TextBuffer::new();
 	tbuf.shader = resx.font.shader;
 	tbuf.blend_mode = shade::BlendMode::Alpha;
-	tbuf.viewport = resx.viewport;
 	tbuf.uniform.texture = resx.font.texture;
 	tbuf.uniform.transform = cvmath::Transform2::ortho(resx.viewport.cast());
 
@@ -414,5 +474,5 @@ pub fn draw_entity_order(fx: &FxState, g: &mut shade::Graphics, resx: &Resources
 		tbuf.text_box(&resx.font, &scribe, &cvmath::Bounds2::point(pos, Vec2::ZERO), shade::d2::TextAlign::MiddleCenter, &format!("{}", index));
 	}
 
-	tbuf.draw(g, shade::Surface::BACK_BUFFER);
+	tbuf.draw(g);
 }

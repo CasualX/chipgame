@@ -7,6 +7,7 @@ pub struct Resources {
 	pub spritesheet_meta: chipty::SpriteSheet<chipty::SpriteId>,
 
 	pub shader: shade::Shader,
+	pub shader_shadowmap: shade::Shader,
 	pub pixel_art_bias: f32,
 	pub viewport: Bounds2i,
 
@@ -48,12 +49,20 @@ impl Resources {
 			let font = fs.read_to_string(&font_config.meta).expect("Failed to read font meta file");
 			let font: shade::msdfgen::FontDto = serde_json::from_str(&font).expect("Failed to parse font meta file");
 			let font: Option<shade::msdfgen::Font> = Some(font.into());
-			let texture = load_png(g, Some(name.as_str()), fs, &font_config.atlas, &shade::TextureProps {
+			let data = fs.read(&font_config.atlas).expect("Failed to read font atlas file");
+			let image = shade::image::DecodedImage::load_memory_png(data.as_slice()).expect("Failed to decode font atlas PNG");
+			let image = image.to_rgba().map_colors(|[r, g, b, a]| shade::color::Rgba8 { r, g, b, a });
+			let props = shade::TextureProps {
+				mip_levels: 1,
+				usage: shade::TextureUsage::TEXTURE,
 				filter_min: shade::TextureFilter::Linear,
 				filter_mag: shade::TextureFilter::Linear,
-				wrap_u: shade::TextureWrap::ClampEdge,
-				wrap_v: shade::TextureWrap::ClampEdge,
-			}).expect("Failed to load font atlas");
+				wrap_u: shade::TextureWrap::Edge,
+				wrap_v: shade::TextureWrap::Edge,
+				..Default::default()
+			};
+			let texture = g.image(Some(name), &(&image, &props));
+			// let texture = load_png(g, Some(name.as_str()), fs, &font_config.atlas, &).expect("Failed to load font atlas");
 			let font = shade::d2::FontResource { font, shader, texture };
 			resx.font = font;
 		}
@@ -64,6 +73,7 @@ impl Resources {
 		resx.spritesheet_meta = serde_json::from_str(&spritesheet_meta).expect("Failed to parse spritesheet metadata");
 
 		resx.shader = g.shader_find("PixelArt");
+		resx.shader_shadowmap = g.shader_find("PixelArtShadowMap");
 		resx.pixel_art_bias = config.pixel_art_bias;
 		resx.colorshader = g.shader_find("Color");
 		resx.uishader = g.shader_find("UI");

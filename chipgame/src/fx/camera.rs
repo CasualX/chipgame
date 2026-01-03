@@ -47,7 +47,7 @@ impl Default for PlayCamera {
 }
 
 impl PlayCamera {
-	pub fn setup(&self, screen_size: Vec2i) -> shade::d3::CameraSetup {
+	pub fn setup(&self, screen_size: Vec2i) -> shade::d3::Camera {
 		let pos = self.target + self.get_offset();
 		let corr = offset_correction(pos.y - self.target.y, pos.z, Angle::deg(FOV_Y));
 		let corr = Vec3(0.0, corr, 0.0);
@@ -60,8 +60,7 @@ impl PlayCamera {
 		let projection = Mat4::blend_ortho_perspective(self.blend, focus_depth, fov_y, aspect_ratio, NEAR, FAR, (Hand::LH, Clip::NO));
 		let view_proj = projection * view;
 		let inv_view_proj = view_proj.inverse();
-		shade::d3::CameraSetup {
-			surface: shade::Surface::BACK_BUFFER,
+		shade::d3::Camera {
 			viewport: Bounds2::vec(screen_size),
 			aspect_ratio,
 			position,

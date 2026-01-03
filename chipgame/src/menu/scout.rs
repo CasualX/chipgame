@@ -25,7 +25,6 @@ impl ScoutMode {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
@@ -48,6 +47,6 @@ impl ScoutMode {
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleLeft, if !self.left { "◀" } else { "◁" });
 		buf.text_box(&resx.font, &scribe, &rect, shade::d2::TextAlign::MiddleRight, if !self.right { "▶" } else { "▷" });
 
-		buf.draw(g, shade::Surface::BACK_BUFFER);
+		buf.draw(g);
 	}
 }

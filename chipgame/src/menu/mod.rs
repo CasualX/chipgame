@@ -44,14 +44,13 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 
 	cv.blend_mode = shade::BlendMode::Alpha;
 	cv.shader = resx.colorshader;
-	cv.viewport = resx.viewport;
 
 	let paint = shade::d2::Paint {
 		template: UiVertex { pos: Vec2::ZERO, uv: Vec2::ZERO, color: [0, 0, 0, alpha] },
 	};
 	cv.fill_rect(&paint, &Bounds2::c(-1.0, 1.0, 1.0, -1.0));
 
-	cv.draw(g, shade::Surface::BACK_BUFFER);
+	cv.draw(g);
 }
 
 fn wrap_items<'a, const N: usize>(items: &'a [&'a str; N]) -> [&'a (dyn fmt::Display + 'a); N] {
@@ -123,7 +122,6 @@ pub fn draw_metrics(g: &mut shade::Graphics, resx: &Resources, metrics: &shade::
 
 pub fn draw_overlay(g: &mut shade::Graphics, resx: &Resources, align: shade::d2::TextAlign, text: &str) {
 	let mut buf = shade::d2::TextBuffer::new();
-	buf.viewport = resx.viewport;
 	buf.blend_mode = shade::BlendMode::Alpha;
 	buf.shader = resx.font.shader;
 
@@ -145,5 +143,5 @@ pub fn draw_overlay(g: &mut shade::Graphics, resx: &Resources, align: shade::d2:
 
 	buf.text_box(&resx.font, &scribe, &rect, align, &text);
 
-	buf.draw(g, shade::Surface::BACK_BUFFER);
+	buf.draw(g);
 }

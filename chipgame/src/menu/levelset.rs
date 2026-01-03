@@ -37,7 +37,6 @@ impl LevelSetMenu {
 
 		if let Some(Some(splash)) = self.splash.get(self.selected) {
 			let cv = pool.get::<UiVertex, UiUniform>();
-			cv.viewport = resx.viewport;
 			cv.blend_mode = shade::BlendMode::Alpha;
 			cv.shader = resx.uishader;
 
@@ -64,7 +63,6 @@ impl LevelSetMenu {
 
 
 		let buf = pool.get::<shade::d2::TextVertex, shade::d2::TextUniform>();
-		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
@@ -94,6 +92,6 @@ impl LevelSetMenu {
 			selected_index: self.selected,
 		}.draw(buf, &bottom, resx);
 
-		pool.draw(g, shade::Surface::BACK_BUFFER);
+		pool.draw(g);
 	}
 }

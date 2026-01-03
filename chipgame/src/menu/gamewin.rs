@@ -32,7 +32,6 @@ impl Fireworks {
 
 			let mut buf = shade::im::DrawBuilder::<UiVertex, UiUniform>::new();
 			buf.blend_mode = shade::BlendMode::Alpha;
-			buf.viewport = resx.viewport;
 			buf.shader = resx.uishader;
 			buf.uniform.transform = Transform2f::ortho(resx.viewport.cast());
 			buf.uniform.texture = resx.effects;
@@ -45,7 +44,7 @@ impl Fireworks {
 				bottom_right: UiVertex { pos: Vec2f::ZERO, uv: Vec2f(u + d_size, v + d_size) / texsize, color },
 			};
 			buf.sprite_rect(&sprite, &rc);
-			buf.draw(g, shade::Surface::BACK_BUFFER);
+			buf.draw(g);
 		}
 
 	}
@@ -94,7 +93,6 @@ impl GameWinMenu {
 	}
 	pub fn draw(&mut self, g: &mut shade::Graphics, resx: &Resources, time: f64) {
 		let mut buf = shade::d2::TextBuffer::new();
-		buf.viewport = resx.viewport;
 		buf.blend_mode = shade::BlendMode::Alpha;
 		buf.shader = resx.font.shader;
 
@@ -126,7 +124,7 @@ impl GameWinMenu {
 			selected_index: self.selected as usize,
 		}.draw(&mut buf, &bottom, resx);
 
-		buf.draw(g, shade::Surface::BACK_BUFFER);
+		buf.draw(g);
 
 		let size = resx.viewport.height() as f32 * FONT_SIZE;
 		if self.time_high_score < 0 || self.time < self.time_high_score {
