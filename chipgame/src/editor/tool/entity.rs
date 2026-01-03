@@ -6,6 +6,17 @@ pub struct EntityToolState {
 	pub selected_args: Option<EntityArgs>,
 }
 
+impl fmt::Display for EntityToolState {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		if let Some(args) = &self.selected_args {
+			write!(f, "{:?}", args.kind)
+		}
+		else {
+			f.write_str("None")
+		}
+	}
+}
+
 impl EntityToolState {
 	pub fn left_click(&mut self, s: &mut EditorEditState, pressed: bool) {
 		let cursor_pos = s.cursor_pos;

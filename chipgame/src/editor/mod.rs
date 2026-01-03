@@ -1,7 +1,7 @@
 //! Level editor.
 
 use std::collections::HashMap;
-use std::mem;
+use std::{fmt, mem};
 use cvmath::*;
 use chipcore::EntityHandle;
 use chipty::{Compass, EntityArgs, EntityKind, FieldConn, FieldDto, LevelDto, Terrain};
@@ -29,7 +29,7 @@ pub struct EditorPlayStats {
 	pub bonks: i32,
 }
 
-static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
+static TERRAIN_SAMPLES: [[Terrain; 2]; 25] = [
 	[Terrain::Blank, Terrain::Floor],
 	[Terrain::Dirt, Terrain::Gravel],
 	[Terrain::Wall, Terrain::CloneMachine],
@@ -38,6 +38,7 @@ static TERRAIN_SAMPLES: [[Terrain; 2]; 24] = [
 	[Terrain::BlueLock, Terrain::RedLock],
 	[Terrain::GreenLock, Terrain::YellowLock],
 	[Terrain::Exit, Terrain::Hint],
+	[Terrain::FakeExit, Terrain::Socket],
 	[Terrain::Water, Terrain::Fire],
 	[Terrain::WaterHazard, Terrain::DirtBlock],
 	[Terrain::ThinWallE, Terrain::ThinWallS],

@@ -13,6 +13,12 @@ impl Default for TerrainToolState {
 	}
 }
 
+impl fmt::Display for TerrainToolState {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "{:?}", self.selected_terrain)
+	}
+}
+
 impl TerrainToolState {
 	pub fn left_click(&mut self, s: &mut EditorEditState, pressed: bool) {
 		if pressed {

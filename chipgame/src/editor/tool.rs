@@ -33,6 +33,13 @@ impl ToolState {
 			ToolState::EntOrder(_) => "Entity Order",
 		}
 	}
+	pub fn display(&self) -> Option<&dyn fmt::Display> {
+		match self {
+			ToolState::Terrain(state) => Some(state),
+			ToolState::Entity(state) => Some(state),
+			_ => None,
+		}
+	}
 
 	pub fn left_click(&mut self, s: &mut EditorEditState, pressed: bool) {
 		match self {

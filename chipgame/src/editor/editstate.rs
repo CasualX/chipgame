@@ -244,6 +244,9 @@ impl EditorEditState {
 		if let Some(tool_state) = &self.tool {
 			let text = fmtools::format!(
 				"Tool: "{tool_state.name()}"\n"
+				if let Some(display) = tool_state.display() {
+					{tool_state.name()}": "{display}"\n"
+				}
 				"Cursor: ("{self.cursor_pos.x}", "{self.cursor_pos.y}")\n"
 			);
 
