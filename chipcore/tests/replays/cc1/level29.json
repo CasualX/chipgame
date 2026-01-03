@@ -1,8 +1,13 @@
 {
-  "ticks": 6295,
-  "realtime": 171.78537,
+  "level_name": "Arcticflow",
+  "attempts": 76,
+  "realtime": 178.75531,
+  "ticks": 6288,
   "steps": 630,
   "bonks": 0,
-  "seed": "b2c80fc353263fda",
-  "replay": "eNrtl0uOxCAMRB1AiEi9mvsfdmZaSvgEQxmc/ki8JSTELlzghCCG/jAHtDHER564A5+O+nOYxkO44kqyxxtRxtkwQSe6tnbWQPhTunI8zoQbwTI09c1ONwZ5M6rDaLiH7wOzEeMjz+hKJAzBSGz0/4Fj0tokRqps2L4r6gOWR9PZzZr01WGZnMN5ynxU2xYnOm2I0e9DbERUs3usN90zykmgS4hdqjfPTUXigRTOJdmIkysouvwFTggPRvSpfBMeso8DklNxQlRFLaW77kUxbCZAjqyeOmkW+Xp53Rttfp6Y+0iyaVy5daGYYvGK4UEtQO4A1AJ0AB1aN2SRZcTgVKDFYrGgwROl1nTi2Il3ubPXNqfhdMBmt9OPSS89j3RVdkCVc3H5HezH04EC11iDB/9v2Dr9O21DWJXkXvFPgeojVpt67oGabsi1eQurlaP0T3m+GnXZ3gNQ2NYs5vgFKPpPeg"
+  "seed": "e22522b885c9431d",
+  "inputs": "eNrtV0EOwyAMc1EP/f+LJ62agCZOHUa3HurTxCjYIQ5h20aAN8qO9+/FwsxZd7TjpY7vaw5yIIDPDdG3HZ9iea5JnqqSMy0dhwYmzKgqu0879bNIFx0w/OU1jrq6/Jmr65eA4iN7vk30bGyR8BEqhPAzbmAfCDyvjGcoyLVR8U7iYKO+hGAW64SP/DogV5D+HFmBuIMxLE8gxVPP7VVG3RTUFtYlTmJdd9/F5Lt9XQGgdekK01qRjDerS2w+G2exlfd1SLC8deIGv+cxw138lbLQzldyKYxPm9wsZ/I9wP9htVCb2DNl3pkXh1S/ilTxwhFxyWKKECDuFpwSQ7EOAg+ux1cn++DBvcCKSPwuix0gV8LlpPsq1nbtv+WootFlV9CraNwntPso9+35mx8nsdL3qpxFhmQRe51kOS/a7kAyTz7z9RcxezGN5KesK3h1tjqUzbabIfZFan7Qx7BQJonSBJLflfEB/vx0sn6ZhzZWPoexmvPgk2kvjhpCkg",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 2
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 5006,
-  "realtime": 87.73333,
-  "steps": 387,
-  "bonks": 4,
-  "seed": "a60126abb9825410",
-  "replay": "eNrll9EOgyAMRTswRhI/av//VduSLQq2pS0XX3ZeVQrltr1um4nyiJOTBbJtZF/iGEOIECEOvi4jkJ7EN5i9j96t9ZT0I9n4vs2eMHkRs6Vp4MCWIqqQ1+Tzwr27TIAuaOnn8IfjA/SzmKbSngtdMpoSWpVZ9ggXwXYDnX1f1aVVYiD5aiVa1pSqIJoDoaWJGiDHaK3JWTgRavjns04H5vaa7iZaUUfqqL6fqSN2dPSaHEXdbQTl8NtYe/HO9YJrYzusSe1MN/pVv9djFVTj7C5/dIys9q+Q5zE4lNojtapROiX9A88PPg/VJkspxK496gfWrccROTJ6pvgzN/wyY0pkvhvpOADjXpdeBl2X/+cV59Zzxhpw2xXpKuqLs30GGHC4Ced2KaXAYpttZQEvHPt1stnjwfy8AGrpQYM"
+  "level_name": "Key Farming",
+  "attempts": 24,
+  "realtime": 120.6209,
+  "ticks": 3990,
+  "steps": 355,
+  "bonks": 0,
+  "seed": "105b5e0a6e2989e1",
+  "inputs": "eNq9VkEOwzAIo1MP/f+Ld4qSrjZgQsexigAb43Jdj7AZ65ejGDPbJ4ilIoyR56zHHZcUo3oeM4Fo5bYph8ZxLdM8eoP0k4SYVkUaaTi5JAMkP9Ye7mdWrI3Zf9KhK5gnZkmelzLZtY03tOoLxJfc2REjz4YL6br3lcZWRfV3Vn0nAwd2g+E4HnMP38E83wF8/jC55kQM1HxPdkg29Av06bxnJZiooAwfXOn8R3h7PALfIiQ/Ey1u6P2dT+pzN3/1Qpg9qH9Gd5fx+zpvrqXoF4IBp6VqsoTS17zhNij7JV4sLQ5Wueeb7LP1JPb00IOa0NBnG1aA/GdXUSpmb355FuG1Yw3MfAG5pzRQ",
+  "unpauses": 7,
+  "warps_set": 5,
+  "warps_used": 3
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 3993,
-  "realtime": 71.433334,
+  "level_name": "Icedeath",
+  "attempts": 26,
+  "realtime": 172.0653,
+  "ticks": 3222,
   "steps": 424,
-  "bonks": 1,
-  "seed": "9fa9cfeda9cd8907",
-  "replay": "eNq1llkOxDAIQ0MVjXL/E480Szc14ZkQf1MHjIGafVEGaDt6EQZYvJhtx4il/jDOtEQxZL/LkcDl1MNjDv1mY/6dmunluZ3zWbMXfSbiUsLj9yPgQ9RjrBdko/XwimplbuUK+ePm9zWB4pqLmzcklKPpvPQ/5fmkk8MM5u+AHkn7GrkwPFefnbzvvwcyatTrLSKJBNOGKR18bpTpVAdZuV5aZfo+Ua4L960St3JiudkUW3KlN2lPZnqN1UOrNotcwfzOsx/1EkDOvo67v0zhmcMQ7ur1FKwI5020Gq9KUZY+0mf/CPcG+FIOQg"
+  "bonks": 0,
+  "seed": "09fb0be7da6c6d30",
+  "inputs": "eNqtlNsOwzAIQ0PEQ///iyctu6RKaw4lfpw8xzUGs4EmcHygOAZ0Zkp/Y/zuA414UC64jqQQGUQinD4HoTmSBeJHnA1+THfh/2fyloFiKTvnGYQlcjR84JzppJof63h1g2IO2fOfTm2sLXd5lBZt5IO2Z1tKetWrnMR1kqxUZ2pvkVHHJPfM9fbaV5396AboFu2aO9mFWIY0HkdNrkGYd0KhgXwIh2RYnlfiJkDPKxS/mlXiPLAuFTeSPBZwjgugnL95eR7r5m3Ami1xsNfDauf+8Zn3Aiy+Djo",
+  "unpauses": 9,
+  "warps_set": 7,
+  "warps_used": 4
 }

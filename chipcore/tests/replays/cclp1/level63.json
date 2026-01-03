@@ -1,8 +1,10 @@
 {
-  "ticks": 2105,
-  "realtime": 36.333332,
+  "level_name": "New Block in Town",
+  "attempts": 10,
+  "realtime": 33.931377,
+  "ticks": 2037,
   "steps": 168,
   "bonks": 2,
-  "seed": "d1f109ae7ca42184",
-  "replay": "eNrVlNsOhCAMRAcwm5Lw/9+72fWCClPrBaPnGUqnQ0fkR4yuDvwIHAWSATojubT3n+6tYNLdKwnBnSbkoQ/lU2rdZ5SLibpG/PFGgqFWpqqfsF1vXUETPb+nK2IdsD7157b/FEywu9KaVNpURtC97Mwkda78uGU4Fo+41a0cZZumjajYgmNZttij5Qeqv2vTczSJUHTTT4eZYw7JJ/MF4WsaXw"
+  "seed": "158ab2dbba2f9ac8",
+  "inputs": "eNrVlUsOgCAMREcxhoX3P68axVKotpXEz9sipdPPGOMGFjoZoE/InyDmDA5S3OGfZMLX+iU1XRuhp3pjf2JqS5TlKTeTN7EZaCppqDZCCHRI+tVq1S+XkU9ANuCQ21twsh3s6OiYUBJDtDqyxsU9STR8A25KVGnIE0w86WqQWvFbA14p2R2fIJUjU0AeVIyTc4ZyN4P6kzD5EPQlh8V5jnxM7RL3z3H/M8x4jRo7"
 }

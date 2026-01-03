@@ -1,8 +1,11 @@
 {
-  "ticks": 9244,
-  "realtime": 184.26666,
-  "steps": 653,
-  "bonks": 20,
+  "level_name": "Entrance Examination",
+  "attempts": 14,
+  "realtime": 205.53755,
+  "ticks": 8068,
+  "steps": 625,
+  "bonks": 12,
   "seed": "4484d887c517b927",
-  "replay": "eNrtWdlugzAQXDBBWOKj+v9fVVA4DNnZwwdqpM6jG+w9Z8fuNK2IHQJNb1CyFre1uOC9EkKfBRogKPnVcXJg1uJuDsJ8bLng05uLtwkYQ/pxHFw4vw2hs+MazXDYxli5g3OcDr/PtagczQTgDF6CLnefgTFKS5wjzr0jznHHHvYNUsEmHlHOmTiDmfjoSrnC1ZiAXBChkOjOw4B628lXCffUKeQgFGLsGoA/0BRm7GRuQEe54CGO6oB/nRdY8kZ5nV+vcFz01hJnJGLsjGOuoDvdCNndPI69sz0LSmGGsSJtLKDvOJjaxIhdKoTQID1LflbIgkw7m4+NiSMmgmLCNuE0nQfqx8Y/N7w25HxXq89edfC3rMk2K+c7f/6EUqiCOrPq35rHErbXHEdpWRxvYKyhNbCYH3VFKM392cvNzTy8qwteaV1Eruan4XpYeKuZp8cQY+alRrvX67BXVikKlVTU6/cNGGIO7C/qCHNbfeJowYvIY9VVSepW70x53NTxRtK+NyXdaPJkaHqJC8DhROUcUgLcsQV0qpOJwCbSc7T39lpeg46Gom+CoTQr6DDqS+BgKHNDO6k4Vtwrl6vDp0Yre99so53X95Tm4o0qv/QmwHR9nT296TGR+rqWDpu6knKBZ6U4Tc2TTzvzjp8VfjrSDpHNhFQuMTZzlp3ZHW5aHSfxZmh9I0yT335QOWiskBe9BcRFzze+dSUoqVikbughEZG3u1RryD89gtgy232AbXsDaaAdr5HB+3DdiP5/YGsR+mYofpTcqNrwg6W3Rct+AaKsbNQ"
+  "inputs": "eNrdWEFywjAMlCHDmBtP6FP6/1cVCCSypbWlyIRM99QxTrxarRS5OT9wTQiUZxBbu77WrnfMK+fzyQZ6IJegyY7l4ftrUhf8qGI7pnu5vE9a186tE4iT68Z/UUKZsa5nQHrG8iqNTiW01Pqp3MqhWE4WQamIWKbnjYWIKasWqRcOcrMWptCVK2sKts2imaQtr2HkoJEM8qS+84aCcKmzeIj7g7tF+3tivq33yFVb2/A+0bJ32htlLQ/nAHqFrOWqufDHUbOPaK2ferupdW46i1C9FbHoO2SM9Bk/ID37Hkb5ej0s63ECf3M/BGoHfoMsHg55clMFSNX6XU7/DptiUTXhX1GzP/tYdFPyHm6KY7rPYfrzKD40qj8cTJ+F0D/jMyZfdDg/j8vXi1KERb24tZUhboG0Fzc5/uPJgbrHOttziH/34t2f2cI+ybtge12EatOg80BsjZHw3R/WUXPuTQNBEQ0rPv5ZaEwswdkV+Sor83mr3CnW9/T3RmZLi3A8j95DVhPYbOboh88nnHzc+jbuQep8nvaBvR6Z936+i1UmTPUdXrE4fRuV9deEN4tLhpWsLZTUcwd+h1ECIhopGYPji14qc7y/M5hxaejIU/Ztw5AmLgkkfnI3HPLDPqF2Plo6cOeQtyTYYvSDSYw35bYWrfpsdOYW2PqmfXhzHtPY64kCMcHp9302CKSP2nuyvtky0IhWUX/1dWsq/3vr5uZD7lE0RII0EwrN1hlPZbqcFhijSlxkW9l5byNN6iZef6x6ZG4",
+  "unpauses": 4
 }

@@ -1,13 +1,13 @@
 {
   "level_name": "Lock Block",
-  "attempts": 35,
-  "realtime": 122.71884,
-  "ticks": 4339,
-  "steps": 352,
+  "attempts": 49,
+  "realtime": 244.11542,
+  "ticks": 4338,
+  "steps": 358,
   "bonks": 11,
-  "seed": "24dcc027273ce18f",
-  "inputs": "eNrVV9uuwjAM8+g0HaQ87KA98P9fyrgUSpc0Fzoh/Dix1UlsNyzLsoxv+OuDsQ+I8geHXZAOEgCmKlIJe367QT578r86TYffQQrPy3uS8Bm/nr+hpZsBDNzQrhKhTgOZAoSqRJWCqZH8/ZSZoekemSXfe6JOxIxS5fv29O9phUnEfjcosCbbrmi1tC1+3RBV36ZiEquodB/nF4hitQGbc40qxgP/V1Q0yzQ9RtsO+DQhqHP7+BimFMxMeKLKjXme641JTsj76ByJ7TX3sDPkSZxXhCZF2iWGN1U2LwJTbvEiQf0R847SCp5cPIX1JVasSoCXV8RBBhgHTq59xWYHIF6MwVIw2HrYhBuq/DR4KjIJKM6EbT8tHya+9m7KFe8bnoSg+E7p3Uos9TpBucZrXS7ueMC+ghVHjK4EfbUT4jaV0kfrIfsvRuRJDIfqA/2oeXAB8WA/tQ",
-  "unpauses": 5,
-  "warps_set": 5,
-  "warps_used": 10
+  "seed": "a556b3a532fa3388",
+  "inputs": "eNrNV8sOwjAMC9MOO+7/vxYJ0Jq0dh7dKpETAta4iZ14+65DrjieCdHH6hw6Yeb733GfeD0a3zM3ELAO5i4o+hq2/4tk7q7whLlw+u3vY7aPrbbFVMJOqnA5xgyxOZpK9TeFk2FTz1Zr3rCRmlP03X0Nta2MprQsTBcuTjBPejXegnY9cD1MuUp1XeT2Ig3280ffqzb9I25jXdAGWF7RvRDsC9uWkRoSaxnzPDVA2pmQAxFn9B30T0DvxU553Itwkrrd5U8HTn9mbKJzoL5Ji1t3rB51U5IZMblNt8IRjet2vmnnGW0HovpuSqM7xmqKLJrrADPGwRs703yjPY0nw+g8KbqnSM+nvUefEm8FTc6CgxoAZTTlbWRAH4Mn5s8x1wuQGMsocqdWadAoFYig0bHEGb0jbHaX3NNU4KjR+YI2neO6zf8N5gz3yJtj4o1AKCf7cs47TGcXcDc7sHIQgAW32ve+AeRhLrg",
+  "unpauses": 9,
+  "warps_set": 9,
+  "warps_used": 13
 }

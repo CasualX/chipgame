@@ -1,8 +1,13 @@
 {
-  "ticks": 2627,
-  "realtime": 44.85,
-  "steps": 209,
+  "level_name": "Problems",
+  "attempts": 6,
+  "realtime": 66.003685,
+  "ticks": 2390,
+  "steps": 199,
   "bonks": 0,
-  "seed": "f069d79d31f79366",
-  "replay": "eNrVldEOgzAIRak0piz8//cuy9rFTQrI0MTzqC3QmwuUcgTEJYH1TfRylYkGRLTfTdQ64I6K32KtH5IkrMlwU6FO88KddhFkVcj8Z0lUToZaAlxvyWgLv69zOulQWvbqL9cW7Nrh2cdyOWhPRwq7lsi3cwb2ufzFg5P02z0AwYG7HUQgrjYQEcrsf9xuEobg67aUTRRbr8YEFKaJYP9lH1FXbs6IUtTn+nytKjfx0K8+E4/nd7ijTuMVT5nbI8o"
+  "seed": "c08ef6f364b82816",
+  "inputs": "eNrVVdsOhSAMK8QHP8P//8qTnAjOjWINmGifINlGd+nIuQtg6QNAngKkAhQkjmqTHwIuM3dVIHR8LgLnv70NayOleaik11Gcc1RiHjk2yri+BXQOB3juMZePwc8hU4A9X824UIdmHGE/1OnW5S7wublzBME+u8cAtc4hSWWGt813vtyJA1T1ENZkY6HzY8zaKLdVa94d67DiK8ePExH6wtxsQVn09k/l7UO/Aof4luGmqL+rNe0Htj7hbDk3bH57zBw7",
+  "unpauses": 2,
+  "warps_set": 2,
+  "warps_used": 1
 }

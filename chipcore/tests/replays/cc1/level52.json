@@ -1,8 +1,10 @@
 {
-  "ticks": 1135,
-  "realtime": 19.533333,
+  "level_name": "The Last Laugh",
+  "attempts": 19,
+  "realtime": 21.349005,
+  "ticks": 1134,
   "steps": 99,
-  "bonks": 1,
-  "seed": "f494b0ee56be45b4",
-  "replay": "eNqtk1EOwCAIQzsxRBfuf96ZfSxOUYnyvmnEtsTYIsmCSK3BchbhBcDVo8i1MUeGC4vlQyo5L18lClOITtQ27uTFvwI6bNiIOW7DvGUCzZ02Qj6JFANMFuid/A4lzytdGYW+UQcRDDNuPS63jwf9WRCp"
+  "bonks": 0,
+  "seed": "756651be5c1aa678",
+  "inputs": "eNq1ktsKACEIRCfpof//4l3cNgy8ZNF5CAK1GafWPMBUB3T8EV8hEb1nYYIubiuX8DT/fkNfyp5Czb2GLOYh0K50BnK+jr7GWGKsp26B/EqwmJSSWjrNpKQVr9a/k4qsGjlHvCxaZ0W5FGxjcl8P4cYNSw"
 }
