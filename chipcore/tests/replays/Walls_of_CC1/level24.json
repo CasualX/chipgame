@@ -1,8 +1,13 @@
 {
-  "ticks": 8590,
-  "realtime": 742.0333,
-  "steps": 420,
-  "bonks": 4,
-  "seed": "dd377c2c4a62478a",
-  "replay": "eNrtWVuSwiAQJISykqocyvufal3NrsC8egjEfNhfliHMq6cHMcYnwgEsBPnTlFKxenri8SFSVBunF5h3RZv7K+mW75ivSjKoS7VlG3yGlBjrdaEPEsld9iXzqPSTq66UCa9nSB68vJNCrIJULePxxH4hfPEBxKhIj9LUnLpJnJYURmLwIm8OQ21tbl0jz7nW1wKAOosRSMhNrnp01eKBTIPIgwyqv/WKDWwAsSy13RdJTJIsUfS11bZt+YMYEf+qCazHwmKCEWSvZs+wTiqkjG/JDR8Ty7pOXqzWlnl5EbvruvQBVmpAwD1qb0iYivsvAFWlimM5xqhUPlCsvBRmYyeEfuhFltbjZvvgtFIDaFA2Gx6CeIuDkEvdPM9IQdmI6xz3a/MvzoMtVcObVlVGVQ1H6pRwFOL3U2woHhRfo+dxqBRlBJO04vpo1o44EDlRGUm0PSdsN1WwfpwXFjo8VD5JBmgnviP0pWf5IJR+pvGN4YuiJcRc4BQw2bJT7zpUDy8kB6H9N8ybIr2yc5l0mvdHgK+tzcVvhTvdQAJdxyTjI38YMDNcINb/8fuYrARrbuiXC2iO3dLbpJeOWxySEId32uWKnAaNQGib3PWjtlJri1Wcb+OGaTwfglLs0Z5ygiitH9BFXNuOOSwCuBlSy9wQlfVulziFCoVLoKIxeLuDpMZ/0Tu1j5/SuWM05QbSvir/JwG9Khe8wXYKzTmwKC8PYTR/8kT/AQ8OTlk"
+  "level_name": "Bunker Mentality",
+  "attempts": 64,
+  "realtime": 205.0336,
+  "ticks": 3758,
+  "steps": 302,
+  "bonks": 0,
+  "seed": "e40172e2ecfecc68",
+  "inputs": "eNrFV9sShSAIRKeHHvuE/v8rz3QzEonFS2efGkdwQVYoxh20YTqwf4cD+/ecg4jvV7HtiTlO25BDWT+XVT/8rCKBZMv8F9YnxVjYBm29jIt/OYNpHeCghC7YGHdX4CE5KDmXHEjzGYCk5ME8fd500BrIExeBAAKEdF2kpAGK15DKm9RMrZmOIHhycgeG+LR4XrlVoiUrQcF5kXMzjHPTScvC64XXjWYC1zCEEfGSEGf8K7S3/f3tEv2uS22ob0V1YFwCvFbmryEbD3mtP6kf0vp1R+fZ7OF9D73nrV6gg1qPhtF+ST4gnDERQgMEjRWbFMMI0cpBxHN3VNM4hUg4oXUEClMwXE0tb0FLl5gqgHYYVCTGHwPC05dDOPbnhPgD6F9BCA",
+  "unpauses": 12,
+  "warps_set": 12,
+  "warps_used": 9
 }

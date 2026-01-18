@@ -1,8 +1,10 @@
 {
-  "ticks": 3079,
-  "realtime": 52.316666,
-  "steps": 240,
-  "bonks": 2,
+  "level_name": "Time Lapse",
+  "attempts": 9,
+  "realtime": 59.48565,
+  "ticks": 2544,
+  "steps": 216,
+  "bonks": 0,
   "seed": "def5346f23635ea2",
-  "replay": "eNrNlEkWxCAIRJF24SL3P28vjN2gkcHgS/6SGIaiFJEBEqUCuXHGfz+nCkmXNabFEqNrodHCJNvkBM/LQyhCeoFeKe9QhIujyQvQOZOq2HWRTgDQdzaZsPvYqh4sTgvV+h+HW3wNWVUcXSPj25RoMItTBvfJjprbz6ZiGa55piP8Z6dD5BfgXaO4YbLjQT1A40ID+kjRLHZ1nBhOxm0ULQh+0PWNEhXXCbR/yDiwxa13FNoq4dbGVnjIhvsNylTX3eR4A4JfyPULECFNeYIvuK8oCw"
+  "inputs": "eNrNlc0SgCAIhNHp0Ln3f9h+zFzJFBFn+k6OkwLLStvmL+hgOaGAjxxrF8j2n+/vE7gOODyWdu712kW8n+X2AY8V9yDPBpi/DPqsK1ejdjplL80ziQKhFq4V6whq2BsLWuysoZeGzEVlZ6T8mQ6ZEKgt+gS2C/qQQh8Vsigk83/xLSi74W2ZradgtojqMnE4qWYdOrim1XvS1nLQd6t0v7quZslWJlh/icnkpAFftew2721KfSioy+jvMzLfjLSaMmOr7DmrIFY"
 }

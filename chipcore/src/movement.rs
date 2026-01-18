@@ -429,7 +429,7 @@ pub fn try_terrain_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut 
 		// CC1: Level 109 - Torturechamber
 		Terrain::BearTrap => {
 			if ent.flags & EF_MOMENTUM != 0 {
-				if let Some(step_dir) = ent.step_dir {
+				if let Some(step_dir) = ent.step_dir.or(ent.face_dir) {
 					if try_move(s, phase, ent, step_dir) {
 						return true;
 					}

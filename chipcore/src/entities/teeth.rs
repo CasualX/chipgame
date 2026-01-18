@@ -12,7 +12,7 @@ pub fn create(s: &mut GameState, args: &EntityArgs) -> EntityHandle {
 		step_dir: None,
 		step_spd: BASE_SPD * 2,
 		step_time: 0,
-		flags: 0,
+		flags: EF_MOMENTUM, // HACK: Spawn teeth with momentum, fixes Walls of CC1: Level 148
 	});
 	s.qt.add(handle, args.pos);
 	return handle;

@@ -1,8 +1,13 @@
 {
-  "ticks": 1304,
-  "realtime": 22.133333,
+  "level_name": "Torturechamber",
+  "attempts": 6,
+  "realtime": 51.803566,
+  "ticks": 1254,
   "steps": 122,
   "bonks": 0,
   "seed": "bb16f05352fdbe8a",
-  "replay": "eNrVk0sOwCAIRKmYRhvvf96u/DNA4sq3dpAZIKWdDElXUEpEkEP+BZm3E+6BmR8dGkKhhZbbQpMSUJCsoGO2qUQduYqcA06xOpvfrM71nsc8rc3Mvav+W306rJ81W3XuwKcFythfDt2XlItya27zPDflkfx7Gw80"
+  "inputs": "eNrVkksOgCAMRMsnBg2H8P6nNAYDQz+IccVbEcqUdtqUJLtJWoKcowVNyA+vszX8OoQQ3BgCU4hRfWNUKRkK0hX0GzGVOOaRleZKBbesLwjPwkGlMYy83Itq+LppBuHH2Abmd5Mw40T+U4BRUUlzox85nK1R2dCnjrQ9Gj+9AH5+ELI",
+  "unpauses": 4,
+  "warps_set": 3,
+  "warps_used": 2
 }
