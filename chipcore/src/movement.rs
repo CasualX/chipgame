@@ -499,7 +499,8 @@ pub fn teleport(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 			ent.pos = dest;
 			// Force the entity to move out of the teleporter
 			if try_move(s, phase, ent, step_dir) {
-				break true;
+				// Fixes visual glitch: Don't emit EntityTeleport if they exit the same teleporter they entered
+				break old_pos != dest;
 			}
 		}
 		// Reflect the entity back if they're softlocked
