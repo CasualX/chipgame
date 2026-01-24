@@ -2,17 +2,20 @@ use super::*;
 
 #[derive(Default)]
 pub struct Resources {
+	pub textures: HashMap<String, shade::Texture2D>,
+	pub shaders: HashMap<String, shade::ShaderProgram>,
+
 	pub effects: shade::Texture2D,
 	pub spritesheet_texture: shade::Texture2D,
 	pub spritesheet_meta: chipty::SpriteSheet<chipty::SpriteId>,
 
-	pub shader: shade::Shader,
-	pub shader_shadowmap: shade::Shader,
+	pub shader: shade::ShaderProgram,
+	pub shader_shadowmap: shade::ShaderProgram,
 	pub pixel_art_bias: f32,
 	pub viewport: Bounds2i,
 
-	pub colorshader: shade::Shader,
-	pub uishader: shade::Shader,
+	pub colorshader: shade::ShaderProgram,
+	pub uishader: shade::ShaderProgram,
 	pub menubg: shade::Texture2D,
 	pub menubg_scale: f32,
 
@@ -21,6 +24,7 @@ pub struct Resources {
 
 #[track_caller]
 fn load_png(
+	resx: &mut Resources,
 	g: &mut shade::Graphics,
 	name: Option<&str>,
 	fs: &crate::FileSystem,
@@ -29,7 +33,10 @@ fn load_png(
 ) -> Result<shade::Texture2D, shade::image::LoadImageError> {
 	let data = fs.read(path).expect("Failed to read PNG file");
 	let image = shade::image::DecodedImage::load_memory_png(data.as_slice())?;
-	let tex = g.image(name, &(&image, props));
+	let tex = g.image(&(&image, props));
+	if let Some(name) = name {
+		resx.textures.insert(name.to_string(), tex);
+	}
 	Ok(tex)
 }
 
@@ -39,12 +46,13 @@ impl Resources {
 		for (name, shader) in &config.shaders {
 			let vs = fs.read_to_string(&shader.vertex_shader).expect("Failed to read shader vertex file");
 			let fs = fs.read_to_string(&shader.fragment_shader).expect("Failed to read shader fragment file");
-			g.shader_create(Some(name.as_str()), &vs, &fs);
+			let shader = g.shader_compile(&vs, &fs);
+			resx.shaders.insert(name.to_string(), shader);
 		}
 		for (name, texture) in &config.textures {
-			load_png(g, Some(name.as_str()), fs, &texture.path, &texture.props).expect("Failed to load texture");
+			load_png(resx, g, Some(name.as_str()), fs, &texture.path, &texture.props).expect("Failed to load texture");
 		}
-		let shader = g.shader_create(None, shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
+		let shader = g.shader_compile(shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
 		for (name, font_config) in &config.fonts {
 			let font = fs.read_to_string(&font_config.meta).expect("Failed to read font meta file");
 			let font: shade::msdfgen::FontDto = serde_json::from_str(&font).expect("Failed to parse font meta file");
@@ -61,23 +69,24 @@ impl Resources {
 				wrap_v: shade::TextureWrap::Edge,
 				..Default::default()
 			};
-			let texture = g.image(Some(name), &(&image, &props));
+			let texture = g.image(&(&image, &props));
+			resx.textures.insert(name.to_string(), texture);
 			// let texture = load_png(g, Some(name.as_str()), fs, &font_config.atlas, &).expect("Failed to load font atlas");
 			let font = shade::d2::FontResource { font, shader, texture };
 			resx.font = font;
 		}
 
-		resx.effects = g.texture2d_find("Effects");
-		resx.spritesheet_texture = g.texture2d_find("SpriteSheet");
+		resx.effects = resx.textures.get("Effects").unwrap().clone();
+		resx.spritesheet_texture = resx.textures.get("SpriteSheet").unwrap().clone();
 		let spritesheet_meta = fs.read_to_string("spritesheet.json").expect("Failed to read spritesheet metadata");
 		resx.spritesheet_meta = serde_json::from_str(&spritesheet_meta).expect("Failed to parse spritesheet metadata");
 
-		resx.shader = g.shader_find("PixelArt");
-		resx.shader_shadowmap = g.shader_find("PixelArtShadowMap");
+		resx.shader = resx.shaders.get("PixelArt").unwrap().clone();
+		resx.shader_shadowmap = resx.shaders.get("PixelArtShadowMap").unwrap().clone();
 		resx.pixel_art_bias = config.pixel_art_bias;
-		resx.colorshader = g.shader_find("Color");
-		resx.uishader = g.shader_find("UI");
-		resx.menubg = g.texture2d_find("MenuBG");
+		resx.colorshader = resx.shaders.get("Color").unwrap().clone();
+		resx.uishader = resx.shaders.get("UI").unwrap().clone();
+		resx.menubg = resx.textures.get("MenuBG").unwrap().clone();
 		resx.menubg_scale = 2.0;
 	}
 }
