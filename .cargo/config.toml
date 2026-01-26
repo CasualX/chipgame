@@ -1,0 +1,7 @@
+# Target-specific build config.
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+  '--cfg',
+  'getrandom_backend="custom"',
+]

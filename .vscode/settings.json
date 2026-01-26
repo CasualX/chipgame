@@ -1,0 +1,11 @@
+{
+	"liveServer.settings.port": 5501,
+	"liveServer.settings.ignoreFiles": [
+		"target/**",
+		"save/**",
+		".vscode/**",
+		"**/*.scss",
+		"**/*.sass",
+		"**/*.ts"
+	]
+}

@@ -1,5 +1,11 @@
 use super::*;
 
+#[cfg(target_arch = "wasm32")]
+use shade::webgl::shaders as shaders;
+
+#[cfg(not(target_arch = "wasm32"))]
+use shade::gl::shaders as shaders;
+
 #[derive(Default)]
 pub struct Resources {
 	pub textures: HashMap<String, shade::Texture2D>,
@@ -52,7 +58,7 @@ impl Resources {
 		for (name, texture) in &config.textures {
 			load_png(resx, g, Some(name.as_str()), fs, &texture.path, &texture.props).expect("Failed to load texture");
 		}
-		let shader = g.shader_compile(shade::gl::shaders::MTSDF_VS, shade::gl::shaders::MTSDF_FS);
+		let shader = g.shader_compile(shaders::MTSDF_VS, shaders::MTSDF_FS);
 		for (name, font_config) in &config.fonts {
 			let font = fs.read_to_string(&font_config.meta).expect("Failed to read font meta file");
 			let font: shade::msdfgen::FontDto = serde_json::from_str(&font).expect("Failed to parse font meta file");

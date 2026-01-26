@@ -7,6 +7,7 @@ members = [
 	"./chipgame",
 	"./chipplay",
 	"./chipty",
+	"./chipwasm",
 	"./scripts/chipundat",
 	"./scripts/colorkey",
 	"./scripts/copyrecords",
@@ -38,7 +39,7 @@ flate2 = "1.0"
 basenc = "0.2"
 png = "0.17"
 
-shade = { git = "https://github.com/CasualX/shade", features = ["gl", "msdfgen", "png", "gif"] }
+shade = { git = "https://github.com/CasualX/shade", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
 
 paks = "0.1.1"
 

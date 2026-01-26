@@ -95,7 +95,7 @@ fn load_levelsets(sets: &mut Vec<LevelSet>) {
 	sets.sort_by(|a, b| a.name.cmp(&b.name));
 }
 
-fn load_levelset(fs: &FileSystem, name: String, sets: &mut Vec<LevelSet>) {
+pub fn load_levelset(fs: &FileSystem, name: String, sets: &mut Vec<LevelSet>) {
 	let index: chipty::LevelSetDto = {
 		let index = match fs.read_compressed("index.json") {
 			Ok(data) => data,
@@ -141,8 +141,9 @@ fn load_levelset_dto(fs: Option<&FileSystem>, index: chipty::LevelSetDto, name: 
 	}
 
 	let splash = index.splash.and_then(|s| match fs.unwrap() {
-		FileSystem::StdFs(path) => fs::read(path.join(s)).ok(),
+		FileSystem::Memory(paks, key) => paks.read(s.as_bytes(), key).ok(),
 		FileSystem::Paks(paks, key) => paks.read(s.as_bytes(), key).ok(),
+		FileSystem::StdFs(path) => fs::read(path.join(s)).ok(),
 	});
 
 	let title = index.title;
