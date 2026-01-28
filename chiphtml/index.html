@@ -65,11 +65,17 @@
 				border-radius: 10px;
 				font-size: 12px;
 				line-height: 1.4;
-				max-width: 380px;
+				max-width: 420px;
+				opacity: 50%;
 			}
 
 			#hud .muted {
 				color: var(--muted);
+			}
+
+			#hud.hidden {
+				opacity: 0;
+				pointer-events: none;
 			}
 
 			#touch-controls {
@@ -259,6 +265,7 @@
 			const canvas = document.getElementById("game");
 			const touchRoot = document.getElementById("touch-controls");
 			const touchPad = document.getElementById("touch-pad");
+			const hud = document.getElementById("hud");
 
 			function setStatus(text) {
 				if (statusEl) statusEl.textContent = text;
@@ -409,6 +416,7 @@
 				touchEnabled = shouldEnable;
 				touchRoot.classList.toggle("enabled", touchEnabled);
 				touchRoot.setAttribute("aria-hidden", touchEnabled ? "false" : "true");
+				if (hud) hud.classList.toggle("hidden", touchEnabled);
 				if (!touchEnabled) {
 					touchPressed.clear();
 					for (const btn of touchRoot.querySelectorAll("button.active")) {
@@ -462,7 +470,7 @@
 				const dy = y - rect.height / 2;
 				const minDim = Math.min(rect.width, rect.height);
 				const dist = Math.hypot(dx, dy);
-				if (dist < minDim * 0.18) return null;
+				if (dist < minDim * 0.09) return null;
 				if (Math.abs(dx) > Math.abs(dy)) {
 					return dx > 0 ? "right" : "left";
 				}
@@ -569,6 +577,7 @@
 
 				let wasmMemory = null;
 				const decoder = new TextDecoder();
+				const encoder = new TextEncoder();
 
 				function readUtf8(ptr, len) {
 					if (!wasmMemory || ptr === 0 || len === 0) return "";
@@ -603,6 +612,47 @@
 					console.log("quit_game requested");
 				}
 
+				function read_file(path_ptr, path_len, content_ptr, content_len_ptr) {
+					if (!wasmMemory) return -1;
+					const path = readUtf8(path_ptr, path_len);
+					if (!path || !content_len_ptr) return -1;
+					let content = null;
+					try {
+						content = localStorage.getItem(path);
+					} catch (err) {
+						console.warn("read_file localStorage failed", err);
+						return -1;
+					}
+					if (content === null) return -1;
+					const bytes = encoder.encode(content);
+					const lenView = new Uint32Array(wasmMemory.buffer, content_len_ptr, 1);
+					if (!content_ptr) {
+						lenView[0] = bytes.length;
+						return 0;
+					}
+					const cap = lenView[0] >>> 0;
+					const out = new Uint8Array(wasmMemory.buffer, content_ptr, cap);
+					const toCopy = Math.min(cap, bytes.length);
+					out.set(bytes.subarray(0, toCopy));
+					lenView[0] = toCopy;
+					return 0;
+				}
+
+				function write_file(path_ptr, path_len, content_ptr, content_len) {
+					if (!wasmMemory) return -1;
+					const path = readUtf8(path_ptr, path_len);
+					if (!path || !content_ptr) return -1;
+					const bytes = new Uint8Array(wasmMemory.buffer, content_ptr, content_len);
+					const content = decoder.decode(bytes);
+					try {
+						localStorage.setItem(path, content);
+						return 0;
+					} catch (err) {
+						console.warn("write_file localStorage failed", err);
+						return -1;
+					}
+				}
+
 				setStatus("Loading WASM…");
 				const response = await fetch("./chipwasm.wasm");
 				if (!response.ok) {
@@ -617,6 +667,8 @@
 					play_music,
 					set_title,
 					quit_game,
+					read_file,
+					write_file,
 				};
 				const imports = {
 					webgl: shade,

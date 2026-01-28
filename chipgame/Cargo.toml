@@ -3,6 +3,9 @@ name = "chipgame"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+custom_save_data = []
+
 [dependencies]
 chipdat = { path = "../chipdat" }
 chipcore = { path = "../chipcore" }

@@ -1,4 +1,4 @@
-use std::mem;
+use std::{mem, ptr};
 
 mod api;
 
@@ -113,4 +113,30 @@ pub extern "C" fn draw(instance: *mut Instance, time: f64, width: i32, height: i
 	let g = instance.graphics.as_graphics();
 	instance.resx.viewport.maxs = cvmath::Vec2i(width, height);
 	instance.play.draw(g, &instance.resx, time);
+}
+
+#[no_mangle]
+extern "C" fn chipgame_write_file(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32 {
+	unsafe {
+		api::write_file(path_ptr, path_len, content_ptr, content_len)
+	}
+}
+
+#[no_mangle]
+extern "C" fn chipgame_read_file(path_ptr: *const u8, path_len: usize, content_ptr: *mut String) -> i32 {
+	unsafe {
+		let mut size: usize = 0;
+		if api::read_file(path_ptr, path_len, ptr::null_mut(), &mut size as *mut usize) != 0 {
+			return -1;
+		}
+		let content = &mut *content_ptr;
+		content.as_mut_vec().set_len(0);
+		content.reserve(size);
+		let mut read = size;
+		if api::read_file(path_ptr, path_len, content.as_mut_ptr() as *mut u8, &mut read as *mut usize) != 0 {
+			return -1;
+		}
+		content.as_mut_vec().set_len(read);
+		return 0;
+	}
 }

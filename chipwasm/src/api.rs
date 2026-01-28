@@ -5,6 +5,8 @@ extern "C" {
 	pub fn play_music(music_ptr: *const u8, music_len: usize);
 	pub fn set_title(title_ptr: *const u8, title_len: usize);
 	pub fn quit_game();
+	pub fn read_file(path_ptr: *const u8, path_len: usize, content_ptr: *mut u8, content_len: *mut usize) -> i32;
+	pub fn write_file(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32;
 }
 
 // Support getrandom in wasm builds

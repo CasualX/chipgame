@@ -371,8 +371,8 @@ impl FxState {
 			props: shade::TextureProps {
 				mip_levels: 1,
 				usage: shade::TextureUsage!(DEPTH_STENCIL_TARGET | SAMPLED),
-				filter_min: shade::TextureFilter::Linear,
-				filter_mag: shade::TextureFilter::Linear,
+				filter_min: shade::TextureFilter::Nearest,
+				filter_mag: shade::TextureFilter::Nearest,
 				wrap_u: shade::TextureWrap::Border,
 				wrap_v: shade::TextureWrap::Border,
 				border_color: [1.0, 1.0, 1.0, 1.0],

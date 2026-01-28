@@ -529,6 +529,7 @@ fn play_fx_game_over(this: &mut PlayState) {
 	this.menu.stack.push(menu::Menu::GameOver(menu));
 }
 
+#[cfg(not(feature = "custom_save_data"))]
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	let replay = fx.game.save_replay(fx.game_realtime);
 	let replay = chipty::ReplayDto {
@@ -539,9 +540,10 @@ fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	};
 	let record = serde_json::to_string_pretty(&replay).unwrap();
 	let path = format!("save/{}/replay/level{}.attempt{}.json", lvset.name, fx.level_number, fx.game.ps.attempts);
-	let path = path::Path::new(&path);
-	let _ = fs::create_dir(path.parent().unwrap_or(path));
-	if let Err(err) = fs::write(path, record) {
+	if let Err(err) = write_file(&path::Path::new(&path), &record) {
 		eprintln!("Error saving replay: {}", err);
 	}
 }
+
+#[cfg(feature = "custom_save_data")]
+fn save_replay(_lvset: &LevelSet, _fx: &fx::FxState) {}

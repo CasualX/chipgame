@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 use super::*;
 
+use chipty::{SaveFileDto, HighScoresDto};
+
 pub struct Scores {
 	pub ticks: i32,
 	pub steps: i32,
@@ -130,7 +132,7 @@ impl SaveData {
 		};
 
 		let content = serde_json::to_string_pretty(&save_data).unwrap();
-		match fs::write(&file_name, content) {
+		match write_file(&path::Path::new(&file_name), &content) {
 			Ok(_) => {}
 			Err(e) => eprintln!("Error saving {}: {}", file_name, e),
 		}
@@ -158,7 +160,7 @@ impl SaveData {
 		};
 		this.unlocked_levels[0] = true;
 
-		let Ok(content) = fs::read_to_string(&file_name) else {
+		let Ok(content) = read_file(path::Path::new(&file_name)) else {
 			return this;
 		};
 		let Some(dto) = serde_json::from_str::<SaveFileDto>(&content).ok() else {
@@ -201,9 +203,5 @@ impl SaveData {
 }
 
 fn get_levelset_state_filename(level_set: &LevelSet) -> String {
-	let filename = format!("save/{}/state.json", level_set.name);
-	let _ = fs::create_dir(path::Path::new(&filename).parent().unwrap());
-	filename
+	format!("save/{}/state.json", level_set.name)
 }
-
-pub use chipty::{SaveFileDto, HighScoresDto, OptionsDto};
