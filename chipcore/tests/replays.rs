@@ -34,8 +34,11 @@ fn play(level: &chipty::LevelDto, replay: &chipty::ReplayDto) -> bool {
 fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 	eprintln!("\x1b[33mLevels\x1b[m: {:?}", levels_dir);
 	eprintln!("\x1b[33mReplays\x1b[m: {:?}", replays_dir);
-	let mut fail_count = 0usize;
-	for level_number in 1..150 {
+	let mut fail_count = 0;
+	let mut tested_count = 0;
+	const NLEVELS: i32 = 149;
+	for i in 0..NLEVELS {
+		let level_number = i + 1;
 		let level_path = levels_dir.join(format!("level{level_number}.json"));
 		let level_content = fs::read_to_string(&level_path).unwrap();
 		let level: chipty::LevelDto = serde_json::from_str(&level_content).unwrap();
@@ -44,12 +47,15 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 		if let Ok(replay_content) = fs::read_to_string(&replay_path) {
 			let replay: chipty::ReplayDto = serde_json::from_str(&replay_content).unwrap();
 			eprintln!("Playing: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
+			tested_count += 1;
 			fail_count += !play(&level, &replay) as usize;
 		}
 		else {
 			eprintln!("\x1b[31mSkipped\x1b[m: level{level_number} {password:?}: \x1b[32m{}\x1b[m", level.name);
 		}
 	}
+	let tested_pct = (tested_count as f64 / NLEVELS as f64) * 100.0;
+	eprintln!("\x1b[36mCoverage\x1b[m: {}/{} levels tested ({:.1}%)", tested_count, NLEVELS, tested_pct);
 	if fail_count > 0 {
 		panic!("{} replay(s) failed", fail_count);
 	}
