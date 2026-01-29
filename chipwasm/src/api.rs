@@ -1,8 +1,10 @@
 
 extern "C" {
 	fn randomBytes(ptr: *mut u8, len: usize);
-	pub fn play_sound(sound_ptr: *const u8, sound_len: usize);
-	pub fn play_music(music_ptr: *const u8, music_len: usize);
+	pub fn play_sound(sound_id: i32);
+	pub fn play_music(music_id: i32);
+	pub fn register_sound(sound_id: i32, data_ptr: *const u8, data_len: usize);
+	pub fn register_music(music_id: i32, data_ptr: *const u8, data_len: usize);
 	pub fn set_title(title_ptr: *const u8, title_len: usize);
 	pub fn quit_game();
 	pub fn read_file(path_ptr: *const u8, path_len: usize, content_ptr: *mut u8, content_len: *mut usize) -> i32;

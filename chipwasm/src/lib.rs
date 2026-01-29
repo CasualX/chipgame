@@ -11,15 +11,14 @@ const CCLP4_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp4.pa
 const CCLP5_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp5.paks");
 
 fn play_sound(sound: chipty::SoundFx) {
-	let sound_json = serde_json::to_string(&sound).unwrap();
 	unsafe {
-		api::play_sound(sound_json.as_ptr(), sound_json.len());
+		api::play_sound(sound as i32);
 	}
 }
 fn play_music(music: Option<chipty::MusicId>) {
-	let music_json = serde_json::to_string(&music).unwrap();
+	let id = music.map(|m| m as i32).unwrap_or(-1);
 	unsafe {
-		api::play_music(music_json.as_ptr(), music_json.len());
+		api::play_music(id);
 	}
 }
 fn set_title(state: &chipgame::play::PlayState) {
@@ -73,6 +72,7 @@ pub extern "C" fn create() -> *mut Instance {
 	let paks = paks::MemoryReader::from_bytes(DATA_PAK, &key).expect("Failed to open data.paks");
 	let fs = chipgame::FileSystem::Memory(paks, key.clone());
 	instance.resx.load(&fs, &config, instance.graphics.as_graphics());
+	register_audio_assets(&fs, &config);
 
 	load_levelset(CCLP1_PAK, "cclp1".to_string(), &mut instance.play);
 	load_levelset(CCLP2_PAK, "cclp2".to_string(), &mut instance.play);
@@ -84,6 +84,24 @@ pub extern "C" fn create() -> *mut Instance {
 
 	Box::into_raw(instance)
 }
+
+fn register_audio_assets(fs: &chipgame::FileSystem, config: &chipgame::config::Config) {
+	for (&fx, path) in &config.sound_fx {
+		if let Ok(data) = fs.read(path) {
+			unsafe {
+				api::register_sound(fx as i32, data.as_ptr(), data.len());
+			}
+		}
+	}
+	for (&music, path) in &config.music {
+		if let Ok(data) = fs.read(path) {
+			unsafe {
+				api::register_music(music as i32, data.as_ptr(), data.len());
+			}
+		}
+	}
+}
+
 
 #[no_mangle]
 pub extern "C" fn destroy(instance: *mut Instance) {

@@ -420,10 +420,43 @@
 			let gameActive = false;
 			let activationSeen = false;
 			let activationPointerActive = false;
+			let audioCtx = null;
+			let audioReady = false;
+			let audioUnlockRequested = false;
+			const soundBank = new Map();
+			const musicBank = new Map();
+			let musicSource = null;
+			let currentMusicKey = null;
+
+			function ensureAudioContext() {
+				if (audioCtx) return audioCtx;
+				const Ctx = window.AudioContext || window.webkitAudioContext;
+				if (!Ctx) return null;
+				audioCtx = new Ctx();
+				audioReady = false;
+				return audioCtx;
+			}
+
+			function resumeAudio() {
+				if (audioUnlockRequested) return;
+				audioUnlockRequested = true;
+				const ctx = ensureAudioContext();
+				if (!ctx) return;
+				if (ctx.state === "suspended") {
+					ctx.resume().finally(() => {
+						audioUnlockRequested = false;
+						audioReady = ctx.state === "running";
+					});
+				} else {
+					audioUnlockRequested = false;
+					audioReady = ctx.state === "running";
+				}
+			}
 			window.addEventListener("keydown", (e) => {
 				pressed.add(e.code);
 				keyboardSeen = true;
 				lastNonTouchInput = performance.now();
+				resumeAudio();
 				// Prevent page scroll/shortcuts for core keys.
 				if (
 					e.code.startsWith("Arrow") ||
@@ -605,6 +638,7 @@
 					if (!id) return;
 					requestFullscreenOnTouch();
 					requestLandscapeLock();
+					resumeAudio();
 					e.preventDefault();
 					touchPressed.add(id);
 					btn.classList.add("active");
@@ -634,6 +668,7 @@
 			if (loadingScreen) {
 				loadingScreen.addEventListener("pointerdown", (e) => {
 					activationPointerActive = true;
+					resumeAudio();
 					if (e.pointerType === "touch") {
 						requestFullscreenOnTouch();
 						requestLandscapeLock();
@@ -733,14 +768,79 @@
 					}
 				}
 
-				// chipwasm/src/api.rs imports (audio unimplemented for now)
-				function play_sound(sound_ptr, sound_len) {
-					// const json = readUtf8(sound_ptr, sound_len);
-					// console.debug("play_sound", json);
+				function play_sound(sound_id) {
+					const ctx = ensureAudioContext();
+					if (!ctx) return;
+					const entry = soundBank.get(sound_id | 0);
+					if (!entry || !entry.buffer || ctx.state !== "running") return;
+					const source = ctx.createBufferSource();
+					source.buffer = entry.buffer;
+					source.connect(entry.gain);
+					source.start(0);
 				}
-				function play_music(music_ptr, music_len) {
-					// const json = readUtf8(music_ptr, music_len);
-					// console.debug("play_music", json);
+
+				function stopMusic() {
+					if (musicSource) {
+						try {
+							musicSource.stop();
+						} catch {
+							// ignore
+						}
+						musicSource.disconnect();
+						musicSource = null;
+						currentMusicKey = null;
+					}
+				}
+
+				function play_music(music_id) {
+					const ctx = ensureAudioContext();
+					if (!ctx) return;
+					const id = music_id | 0;
+					if (id < 0) {
+						stopMusic();
+						return;
+					}
+					if (currentMusicKey === id && musicSource) return;
+					const entry = musicBank.get(id);
+					if (!entry || !entry.buffer || ctx.state !== "running") return;
+					stopMusic();
+					const source = ctx.createBufferSource();
+					source.buffer = entry.buffer;
+					source.loop = true;
+					source.connect(entry.gain);
+					source.start(0);
+					musicSource = source;
+					currentMusicKey = id;
+				}
+
+				function register_sound(sound_id, data_ptr, data_len) {
+					const ctx = ensureAudioContext();
+					if (!ctx || !wasmMemory) return;
+					const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
+					const copy = new Uint8Array(bytes);
+					ctx.decodeAudioData(copy.buffer).then((buffer) => {
+						const gain = ctx.createGain();
+						gain.gain.value = 1.0;
+						gain.connect(ctx.destination);
+						soundBank.set(sound_id | 0, { buffer, gain });
+					}).catch((err) => {
+						console.warn("decodeAudioData failed", sound_id, err);
+					});
+				}
+
+				function register_music(music_id, data_ptr, data_len) {
+					const ctx = ensureAudioContext();
+					if (!ctx || !wasmMemory) return;
+					const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
+					const copy = new Uint8Array(bytes);
+					ctx.decodeAudioData(copy.buffer).then((buffer) => {
+						const gain = ctx.createGain();
+						gain.gain.value = 0.375;
+						gain.connect(ctx.destination);
+						musicBank.set(music_id | 0, { buffer, gain });
+					}).catch((err) => {
+						console.warn("decodeAudioData failed", music_id, err);
+					});
 				}
 				function set_title(title_ptr, title_len) {
 					document.title = readUtf8(title_ptr, title_len) || "ChipGame (WASM)";
@@ -802,6 +902,8 @@
 					randomBytes,
 					play_sound,
 					play_music,
+					register_sound,
+					register_music,
 					set_title,
 					quit_game,
 					read_file,
@@ -822,6 +924,37 @@
 					throw new Error("WASM exports missing one of: create/think/draw");
 				}
 
+				setLoadingStatus("Ready", 1);
+				setReadyMessage("Press any input to begin");
+				showLoadingReady(true);
+
+				await new Promise((resolve) => {
+					let resolved = false;
+					const done = () => {
+						if (resolved) return;
+						resolved = true;
+						window.removeEventListener("keydown", onKey);
+						window.removeEventListener("pointerdown", onPointer);
+						window.removeEventListener("touchstart", onPointer);
+						resolve();
+					};
+					const onKey = () => {
+						resumeAudio();
+						done();
+					};
+					const onPointer = () => {
+						resumeAudio();
+						done();
+					};
+					window.addEventListener("keydown", onKey, { once: true });
+					window.addEventListener("pointerdown", onPointer, { once: true });
+					window.addEventListener("touchstart", onPointer, { once: true, passive: true });
+				});
+
+				activationSeen = true;
+				setReadyMessage("Release all input to begin");
+				showLoadingReady(true);
+
 				setLoadingStatus("Starting…", 0.8);
 				let gamePtr = 0;
 				try {
@@ -832,9 +965,6 @@
 				if (!gamePtr) {
 					throw new Error("create() returned null (0) instance pointer");
 				}
-				setLoadingStatus("Ready", 1);
-				setReadyMessage("Press any input to begin");
-				showLoadingReady(true);
 
 				// Fixed-step think @ 60Hz, draw @ RAF.
 				const STEP_MS = 1000 / 60;
