@@ -58,24 +58,104 @@
 				position: absolute;
 				left: 12px;
 				top: 12px;
-				padding: 10px 12px;
-				background: var(--panel);
-				backdrop-filter: blur(10px);
+				padding: 6px 8px;
+				background: rgba(3, 7, 18, 0.72);
+				backdrop-filter: blur(8px);
 				border: 1px solid rgba(108, 240, 255, 0.18);
-				border-radius: 10px;
-				font-size: 12px;
-				line-height: 1.4;
-				max-width: 420px;
-				opacity: 50%;
+				border-radius: 8px;
+				font-size: 11px;
+				line-height: 1.2;
+				color: var(--text);
+				min-width: 120px;
+				text-align: center;
+				display: none;
 			}
 
-			#hud .muted {
+			#hud.visible {
+				display: block;
+			}
+
+			#loading-screen {
+				position: absolute;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				background-image: url("./menubg.png");
+				background-repeat: repeat;
+				background-position: center;
+				background-size: 50%;
+				image-rendering: pixelated;
+				z-index: 3;
+			}
+
+			#loading-panel {
+				width: min(760px, 94vw);
+				padding: 36px;
+				border-radius: 16px;
+				background: rgba(2, 6, 23, 0.75);
+				border: 1px solid rgba(148, 163, 184, 0.25);
+				box-shadow: 0 30px 80px rgba(2, 6, 23, 0.55);
+				backdrop-filter: blur(10px);
+			}
+
+			#loading-title {
+				font-size: 28px;
+				font-weight: 700;
+				letter-spacing: 0.3px;
+				margin-bottom: 6px;
+			}
+
+			#loading-subtitle {
 				color: var(--muted);
+				font-size: 16px;
+				margin-bottom: 22px;
 			}
 
-			#hud.hidden {
-				opacity: 0;
-				pointer-events: none;
+			#loading-bar {
+				height: 14px;
+				border-radius: 3px;
+				background: rgba(148, 163, 184, 0.2);
+				overflow: hidden;
+				margin-bottom: 16px;
+			}
+
+			#loading-bar > span {
+				display: block;
+				height: 100%;
+				width: 0%;
+				background: linear-gradient(90deg, rgba(56, 189, 248, 0.7), rgba(14, 165, 233, 0.95));
+				transition: width 180ms ease;
+			}
+
+			#loading-status {
+				font-size: 16px;
+				color: var(--text);
+				margin-bottom: 22px;
+			}
+
+			#loading-hint {
+				font-size: 16px;
+				color: var(--muted);
+				line-height: 1.65;
+			}
+
+			#loading-hint strong {
+				color: var(--text);
+			}
+
+			#loading-ready {
+				margin-top: 20px;
+				padding: 12px 16px;
+				border-radius: 10px;
+				background: rgba(30, 64, 175, 0.22);
+				border: 1px solid rgba(59, 130, 246, 0.35);
+				color: #bfdbfe;
+				font-size: 16px;
+				display: none;
+			}
+
+			#loading-screen.ready #loading-ready {
+				display: block;
 			}
 
 			#touch-controls {
@@ -237,10 +317,20 @@
 	<body>
 		<div id="root">
 			<canvas id="game"></canvas>
-			<div id="hud">
-				<div><strong>ChipGame (WASM)</strong></div>
-				<div class="muted">Arrows/WASD move · Space=A · Backspace=B · Enter=Start · Shift=Select</div>
-				<div id="status" class="muted">Loading…</div>
+			<div id="hud" class="visible">draw 0fps · think 0hz</div>
+			<div id="loading-screen" aria-live="polite">
+				<div id="loading-panel">
+					<div id="loading-title">Play ChipGame!</div>
+					<div id="loading-subtitle">Loading the game session</div>
+					<div id="loading-bar"><span></span></div>
+					<div id="loading-status">Starting…</div>
+					<div id="loading-hint">
+						<strong>Keyboard:</strong> Arrows/WASD move, A=Space, B=Backspace, Start=Enter, Select=Shift<br />
+						<strong>Gamepad:</strong> D-Pad or left stick moves, A, B, Start, Select<br />
+						<strong>Touch:</strong> On-screen pad + buttons supported
+					</div>
+					<div id="loading-ready">Press any input to begin</div>
+				</div>
 			</div>
 			<div id="touch-controls" aria-hidden="true">
 				<div class="pad" id="touch-pad" aria-hidden="true">
@@ -261,23 +351,40 @@
 		<script type="module">
 			import { createWasmAPI } from "./shade.js";
 
-			const statusEl = document.getElementById("status");
+			const loadingStatusEl = document.getElementById("loading-status");
+			const loadingScreen = document.getElementById("loading-screen");
+			const loadingBar = document.querySelector("#loading-bar > span");
+			const loadingReady = document.getElementById("loading-ready");
 			const canvas = document.getElementById("game");
 			const touchRoot = document.getElementById("touch-controls");
 			const touchPad = document.getElementById("touch-pad");
 			const hud = document.getElementById("hud");
 
-			function setStatus(text) {
-				if (statusEl) statusEl.textContent = text;
+			function setLoadingStatus(text, progress) {
+				if (loadingStatusEl) loadingStatusEl.textContent = text;
+				if (typeof progress === "number" && loadingBar) {
+					const clamped = Math.max(0, Math.min(1, progress));
+					loadingBar.style.width = `${Math.round(clamped * 100)}%`;
+				}
+			}
+
+			function showLoadingReady(show) {
+				if (!loadingScreen) return;
+				loadingScreen.classList.toggle("ready", show);
+				if (loadingReady) loadingReady.style.display = show ? "block" : "none";
+			}
+
+			function setReadyMessage(text) {
+				if (loadingReady) loadingReady.textContent = text;
 			}
 
 			window.addEventListener("error", (e) => {
 				console.error("window.error", e.error || e.message || e);
-				setStatus(String(e.error?.message || e.message || e));
+				setLoadingStatus(String(e.error?.message || e.message || e));
 			});
 			window.addEventListener("unhandledrejection", (e) => {
 				console.error("unhandledrejection", e.reason);
-				setStatus(String(e.reason?.message || e.reason || e));
+				setLoadingStatus(String(e.reason?.message || e.reason || e));
 			});
 
 			function resizeCanvasToDisplaySize() {
@@ -310,6 +417,9 @@
 			let lastNonTouchInput = performance.now();
 			let padTouchId = null;
 			let padDir = null;
+			let gameActive = false;
+			let activationSeen = false;
+			let activationPointerActive = false;
 			window.addEventListener("keydown", (e) => {
 				pressed.add(e.code);
 				keyboardSeen = true;
@@ -416,7 +526,6 @@
 				touchEnabled = shouldEnable;
 				touchRoot.classList.toggle("enabled", touchEnabled);
 				touchRoot.setAttribute("aria-hidden", touchEnabled ? "false" : "true");
-				if (hud) hud.classList.toggle("hidden", touchEnabled);
 				if (!touchEnabled) {
 					touchPressed.clear();
 					for (const btn of touchRoot.querySelectorAll("button.active")) {
@@ -443,6 +552,16 @@
 					}
 				} catch {
 					// ignore
+				}
+			}
+
+			async function requestLandscapeLock() {
+				const orientation = screen && screen.orientation;
+				if (!orientation || !orientation.lock) return;
+				try {
+					await orientation.lock("landscape");
+				} catch {
+					// ignore (unsupported or denied)
 				}
 			}
 
@@ -485,6 +604,7 @@
 					const id = btn.getAttribute("data-btn");
 					if (!id) return;
 					requestFullscreenOnTouch();
+					requestLandscapeLock();
 					e.preventDefault();
 					touchPressed.add(id);
 					btn.classList.add("active");
@@ -511,6 +631,22 @@
 				}, { passive: false });
 			}
 
+			if (loadingScreen) {
+				loadingScreen.addEventListener("pointerdown", (e) => {
+					activationPointerActive = true;
+					if (e.pointerType === "touch") {
+						requestFullscreenOnTouch();
+						requestLandscapeLock();
+					}
+				});
+				loadingScreen.addEventListener("pointerup", () => {
+					activationPointerActive = false;
+				});
+				loadingScreen.addEventListener("pointercancel", () => {
+					activationPointerActive = false;
+				});
+			}
+
 			if (touchPad) {
 				touchPad.addEventListener("touchstart", (e) => {
 					if (!touchEnabled) return;
@@ -519,6 +655,7 @@
 					if (!touch) return;
 					padTouchId = touch.identifier;
 					requestFullscreenOnTouch();
+					requestLandscapeLock();
 					e.preventDefault();
 					setPadDirection(getPadDirectionFromTouch(touch));
 				}, { passive: false });
@@ -567,7 +704,7 @@
 			});
 
 			async function load() {
-				setStatus("Initializing WebGL…");
+				setLoadingStatus("Initializing WebGL…", 0.1);
 				const shade = createWasmAPI(canvas, {
 					alpha: false,
 					desynchronized: true,
@@ -653,7 +790,7 @@
 					}
 				}
 
-				setStatus("Loading WASM…");
+				setLoadingStatus("Loading WASM…", 0.25);
 				const response = await fetch("./chipwasm.wasm");
 				if (!response.ok) {
 					throw new Error(`Failed to fetch chipwasm.wasm: ${response.status} ${response.statusText}`);
@@ -675,6 +812,7 @@
 					env,
 				};
 
+				setLoadingStatus("Compiling WASM…", 0.45);
 				const { instance } = await WebAssembly.instantiate(await response.arrayBuffer(), imports);
 				shade.bindInstance(instance);
 				wasmMemory = instance.exports.memory;
@@ -684,7 +822,7 @@
 					throw new Error("WASM exports missing one of: create/think/draw");
 				}
 
-				setStatus("Starting…");
+				setLoadingStatus("Starting…", 0.8);
 				let gamePtr = 0;
 				try {
 					gamePtr = exports.create();
@@ -694,7 +832,9 @@
 				if (!gamePtr) {
 					throw new Error("create() returned null (0) instance pointer");
 				}
-				setStatus("Running");
+				setLoadingStatus("Ready", 1);
+				setReadyMessage("Press any input to begin");
+				showLoadingReady(true);
 
 				// Fixed-step think @ 60Hz, draw @ RAF.
 				const STEP_MS = 1000 / 60;
@@ -713,11 +853,27 @@
 					updateTouchVisibility();
 
 					const buttons = getButtonsBitmask();
+					const activationInput = buttons !== 0 || activationPointerActive;
+					if (!gameActive) {
+						resizeCanvasToDisplaySize();
+						if (!activationSeen && activationInput) {
+							activationSeen = true;
+							setReadyMessage("Release all input to begin");
+							showLoadingReady(true);
+						}
+						if (activationSeen && !activationInput) {
+							gameActive = true;
+							if (loadingScreen) loadingScreen.style.display = "none";
+						}
+						requestAnimationFrame(frame);
+						return;
+					}
+
 					while (acc >= STEP_MS) {
 						try {
 							exports.think(gamePtr, buttons);
 						} catch (err) {
-							setStatus(`think() trapped: ${err && err.message ? err.message : String(err)}`);
+							setLoadingStatus(`think() trapped: ${err && err.message ? err.message : String(err)}`);
 							return;
 						}
 						thinkCount++;
@@ -728,7 +884,7 @@
 					try {
 						exports.draw(gamePtr, now / 1000.0, width, height);
 					} catch (err) {
-						setStatus(`draw() trapped: ${err && err.message ? err.message : String(err)}`);
+						setLoadingStatus(`draw() trapped: ${err && err.message ? err.message : String(err)}`);
 						return;
 					}
 					drawCount++;
@@ -737,7 +893,9 @@
 						const secs = (now - lastHud) / 1000;
 						const fps = Math.round(drawCount / secs);
 						const tps = Math.round(thinkCount / secs);
-						setStatus(`Running · ${width}×${height} · draw ${fps}fps · think ${tps}hz`);
+						if (hud) {
+							hud.textContent = `draw ${fps}fps · think ${tps}hz`;
+						}
 						drawCount = 0;
 						thinkCount = 0;
 						lastHud = now;
