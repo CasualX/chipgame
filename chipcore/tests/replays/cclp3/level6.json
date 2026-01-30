@@ -1,8 +1,10 @@
 {
-  "ticks": 2123,
-  "realtime": 37.516666,
-  "steps": 171,
-  "bonks": 1,
-  "seed": "eca9c46b813b0913",
-  "replay": "eNq9lesOBBEMhWuJkPT9n3c3MSjTulX2+zOJmDqnF0JQAy4BnytYk6kBfToBMfwLfEx5r7TjE+c/568jwEPZCDVpw1INIJtyqLIWjWGq0gPmCBqwdZlrgeh6BO2y8w0Ripbto77yPzkd3JRi+izDvzM6muUu9URx9cKUY5kF9UJ/Mv0GNO5b3WDqmKafZVTsEH/kH6jZQbuSGS/TGMfltjeEcqLFcoXFPm/8WMaiu8bSQNdbFfnkq+4UeoPuPqYtyodvc14F0XEysl+mLR3W"
+  "level_name": "Thieves and Teleports",
+  "attempts": 9,
+  "realtime": 54.550125,
+  "ticks": 2004,
+  "steps": 167,
+  "bonks": 0,
+  "seed": "bf0b7efc78371655",
+  "inputs": "eNqtVUEOgCAMK4YD/3+xBzV2KyOb0iOZo+06HCMFPOge9zkXtgtUb0qkJ9cf2zHv77hhbAXpujX+1WCs4o5mLqzFeGsAB/WHR009+S4oep+nQ77V+GAtG54bIm6sxabsRSbobSNQz4DojRrr2tEcIf6E5NTbDBJehdp1jnw+EqS50yf+0ayjnGjEJjOS44Kffis+Z3XheYtoosouk+HgWdI9nQir7lfmUeYv+LLqaH78FjbctX7bT76EFeg"
 }

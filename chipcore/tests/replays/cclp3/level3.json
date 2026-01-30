@@ -1,8 +1,13 @@
 {
-  "ticks": 5676,
-  "realtime": 96.28333,
-  "steps": 515,
-  "bonks": 3,
-  "seed": "fc897d8304dce50b",
-  "replay": "eNrtl+GuwyAIhWnxGl14/+e9S9bMboUCis2S7fvZWItwPNBSOGpdZGC3kCg1qIic7IfrBi4j1Ae2xcByXCUf6PByeuf+bGWRPiwsb+S298okDVr1KpPeMXJiAWOda9GBFA0JpVvjAPW+PAswcj4oZTyDB6G7tQGfgCLJKUiSGfOsU/7S1UDETcxZMBBfuUhXO+lC36QuKcnuTW4MKdy3l9qvE9TtifPAAOtRg4agZNaBbjbHJXiR451uSYGvc8JYqzi5UNI4FALyeePl4zFc0M69DYguI1ErHtkBsGv7Ke7ll+mCQYPm63W69si36BPkKPeBCacll85tnkoRIZhi6E7zub0BuFLdPSmJ/yBgqju5PoG7W2q5pjdX6XYxEpFhJvtxOXYFCX/HuX9Ut8224GvHXqcxROFtKxQf5JxATRml0CBrwE7xA8UXYBpHuSaA0rTVGuM/89VQ1g"
+  "level_name": "A Walk in the Park",
+  "attempts": 22,
+  "realtime": 295.26343,
+  "ticks": 5557,
+  "steps": 509,
+  "bonks": 1,
+  "seed": "ba488a144ed64a45",
+  "inputs": "eNrNV0luwzAMnBo66Bn9/yuL1KlBmxwuWoLOIRACRhxuI6Z3F3ihvfE6ExN8KZzfH79gNjdTXPfjbn+dpU0nNo+z55MF3R7443aEuPwm7CFzS3Mlci6/T/JhXtFYjCL9YEWKO8ZwMAXTL/J1SeUEbj9D9/N4JG4Or7jiW0b7Af8AkkfbiJQaDMPuwE/E5bWGpd4jF03GlVEM1u33Dn+fvyVkAXoauhGZTSY067ka6B+w8RziFksnkXibm/xJH8O0VG2YETBVlDyrfcU2G5b/bL0qrS2nZ4feBXnzqkxZVaIGkQz1KLq7JpO2VdIfTNNeILOUjy1KbELnalqr/LEQy57qPfVl3OI8BJv+LIdyLep5XjNHnt+Yj6tjxsqV8/sQLD1HSNe3EjtZDRPbzmnFeOgKnQdGXKfBuf/gmqyZnJ8sitL9Np+BebTvf9hXNr1MT6o38dNvDdPV3XxQ5NN256cveB/h7jbL38S454Edb7Hll5QRe73yuZvdD61/Gf5Ope1/ANl6Rq8",
+  "unpauses": 9,
+  "warps_set": 9,
+  "warps_used": 8
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 7033,
-  "realtime": 118.65,
-  "steps": 603,
-  "bonks": 7,
-  "seed": "8d14369c1d013999",
-  "replay": "eNrNWFtywzAIJKajCRnd/7xNm3GsB4hFVhvvRz5i2RKwy2Jv2wv0ZYM2HaldR3cXRLdZkLc/AiuWFlo+Ur+MRwfmDYcXS5/aPpFSXhb9TCI/q56/6nW5hyDhkk0gGanJQ5bpOFcjmDQJWcwKd3QB5be+9us55zjHi+hrpYq6PwX1RIMblFJU1/qY9BiOc4sskR3eSIzeprWzOkSbpzQtG5AIbj6Zbx8HRdsLRRT1qsZbSVnp5YR0lFKI7rrh+QniITX/5YydrSSqLZFahaN2xfrdIZso+i5oMBltaaTllUB+VX6hdq2WN0nJDA1nBi2IhNb0CqBjcgjUqy0adwQoGjizNXoltdJjWfFEs8macbNmKKT4Qa66MGT+TUSoZZG7y65NESRZRa54r8LjcUUaoj63AM8UYjXwn9OjnU1tdniTa9HFi4Z8rDz+rLlABgspNA5FYj5OosRtBReEeM6zDLz0lWHFm5A5nJpa2nFGeWm7GJBZltRZkaGaQrLYcxrtV8i76rABKLCm5FG06Y05Jq5CcDSSHqOL+FPQWz9giCDD0imhTlTaLJ1MzWQnmYHisb4f6fB012Hw8NMGCaorbpIfd4MUZu6e73P6+fMvKjSukPjG/+/Tdlo3K4xVVCoJEKZPIc8JkUdBjuo8B7NlODuxrw+69cW9EZs7I7MpsjGyKxYAci5k+vjFN/HQbvU"
+  "level_name": "Suction Solution",
+  "attempts": 13,
+  "realtime": 175.95145,
+  "ticks": 6834,
+  "steps": 601,
+  "bonks": 0,
+  "seed": "676ede11b9f36ee4",
+  "inputs": "eNrNWMtywjAMFG6GyYFD//9rW5qCH9rVI04AnRiPLOuxWimU8idylwWK/EvpBOrL6snvrcteUT4U6rMdibKjpGpqA62O52/kLSOfnahEin5P62yi/VqDAi2oSMu8IAQ+/V8Tor2VVCUiwEB4MG4AaGC/G7v12EIzdRGhojlvsyo+9rr8+frUf5atvsokZckaBsOimOcdbd/G7gf9V3mIl8XAwMuFNy7hE3FCIfoawUOvj81KHHIqCiiVRUz8rw8gwhcDiFXFp+QOnwbeDP8zTLtiPjGyNuIZediHp4inPZdIqVjLUyaXkSf9CQWnw5LO56ukBxDJJORPVo6L6kfcF5GcD5gslgrHgeqvagdvLsOFasZlW7Q45jjf6odq1Z5OQvI5pvBjMEk44RARtvw7G134E2KLIADNbkbpc44WiwNTqRgmQpt60/99E18S+9T0g+UNQmkx01lgUkcuJFbAN4lb6/4bXM/60IYcaVI25UVvI+p3DOnG/wl+XJ0Pnp3lLMnhVsBuJmCjCNPFJ8yfZKp29Vpq0gnlUvL14esT+6fkk0U/QSfRry1jo7D1Z79qM82T7ZFDCFnke8/dHYRSb6Oz8MuXk0VolRyFu84jMKvcsJ8nN96j5nwDMaIReLLm0kRf9T5Q7S+uE7AjrkcRZ2pkhsr1upm5xdv/YbU9dOHYQ8nSugUwqZ0xHq65mjS0RgzB/EBS/AGmbVWS",
+  "unpauses": 8,
+  "warps_set": 6,
+  "warps_used": 3
 }

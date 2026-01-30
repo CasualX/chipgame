@@ -1,11 +1,13 @@
 {
   "level_name": "Entrance Examination",
-  "attempts": 14,
-  "realtime": 205.53755,
-  "ticks": 8068,
-  "steps": 625,
-  "bonks": 12,
-  "seed": "4484d887c517b927",
-  "inputs": "eNrdWEFywjAMlCHDmBtP6FP6/1cVCCSypbWlyIRM99QxTrxarRS5OT9wTQiUZxBbu77WrnfMK+fzyQZ6IJegyY7l4ftrUhf8qGI7pnu5vE9a186tE4iT68Z/UUKZsa5nQHrG8iqNTiW01Pqp3MqhWE4WQamIWKbnjYWIKasWqRcOcrMWptCVK2sKts2imaQtr2HkoJEM8qS+84aCcKmzeIj7g7tF+3tivq33yFVb2/A+0bJ32htlLQ/nAHqFrOWqufDHUbOPaK2ferupdW46i1C9FbHoO2SM9Bk/ID37Hkb5ej0s63ECf3M/BGoHfoMsHg55clMFSNX6XU7/DptiUTXhX1GzP/tYdFPyHm6KY7rPYfrzKD40qj8cTJ+F0D/jMyZfdDg/j8vXi1KERb24tZUhboG0Fzc5/uPJgbrHOttziH/34t2f2cI+ybtge12EatOg80BsjZHw3R/WUXPuTQNBEQ0rPv5ZaEwswdkV+Sor83mr3CnW9/T3RmZLi3A8j95DVhPYbOboh88nnHzc+jbuQep8nvaBvR6Z936+i1UmTPUdXrE4fRuV9deEN4tLhpWsLZTUcwd+h1ECIhopGYPji14qc7y/M5hxaejIU/Ztw5AmLgkkfnI3HPLDPqF2Plo6cOeQtyTYYvSDSYw35bYWrfpsdOYW2PqmfXhzHtPY64kCMcHp9302CKSP2nuyvtky0IhWUX/1dWsq/3vr5uZD7lE0RII0EwrN1hlPZbqcFhijSlxkW9l5byNN6iZef6x6ZG4",
-  "unpauses": 4
+  "attempts": 30,
+  "realtime": 296.79715,
+  "ticks": 6992,
+  "steps": 587,
+  "bonks": 1,
+  "seed": "f23e7a9ced350f65",
+  "inputs": "eNrtWFtywyAMFBl/cIzc/5RtY7cWoNUDy0ymk/1yiI2k1RNKeYF+UH/x/VzG9dfzuM6WacdDxf7OtoO/z9ZpWOdy++VD7Kl/5ZYce/aGnHsyNLqdn1C7boPpA2WNgrl2XB+ZQYEqSxadcKhPozD/+6XYFnOlixSHkh8PeSNXIVATM5S0T6ev4DsiW5b17ZYMLcaoAsNGX+z/bYtB8767hoafG3TwxdXfM+MBxI8z9w2mUTxXECim45QY40Sg/UF7oXxPYNuRhUNtFHxh5tdEMiCuFtexIJ8dnQZvHgEVoxWGeoG9jymAeyar2CWFMyWp8zb65PBzqvQm+vxTf/ly+RM/uXMFBWvaXUOnZu/DjbFheEyKRmhAN/Ps9rjC52w/UmYt66Pl9SocAxcwnV9OPtGMAWfd3Cy/QIl1HldtLisQPnc073viM+bf9v3uW3EdzoexmkMZtnh7sXpGQFnC+X8auDtkEIHP1eCOcTeSlc3YqNDo0rYmYvLgPan/Jl80o8QAyXnNReNBVB8Kj6TiP+ITnKubKaSjKkUyofwYT0ghLlRUtTujS3cEZu0M3IsEeiZow7o7QTtx9PDWXr/XRlLVeaTZn+w511BaL3kLJ6Dj9tSTmZ6S9QVCa1l2",
+  "unpauses": 11,
+  "warps_set": 10,
+  "warps_used": 11
 }

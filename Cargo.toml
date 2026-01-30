@@ -11,6 +11,7 @@ members = [
 	"./scripts/chipundat",
 	"./scripts/colorkey",
 	"./scripts/copyrecords",
+	"./scripts/fixcclp3",
 	"./scripts/fixlevel",
 	"./scripts/levelquery",
 	"./scripts/makedocs",
