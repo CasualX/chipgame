@@ -145,8 +145,11 @@ impl EditorEditState {
 
 		let cam = self.fx.camera.setup(self.screen_size);
 
-		g.begin(&shade::BeginArgs::BackBuffer {
+		g.begin(&shade::BeginArgs::Immediate {
 			viewport: resx.viewport,
+			color: &[resx.backcolor],
+			levels: None,
+			depth: resx.backdepth,
 		});
 
 		let p = self.mouse_pos; {

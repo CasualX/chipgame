@@ -56,8 +56,11 @@ impl RenderState {
 		self.effects.retain(|efx| ctx.time < efx.start + 1.0);
 	}
 	pub fn draw(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera, time: f64) {
-		g.begin(&shade::BeginArgs::BackBuffer {
+		g.begin(&shade::BeginArgs::Immediate {
 			viewport: resx.viewport,
+			color: &[resx.backcolor],
+			levels: None,
+			depth: resx.backdepth,
 		});
 
 		self.draw_field(g, resx, camera, time, false);

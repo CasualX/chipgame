@@ -129,8 +129,10 @@ pub extern "C" fn think(instance: *mut Instance, buttons: u8) {
 pub extern "C" fn draw(instance: *mut Instance, time: f64, width: i32, height: i32) {
 	let instance = unsafe { &mut *instance };
 	let g = instance.graphics.as_graphics();
-	instance.resx.viewport.maxs = cvmath::Vec2i(width, height);
+	instance.resx.backbuffer_viewport.maxs = cvmath::Vec2i(width, height);
+	instance.resx.update_back(g);
 	instance.play.draw(g, &instance.resx, time);
+	instance.resx.present(g);
 }
 
 #[no_mangle]

@@ -6,6 +6,11 @@ use shade::webgl::shaders as shaders;
 #[cfg(not(target_arch = "wasm32"))]
 use shade::gl::shaders as shaders;
 
+pub struct PostProcessCopy {
+	pub quad: shade::d2::PostProcessQuad,
+	pub shader: shade::ShaderProgram,
+}
+
 #[derive(Default)]
 pub struct Resources {
 	pub textures: HashMap<String, shade::Texture2D>,
@@ -18,7 +23,7 @@ pub struct Resources {
 	pub shader: shade::ShaderProgram,
 	pub shader_shadowmap: shade::ShaderProgram,
 	pub pixel_art_bias: f32,
-	pub viewport: Bounds2i,
+	pub backbuffer_viewport: Bounds2i,
 
 	pub colorshader: shade::ShaderProgram,
 	pub uishader: shade::ShaderProgram,
@@ -26,6 +31,12 @@ pub struct Resources {
 	pub menubg_scale: f32,
 
 	pub font: shade::d2::FontResource<Option<shade::msdfgen::Font>>,
+
+	pub backcolor: shade::Texture2D,
+	pub backdepth: shade::Texture2D,
+	pub viewport: Bounds2i,
+	pub pp: Option<PostProcessCopy>,
+	pub renderscale: f32,
 }
 
 #[track_caller]
@@ -93,6 +104,61 @@ impl Resources {
 		resx.colorshader = resx.shaders.get("Color").unwrap().clone();
 		resx.uishader = resx.shaders.get("UI").unwrap().clone();
 		resx.menubg = resx.textures.get("MenuBG").unwrap().clone();
-		resx.menubg_scale = 2.0;
+		resx.menubg_scale = 2.0 * config.render_scale;
+		if resx.pp.is_none() {
+			resx.pp = Some(PostProcessCopy {
+				quad: shade::d2::PostProcessQuad::create(g),
+				shader: g.shader_compile(shaders::POST_PROCESS_VS, shaders::POST_PROCESS_COPY_FS),
+			});
+		}
+		resx.renderscale = config.render_scale;
+	}
+
+	pub fn update_back(&mut self, g: &mut shade::Graphics) {
+		let width = (self.backbuffer_viewport.width() as f32 * self.renderscale) as i32;
+		let height = (self.backbuffer_viewport.height() as f32 * self.renderscale) as i32;
+		self.viewport = Bounds2i::c(0, 0, width, height);
+		self.backcolor = g.texture2d_update(self.backcolor, &shade::Texture2DInfo {
+			width,
+			height,
+			format: shade::TextureFormat::SRGBA8,
+			props: shade::TextureProps {
+				mip_levels: 1,
+				usage: shade::TextureUsage!(SAMPLED | COLOR_TARGET),
+				filter_min: shade::TextureFilter::Linear,
+				filter_mag: shade::TextureFilter::Linear,
+				wrap_u: shade::TextureWrap::Edge,
+				wrap_v: shade::TextureWrap::Edge,
+				..Default::default()
+			}
+		});
+		self.backdepth = g.texture2d_update(self.backdepth, &shade::Texture2DInfo {
+			width,
+			height,
+			format: shade::TextureFormat::Depth24,
+			props: shade::TextureProps {
+				mip_levels: 1,
+				usage: shade::TextureUsage!(SAMPLED | DEPTH_STENCIL_TARGET),
+				filter_min: shade::TextureFilter::Nearest,
+				filter_mag: shade::TextureFilter::Nearest,
+				wrap_u: shade::TextureWrap::Edge,
+				wrap_v: shade::TextureWrap::Edge,
+				..Default::default()
+			}
+		});
+	}
+
+	pub fn present(&self, g: &mut shade::Graphics) {
+		g.begin(&shade::BeginArgs::BackBuffer {
+			viewport: self.backbuffer_viewport,
+		});
+		if let Some(pp) = &self.pp {
+			pp.quad.draw(g, pp.shader, shade::BlendMode::Solid, &[
+				&shade::UniformFn(|set| {
+					set.value("u_texture", &self.backcolor);
+				})
+			]);
+		}
+		g.end();
 	}
 }

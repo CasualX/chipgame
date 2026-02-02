@@ -230,7 +230,7 @@ fn main() {
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
 						app.surface.resize(&app.context, width, height);
-						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
+						app.resx.backbuffer_viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 					}
 					editor.set_screen_size(new_size.width as i32, new_size.height as i32);
 				}
@@ -445,7 +445,9 @@ fn main() {
 						if let Some(ap) = &mut ap { ap.play_music(music); }
 
 						let time = time_base.elapsed().as_secs_f64();
+						app.resx.update_back(&mut app.g);
 						editor.draw(&mut app.g, &app.resx, time);
+						app.resx.present(&mut app.g);
 
 						_ = app.g.get_draw_metrics(true);
 
@@ -489,3 +491,9 @@ fn level_complete(editor: &mut editor::EditorState) {
 	}
 	editor.toggle_play();
 }
+
+// Dummy file I/O functions for linking
+#[no_mangle]
+extern "C" fn chipgame_write_file(_path_ptr: *const u8, _path_len: usize, _content_ptr: *const u8, _content_len: usize) -> i32 { -1 }
+#[no_mangle]
+extern "C" fn chipgame_read_file(_path_ptr: *const u8, _path_len: usize, _content_ptr: *mut String) -> i32 { -1 }

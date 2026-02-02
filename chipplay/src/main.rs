@@ -193,7 +193,7 @@ fn main() {
 						let height = NonZeroU32::new(new_size.height.max(1)).unwrap();
 						app.size = new_size;
 						app.surface.resize(&app.context, width, height);
-						app.resx.viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
+						app.resx.backbuffer_viewport.maxs = [app.size.width as i32, app.size.height as i32].into();
 					}
 				}
 				WindowEvent::CloseRequested => event_loop.exit(),
@@ -253,7 +253,9 @@ fn main() {
 						}
 
 						let time = time_base.elapsed().as_secs_f64();
+						app.resx.update_back(&mut app.g);
 						state.draw(&mut app.g, &mut app.resx, time);
+						app.resx.present(&mut app.g);
 
 						state.metrics = app.g.get_draw_metrics(true);
 
@@ -271,3 +273,9 @@ fn main() {
 		}
 	});
 }
+
+// Dummy file I/O functions for linking
+#[no_mangle]
+extern "C" fn chipgame_write_file(_path_ptr: *const u8, _path_len: usize, _content_ptr: *const u8, _content_len: usize) -> i32 { -1 }
+#[no_mangle]
+extern "C" fn chipgame_read_file(_path_ptr: *const u8, _path_len: usize, _content_ptr: *mut String) -> i32 { -1 }

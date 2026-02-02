@@ -234,8 +234,11 @@ impl FxState {
 		self.render.draw(g, resx, &camera, time);
 
 		if self.hud_enabled {
-			g.begin(&shade::BeginArgs::BackBuffer {
+			g.begin(&shade::BeginArgs::Immediate {
 				viewport: resx.viewport,
+				color: &[resx.backcolor],
+				levels: None,
+				depth: resx.backdepth,
 			});
 			self.render_ui(g, resx, time);
 			g.end();

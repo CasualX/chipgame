@@ -40,6 +40,7 @@ pub struct Config {
 	pub pixel_art_bias: f32,
 	pub vsync: bool,
 	pub multisampling: u8,
+	pub render_scale: f32,
 	pub sound_fx: HashMap<chipty::SoundFx, String>,
 	pub music: HashMap<chipty::MusicId, String>,
 	pub shaders: HashMap<String, ShaderConfig>,
@@ -63,6 +64,7 @@ impl Config {
 		let mut pixel_art_bias = 0.5f32;
 		let mut vsync = false;
 		let mut multisampling = 0;
+		let mut render_scale = 1.0f32;
 		let mut sound_fx: HashMap<chipty::SoundFx, String> = HashMap::new();
 		let mut music: HashMap<chipty::MusicId, String> = HashMap::new();
 		let mut shaders: HashMap<String, ShaderConfig> = HashMap::new();
@@ -77,6 +79,7 @@ impl Config {
 						"PixelArtBias" => { if let Ok(v) = value.parse::<f32>() { pixel_art_bias = v; } }
 						"VSync" => { if let Ok(v) = value.parse::<bool>() { vsync = v; } }
 						"Multisampling" => { if let Ok(v) = value.parse::<u8>() { multisampling = v; } }
+						"RenderScale" => { if let Ok(v) = value.parse::<f32>() { render_scale = v; } }
 						_ => {}
 					},
 					Section::SoundFx => {
@@ -167,6 +170,7 @@ impl Config {
 			shaders,
 			textures,
 			fonts,
+			render_scale,
 		}
 	}
 }

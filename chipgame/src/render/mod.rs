@@ -27,8 +27,11 @@ pub struct TileGfx {
 }
 
 pub fn drawbg(g: &mut shade::Graphics, resx: &Resources) {
-	g.begin(&shade::BeginArgs::BackBuffer {
+	g.begin(&shade::BeginArgs::Immediate {
 		viewport: resx.viewport,
+		color: &[resx.backcolor],
+		levels: None,
+		depth: resx.backdepth,
 	});
 	let mut cv = shade::im::DrawBuilder::<render::Vertex, render::Uniform>::new();
 	cv.depth_test = None;
