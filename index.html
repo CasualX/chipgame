@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>ChipGame (WASM)</title>
+		<style>
+			:root {
+				color-scheme: dark;
+				--bg: #030712;
+				--panel: rgba(16, 23, 41, 0.72);
+				--text: #f2f5ff;
+				--muted: #94a3b8;
+				font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				background: var(--bg);
+				color: var(--text);
+				overflow: hidden;
+			}
+
+			body::before {
+				content: "";
+				position: fixed;
+				inset: 0;
+				pointer-events: none;
+				background-image: url("./menubg.png");
+				background-repeat: repeat;
+				background-position: center;
+				background-size: 50%;
+				image-rendering: pixelated;
+				opacity: 0.9;
+			}
+
+			#root {
+				position: relative;
+				width: 100%;
+				height: 100%;
+			}
+
+			#game {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			#hud {
+				position: absolute;
+				left: 12px;
+				top: 12px;
+				padding: 6px 8px;
+				background: rgba(3, 7, 18, 0.72);
+				backdrop-filter: blur(8px);
+				border: 1px solid rgba(108, 240, 255, 0.18);
+				border-radius: 8px;
+				font-size: 11px;
+				line-height: 1.2;
+				color: var(--text);
+				min-width: 120px;
+				text-align: center;
+				display: none;
+			}
+
+			#hud.visible {
+				display: block;
+			}
+
+			#loading-screen {
+				position: absolute;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				background-image: url("./menubg.png");
+				background-repeat: repeat;
+				background-position: center;
+				background-size: 50%;
+				image-rendering: pixelated;
+				z-index: 3;
+			}
+
+			#loading-panel {
+				width: min(760px, 94vw);
+				padding: 36px;
+				border-radius: 16px;
+				background: rgba(2, 6, 23, 0.75);
+				border: 1px solid rgba(148, 163, 184, 0.25);
+				box-shadow: 0 30px 80px rgba(2, 6, 23, 0.55);
+				backdrop-filter: blur(10px);
+			}
+
+			#loading-title {
+				font-size: 28px;
+				font-weight: 700;
+				letter-spacing: 0.3px;
+				margin-bottom: 6px;
+			}
+
+			#loading-subtitle {
+				color: var(--muted);
+				font-size: 16px;
+				margin-bottom: 22px;
+			}
+
+			#loading-bar {
+				height: 14px;
+				border-radius: 3px;
+				background: rgba(148, 163, 184, 0.2);
+				overflow: hidden;
+				margin-bottom: 16px;
+			}
+
+			#loading-bar > span {
+				display: block;
+				height: 100%;
+				width: 0%;
+				background: linear-gradient(90deg, rgba(56, 189, 248, 0.7), rgba(14, 165, 233, 0.95));
+				transition: width 180ms ease;
+			}
+
+			#loading-status {
+				font-size: 16px;
+				color: var(--text);
+				margin-bottom: 22px;
+			}
+
+			#loading-hint {
+				font-size: 16px;
+				color: var(--muted);
+				line-height: 1.65;
+			}
+
+			#loading-hint strong {
+				color: var(--text);
+			}
+
+			#loading-ready {
+				margin-top: 20px;
+				padding: 12px 16px;
+				border-radius: 10px;
+				background: rgba(30, 64, 175, 0.22);
+				border: 1px solid rgba(59, 130, 246, 0.35);
+				color: #bfdbfe;
+				font-size: 16px;
+				display: none;
+			}
+
+			#loading-screen.ready #loading-ready {
+				display: block;
+			}
+
+			#touch-controls {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 160ms ease;
+			}
+
+			#touch-controls.enabled {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			#touch-controls .pad,
+			#touch-controls .cluster {
+				position: absolute;
+				display: grid;
+				gap: 10px;
+			}
+
+			#touch-controls button {
+				appearance: none;
+				border: 1px solid rgba(148, 163, 184, 0.45);
+				background: rgba(15, 23, 42, 0.7);
+				color: var(--text);
+				border-radius: 14px;
+				width: 64px;
+				height: 64px;
+				font-weight: 600;
+				font-size: 13px;
+				letter-spacing: 0.4px;
+				backdrop-filter: blur(8px);
+				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 24px rgba(2, 6, 23, 0.35);
+				touch-action: none;
+			}
+
+			#touch-controls button.active {
+				background: rgba(56, 189, 248, 0.7);
+				border-color: rgba(56, 189, 248, 0.9);
+				color: #0b1120;
+			}
+
+			#touch-controls .pad {
+				left: 18px;
+				bottom: 18px;
+				width: 220px;
+				height: 220px;
+				display: block;
+			}
+
+			#touch-controls .pad .dir {
+				position: absolute;
+				width: 80px;
+				height: 80px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 18px;
+				font-weight: 700;
+				color: var(--text);
+				background: rgba(15, 23, 42, 0.55);
+				border: 1px solid rgba(148, 163, 184, 0.35);
+				clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+				pointer-events: none;
+				backdrop-filter: blur(6px);
+			}
+
+			#touch-controls .pad .dir.active {
+				background: rgba(56, 189, 248, 0.7);
+				border-color: rgba(56, 189, 248, 0.9);
+				color: #0b1120;
+			}
+
+			#touch-controls .pad .dir.up {
+				left: 50%;
+				top: 8px;
+				transform: translateX(-50%);
+			}
+
+			#touch-controls .pad .dir.down {
+				left: 50%;
+				bottom: 8px;
+				transform: translateX(-50%);
+			}
+
+			#touch-controls .pad .dir.left {
+				left: 8px;
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			#touch-controls .pad .dir.right {
+				right: 8px;
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			#touch-controls .cluster {
+				right: 24px;
+				bottom: 24px;
+				grid-template-columns: repeat(2, 64px);
+				grid-auto-rows: 64px;
+				align-items: center;
+			}
+
+			#touch-controls .cluster button[data-btn="start"],
+			#touch-controls .cluster button[data-btn="select"] {
+				grid-column: 1 / span 2;
+				justify-self: center;
+				width: 120px;
+				height: 56px;
+				border-radius: 12px;
+				font-size: 12px;
+			}
+
+			@media (max-width: 720px) {
+				#touch-controls .pad {
+					left: 12px;
+					bottom: 12px;
+					width: 190px;
+					height: 190px;
+				}
+
+				#touch-controls .cluster {
+					right: 16px;
+					bottom: 16px;
+					grid-template-columns: repeat(2, 56px);
+					grid-auto-rows: 56px;
+				}
+
+				#touch-controls .cluster button,
+				#touch-controls .pad button {
+					width: 56px;
+					height: 56px;
+				}
+
+				#touch-controls .pad .dir {
+					width: 70px;
+					height: 70px;
+					font-size: 16px;
+				}
+
+				#touch-controls .cluster button[data-btn="start"],
+				#touch-controls .cluster button[data-btn="select"] {
+					width: 108px;
+					height: 56px;
+				}
+			}
+
+			@media (pointer: coarse) {
+				#hud {
+					font-size: 11px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="root">
+			<canvas id="game"></canvas>
+			<div id="hud" class="visible">draw 0fps · think 0hz</div>
+			<div id="loading-screen" aria-live="polite">
+				<div id="loading-panel">
+					<div id="loading-title">Play ChipGame!</div>
+					<div id="loading-subtitle">Loading the game session</div>
+					<div id="loading-bar"><span></span></div>
+					<div id="loading-status">Starting…</div>
+					<div id="loading-hint">
+						<strong>Keyboard:</strong> Arrows/WASD move, A=Space, B=Backspace, Start=Enter, Select=Shift<br />
+						<strong>Gamepad:</strong> D-Pad or left stick moves, A, B, Start, Select<br />
+						<strong>Touch:</strong> On-screen pad + buttons supported
+					</div>
+					<div id="loading-ready">Press any input to begin</div>
+				</div>
+			</div>
+			<div id="touch-controls" aria-hidden="true">
+				<div class="pad" id="touch-pad" aria-hidden="true">
+					<div class="dir up">▲</div>
+					<div class="dir down">▼</div>
+					<div class="dir left">◀</div>
+					<div class="dir right">▶</div>
+				</div>
+				<div class="cluster">
+					<button data-btn="b">B</button>
+					<button data-btn="a">A</button>
+					<button data-btn="start">Start</button>
+					<button data-btn="select">Select</button>
+				</div>
+			</div>
+		</div>
+
+		<script type="module">
+			import { createWasmAPI } from "./shade.js";
+
+			const loadingStatusEl = document.getElementById("loading-status");
+			const loadingScreen = document.getElementById("loading-screen");
+			const loadingBar = document.querySelector("#loading-bar > span");
+			const loadingReady = document.getElementById("loading-ready");
+			const canvas = document.getElementById("game");
+			const touchRoot = document.getElementById("touch-controls");
+			const touchPad = document.getElementById("touch-pad");
+			const hud = document.getElementById("hud");
+
+			function setLoadingStatus(text, progress) {
+				if (loadingStatusEl) loadingStatusEl.textContent = text;
+				if (typeof progress === "number" && loadingBar) {
+					const clamped = Math.max(0, Math.min(1, progress));
+					loadingBar.style.width = `${Math.round(clamped * 100)}%`;
+				}
+			}
+
+			function showLoadingReady(show) {
+				if (!loadingScreen) return;
+				loadingScreen.classList.toggle("ready", show);
+				if (loadingReady) loadingReady.style.display = show ? "block" : "none";
+			}
+
+			function setReadyMessage(text) {
+				if (loadingReady) loadingReady.textContent = text;
+			}
+
+			window.addEventListener("error", (e) => {
+				console.error("window.error", e.error || e.message || e);
+				setLoadingStatus(String(e.error?.message || e.message || e));
+			});
+			window.addEventListener("unhandledrejection", (e) => {
+				console.error("unhandledrejection", e.reason);
+				setLoadingStatus(String(e.reason?.message || e.reason || e));
+			});
+
+			function resizeCanvasToDisplaySize() {
+				const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+				const rect = canvas.getBoundingClientRect();
+				const width = Math.max(1, Math.floor(rect.width * dpr));
+				const height = Math.max(1, Math.floor(rect.height * dpr));
+				if (canvas.width !== width || canvas.height !== height) {
+					canvas.width = width;
+					canvas.height = height;
+				}
+				return { width, height, dpr };
+			}
+
+			// Input bit layout (chipcore/src/input.rs)
+			const INPUT_UP = 1 << 0;
+			const INPUT_LEFT = 1 << 1;
+			const INPUT_DOWN = 1 << 2;
+			const INPUT_RIGHT = 1 << 3;
+			const INPUT_A = 1 << 4;
+			const INPUT_B = 1 << 5;
+			const INPUT_START = 1 << 6;
+			const INPUT_SELECT = 1 << 7;
+
+			const pressed = new Set();
+			const touchPressed = new Set();
+			let keyboardSeen = false;
+			let gamepadSeen = false;
+			let touchEnabled = false;
+			let lastNonTouchInput = performance.now();
+			let padTouchId = null;
+			let padDir = null;
+			let gameActive = false;
+			let activationSeen = false;
+			let activationPointerActive = false;
+			let audioCtx = null;
+			let audioReady = false;
+			let audioUnlockRequested = false;
+			const soundBank = new Map();
+			const musicBank = new Map();
+			let musicSource = null;
+			let currentMusicKey = null;
+			let wasmExports = null;
+			let wasmGamePtr = 0;
+			let audioAssetsRequested = false;
+			let audioAssetsRequestFailed = false;
+
+			function ensureAudioContext() {
+				if (audioCtx) return audioCtx;
+				const Ctx = window.AudioContext || window.webkitAudioContext;
+				if (!Ctx) return null;
+				audioCtx = new Ctx();
+				audioReady = false;
+				return audioCtx;
+			}
+
+			function resumeAudio() {
+				if (audioUnlockRequested) return;
+				audioUnlockRequested = true;
+				const ctx = ensureAudioContext();
+				if (!ctx) return;
+				if (ctx.state === "suspended") {
+					ctx.resume().finally(() => {
+						audioUnlockRequested = false;
+						audioReady = ctx.state === "running";
+					});
+				} else {
+					audioUnlockRequested = false;
+					audioReady = ctx.state === "running";
+				}
+			}
+
+			function requestAudioAssetsFromGesture() {
+				if (audioAssetsRequested || audioAssetsRequestFailed) return;
+				resumeAudio();
+				if (!wasmExports || !wasmExports.audio_init) return;
+				audioAssetsRequested = true;
+				try {
+					wasmExports.audio_init();
+				} catch (err) {
+					audioAssetsRequestFailed = true;
+					console.warn("audio_init failed", err);
+				}
+			}
+			window.addEventListener("keydown", (e) => {
+				pressed.add(e.code);
+				keyboardSeen = true;
+				lastNonTouchInput = performance.now();
+				resumeAudio();
+				requestAudioAssetsFromGesture();
+				// Prevent page scroll/shortcuts for core keys.
+				if (
+					e.code.startsWith("Arrow") ||
+					e.code === "Space" ||
+					e.code === "Backspace" ||
+					e.code === "Enter" ||
+					e.code === "ShiftLeft" ||
+					e.code === "ShiftRight"
+				) {
+					e.preventDefault();
+				}
+			});
+			window.addEventListener("keyup", (e) => {
+				pressed.delete(e.code);
+				keyboardSeen = true;
+				lastNonTouchInput = performance.now();
+				if (
+					e.code.startsWith("Arrow") ||
+					e.code === "Space" ||
+					e.code === "Backspace" ||
+					e.code === "Enter" ||
+					e.code === "ShiftLeft" ||
+					e.code === "ShiftRight"
+				) {
+					e.preventDefault();
+				}
+			});
+
+			function getButtonsBitmask() {
+				let b = 0;
+				if (pressed.has("ArrowUp") || pressed.has("KeyW")) b |= INPUT_UP;
+				if (pressed.has("ArrowLeft") || pressed.has("KeyA")) b |= INPUT_LEFT;
+				if (pressed.has("ArrowDown") || pressed.has("KeyS")) b |= INPUT_DOWN;
+				if (pressed.has("ArrowRight") || pressed.has("KeyD")) b |= INPUT_RIGHT;
+				if (pressed.has("Space")) b |= INPUT_A;
+				if (pressed.has("Backspace")) b |= INPUT_B;
+				if (pressed.has("Enter")) b |= INPUT_START;
+				if (pressed.has("ShiftLeft") || pressed.has("ShiftRight")) b |= INPUT_SELECT;
+
+				if (touchPressed.has("up")) b |= INPUT_UP;
+				if (touchPressed.has("left")) b |= INPUT_LEFT;
+				if (touchPressed.has("down")) b |= INPUT_DOWN;
+				if (touchPressed.has("right")) b |= INPUT_RIGHT;
+				if (touchPressed.has("a")) b |= INPUT_A;
+				if (touchPressed.has("b")) b |= INPUT_B;
+				if (touchPressed.has("start")) b |= INPUT_START;
+				if (touchPressed.has("select")) b |= INPUT_SELECT;
+
+				b |= getGamepadButtonsBitmask();
+				return b;
+			}
+
+			function getGamepadButtonsBitmask() {
+				// Mirrors chipplay/src/gamepad.rs:
+				// - DPad + left stick directions
+				// - South=A, East=B
+				// - Start
+				// - Select or Mode => Select
+				const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+				let b = 0;
+
+				const DEADZONE = 0.5;
+				for (const gp of pads) {
+					if (!gp || !gp.connected) continue;
+					gamepadSeen = true;
+
+					const buttons = gp.buttons || [];
+					const axes = gp.axes || [];
+
+					// Standard mapping indices ("standard" gamepads)
+					// DPad: 12-15, South:0, East:1, Select:8, Start:9, Mode:16
+					if (buttons[12]?.pressed) b |= INPUT_UP;
+					if (buttons[13]?.pressed) b |= INPUT_DOWN;
+					if (buttons[14]?.pressed) b |= INPUT_LEFT;
+					if (buttons[15]?.pressed) b |= INPUT_RIGHT;
+
+					if (buttons[0]?.pressed) b |= INPUT_A;
+					if (buttons[1]?.pressed) b |= INPUT_B;
+					if (buttons[9]?.pressed) b |= INPUT_START;
+					if (buttons[8]?.pressed || buttons[16]?.pressed) b |= INPUT_SELECT;
+
+					// Left stick axes: 0 (x), 1 (y). Note Y is typically -up/+down.
+					const lx = axes[0] ?? 0;
+					const ly = axes[1] ?? 0;
+					if (lx <= -DEADZONE) b |= INPUT_LEFT;
+					if (lx >= DEADZONE) b |= INPUT_RIGHT;
+					if (ly <= -DEADZONE) b |= INPUT_UP;
+					if (ly >= DEADZONE) b |= INPUT_DOWN;
+				}
+
+				return b;
+			}
+
+			function updateTouchVisibility() {
+				if (!touchRoot) return;
+				const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+				const recentlyNonTouch = performance.now() - lastNonTouchInput < 3000;
+				const shouldEnable = coarse && !(keyboardSeen || gamepadSeen) && !recentlyNonTouch;
+				if (shouldEnable === touchEnabled) return;
+				touchEnabled = shouldEnable;
+				touchRoot.classList.toggle("enabled", touchEnabled);
+				touchRoot.setAttribute("aria-hidden", touchEnabled ? "false" : "true");
+				if (!touchEnabled) {
+					touchPressed.clear();
+					for (const btn of touchRoot.querySelectorAll("button.active")) {
+						btn.classList.remove("active");
+					}
+					if (touchPad) {
+						for (const dir of touchPad.querySelectorAll(".dir.active")) {
+							dir.classList.remove("active");
+						}
+					}
+					padTouchId = null;
+					padDir = null;
+				}
+			}
+
+			function requestFullscreenOnTouch() {
+				if (document.fullscreenElement) return;
+				const target = document.documentElement;
+				if (!target || !target.requestFullscreen) return;
+				try {
+					const result = target.requestFullscreen();
+					if (result && typeof result.catch === "function") {
+						result.catch(() => {});
+					}
+				} catch {
+					// ignore
+				}
+			}
+
+			async function requestLandscapeLock() {
+				const orientation = screen && screen.orientation;
+				if (!orientation || !orientation.lock) return;
+				try {
+					await orientation.lock("landscape");
+				} catch {
+					// ignore (unsupported or denied)
+				}
+			}
+
+			function setPadDirection(dir) {
+				if (padDir === dir) return;
+				if (padDir) {
+					touchPressed.delete(padDir);
+					const oldEl = touchPad?.querySelector(`.dir.${padDir}`);
+					if (oldEl) oldEl.classList.remove("active");
+				}
+				padDir = dir;
+				if (padDir) {
+					touchPressed.add(padDir);
+					const newEl = touchPad?.querySelector(`.dir.${padDir}`);
+					if (newEl) newEl.classList.add("active");
+				}
+			}
+
+			function getPadDirectionFromTouch(touch) {
+				if (!touchPad) return null;
+				const rect = touchPad.getBoundingClientRect();
+				const x = touch.clientX - rect.left;
+				const y = touch.clientY - rect.top;
+				const dx = x - rect.width / 2;
+				const dy = y - rect.height / 2;
+				const minDim = Math.min(rect.width, rect.height);
+				const dist = Math.hypot(dx, dy);
+				if (dist < minDim * 0.09) return null;
+				if (Math.abs(dx) > Math.abs(dy)) {
+					return dx > 0 ? "right" : "left";
+				}
+				return dy > 0 ? "down" : "up";
+			}
+
+			if (touchRoot) {
+				touchRoot.addEventListener("touchstart", (e) => {
+					if (!touchEnabled) return;
+					const btn = e.target.closest("button[data-btn]");
+					if (!btn) return;
+					const id = btn.getAttribute("data-btn");
+					if (!id) return;
+					requestFullscreenOnTouch();
+					requestLandscapeLock();
+					resumeAudio();
+					requestAudioAssetsFromGesture();
+					e.preventDefault();
+					touchPressed.add(id);
+					btn.classList.add("active");
+				}, { passive: false });
+
+				touchRoot.addEventListener("touchend", (e) => {
+					if (!touchEnabled) return;
+					const btn = e.target.closest("button[data-btn]");
+					if (btn) {
+						const id = btn.getAttribute("data-btn");
+						if (id) touchPressed.delete(id);
+						btn.classList.remove("active");
+					}
+				}, { passive: false });
+
+				touchRoot.addEventListener("touchcancel", (e) => {
+					if (!touchEnabled) return;
+					const btn = e.target.closest("button[data-btn]");
+					if (btn) {
+						const id = btn.getAttribute("data-btn");
+						if (id) touchPressed.delete(id);
+						btn.classList.remove("active");
+					}
+				}, { passive: false });
+			}
+
+			if (loadingScreen) {
+				loadingScreen.addEventListener("pointerdown", (e) => {
+					activationPointerActive = true;
+					resumeAudio();
+					requestAudioAssetsFromGesture();
+					if (e.pointerType === "touch") {
+						requestFullscreenOnTouch();
+						requestLandscapeLock();
+					}
+				});
+				loadingScreen.addEventListener("touchstart", (e) => {
+					activationPointerActive = true;
+					resumeAudio();
+					requestAudioAssetsFromGesture();
+					requestFullscreenOnTouch();
+					requestLandscapeLock();
+					e.preventDefault();
+				}, { passive: false });
+				loadingScreen.addEventListener("pointerup", () => {
+					activationPointerActive = false;
+				});
+				loadingScreen.addEventListener("pointercancel", () => {
+					activationPointerActive = false;
+				});
+			}
+
+			if (touchPad) {
+				touchPad.addEventListener("touchstart", (e) => {
+					if (!touchEnabled) return;
+					if (padTouchId !== null) return;
+					const touch = e.changedTouches[0];
+					if (!touch) return;
+					padTouchId = touch.identifier;
+					requestFullscreenOnTouch();
+					requestLandscapeLock();
+					resumeAudio();
+					requestAudioAssetsFromGesture();
+					e.preventDefault();
+					setPadDirection(getPadDirectionFromTouch(touch));
+				}, { passive: false });
+
+				touchPad.addEventListener("touchmove", (e) => {
+					if (!touchEnabled || padTouchId === null) return;
+					const touch = Array.from(e.touches).find((t) => t.identifier === padTouchId);
+					if (!touch) return;
+					e.preventDefault();
+					setPadDirection(getPadDirectionFromTouch(touch));
+				}, { passive: false });
+
+				touchPad.addEventListener("touchend", (e) => {
+					if (padTouchId === null) return;
+					for (const touch of e.changedTouches) {
+						if (touch.identifier === padTouchId) {
+							padTouchId = null;
+							setPadDirection(null);
+							e.preventDefault();
+							break;
+						}
+					}
+				}, { passive: false });
+
+				touchPad.addEventListener("touchcancel", (e) => {
+					if (padTouchId === null) return;
+					for (const touch of e.changedTouches) {
+						if (touch.identifier === padTouchId) {
+							padTouchId = null;
+							setPadDirection(null);
+							e.preventDefault();
+							break;
+						}
+					}
+				}, { passive: false });
+			}
+
+			window.addEventListener("gamepadconnected", () => {
+				gamepadSeen = true;
+				lastNonTouchInput = performance.now();
+				updateTouchVisibility();
+			});
+			window.addEventListener("gamepaddisconnected", () => {
+				gamepadSeen = false;
+				updateTouchVisibility();
+			});
+
+			async function load() {
+				setLoadingStatus("Initializing WebGL…", 0.1);
+				const shade = createWasmAPI(canvas, {
+					alpha: false,
+					desynchronized: true,
+					antialias: false,
+					premultipliedAlpha: false,
+				});
+
+				let wasmMemory = null;
+				const decoder = new TextDecoder();
+				const encoder = new TextEncoder();
+
+				function readUtf8(ptr, len) {
+					if (!wasmMemory || ptr === 0 || len === 0) return "";
+					return decoder.decode(new Uint8Array(wasmMemory.buffer, ptr, len));
+				}
+
+				function randomBytes(ptr, len) {
+					if (!wasmMemory) return;
+					const out = new Uint8Array(wasmMemory.buffer, ptr, len);
+					if (globalThis.crypto && globalThis.crypto.getRandomValues) {
+						globalThis.crypto.getRandomValues(out);
+						return;
+					}
+					for (let i = 0; i < out.length; i++) {
+						out[i] = (Math.random() * 256) | 0;
+					}
+				}
+
+				function play_sound(sound_id) {
+					const ctx = ensureAudioContext();
+					if (!ctx) return;
+					const entry = soundBank.get(sound_id | 0);
+					if (!entry || !entry.buffer || ctx.state !== "running") return;
+					const source = ctx.createBufferSource();
+					source.buffer = entry.buffer;
+					source.connect(entry.gain);
+					source.start(0);
+				}
+
+				function stopMusic() {
+					if (musicSource) {
+						try {
+							musicSource.stop();
+						} catch {
+							// ignore
+						}
+						musicSource.disconnect();
+						musicSource = null;
+						currentMusicKey = null;
+					}
+				}
+
+				function play_music(music_id) {
+					const ctx = ensureAudioContext();
+					if (!ctx) return;
+					const id = music_id | 0;
+					if (id < 0) {
+						stopMusic();
+						return;
+					}
+					if (currentMusicKey === id && musicSource) return;
+					const entry = musicBank.get(id);
+					if (!entry || !entry.buffer || ctx.state !== "running") return;
+					stopMusic();
+					const source = ctx.createBufferSource();
+					source.buffer = entry.buffer;
+					source.loop = true;
+					source.connect(entry.gain);
+					source.start(0);
+					musicSource = source;
+					currentMusicKey = id;
+				}
+
+				function register_sound(sound_id, data_ptr, data_len) {
+					const ctx = ensureAudioContext();
+					if (!ctx || !wasmMemory) return;
+					const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
+					const copy = new Uint8Array(bytes);
+					ctx.decodeAudioData(copy.buffer).then((buffer) => {
+						const gain = ctx.createGain();
+						gain.gain.value = 1.0;
+						gain.connect(ctx.destination);
+						soundBank.set(sound_id | 0, { buffer, gain });
+					}).catch((err) => {
+						console.warn("decodeAudioData failed", sound_id, err);
+					});
+				}
+
+				function register_music(music_id, data_ptr, data_len) {
+					const ctx = ensureAudioContext();
+					if (!ctx || !wasmMemory) return;
+					const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
+					const copy = new Uint8Array(bytes);
+					ctx.decodeAudioData(copy.buffer).then((buffer) => {
+						const gain = ctx.createGain();
+						gain.gain.value = 0.375;
+						gain.connect(ctx.destination);
+						musicBank.set(music_id | 0, { buffer, gain });
+					}).catch((err) => {
+						console.warn("decodeAudioData failed", music_id, err);
+					});
+				}
+				function set_title(title_ptr, title_len) {
+					document.title = readUtf8(title_ptr, title_len) || "ChipGame (WASM)";
+				}
+				function quit_game() {
+					console.log("quit_game requested");
+				}
+
+				function read_file(path_ptr, path_len, content_ptr, content_len_ptr) {
+					if (!wasmMemory) return -1;
+					const path = readUtf8(path_ptr, path_len);
+					if (!path || !content_len_ptr) return -1;
+					let content = null;
+					try {
+						content = localStorage.getItem(path);
+					} catch (err) {
+						console.warn("read_file localStorage failed", err);
+						return -1;
+					}
+					if (content === null) return -1;
+					const bytes = encoder.encode(content);
+					const lenView = new Uint32Array(wasmMemory.buffer, content_len_ptr, 1);
+					if (!content_ptr) {
+						lenView[0] = bytes.length;
+						return 0;
+					}
+					const cap = lenView[0] >>> 0;
+					const out = new Uint8Array(wasmMemory.buffer, content_ptr, cap);
+					const toCopy = Math.min(cap, bytes.length);
+					out.set(bytes.subarray(0, toCopy));
+					lenView[0] = toCopy;
+					return 0;
+				}
+
+				function write_file(path_ptr, path_len, content_ptr, content_len) {
+					if (!wasmMemory) return -1;
+					const path = readUtf8(path_ptr, path_len);
+					if (!path || !content_ptr) return -1;
+					const bytes = new Uint8Array(wasmMemory.buffer, content_ptr, content_len);
+					const content = decoder.decode(bytes);
+					try {
+						localStorage.setItem(path, content);
+						return 0;
+					} catch (err) {
+						console.warn("write_file localStorage failed", err);
+						return -1;
+					}
+				}
+
+				setLoadingStatus("Loading WASM…", 0.25);
+				const response = await fetch("./chipwasm.wasm");
+				if (!response.ok) {
+					throw new Error(`Failed to fetch chipwasm.wasm: ${response.status} ${response.statusText}`);
+				}
+
+				// Some builds import Shade shims from `shade`, others from `env`.
+				// Provide both to keep the host resilient.
+				const env = {
+					randomBytes,
+					play_sound,
+					play_music,
+					register_sound,
+					register_music,
+					set_title,
+					quit_game,
+					read_file,
+					write_file,
+				};
+				const imports = {
+					webgl: shade,
+					env,
+				};
+
+				setLoadingStatus("Compiling WASM…", 0.45);
+				const { instance } = await WebAssembly.instantiate(await response.arrayBuffer(), imports);
+				shade.bindInstance(instance);
+				wasmMemory = instance.exports.memory;
+
+				const exports = instance.exports;
+				if (!exports.create || !exports.think || !exports.draw) {
+					throw new Error("WASM exports missing one of: create/think/draw");
+				}
+				wasmExports = exports;
+
+				setLoadingStatus("Starting…", 0.8);
+				let gamePtr = 0;
+				try {
+					gamePtr = exports.create();
+				} catch (err) {
+					throw new Error(`create() trapped: ${err && err.message ? err.message : String(err)}`);
+				}
+				if (!gamePtr) {
+					throw new Error("create() returned null (0) instance pointer");
+				}
+				wasmGamePtr = gamePtr;
+
+				setLoadingStatus("Ready", 1);
+				setReadyMessage("Press any input to begin");
+				showLoadingReady(true);
+
+				// Fixed-step think @ 60Hz, draw @ RAF.
+				const STEP_MS = 1000 / 60;
+				let acc = 0;
+				let last = performance.now();
+
+				let drawCount = 0;
+				let thinkCount = 0;
+				let lastHud = performance.now();
+
+				function frame(now) {
+					const dt = Math.min(250, now - last);
+					last = now;
+					acc += dt;
+
+					updateTouchVisibility();
+
+					const buttons = getButtonsBitmask();
+					const activationInput = buttons !== 0 || activationPointerActive;
+					if (!gameActive) {
+						resizeCanvasToDisplaySize();
+						if (!activationSeen && activationInput) {
+							activationSeen = true;
+							setReadyMessage("Release all input to begin");
+							showLoadingReady(true);
+						}
+						if (activationSeen && !activationInput) {
+							gameActive = true;
+							if (loadingScreen) loadingScreen.style.display = "none";
+						}
+						requestAnimationFrame(frame);
+						return;
+					}
+
+					while (acc >= STEP_MS) {
+							try {
+								exports.think(gamePtr, buttons);
+						} catch (err) {
+							setLoadingStatus(`think() trapped: ${err && err.message ? err.message : String(err)}`);
+							return;
+						}
+						thinkCount++;
+						acc -= STEP_MS;
+					}
+
+					const { width, height } = resizeCanvasToDisplaySize();
+					try {
+						exports.draw(gamePtr, now / 1000.0, width, height);
+					} catch (err) {
+						setLoadingStatus(`draw() trapped: ${err && err.message ? err.message : String(err)}`);
+						return;
+					}
+					drawCount++;
+
+					if (now - lastHud >= 500) {
+						const secs = (now - lastHud) / 1000;
+						const fps = Math.round(drawCount / secs);
+						const tps = Math.round(thinkCount / secs);
+						if (hud) {
+							hud.textContent = `draw ${fps}fps · think ${tps}hz`;
+						}
+						drawCount = 0;
+						thinkCount = 0;
+						lastHud = now;
+					}
+					requestAnimationFrame(frame);
+				}
+
+				// Prime sizing and kick off.
+				resizeCanvasToDisplaySize();
+				requestAnimationFrame(frame);
+
+				function cleanup() {
+					try {
+						if (exports.destroy) exports.destroy(gamePtr);
+					} catch {
+						// ignore
+					}
+				}
+				window.addEventListener("pagehide", cleanup, { once: true });
+				window.addEventListener("beforeunload", cleanup, { once: true });
+			}
+
+			load().catch((err) => {
+				console.error(err);
+				setLoadingStatus(String(err && err.message ? err.message : err));
+			});
+		</script>
+	</body>
+</html>
