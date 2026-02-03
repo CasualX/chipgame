@@ -16,7 +16,7 @@ pub use self::savedata::*;
 pub use self::lvsets::*;
 pub use self::tiles::*;
 
-#[cfg(not(feature = "custom_save_data"))]
+#[cfg(not(target_arch = "wasm32"))]
 fn write_file(path: &path::Path, content: &str) -> io::Result<()> {
 	if let Some(parent) = path.parent() {
 		let _ = fs::create_dir_all(parent);
@@ -24,12 +24,12 @@ fn write_file(path: &path::Path, content: &str) -> io::Result<()> {
 	fs::write(path, content)
 }
 
-#[cfg(not(feature = "custom_save_data"))]
+#[cfg(not(target_arch = "wasm32"))]
 fn read_file(path: &path::Path) -> io::Result<String> {
 	fs::read_to_string(path)
 }
 
-#[cfg(feature = "custom_save_data")]
+#[cfg(target_arch = "wasm32")]
 fn write_file(path: &path::Path, content: &str) -> io::Result<()> {
 	extern "C" {
 		fn chipgame_write_file(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32;
@@ -47,7 +47,7 @@ fn write_file(path: &path::Path, content: &str) -> io::Result<()> {
 	}
 }
 
-#[cfg(feature = "custom_save_data")]
+#[cfg(target_arch = "wasm32")]
 fn read_file(path: &path::Path) -> io::Result<String> {
 	#[allow(improper_ctypes)]
 	extern "C" {

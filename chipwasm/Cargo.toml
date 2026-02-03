@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 chipcore = { path = "../chipcore" }
-chipgame = { path = "../chipgame", features=["custom_save_data"] }
+chipgame = { path = "../chipgame" }
 chipty = { path = "../chipty" }
 
 shade.workspace = true

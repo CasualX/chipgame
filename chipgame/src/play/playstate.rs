@@ -532,7 +532,7 @@ fn play_fx_game_over(this: &mut PlayState) {
 	this.menu.stack.push(menu::Menu::GameOver(menu));
 }
 
-#[cfg(not(feature = "custom_save_data"))]
+#[cfg(not(target_arch = "wasm32"))]
 fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	let replay = fx.game.save_replay(fx.game_realtime);
 	let replay = chipty::ReplayDto {
@@ -548,5 +548,5 @@ fn save_replay(lvset: &LevelSet, fx: &fx::FxState) {
 	}
 }
 
-#[cfg(feature = "custom_save_data")]
+#[cfg(target_arch = "wasm32")]
 fn save_replay(_lvset: &LevelSet, _fx: &fx::FxState) {}
