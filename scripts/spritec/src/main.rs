@@ -12,11 +12,12 @@ mod config;
 struct FrameAsset {
 	file: String,
 	image: Image,
+	gutter: config::GutterMode,
 }
 
 const SPRITE_FRAME_TIME: f32 = 0.0; // FIXME: set proper frame time
 
-const GUTTER: i32 = 2;
+const GUTTER: i32 = 1;
 
 fn area_with_gutter(image: &Image) -> i32 {
 	(image.width + GUTTER * 2) * (image.height + GUTTER * 2)
@@ -62,7 +63,8 @@ fn main() {
 			.unwrap_or_else(|| panic!("sheet too small for {}", frame.file));
 		let draw_x = x + GUTTER;
 		let draw_y = y + GUTTER;
-		sheet.copy_with_gutter(&frame.image, Point2i(draw_x, draw_y), GUTTER);
+		let gutter_mode = frame.gutter.into();
+		sheet.copy_with_gutter(&frame.image, Point2i(draw_x, draw_y), GUTTER, gutter_mode);
 		let rect = [draw_x, draw_y, frame.image.width, frame.image.height];
 		frame_lookup.insert(frame.file.clone(), rect);
 		packed_frames += 1;
@@ -119,7 +121,7 @@ fn load_unique_frames(root: &path::Path, sprites: &[config::Sprite]) -> Vec<Fram
 				let frame_path = root.join(rel);
 				let image = shade::image::DecodedImage::load_file_png(frame_path).expect("load sprite frame png").to_rgba();
 				let file = rel.clone();
-				frames.push(FrameAsset { file, image });
+				frames.push(FrameAsset { file, image, gutter: sprite.gutter });
 			}
 		}
 	}

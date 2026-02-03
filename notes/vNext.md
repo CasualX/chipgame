@@ -97,10 +97,21 @@ Playtesters have reported being very confused about the state of BearTraps.
 
 
 
+Texture shimmering
+------------------
+
+Tiling floor textures shimmer at the edges and have visible hard edges.
+This is caused because the padding around the tiles is using Clamp mode, instead use Repeat mode to fill in the padding.
+
+* [x] Update texture padding to use Repeat mode instead of Clamp mode for specific tiles.\
+
+
+
 Miscellaneous
 -------------
 
 * [x] Improve WaterHazard terrain graphics.\
+* [x] Improve Paramecium graphics by offsetting the sprite slightly.\
 * [x] Fix crash when spamming Gliders into ForceRandom and Teleport grid.\
 * [ ] DAT convert: Put monsters not in the monster list on Traps.\
 * [x] Editor: Show current tool and grid coordinates on screen.\

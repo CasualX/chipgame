@@ -1,9 +1,26 @@
 use std::{fs, path};
 
+#[derive(Copy, Clone, Debug)]
+pub enum GutterMode {
+	ClampToEdge,
+	SelfTiled,
+	Transparent,
+}
+impl Into<shade::image::BlitGutterMode<[u8; 4]>> for GutterMode {
+	fn into(self) -> shade::image::BlitGutterMode<[u8; 4]> {
+		match self {
+			GutterMode::ClampToEdge => shade::image::BlitGutterMode::Edge,
+			GutterMode::SelfTiled => shade::image::BlitGutterMode::Repeat,
+			GutterMode::Transparent => shade::image::BlitGutterMode::Border([0; 4]),
+		}
+	}
+}
+
 pub struct Sprite {
 	pub name: String,
 	pub frames: Vec<String>,
 	pub transform: chipty::SpriteTransform,
+	pub gutter: GutterMode,
 }
 
 pub struct File {
@@ -26,6 +43,7 @@ fn load_sprites(root: &path::Path) -> Vec<Sprite> {
 	let mut current_name: Option<String> = None;
 	let mut current_frames: Vec<String> = Vec::new();
 	let mut current_transform = chipty::SpriteTransform::None;
+	let mut current_gutter = GutterMode::ClampToEdge;
 
 	for item in ini_core::Parser::new(&config_text) {
 		match item {
@@ -34,7 +52,7 @@ fn load_sprites(root: &path::Path) -> Vec<Sprite> {
 					if current_frames.is_empty() {
 						panic!("sprite {} missing Path entries", prev_name);
 					}
-					sections.push(Sprite { name: prev_name, frames: current_frames, transform: current_transform });
+					sections.push(Sprite { name: prev_name, frames: current_frames, transform: current_transform, gutter: current_gutter });
 				}
 				current_name = Some(name.to_string());
 				current_transform = chipty::SpriteTransform::None;
@@ -56,6 +74,14 @@ fn load_sprites(root: &path::Path) -> Vec<Sprite> {
 						_ => panic!("unknown Transform value: {}", value),
 					};
 				}
+				else if key == "Gutter" {
+					current_gutter = match value {
+						"ClampToEdge" => GutterMode::ClampToEdge,
+						"SelfTiled" => GutterMode::SelfTiled,
+						"Transparent" => GutterMode::Transparent,
+						_ => panic!("unknown Gutter value: {}", value),
+					};
+				}
 			}
 			_ => {}
 		}
@@ -65,7 +91,7 @@ fn load_sprites(root: &path::Path) -> Vec<Sprite> {
 		if current_frames.is_empty() {
 			panic!("sprite {} missing Path entries", prev_name);
 		}
-		sections.push(Sprite { name: prev_name, frames: std::mem::take(&mut current_frames), transform: current_transform });
+		sections.push(Sprite { name: prev_name, frames: std::mem::take(&mut current_frames), transform: current_transform, gutter: current_gutter });
 	}
 
 	let mut sprites: Vec<Sprite> = sections;
