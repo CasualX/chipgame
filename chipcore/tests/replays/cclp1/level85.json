@@ -1,8 +1,13 @@
 {
-  "ticks": 2815,
-  "realtime": 46.902397,
-  "steps": 201,
-  "bonks": 3,
-  "seed": "1a72500e25d0d982",
-  "replay": "eNrtltEOgCAIRa/pnA/+//e2tWZkpChma+u81cKAbhdCeA0AZgMgd40WwBH2U/PrCjE9H/OkNZktAtqOFLaa7w7JBz8fo6JGVmsa8Q4SOzqMQiV9Bici9gdH6nGpdO+LQRjwdVQFjwLAY1oCmRWFAFZ6bj61TnBpev1Lx/wAB14wt1rThiy5zPUKOi944XklYAdgq0pEs5zFdu00F+sn1nLberprzfJ9q6t0MitaoR93"
+  "level_name": "Black Hole",
+  "attempts": 51,
+  "realtime": 242.0369,
+  "ticks": 2814,
+  "steps": 199,
+  "bonks": 39,
+  "seed": "cc5adb7a72e2ad3a",
+  "inputs": "eNrtVkESwyAIxIyHPCP/f2UnbeJsBARk2vHQPTFKVsANuO+LgD6oJy67zAB5LiKgZ+v3FgbB/SvzmY3rxDZCKPdG6ahs42R1wJPLH8sCL5s0ncgaI8r8U5NKV0KgYEugGdFbnFUArj/4b3vwrUL3xvEAbkaLilEY3UKsEMUyyCCrOFAQGd1X7az0hXxdaWmdPhpP7+9t9RqRdoI1jYYxg88hQpi59hugcsV7ek7mUrc0HOrscml219Mwnn52Iw/Gz+3K3jm/nFMooLIkXtc6Hsk",
+  "unpauses": 11,
+  "warps_set": 10,
+  "warps_used": 16
 }

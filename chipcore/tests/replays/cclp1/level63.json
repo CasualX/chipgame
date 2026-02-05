@@ -1,10 +1,13 @@
 {
   "level_name": "New Block in Town",
-  "attempts": 10,
-  "realtime": 33.931377,
-  "ticks": 2037,
-  "steps": 168,
-  "bonks": 2,
-  "seed": "158ab2dbba2f9ac8",
-  "inputs": "eNrVlUsOgCAMREcxhoX3P68axVKotpXEz9sipdPPGOMGFjoZoE/InyDmDA5S3OGfZMLX+iU1XRuhp3pjf2JqS5TlKTeTN7EZaCppqDZCCHRI+tVq1S+XkU9ANuCQ21twsh3s6OiYUBJDtDqyxsU9STR8A25KVGnIE0w86WqQWvFbA14p2R2fIJUjU0AeVIyTc4ZyN4P6kzD5EPQlh8V5jnxM7RL3z3H/M8x4jRo7"
+  "attempts": 36,
+  "realtime": 91.78492,
+  "ticks": 1886,
+  "steps": 162,
+  "bonks": 0,
+  "seed": "93b265549d945ed2",
+  "inputs": "eNrVlFEKwCAMQ+Pww2Ps/qccE5VoW1ZUhL2vIV1tEmpKGbyEARSuDLSaWkJdgOhE6x/PUkfAys+J1JMU4acH9qTrv21O6HP2Wlb5coByb7QsDEvQ9+46iBMM3XT3as3NRXwtf7tFKh3KNcwgbp/3ZhwsWu73MZZ2TovPyAXyJMyxMyOvdmgvwczLqm2/9Ydnck+0loNcJFfIOv8vD3HFFv0",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 11
 }

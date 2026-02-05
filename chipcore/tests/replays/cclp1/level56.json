@@ -1,8 +1,11 @@
 {
-  "ticks": 3309,
-  "realtime": 61.766666,
-  "steps": 204,
-  "bonks": 1,
-  "seed": "835a45acc72c915d",
-  "replay": "eNrNVtEOgzAIpKYxLvH/v3fJoraUg6u22XaPCkiP42xKJ0S2A5IsBGABKG+jCpuBTALq5B+QhqHrId5YDuem5EWTFckX2to25I5mjg5ggq+pWkUZASruw13ANYqvQl71BJqPhUpnMzu/73PUzspntuT1bfTvofvmG3FvD87oPWdPKGBmT7faqDMz2N1mXsC6RMrUGYxPzpJ0ncpzAcAm8Ysx+KfaBsDYgh4ZzAqx5ntK6wfWD718/Fx35GfUMVGF+Dw6knu6x6e7J83wr7fwsZC/pK49X4XRX6OXS1/L3IP6wWbp+fr4VegJ4+t69c23Oeev8GQn6vuvnureVF/QPUlaLdeLoTIm3E4jpc+hUVU1z8p8a+ZVK2+peRy6"
+  "level_name": "Connect the Chips",
+  "attempts": 13,
+  "realtime": 52.764423,
+  "ticks": 2208,
+  "steps": 184,
+  "bonks": 0,
+  "seed": "fcdd0bf742ba1e1c",
+  "inputs": "eNqlVEkSBCEMYqY8+P8Xz9KL2IGYruaoWQhEe/8DP7xSfAPeEToJ/cSq7Fm8C1STV3zWcyigDUw9Gl/oVNIT1FEMhA2djMDUYWsPLdEeD1MVLoPD+Ib7VXsd3cTsbkzH50q/atXRFqQW+Ga1ElcLHB+O4V5+Fvhcg+jdkk8QNOXG5+nCzbmOK2doV+Z9c+45JSo8ww6keqp9dh4VdG7xBcd3VOIWY8b6gAV1O8w6pOeTFy7+JoDlbms9x4wuqd1A5rUjlP4nIp4Lx9OwPsI782VWvH4C/14CofYc6Z8QQqjlEfMBnzwVhA",
+  "unpauses": 1
 }

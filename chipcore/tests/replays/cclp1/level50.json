@@ -1,10 +1,11 @@
 {
   "level_name": "The Grass Is Greener on the Other Side",
-  "attempts": 24,
-  "realtime": 41.68097,
-  "ticks": 2076,
-  "steps": 174,
-  "bonks": 1,
-  "seed": "32de5b60f79cc934",
-  "inputs": "eNq9lVkOgCAMREdDCPc/sYkbQwvaIvg+sRvTUlOSYGcR4GQ9yDb6GOxCx2x/ObgAnmsLCqgaGibgy/MXOi8cODMr1ypbaVKxoXLWkQjZqho6uSRHnhhzzML3AVed9Zh3quLyaQAzYpqSWoaj+hba5JimviQ586EH2wx0CRRmMeJx5pHEP7LJXCOWi7t+j26NdQLM2I29/XtrkGfDfruY/h91z3eMkSNvbgQZjg"
+  "attempts": 25,
+  "realtime": 58.229477,
+  "ticks": 2052,
+  "steps": 172,
+  "bonks": 0,
+  "seed": "64c7ac3ee99e56c1",
+  "inputs": "eNrFlFsOhSAMREdibtz/im+IrylMlQrG81kIHIbCshRgZSrZ6inDU87qVq+qCdX8YyiIcsPOLCidocYzfHYeorKp896cnDaGMZUzYH3SOIrQ2Nm56yhoWAcmKwnQ4+M0QcO+X2LdKk/EMoHt55ucRT6y//cBDpVXmntRzrh/14O27Xlr4Cc2yifUPAP+iqugfcv2fZ0efuOve3x477Ds6gUR/aQ6NKcLn3Z+mXPtP7LwF0g",
+  "unpauses": 5
 }

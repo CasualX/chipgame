@@ -1,10 +1,13 @@
 {
   "level_name": "Booster Shots",
-  "attempts": 9,
-  "realtime": 144.10109,
-  "ticks": 8647,
-  "steps": 751,
-  "bonks": 20,
-  "seed": "ea8a5942307396cc",
-  "inputs": "eNrtWe1uwzAItOMqSqW8//Pu2/UHBwfOOmkb/9omNobjONxt+7JkWP60xD6oPnyI1r/c2KbasO3rh+6neTnBITIKl1imTQ7TcYP2TR7jzT7CFnVnBt/COUZYZJ8BTL7B8oEbOhFPs7U8rgBAKkUy1CoVKIVCZF0lCXy0ZruEkeAoR9ox7K9JizJmu+ya4Aaw2lccJs3DhDkXsC1ZJUYg8DJSIgtuUK4zaSTv537xyfM0sxCofrFu6crvPqGQ9rFJjKoYa7omZd+FZFLdZKYiiev6MNVNMBrruc6Bi6dWo0QVUUw9rVKtpXPe2VqiVEuowHMCs6O9zdUMt2qzCogLt32pHC8osx8wLY2X0JVouIUl8YfkLAASmgeVsrlagFeJ6/3J5YNYHHOdgr3sxtgtf0rSIber0zNZ5Zmiw6gDoeLnacTgTbLsNcIIbK3dmQ5rxn5Zkv9uoyjlfgGl+MM/JHbg77tXxSGlFICMzBk+PWg26TWVKuihqjoG7VHY8FEsdQubS6d2/acdQgoV0iKIMTSQJJ7oCdF/MNQ3nZGYsxQFWZw9558rn2P8IL2vEVagI0ReHfb3ezMqOEujP77nYzDLPH1oDYZznIW7TbM8ucxsSlEhpubkEeANxh53EokdKwAjSjoT9ClMbB1F1/W4vvUeHw8/O3TkX6bHvGBpeQrHAi/OeNo0aMpb6QpuM8DfnWKLGOMZvjkdYyAx60SwiLGNopieE0nS3WZmPk3QVZ2ipeBKiO2wF73bIG41SGPHDSnzJm1uUVN2DlwESbhqYUNG8IJLHhQ0zxpHLGW39i8wAbB6Khdy5kw93ZVXmnZkqly7wlu0F5nnWEQ"
+  "attempts": 31,
+  "realtime": 319.84534,
+  "ticks": 6505,
+  "steps": 665,
+  "bonks": 0,
+  "seed": "15a445a3c9f41c11",
+  "inputs": "eNrFWEt2wzAIRHle6Bi5/ymb1K82iAFGUtuwaWojxHcAt/YiOelh6P2k3eR55IfrTccCiZap5Zi7zt+NIyH0uXi6oeGo3PcO/COTOT6nZeE3GBfC505bTd2Z7W/sgWt4y3zsclv0Yf1Ky9U6upzRz714wGP1GWVK4Lc0ExBPH7Panz1faf9pOT4DvRx/tjvPP7/Ja3trCDNEeUBH2SdXrwjxRDUo538BVoD45mXWcUKHR/AtVhfg8wBKHPA8Foj0MzAsuxagbmLXJT9FcqB0J4nGmcqyCXRN7Y3kFPdOqi+8dw6kT1a/qJAnIrJJQRWcf3AXQC7K06XOJ4uEoFLu51gT2NeIYg3pOV6Gpo9ZqURlycFiUlxCBIalTjQ6ZfMManuB+iYwIRSqQCbQJvW9GahE/tBcZb7+X4mOI6CxBgMNilORJ9fvOyKEpWWGC2jN97sjmtLZBtNEpqKfNUU8FAYtZbURRsNfWapRyGRr3aKGFcKFZjRPz8qUBUBi6jfQTuy7SH8Ef3mbrLMjwVZvyOBDfYocmGysh66BkZmc9rYRb+qsWy1+kYjOOH5AWaJk4fH+jYqW6N0hZwga1GKWQcnaSrAxvm8g/EwfYLg+OAO87v0765nVtk1Q6h+80LZg0TWflnzm6xAyGjErwUpPRMOBW106U7nLuhUbRNQf4w9Vk6oVkz8vTEvwPiTbjcuHnZqVao46yDxc8Il3UDHH0hFrm7QzeyMDZoOxeZ3Yz5dffedN6w",
+  "unpauses": 15,
+  "warps_set": 14,
+  "warps_used": 14
 }

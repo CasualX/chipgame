@@ -1,8 +1,13 @@
 {
-  "ticks": 5084,
-  "realtime": 85.166664,
-  "steps": 399,
-  "bonks": 12,
-  "seed": "bc6adeb1d8137a30",
-  "replay": "eNrFV9kSwiAMjI3TKTP8//fqqFWO3Ajdt7YUcmw24TgE5LsV8MF24v14ewMI0G+7fRo8PzEW7B/cp2PfdGhmABPxdNOR0jEDOedYPGALABFbZmgMkzcEgg89RynHW+6Vf0h1UXL5BWSdZTKpsyAJ6TqtzDlWwxDnL3B5a+sXnFzKX7Rvj4uQLCW5DLxiiilSFFbeybtzL98QROm3ppCaB6VRe6UT21IgruQLoqiZQrztubGtr8FVG7d/fc5vdenLdd2eV3gpRpac8PvU/8gaJudN9w4G4dU41oth27yjjczWUQyHqmPW7ExqFRx0wChm9unvj/VPNoglKk5HekKEQxO8f+DHhqzd9ErdQHpW2/ipr52bPJqs3zvJ2NSB1DlINBp50u9jYLtaphcWVACtbMzIonHEFeHmHujHP5QJ5F7h6HSeLiZnFt2T7XlypMPIPANPZx3p5INsoKwK8aFjclMC9ZcHah02OQ"
+  "level_name": "(Ir)reversible",
+  "attempts": 36,
+  "realtime": 122.28615,
+  "ticks": 4419,
+  "steps": 395,
+  "bonks": 0,
+  "seed": "23cee75b605e647f",
+  "inputs": "eNrNV9ESwyAIS70+9DP2/1+59Wo7FaJgj255dAxzAYLdti6wYx1gj1k+QEZKKZ+0yL9qOM5zhjUIBcPrMstfBNmMpYMzZnsAmNeNV2SIrwLj22vleT4tD1WyjK8rwu7SqgaWv65yL6Ykyutj7a6ZKXB2dSuuwvO57tW0Wv4Ep7NJllLJQzXW2vedK92C3sma2tdAgLVL2afKeTB+0yF9B9M3gpygKwZzDLr2D8a6DAveswafT3BVUGZT/qttdsvKlDnG+wl4TcPbb6zUjJqTjrew0b7vnUa7Y7TWxp8T0Q7CSrdGYXBvtGH2n1X9BM6rAhdQwRns0SfPhXPEak51kMxmtZJPYrmTqQ5CjpK792tnCQegrRWvWPKBdGveq5nKeWD62BzqBgzWCwtHmb/n5xae7g9n2zxO6azOfiPKG5PCO8w",
+  "unpauses": 13,
+  "warps_set": 12,
+  "warps_used": 4
 }
