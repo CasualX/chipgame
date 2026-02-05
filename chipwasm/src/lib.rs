@@ -72,7 +72,6 @@ pub extern "C" fn create() -> *mut Instance {
 	let paks = paks::MemoryReader::from_bytes(DATA_PAK, &key).expect("Failed to open data.paks");
 	let fs = chipgame::FileSystem::Memory(paks, key.clone());
 	instance.resx.load(&fs, &config, instance.graphics.as_graphics());
-	register_audio_assets(&fs, &config);
 
 	load_levelset(CCLP1_PAK, "cclp1".to_string(), &mut instance.play);
 	load_levelset(CCLP2_PAK, "cclp2".to_string(), &mut instance.play);
@@ -83,6 +82,15 @@ pub extern "C" fn create() -> *mut Instance {
 	instance.play.launch(instance.graphics.as_graphics());
 
 	Box::into_raw(instance)
+}
+
+#[no_mangle]
+pub extern "C" fn audio_init() {
+	let config = chipgame::config::Config::parse(CHIPGAME_INI);
+	let key = paks::Key::default();
+	let paks = paks::MemoryReader::from_bytes(DATA_PAK, &key).expect("Failed to open data.paks");
+	let fs = chipgame::FileSystem::Memory(paks, key.clone());
+	register_audio_assets(&fs, &config);
 }
 
 fn register_audio_assets(fs: &chipgame::FileSystem, config: &chipgame::config::Config) {

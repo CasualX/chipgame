@@ -427,6 +427,10 @@
 			const musicBank = new Map();
 			let musicSource = null;
 			let currentMusicKey = null;
+			let wasmExports = null;
+			let wasmGamePtr = 0;
+			let audioAssetsRequested = false;
+			let audioAssetsRequestFailed = false;
 
 			function ensureAudioContext() {
 				if (audioCtx) return audioCtx;
@@ -452,11 +456,25 @@
 					audioReady = ctx.state === "running";
 				}
 			}
+
+			function requestAudioAssetsFromGesture() {
+				if (audioAssetsRequested || audioAssetsRequestFailed) return;
+				resumeAudio();
+				if (!wasmExports || !wasmExports.audio_init) return;
+				audioAssetsRequested = true;
+				try {
+					wasmExports.audio_init();
+				} catch (err) {
+					audioAssetsRequestFailed = true;
+					console.warn("audio_init failed", err);
+				}
+			}
 			window.addEventListener("keydown", (e) => {
 				pressed.add(e.code);
 				keyboardSeen = true;
 				lastNonTouchInput = performance.now();
 				resumeAudio();
+				requestAudioAssetsFromGesture();
 				// Prevent page scroll/shortcuts for core keys.
 				if (
 					e.code.startsWith("Arrow") ||
@@ -639,6 +657,7 @@
 					requestFullscreenOnTouch();
 					requestLandscapeLock();
 					resumeAudio();
+					requestAudioAssetsFromGesture();
 					e.preventDefault();
 					touchPressed.add(id);
 					btn.classList.add("active");
@@ -669,11 +688,20 @@
 				loadingScreen.addEventListener("pointerdown", (e) => {
 					activationPointerActive = true;
 					resumeAudio();
+					requestAudioAssetsFromGesture();
 					if (e.pointerType === "touch") {
 						requestFullscreenOnTouch();
 						requestLandscapeLock();
 					}
 				});
+				loadingScreen.addEventListener("touchstart", (e) => {
+					activationPointerActive = true;
+					resumeAudio();
+					requestAudioAssetsFromGesture();
+					requestFullscreenOnTouch();
+					requestLandscapeLock();
+					e.preventDefault();
+				}, { passive: false });
 				loadingScreen.addEventListener("pointerup", () => {
 					activationPointerActive = false;
 				});
@@ -691,6 +719,8 @@
 					padTouchId = touch.identifier;
 					requestFullscreenOnTouch();
 					requestLandscapeLock();
+					resumeAudio();
+					requestAudioAssetsFromGesture();
 					e.preventDefault();
 					setPadDirection(getPadDirectionFromTouch(touch));
 				}, { passive: false });
@@ -923,37 +953,7 @@
 				if (!exports.create || !exports.think || !exports.draw) {
 					throw new Error("WASM exports missing one of: create/think/draw");
 				}
-
-				setLoadingStatus("Ready", 1);
-				setReadyMessage("Press any input to begin");
-				showLoadingReady(true);
-
-				await new Promise((resolve) => {
-					let resolved = false;
-					const done = () => {
-						if (resolved) return;
-						resolved = true;
-						window.removeEventListener("keydown", onKey);
-						window.removeEventListener("pointerdown", onPointer);
-						window.removeEventListener("touchstart", onPointer);
-						resolve();
-					};
-					const onKey = () => {
-						resumeAudio();
-						done();
-					};
-					const onPointer = () => {
-						resumeAudio();
-						done();
-					};
-					window.addEventListener("keydown", onKey, { once: true });
-					window.addEventListener("pointerdown", onPointer, { once: true });
-					window.addEventListener("touchstart", onPointer, { once: true, passive: true });
-				});
-
-				activationSeen = true;
-				setReadyMessage("Release all input to begin");
-				showLoadingReady(true);
+				wasmExports = exports;
 
 				setLoadingStatus("Starting…", 0.8);
 				let gamePtr = 0;
@@ -965,6 +965,11 @@
 				if (!gamePtr) {
 					throw new Error("create() returned null (0) instance pointer");
 				}
+				wasmGamePtr = gamePtr;
+
+				setLoadingStatus("Ready", 1);
+				setReadyMessage("Press any input to begin");
+				showLoadingReady(true);
 
 				// Fixed-step think @ 60Hz, draw @ RAF.
 				const STEP_MS = 1000 / 60;
@@ -1000,8 +1005,8 @@
 					}
 
 					while (acc >= STEP_MS) {
-						try {
-							exports.think(gamePtr, buttons);
+							try {
+								exports.think(gamePtr, buttons);
 						} catch (err) {
 							setLoadingStatus(`think() trapped: ${err && err.message ? err.message : String(err)}`);
 							return;
@@ -1050,7 +1055,7 @@
 
 			load().catch((err) => {
 				console.error(err);
-				setStatus(String(err && err.message ? err.message : err));
+				setLoadingStatus(String(err && err.message ? err.message : err));
 			});
 		</script>
 	</body>
