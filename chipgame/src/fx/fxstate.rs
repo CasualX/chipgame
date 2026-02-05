@@ -64,7 +64,7 @@ impl FxState {
 		fx.hud_enabled = true;
 		fx.darken = true;
 		fx.darken_time = -1.0;
-		fx.assist_dist = 4;
+		fx.assist_dist = 2;
 
 		// Parse the level data into the game state
 		fx.game.parse(level_dto, rng_seed);
@@ -175,17 +175,32 @@ impl FxState {
 		let fade_invisible = FadeValues { near_alpha: 0.75, far_alpha: 0.0 };
 		let fade_visible = FadeValues { near_alpha: 0.75, far_alpha: 1.0 };
 
-		// Update invisible walls based on player proximity
-		fade_assist_dist(&self.mirage_walls, &mut self.render.objects, self.assist_dist, &fade_invisible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
-		fade_assist_dist(&self.hidden_fire, &mut self.render.objects, self.assist_dist, &fade_invisible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
-		fade_assist_dist(&self.fake_blue_walls, &mut self.render.objects, self.assist_dist, &fade_visible, |&pos| chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos)));
-		fade_assist_dist(&self.hidden_objects, &mut self.render.objects, self.assist_dist, &fade_invisible, |&ehandle| {
+		// Update objects based on player proximity
+		fade_assist_dist(&self.mirage_walls, &mut self.render.objects, &fade_invisible, |&pos|
+			chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos) <= self.assist_dist));
+		fade_assist_dist(&self.hidden_fire, &mut self.render.objects, &fade_invisible, |&pos|
+			chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos) <= self.assist_dist));
+		fade_assist_dist(&self.fake_blue_walls, &mut self.render.objects, &fade_visible, |&pos|
+			chipcore::ps_nearest_ent(&self.game, pos).map(|player| player.pos.distance_hat(pos) <= self.assist_dist));
+		fade_assist_dist(&self.hidden_objects, &mut self.render.objects, &fade_invisible, |&ehandle| {
 			let ent = self.game.ents.get(ehandle)?;
+			// Hidden objects are kind of scuffed... Some special rules:
+			// If the entity is hidden inside a wall, make it always visible
+			let terrain = self.game.field.get_terrain(ent.pos);
+			let is_wall = matches!(terrain,
+				chipty::Terrain::Wall | chipty::Terrain::HiddenWall | chipty::Terrain::InvisibleWall |
+				chipty::Terrain::FakeBlueWall | chipty::Terrain::RealBlueWall |
+				chipty::Terrain::RedLock | chipty::Terrain::BlueLock |
+				chipty::Terrain::GreenLock | chipty::Terrain::YellowLock |
+				chipty::Terrain::ToggleWall | chipty::Terrain::ToggleFloor |
+				chipty::Terrain::CloneMachine);
+			if is_wall {
+				return Some(true);
+			}
 			let player = chipcore::ps_nearest_ent(&self.game, ent.pos)?;
 			let dist = player.pos.distance_hat(ent.pos);
-			Some(dist)
+			Some(dist <= self.assist_dist)
 		});
-
 	}
 	/// Process game events and update FX state accordingly.
 	pub fn sync(&mut self) {
@@ -427,22 +442,17 @@ struct FadeValues {
 	far_alpha: f32,
 }
 
-fn fade_assist_dist<T, F: Fn(&T) -> Option<i32>>(
+fn fade_assist_dist<T, F: Fn(&T) -> Option<bool>>(
 	map: &HashMap<T, render::ObjectHandle>,
 	objects: &mut render::ObjectMap,
-	fade_dist: i32,
 	values: &FadeValues,
 	f: F,
 ) {
 	for (key, &obj_handle) in map {
 		let Some(obj) = objects.get_mut(obj_handle) else { continue };
-		let Some(dist) = f(key) else { continue };
-		if dist <= fade_dist {
-			fade_to(obj, values.near_alpha, 4.0);
-		}
-		else {
-			fade_to(obj, values.far_alpha, 4.0);
-		}
+		let Some(nearby) = f(key) else { continue };
+		let target_alpha = if nearby { values.near_alpha } else { values.far_alpha };
+		fade_to(obj, target_alpha, 4.0);
 	}
 }
 
