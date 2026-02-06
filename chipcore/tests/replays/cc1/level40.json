@@ -1,8 +1,10 @@
 {
-  "ticks": 529,
-  "realtime": 9.216666,
-  "steps": 62,
+  "level_name": "Floorgasborg",
+  "attempts": 62,
+  "realtime": 15.091064,
+  "ticks": 516,
+  "steps": 58,
   "bonks": 0,
-  "seed": "19e76c53d9e91c75",
-  "replay": "eNq90cENACAIA0CghmjC/vPqRz/4wBC5AaBpmVNGDzBrjqpcIHydvvFhsEihneSURYmF8Ph6AqdOBKQ"
+  "seed": "b69a7ae056c0a71f",
+  "inputs": "eNqlkUEKACAIBKfo0P9fnKCYiF1yTiKyjDpGB4RdEvoysxIwL1qjrD4UVlDnYybaNyud9AVx25BAm1ng+QSHn6c88tPNbdMDXmwEYw"
 }

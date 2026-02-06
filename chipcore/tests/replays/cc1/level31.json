@@ -1,8 +1,12 @@
 {
-  "ticks": 1603,
-  "realtime": 27.5,
+  "level_name": "Knot",
+  "attempts": 22,
+  "realtime": 30.797897,
+  "ticks": 1602,
   "steps": 138,
   "bonks": 0,
-  "seed": "f84bd7de89175a45",
-  "replay": "eNrV1LEKACAIBFDTEAX//3urpalND+ytLnpwmj3QqEMGQDMvDMq9IDyHrBZHOj9lCJ3dKOhSlmO0IcIwulV0NsCt/RUBX4xf7/kC0rodNw"
+  "seed": "5f70c99914eb6861",
+  "inputs": "eNq1lDEOACAIA6tx4P8vNkFNlMlAe5ODIRVOzCJwWh2vY2xwGHl2ha4AYCS8Uip7SBiwJmFISpIRuoT1MetE5FhY9lny0lWt7LPeZDGZDvz8X4Rd8dz38wRmpRml",
+  "unpauses": 1,
+  "warps_set": 1
 }

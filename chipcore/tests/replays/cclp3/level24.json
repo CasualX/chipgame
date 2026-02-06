@@ -1,8 +1,13 @@
 {
-  "ticks": 1978,
-  "realtime": 33.816666,
-  "steps": 154,
+  "level_name": "Impossible?",
+  "attempts": 48,
+  "realtime": 81.662575,
+  "ticks": 1801,
+  "steps": 150,
   "bonks": 1,
-  "seed": "c0d8ca31ef39b670",
-  "replay": "eNrFlVsOgzAMBDcxtUiV+5+3UtWWArsoDq/5A4QN42QzDBrPIcySABO8EzB+KGXxruUTeI6nUCd1M3egTnQdpSmCe74Pd1ffVfdKBmH/6ND1n+AcbVO5ZL0jawQhyUdoVpWbyheVL2Z8LPzp39h+F73j/t5fJUFlc7pIFJAioCnRGnikG7CN80ifSIxC8sA7krd7m9Q3rW1eoXkdcQ"
+  "seed": "90d3f56064895b96",
+  "inputs": "eNq9lVEOwCAIQ9HwsWN4/1MuMyZ2YhORufc3p1KqoOqDGBTG8zp1fpow399GvirS9xHUYHVmP0OsEMQ37dpE0BOZ52s31Ai7znwGyWLDeZjf1hYD/jWr2sfK+AkT8My9/mkUWfLhJEPuQvvDWB8nriOTyO4GasJsUGiJ9AzSA1+kv2EH4NczLTB3g6OFbR+qFdNZlBs5VBfG",
+  "unpauses": 6,
+  "warps_set": 5,
+  "warps_used": 6
 }
