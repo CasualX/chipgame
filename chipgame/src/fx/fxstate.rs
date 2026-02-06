@@ -189,10 +189,10 @@ impl FxState {
 			let terrain = self.game.field.get_terrain(ent.pos);
 			let is_wall = matches!(terrain,
 				chipty::Terrain::Wall | chipty::Terrain::HiddenWall | chipty::Terrain::InvisibleWall |
-				chipty::Terrain::FakeBlueWall | chipty::Terrain::RealBlueWall |
-				chipty::Terrain::RedLock | chipty::Terrain::BlueLock |
-				chipty::Terrain::GreenLock | chipty::Terrain::YellowLock |
+				chipty::Terrain::RealBlueWall |// chipty::Terrain::FakeBlueWall |
+				chipty::Terrain::BlueLock | chipty::Terrain::RedLock | chipty::Terrain::GreenLock | chipty::Terrain::YellowLock |
 				chipty::Terrain::ToggleWall | chipty::Terrain::ToggleFloor |
+				chipty::Terrain::CloneBlockN | chipty::Terrain::CloneBlockW | chipty::Terrain::CloneBlockS | chipty::Terrain::CloneBlockE |
 				chipty::Terrain::CloneMachine);
 			if is_wall {
 				return Some(true);
