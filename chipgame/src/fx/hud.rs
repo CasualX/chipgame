@@ -44,7 +44,7 @@ impl FxState {
 		if game.ps.keys.iter().any(|&k| k > 0) {
 			cv.fill_rect(&paint, &Bounds2::c(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
 		}
-		if game.ps.flippers || game.ps.fire_boots || game.ps.ice_skates || game.ps.suction_boots {
+		if game.ps.boots != chipcore::Boots::NONE {
 			cv.fill_rect(&paint, &Bounds2::c(items_x1, y, items_x2, resx.viewport.bottom() as f32));
 		}
 		if !self.darken {
@@ -66,16 +66,16 @@ impl FxState {
 		if game.ps.keys[3] > 0 {
 			draw_sprite(cv, resx, chipty::SpriteId::YellowKey, Vec2(keys_x1 + a * 3.5, y), a);
 		}
-		if game.ps.flippers {
+		if game.ps.boots.has(chipcore::Boots::FLIPPERS) {
 			draw_sprite(cv, resx, chipty::SpriteId::Flippers, Vec2(items_x1 + a * 0.5, y), a);
 		}
-		if game.ps.fire_boots {
+		if game.ps.boots.has(chipcore::Boots::FIRE_BOOTS) {
 			draw_sprite(cv, resx, chipty::SpriteId::FireBoots, Vec2(items_x1 + a * 1.5, y), a);
 		}
-		if game.ps.ice_skates {
+		if game.ps.boots.has(chipcore::Boots::ICE_SKATES) {
 			draw_sprite(cv, resx, chipty::SpriteId::IceSkates, Vec2(items_x1 + a * 2.5, y), a);
 		}
-		if game.ps.suction_boots {
+		if game.ps.boots.has(chipcore::Boots::SUCTION_BOOTS) {
 			draw_sprite(cv, resx, chipty::SpriteId::SuctionBoots, Vec2(items_x1 + a * 3.5, y), a);
 		}
 

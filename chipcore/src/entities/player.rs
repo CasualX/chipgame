@@ -61,7 +61,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 				}
 
 				// Handle ice physics
-				if !s.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNW | Terrain::IceNE | Terrain::IceSW | Terrain::IceSE) {
+				if !s.ps.boots.has(Boots::ICE_SKATES) && matches!(terrain, Terrain::Ice | Terrain::IceNW | Terrain::IceNE | Terrain::IceSW | Terrain::IceSE) {
 					let (ice_dir, back_dir) = match step_dir {
 						Compass::Up => match terrain {
 							Terrain::IceNW => (Compass::Right, Compass::Down),
@@ -112,7 +112,7 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 
 			// Handle force terrain
 			let force_dir = match terrain {
-				_ if s.ps.suction_boots => None,
+				_ if s.ps.boots.has(Boots::SUCTION_BOOTS) => None,
 				Terrain::ForceW => Some(Compass::Left),
 				Terrain::ForceE => Some(Compass::Right),
 				Terrain::ForceN => Some(Compass::Up),
@@ -180,7 +180,7 @@ fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 			PlayerActivity::Swimming
 		},
 		Terrain::Ice | Terrain::IceNE | Terrain::IceNW | Terrain::IceSE | Terrain::IceSW => {
-			if s.ps.ice_skates {
+			if s.ps.boots.has(Boots::ICE_SKATES) {
 				PlayerActivity::IceSkating
 			}
 			else {
@@ -188,7 +188,7 @@ fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 			}
 		}
 		Terrain::ForceN | Terrain::ForceW | Terrain::ForceS | Terrain::ForceE | Terrain::ForceRandom => {
-			if s.ps.suction_boots {
+			if s.ps.boots.has(Boots::SUCTION_BOOTS) {
 				PlayerActivity::ForceWalking
 			}
 			else {
@@ -217,11 +217,11 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 	}
 
 	if s.time == ent.step_time + ent.step_spd - 1 && ent.flags & EF_NEW_POS != 0 {
-		if matches!(terrain, Terrain::Fire) && !s.ps.fire_boots {
+		if matches!(terrain, Terrain::Fire) && !s.ps.boots.has(Boots::FIRE_BOOTS) {
 			ps_attack(s, ent.handle, GameOverReason::Burned);
 			return;
 		}
-		if matches!(terrain, Terrain::Water) && !s.ps.flippers {
+		if matches!(terrain, Terrain::Water) && !s.ps.boots.has(Boots::FLIPPERS) {
 			ps_attack(s, ent.handle, GameOverReason::Drowned);
 			return;
 		}

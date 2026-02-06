@@ -141,7 +141,7 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	// Set the entity's step speed based on the terrain
 	if matches!(from_terrain, Terrain::ForceW | Terrain::ForceE | Terrain::ForceN | Terrain::ForceS | Terrain::ForceRandom) {
 		if matches!(mover_kind, EntityKind::Player) {
-			if s.ps.suction_boots {
+			if s.ps.boots.has(Boots::SUCTION_BOOTS) {
 				ent.step_spd = ent.base_spd;
 				ps_activity(s, ent.handle, PlayerActivity::ForceWalking);
 			}
@@ -156,7 +156,7 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	}
 	else if matches!(from_terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
 		if matches!(mover_kind, EntityKind::Player) {
-			if s.ps.ice_skates {
+			if s.ps.boots.has(Boots::ICE_SKATES) {
 				ent.step_spd = ent.base_spd;
 				ps_activity(s, ent.handle, PlayerActivity::IceSkating);
 			}

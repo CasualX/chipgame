@@ -533,6 +533,90 @@ pub fn lock_opened(fx: &mut FxState, pos: Vec2<i32>, key: chipcore::KeyColor) {
 	};
 	let handle = fx.render.objects.alloc();
 	fx.render.objects.insert(handle, obj);
+
+	// Visual feedback: the key was consumed to open the lock.
+	let key_obj = render::Object {
+		data: render::ObjectData {
+			pos: Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 0.0),
+			sprite: match key {
+				chipcore::KeyColor::Red => chipty::SpriteId::RedKey,
+				chipcore::KeyColor::Green => chipty::SpriteId::GreenKey,
+				chipcore::KeyColor::Blue => chipty::SpriteId::BlueKey,
+				chipcore::KeyColor::Yellow => chipty::SpriteId::YellowKey,
+			},
+			frame: 0,
+			model: chipty::ModelId::Sprite,
+			alpha: 1.0,
+			greyscale: false,
+			depth_test: true,
+		},
+		anim: render::Animation {
+			anims: vec![
+				render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }),
+				render::AnimState::MoveZ(render::MoveZ {
+					target_z: 50.0,
+					move_spd: 200.0,
+				}),
+			],
+			unalive_after_anim: true,
+		},
+	};
+	let key_handle = fx.render.objects.alloc();
+	fx.render.objects.insert(key_handle, key_obj);
+}
+
+pub fn items_thief(fx: &mut FxState, boots: chipcore::Boots) {
+	if boots == chipcore::Boots::NONE {
+		return;
+	}
+
+	let Some(player) = fx.game.ents.get(fx.game.ps.master) else {
+		return;
+	};
+	let pos = player.pos;
+	let base = Vec3::new(pos.x as f32 * 32.0, pos.y as f32 * 32.0, 10.0);
+
+	let mut sprites: Vec<chipty::SpriteId> = Vec::new();
+	if boots.has(chipcore::Boots::FLIPPERS) {
+		sprites.push(chipty::SpriteId::Flippers);
+	}
+	if boots.has(chipcore::Boots::FIRE_BOOTS) {
+		sprites.push(chipty::SpriteId::FireBoots);
+	}
+	if boots.has(chipcore::Boots::ICE_SKATES) {
+		sprites.push(chipty::SpriteId::IceSkates);
+	}
+	if boots.has(chipcore::Boots::SUCTION_BOOTS) {
+		sprites.push(chipty::SpriteId::SuctionBoots);
+	}
+
+	for (i, sprite) in sprites.into_iter().enumerate() {
+		let x_off = 6.0 * i as f32;
+		let y_off = -2.0 * i as f32;
+		let obj = render::Object {
+			data: render::ObjectData {
+				pos: base + Vec3::new(x_off, y_off, 0.0),
+				sprite,
+				frame: 0,
+				model: chipty::ModelId::Sprite,
+				alpha: 1.0,
+				greyscale: false,
+				depth_test: true,
+			},
+			anim: render::Animation {
+				anims: vec![
+					render::AnimState::FadeOut(render::FadeOut { atime: 0.0 }),
+					render::AnimState::MoveZ(render::MoveZ {
+						target_z: base.z + 50.0,
+						move_spd: 200.0,
+					}),
+				],
+				unalive_after_anim: true,
+			},
+		};
+		let handle = fx.render.objects.alloc();
+		fx.render.objects.insert(handle, obj);
+	}
 }
 
 pub fn recessed_wall_raised(fx: &mut FxState, pos: Vec2<i32>) {

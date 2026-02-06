@@ -65,19 +65,19 @@ fn pickup_item(s: &mut GameState, ent: &mut Entity) {
 			(ItemPickup::YellowKey, SoundFx::KeyCollected)
 		},
 		EntityKind::Flippers => {
-			s.ps.flippers = true;
+			s.ps.boots.give(Boots::FLIPPERS);
 			(ItemPickup::Flippers, SoundFx::BootCollected)
 		},
 		EntityKind::FireBoots => {
-			s.ps.fire_boots = true;
+			s.ps.boots.give(Boots::FIRE_BOOTS);
 			(ItemPickup::FireBoots, SoundFx::BootCollected)
 		},
 		EntityKind::IceSkates => {
-			s.ps.ice_skates = true;
+			s.ps.boots.give(Boots::ICE_SKATES);
 			(ItemPickup::IceSkates, SoundFx::BootCollected)
 		},
 		EntityKind::SuctionBoots => {
-			s.ps.suction_boots = true;
+			s.ps.boots.give(Boots::SUCTION_BOOTS);
 			(ItemPickup::SuctionBoots, SoundFx::BootCollected)
 		},
 		_ => return,

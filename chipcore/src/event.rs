@@ -64,7 +64,7 @@ pub enum GameEvent {
 	BombExplode { pos: Vec2i },
 	WaterSplash { pos: Vec2i },
 	SocketFilled { pos: Vec2i },
-	ItemsThief { player: PlayerIndex },
+	ItemsThief { player: PlayerIndex, boots: Boots },
 	LockOpened { pos: Vec2i, key: KeyColor },
 	TerrainUpdated { pos: Vec2i, old: Terrain, new: Terrain },
 	GameOver { reason: GameOverReason },

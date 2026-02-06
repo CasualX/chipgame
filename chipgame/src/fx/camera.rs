@@ -29,8 +29,9 @@ pub struct PlayCamera {
 }
 
 impl Default for PlayCamera {
-	fn default() -> Self {
-		Self {
+	fn default() -> PlayCamera {
+		PlayCamera {
+			// offset: Vec3::new(0.0, 0.5 * 32.0, 150.0),
 			offset: Vec3::new(0.0, 1.0 * 32.0, 200.0),
 			target: Vec3f::ZERO,
 			position: Vec3f::ONE,

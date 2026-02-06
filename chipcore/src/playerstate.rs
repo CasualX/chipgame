@@ -23,6 +23,28 @@ pub enum PlayerActivity {
 	ForceWalking,
 }
 
+/// Boots bitmask.
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq)]
+pub struct Boots(pub u8);
+
+impl Boots {
+	pub const NONE: Boots = Boots(0);
+	pub const FLIPPERS: Boots = Boots(1 << 0);
+	pub const FIRE_BOOTS: Boots = Boots(1 << 1);
+	pub const ICE_SKATES: Boots = Boots(1 << 2);
+	pub const SUCTION_BOOTS: Boots = Boots(1 << 3);
+
+	#[inline]
+	pub fn has(self, other: Boots) -> bool {
+		(self.0 & other.0) != 0
+	}
+
+	#[inline]
+	pub fn give(&mut self, other: Boots) {
+		self.0 |= other.0;
+	}
+}
+
 /// Player state.
 #[derive(Clone, Default)]
 pub struct PlayerState {
@@ -47,10 +69,7 @@ pub struct PlayerState {
 	/// Keys collected.
 	pub keys: [u8; 4],
 
-	pub flippers: bool,
-	pub fire_boots: bool,
-	pub ice_skates: bool,
-	pub suction_boots: bool,
+	pub boots: Boots,
 	pub dev_wtw: bool,
 }
 

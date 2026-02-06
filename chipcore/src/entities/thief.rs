@@ -25,12 +25,10 @@ fn action_phase(s: &mut GameState, _phase: &mut ActionPhase, ent: &mut Entity) {
 	update_hidden_flag(s, ent);
 
 	if ps_check_new_pos(s, ent.pos) {
-		if s.ps.flippers || s.ps.fire_boots || s.ps.ice_skates || s.ps.suction_boots {
-			s.ps.flippers = false;
-			s.ps.fire_boots = false;
-			s.ps.ice_skates = false;
-			s.ps.suction_boots = false;
-			s.events.fire(GameEvent::ItemsThief { player: () });
+		let boots = s.ps.boots;
+		if boots != Boots::NONE {
+			s.ps.boots = Boots::NONE;
+			s.events.fire(GameEvent::ItemsThief { player: (), boots });
 			s.events.fire(GameEvent::SoundFx { sound: SoundFx::BootsStolen });
 		}
 	}

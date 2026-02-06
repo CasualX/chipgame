@@ -217,6 +217,7 @@ impl FxState {
 				&chipcore::GameEvent::PlayerActivity { entity } => handlers::player_activity(self, entity),
 				&chipcore::GameEvent::PlayerPush { entity } => handlers::player_push(self, entity),
 				&chipcore::GameEvent::PlayerBump { entity } => handlers::player_push(self, entity),
+				&chipcore::GameEvent::ItemsThief { player: _, boots } => handlers::items_thief(self, boots),
 				&chipcore::GameEvent::LockOpened { pos, key } => handlers::lock_opened(self, pos, key),
 				&chipcore::GameEvent::FireHidden { pos, hidden } => handlers::fire_hidden(self, pos, hidden),
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),

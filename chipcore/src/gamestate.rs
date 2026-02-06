@@ -295,13 +295,13 @@ impl GameState {
 		if matches!(terrain, Terrain::Exit | Terrain::Teleport) {
 			return true;
 		}
-		if !self.ps.ice_skates && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
+		if !self.ps.boots.has(Boots::ICE_SKATES) && matches!(terrain, Terrain::Ice | Terrain::IceNE | Terrain::IceSE | Terrain::IceNW | Terrain::IceSW) {
 			return true;
 		}
-		if !self.ps.flippers && matches!(terrain, Terrain::Water) {
+		if !self.ps.boots.has(Boots::FLIPPERS) && matches!(terrain, Terrain::Water) {
 			return true;
 		}
-		if !self.ps.fire_boots && matches!(terrain, Terrain::Fire) {
+		if !self.ps.boots.has(Boots::FIRE_BOOTS) && matches!(terrain, Terrain::Fire) {
 			return true;
 		}
 		return false;

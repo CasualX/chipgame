@@ -8,10 +8,10 @@ impl cvar::IVisit for GameState {
 		}));
 		f(&mut cvar::Action("cheats.give!", |args, fd| {
 			if args.is_empty() || args == "boots" {
-				self.ps.flippers = true;
-				self.ps.fire_boots = true;
-				self.ps.ice_skates = true;
-				self.ps.suction_boots = true;
+				self.ps.boots.give(Boots::FLIPPERS);
+				self.ps.boots.give(Boots::FIRE_BOOTS);
+				self.ps.boots.give(Boots::ICE_SKATES);
+				self.ps.boots.give(Boots::SUCTION_BOOTS);
 				_ = write!(fd, "Given boots.\n");
 			}
 			if args.is_empty() || args == "keys" {
