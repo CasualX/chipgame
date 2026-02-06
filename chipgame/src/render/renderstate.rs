@@ -78,7 +78,7 @@ impl RenderState {
 		cv.uniform.pixel_bias = resx.pixel_art_bias;
 		cv.uniform.shadow_map = self.shadow_map;
 		cv.uniform.light_matrix = self.light_matrix;
-		render::field(&mut cv, self, resx, time);
+		render::field(&mut cv, camera, self, resx, time);
 		cv.draw(g);
 	}
 	pub fn draw_effects(&self, g: &mut shade::Graphics, resx: &Resources, camera: &shade::d3::Camera, time: f64) {

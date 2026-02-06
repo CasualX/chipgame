@@ -173,7 +173,7 @@ impl EditorEditState {
 			for i in 0..ENTITY_SAMPLES.len() as i32 {
 				let (_, sprite) = ENTITY_SAMPLES[i as usize];
 				let pos = Vec3::new(i as f32 * 32.0, -2.0 * 32.0, 0.0);
-				render::draw(&mut cv, resx, pos, sprite, chipty::ModelId::ReallyFlatSprite, 0, 1.0);
+				render::draw(&mut cv, Some(&cam), resx, pos, sprite, chipty::ModelId::ReallyFlatSprite, 0, 1.0);
 			}
 
 			match &self.tool {

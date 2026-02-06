@@ -284,10 +284,26 @@ fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resource
 	});
 }
 
-pub fn draw(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, model: chipty::ModelId, frame: u16, alpha: f32) {
+pub fn draw(
+	cv: &mut shade::im::DrawBuilder<Vertex, Uniform>,
+	camera: Option<&shade::d3::Camera>,
+	resx: &Resources,
+	pos: Vec3<f32>,
+	sprite: chipty::SpriteId,
+	model: chipty::ModelId,
+	frame: u16,
+	alpha: f32,
+) {
 	if alpha <= 0.0 {
 		return;
 	}
+	if let Some(camera) = camera {
+		let bounds = Bounds3(pos, pos + Vec3(32.0, 32.0, 32.0));
+		if !camera.is_visible(&bounds, None) {
+			return;
+		}
+	}
+
 	match model {
 		chipty::ModelId::Empty => (),
 		chipty::ModelId::Floor => draw_floor(cv, resx, pos, sprite, 0.0, 0.0, frame, alpha),
@@ -303,10 +319,10 @@ pub fn draw(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, 
 
 pub fn draw_tile(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, resx: &Resources, terrain: chipty::Terrain, pos: Vec3<f32>, tiles: &[TileGfx]) {
 	let tile = tiles[terrain as usize];
-	draw(cv, resx, pos, tile.sprite, tile.model, 0, 1.0);
+	draw(cv, None, resx, pos, tile.sprite, tile.model, 0, 1.0);
 }
 
-pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, fx: &RenderState, resx: &Resources, time: f64) {
+pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>, camera: &shade::d3::Camera, fx: &RenderState, resx: &Resources, time: f64) {
 	// Render the level geometry
 	cv.blend_mode = shade::BlendMode::Solid;
 	let frame = (time * 8.0) as i32 as u16;
@@ -319,7 +335,7 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 				continue;
 			}
 			let (sprite, model) = (tile.sprite, tile.model);
-			draw(cv, resx, Vec2(x, y).map(|c| c as f32 * 32.0).vec3(0.0), sprite, model, frame, 1.0);
+			draw(cv, Some(camera), resx, Vec2(x, y).map(|c| c as f32 * 32.0).vec3(0.0), sprite, model, frame, 1.0);
 		}
 	}
 
@@ -336,6 +352,6 @@ pub fn field(cv: &mut shade::im::DrawBuilder::<render::Vertex, render::Uniform>,
 		// Configure depth testing
 		cv.depth_test = if obj.depth_test { Some(shade::Compare::LessEqual) } else { None };
 		// Draw the object
-		draw(cv, resx, obj.pos, obj.sprite, obj.model, obj.frame, obj.alpha);
+		draw(cv, Some(camera), resx, obj.pos, obj.sprite, obj.model, obj.frame, obj.alpha);
 	}
 }
