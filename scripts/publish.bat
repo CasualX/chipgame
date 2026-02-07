@@ -1,11 +1,41 @@
 @echo off
 
+set ALLOW_DIRTY=0
+
+:parse_args
+if "%~1"=="" goto args_done
+
+if "%~1"=="--allow-dirty" (
+	set ALLOW_DIRTY=1
+	shift
+	goto parse_args
+)
+
+if "%~1"=="-h" (
+	echo Usage: %~nx0 [--allow-dirty]
+	exit /b 0
+)
+
+if "%~1"=="--help" (
+	echo Usage: %~nx0 [--allow-dirty]
+	exit /b 0
+)
+
+echo Error: unknown argument: %~1
+echo Usage: %~nx0 [--allow-dirty]
+exit /b 2
+
+:args_done
+
 rem Require a clean git checkout (no staged/unstaged changes; untracked OK)
-git diff-index --quiet HEAD --
-if not %errorlevel%==0 (
-	echo Error: git working tree is dirty ^(staged or unstaged changes^).
-	echo Please commit, stash, or discard changes before publishing.
-	exit /b 1
+if %ALLOW_DIRTY%==0 (
+	git diff-index --quiet HEAD --
+	if not %errorlevel%==0 (
+		echo Error: git working tree is dirty ^(staged or unstaged changes^).
+		echo Re-run with --allow-dirty to bypass this check.
+		echo ^(Tip: untracked files are already allowed.^)
+		exit /b 1
+	)
 )
 
 rem Clean the publish directory

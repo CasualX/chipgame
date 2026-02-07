@@ -2,11 +2,34 @@
 
 set -euo pipefail
 
+allow_dirty=0
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--allow-dirty)
+			allow_dirty=1
+			shift
+			;;
+		-h|--help)
+			echo "Usage: $(basename "$0") [--allow-dirty]" >&2
+			exit 0
+			;;
+		*)
+			echo "Error: unknown argument: $1" >&2
+			echo "Usage: $(basename "$0") [--allow-dirty]" >&2
+			exit 2
+			;;
+	esac
+done
+
 # Require a clean git checkout (no staged/unstaged changes; untracked OK)
-if ! git diff-index --quiet HEAD --; then
-	echo "Error: git working tree is dirty (staged or unstaged changes)." >&2
-	echo "Please commit, stash, or discard changes before publishing." >&2
-	exit 1
+if [[ $allow_dirty -eq 0 ]]; then
+	if ! git diff-index --quiet HEAD --; then
+		echo "Error: git working tree is dirty (staged or unstaged changes)." >&2
+		echo "Re-run with --allow-dirty to bypass this check." >&2
+		echo "(Tip: untracked files are already allowed.)" >&2
+		exit 1
+	fi
 fi
 
 # Clean the publish directory
