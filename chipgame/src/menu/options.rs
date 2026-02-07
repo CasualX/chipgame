@@ -7,7 +7,7 @@ pub struct OptionsMenu {
 }
 
 impl OptionsMenu {
-	const ITEMS_COUNT: u8 = 9;
+	const ITEMS_COUNT: u8 = 10;
 	pub fn think(&mut self, input: &Input, events: &mut Vec<MenuEvent>) {
 		if input.up.is_pressed() {
 			if self.selected > 0 {
@@ -39,22 +39,29 @@ impl OptionsMenu {
 					MenuEvent::SetPerspective { value: self.options.perspective }
 				}
 				3 => {
+					self.options.zoom_mode = match self.options.zoom_mode {
+						chipty::ZoomMode::Classic => chipty::ZoomMode::Wide,
+						chipty::ZoomMode::Wide => chipty::ZoomMode::Classic,
+					};
+					MenuEvent::SetZoomMode { value: self.options.zoom_mode }
+				}
+				4 => {
 					self.options.assist_mode = !self.options.assist_mode;
 					MenuEvent::SetAssistMode { value: self.options.assist_mode }
 				}
-				4 => {
+				5 => {
 					self.options.step_mode = !self.options.step_mode;
 					MenuEvent::SetStepMode { value: self.options.step_mode }
 				}
-				5 => {
+				6 => {
 					self.options.auto_save_replay = !self.options.auto_save_replay;
 					MenuEvent::SetAutoSaveReplay { value: self.options.auto_save_replay }
 				}
-				6 => {
+				7 => {
 					self.options.speedrun_mode = !self.options.speedrun_mode;
 					MenuEvent::SetSpeedrunMode { value: self.options.speedrun_mode }
 				}
-				7 => {
+				8 => {
 					self.options.developer_mode = !self.options.developer_mode;
 					MenuEvent::SetDeveloperMode { value: self.options.developer_mode }
 				}
@@ -77,11 +84,16 @@ impl OptionsMenu {
 		buf.uniform.texture = resx.font.texture;
 
 		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
+		let get_zoom = |mode| match mode {
+			chipty::ZoomMode::Classic => "\x1b[color=#0f0]Classic",
+			chipty::ZoomMode::Wide => "\x1b[color=#ff0]Wide",
+		};
 
 		let items: [&dyn fmt::Display; _] = [
 			&fmtools::fmt!("Background music: "{get_flag(self.options.background_music)}),
 			&fmtools::fmt!("Sound effects: "{get_flag(self.options.sound_effects)}),
 			&fmtools::fmt!("Perspective: "{get_flag(self.options.perspective)}),
+			&fmtools::fmt!("Camera zoom: "{get_zoom(self.options.zoom_mode)}),
 			&fmtools::fmt!("Assist mode: "{get_flag(self.options.assist_mode)}),
 			&fmtools::fmt!("Step mode: "{get_flag(self.options.step_mode)}),
 			&fmtools::fmt!("Auto save replays: "{get_flag(self.options.auto_save_replay)}),

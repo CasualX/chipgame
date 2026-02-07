@@ -4,6 +4,9 @@ const FOV_Y: f32 = 90.0;
 const NEAR: f32 = 10.0;
 const FAR: f32 = 2000.0;
 
+const CLASSIC_OFFSET: Vec3f = Vec3(0.0, 0.5 * 32.0, 150.0);
+const WIDE_OFFSET: Vec3f = Vec3(0.0, 1.0 * 32.0, 200.0);
+
 #[derive(Clone)]
 pub struct PlayCamera {
 	// Camera offset from the object
@@ -31,8 +34,7 @@ pub struct PlayCamera {
 impl Default for PlayCamera {
 	fn default() -> PlayCamera {
 		PlayCamera {
-			// offset: Vec3::new(0.0, 0.5 * 32.0, 150.0),
-			offset: Vec3::new(0.0, 1.0 * 32.0, 200.0),
+			offset: WIDE_OFFSET,
 			target: Vec3f::ZERO,
 			position: Vec3f::ONE,
 			blend: 0.0,
@@ -81,6 +83,14 @@ impl PlayCamera {
 
 	pub fn set_perspective(&mut self, perspective: bool) {
 		self.perspective = perspective;
+	}
+
+	pub fn set_zoom_mode(&mut self, zoom_mode: chipty::ZoomMode) {
+		self.offset = match zoom_mode {
+			chipty::ZoomMode::Classic => CLASSIC_OFFSET,
+			chipty::ZoomMode::Wide => WIDE_OFFSET,
+		};
+		self.position = self.target + self.get_offset();
 	}
 
 	pub fn set_target(&mut self, pos: Vec3f) {

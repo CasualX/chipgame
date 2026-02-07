@@ -31,6 +31,7 @@ pub enum MenuEvent {
 	SetSoundEffects { value: bool },
 	SetDeveloperMode { value: bool },
 	SetPerspective { value: bool },
+	SetZoomMode { value: chipty::ZoomMode },
 	SetAssistMode { value: bool },
 	SetStepMode { value: bool },
 	SetAutoSaveReplay { value: bool },

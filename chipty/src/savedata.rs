@@ -39,6 +39,15 @@ fn default_true() -> bool {
 	true
 }
 
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ZoomMode {
+	Classic,
+	#[default]
+	Wide,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, Debug)]
 pub struct OptionsDto {
@@ -47,6 +56,8 @@ pub struct OptionsDto {
 	pub developer_mode: bool,
 	#[serde(default = "default_true")]
 	pub perspective: bool,
+	#[serde(default)]
+	pub zoom_mode: ZoomMode,
 	#[serde(default = "default_true")]
 	pub assist_mode: bool,
 	#[serde(default)]
@@ -64,6 +75,7 @@ impl Default for OptionsDto {
 			sound_effects: true,
 			developer_mode: false,
 			perspective: true,
+			zoom_mode: ZoomMode::default(),
 			assist_mode: true,
 			step_mode: false,
 			auto_save_replay: false,
