@@ -1,10 +1,13 @@
 {
   "level_name": "Lead Us Not into Temptation",
-  "attempts": 47,
-  "realtime": 107.92792,
-  "ticks": 6477,
-  "steps": 578,
+  "attempts": 70,
+  "realtime": 247.29575,
+  "ticks": 5886,
+  "steps": 554,
   "bonks": 4,
   "seed": "dc5604e326e94342",
-  "inputs": "eNrNWO2SwyAIpDXDpDN5/+e96/UaFfmOSbs/24iIywqs6wsANzdWE9uiAfTFEVdegDuHsJng4Vv7Zd/V4e0ZeIeWD4WM36VrDOr1zD7PQB3PmYaPSymuG637+KMx57qXHDzR2B1pf0R8m9g2mraIHtZ40S3qrlIADS64OPm/D0Z4Ej1LkIbfDImrjhCT6Gk6bwaeFfAi5A4hji+/BlmUlbPhKyVjS+TWOSeHOmoOGNVnGVYjhvO+Q788rPnTMeOJOMWozIkETK0z0BUW9Eax2vYUZt7qi3vcpCXa3/nga4pxKqEcHpyJP917PD6WkgdegXtamOahStz2OV0zNboRch/NmBZDFff6Nvb11tGcGErIfNFhpIDW4d2uh68DgiRLDtf6RW479HJjT2WQZTXciuefSOGwxm9c1TkUXmh/uNcTNGq9MURj2+cnuDgcpDOSfhdrG/pT274Rt5/WULfWVQfVD3Qehe2QsgBdM904mGyMnRbbMg2gayWJaf5lqrIwrVTwWoI5kzhLSiQS0keM9o0cq/kxTkynmVmGNSgKESca1in5uWSGH9kbzxfiV2xXHFO+8T+1hEVFW0XznoE83ywpxLxyRAAayXv5Mv0CPj2swnnOaX8Ao6lQ6A"
+  "inputs": "eNrNWEkSwjAMM0wPeQb/fyUHllFjy3JK0qJTB1zjRZEdWnvB7FaGvdE4Pia2OdTfHY3ovse4H21v+9zRHmKI/dh6YIXvNVihm2F/qiyZnd2msyP2jA99BT7vVgqjfP5Fr8tp/ANj4XOLs+tqHmX39c+qge8yzoCrTVR7/Tk9Ay7OinGukL4lzE84JvIYLGKCV+DX8wP94heZrETS437sbfXo4fjscvOasw/kOFv6qg4p/ApM1o0VXkMidL3A8vrn3AZ7gWeFFctrUV7dRA8b18y5fdEbxdTfukQiUTyuOki817Q+0fCxSwo4VZdM8E3dTVQdSlO7m0T5PoPnmj0Hs8P13Q204z3l8YNPMvFzJlbXA9WtrQi1ZrBFnfnBONBT9SKg7kejDRL5hkQareEiVMLQ2m42nI6YR7Pyav7CcMCLoq7Xk/z/k7Vziu8VzR2fYH4dhuAJMCRS72D9d21gV+FKC51QaHEYZbUdFZxRSrrJpU7o6IYG9rfT8dMWRCZ+nuUvx6zS33YCOFe9EqYqZPGGIzZYuT32aoNAmydSYD47",
+  "unpauses": 10,
+  "warps_set": 9,
+  "warps_used": 10
 }

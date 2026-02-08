@@ -1,8 +1,13 @@
 {
-  "ticks": 5784,
-  "realtime": 96.96667,
-  "steps": 381,
-  "bonks": 7,
+  "level_name": "Insert Name Here Caverns",
+  "attempts": 27,
+  "realtime": 100.74239,
+  "ticks": 3716,
+  "steps": 379,
+  "bonks": 0,
   "seed": "c48687c2d5b56c52",
-  "replay": "eNrVWFmugzAMDCFCPIn7n/dVKtnHSzbazl9L4tgzXgLWehgWzrn0Z7LHeRgL4DdsAcQBYcceFiZmDtcEo4xqFEJMyi2IL4agqIiOix6cbwDZMjfuA5K/NgykL0dc5nztDImFWhf05weeWojH1LpJm4voo0CAl9zU/Sj+qcygcwpGBdEnuFBcjB3v63XpCqsnzO1Z9PqhiwBw0dYpE1v7yiYObGOFfQJcWPkGoiyNBoeZfdPa/1eB4RXUWLY6FOG1Zkxi3Gf+bfxNhhiJIJ3QOrEnng1jc/nwHKQyJTN3ma4oQdneMRWt0stZEYvrbPrgQJ0ns6moD2Gax1aS94smTkDYhD6LZv8PAWZhMw9z+1SHsW7lQHt5IgnoycC8ffXMZS7kqX23vaF/pqPnuWUb+OVCUHUQeZxrWtADV6c5eabJQHRmRVfJj2FWIElZAew4mAwpD6HvUka+a6GXjwpaC2vf1uiSQdWyDmb4Nj3pO4Hok96/T7w5lclOexxYISMblVQzYXaP4Xp63XuP6vvuP148Jkk"
+  "inputs": "eNqtVssSxCAIS509eO7/f+zu6LQFMRp2yqljlUeAwHmeZ7kFPzGf+DRpnyhecMnRxd15zt1bo3Mrt/5C5dZmbt7+WLceP4nO607Wt1orrMV20s6mCICB6pAcHPcujlF5ddWYPyQZ0ci8DXkPOFdRNqHMchfQiLHHc2vA5rK+Kej29EoqoTj6vwBNAk89fbG6lJyH3CFdLaQHWbP3OwQr15fWM/uHMUP5R6aMoei8XrmbYGjFSo5980nSluVnVgPGorMRWhPzHHMmfHz2CGhVRBBOsdbFJ9FDyr7BVqQqkeMU5pnGAsIVoByymwjw/UJqKeZo1mspgpxiDkDVua95M52hNMU7ZKrHMSsFupV0teFE5ek4k/dq5rVvG3jDmhZehUg3tck5b2AabhfjxnqwzZT3BNepx6vPFobJAjcId6a1ut7x01vhKyLzwStbG5b8l1WkjOMlv8aVYsHTCe7cjiclI/mdkcTYvr8pgybi",
+  "unpauses": 2,
+  "warps_set": 2,
+  "warps_used": 1
 }

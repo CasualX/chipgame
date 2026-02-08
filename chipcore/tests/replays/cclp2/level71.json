@@ -1,13 +1,12 @@
 {
-  "level_name": "Mads' Rush II *",
-  "attempts": 10,
-  "realtime": 116.384384,
-  "ticks": 2233,
-  "steps": 193,
+  "level_name": "Mads' Rush II",
+  "attempts": 18,
+  "realtime": 56.94868,
+  "ticks": 2298,
+  "steps": 197,
   "bonks": 2,
   "seed": "1a8d2a8c790ebe1f",
-  "inputs": "eNqtVUsOhTAI9BkXHMP7n/JpbeLwh9hZkYa2MMBAdGF7QBOv/ZwfA2gf9vmm/X8Dnu2CxZOC/YuAvFwf7ntjH/Dy1Tf2VXhDyPip0JfkuwBFPptlLPOM/sIn7wf5cV5T1cNeAqHP9CI5d4wrbWNZscrGvITvqFkwZhbJ1bPvxUwFm9dX5oJVVRzy3CW3da1YCdljMztrflUnsPgb827qg9Suutjg/UrPo30CPC2rqFSuCXx+45Bjba1w2907n9+J5TDeuYn+drdPol3l2DGFs7dSXGFlPn8gkR6f",
-  "unpauses": 13,
-  "warps_set": 13,
-  "warps_used": 9
+  "inputs": "eNqtVMENxDAIa6o8GKPj3P4TXS+JVAi4xLr4hSgNYDAiN44OGXjs7q8N2q6x//DxpQHZEKaeFCavhuoLxtjYH84G1K//49yFp4SMnxX6kn43YJFPcozLPOv4KSbfhzlxPlO3w6iB15gRJbPuDFfe1mPVUw708vqO00KgWU2u1z6qWeeVzw0J/JrqOtfvee4fHA8F5kW2Y0Po9czVZIY0fIErUPmkeFSS8ZdNJ4I9UPp39rSx1V0GxO04wt1a6Xjl/pJ3TcCb7H1MWjf6vCCY607uB1Du/81xFeOrq+O+/iMipg",
+  "unpauses": 2,
+  "warps_set": 2
 }

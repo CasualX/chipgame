@@ -67,10 +67,13 @@ fn brute_force(level: &chipty::LevelDto, replay: &chipty::ReplayDto, seed: u64, 
 				game.tick(&input);
 			}
 
-			let success =
-				game.is_game_over() &&
-				game.time == replay.ticks &&
-				game.ps.bonks == replay.bonks;
+			// Find the PlayerGameOver event and assert the reason is LevelComplete
+			let events = game.events.take();
+			let game_over_reason = events.iter().find_map(|event| match event {
+				&chipcore::GameEvent::PlayerGameOver { reason, .. } => Some(reason),
+				_ => None,
+			});
+			let success = game_over_reason == Some(chipcore::GameOverReason::LevelComplete);
 
 			best_time.fetch_max(game.time, atomic::Ordering::Relaxed);
 			attempts_done.fetch_add(1, atomic::Ordering::Relaxed);

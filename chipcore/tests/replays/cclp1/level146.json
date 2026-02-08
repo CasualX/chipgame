@@ -1,11 +1,12 @@
 {
   "level_name": "Cineworld",
-  "attempts": 16,
-  "realtime": 137.64995,
-  "ticks": 8083,
-  "steps": 608,
-  "bonks": 14,
-  "seed": "3e8fdc5281efb070",
-  "inputs": "eNrFWVtuwzAM05Ig8EcOtaP16FuxIZBr2SLlR/hZNLEtSiTdplRAfvHFYDNhfzdVAS0qaQiuo4Irr8N9mJ06egDn4aLyJMdVGG4pSuzbZNxbEbEpXITguERoEB9UCb2pe7/Qb81R49ceySOEkxixYUtLu+Zv6P7hXo4xS0nUWZYrH3R2NIuurBUq2rj+Dmi6pelKIeshOdwbY0hLv4w9ikoHN0ixchj76IqW3nG7zfaTngbkFhMGojWqT5x+4hqCp0ddZ14yLAfUb4RtfVvHNTa7dx+qY43IKK9/+NZg2WmcIAFEmTfZNTjj+5RwKW364D6WngiLoNe7KmhkgdU+IfzVTnkG9RQgnmjMWGKUMaItOTRnQ1gnuEI9B+X39WbBNsCAayhkWa6CVB5ukKE+p8wElcQetaInY2aM81pdlyHjYmJnVKONu0b9Ogo4rp8AuWAiW3zRbN1AKFrAy8iwQ2xShuJlxFa8bETeVpqhHl6vMGY3XZ7n1utv1GSBvzVMAv35IjtfxAcXXq61rFV7DulaOxUNoIPKFV4YkmllzC8DNoVlFamkl9dCArVEV/v+gzkBYotsj6egbjfypalnw/LIDWbm719xhQ+hYQtCMoE2v6VqSDKjFaBLwiX03+wPc8l6VA",
-  "unpauses": 3
+  "attempts": 18,
+  "realtime": 135.94824,
+  "ticks": 7785,
+  "steps": 580,
+  "bonks": 4,
+  "seed": "9bb6155376595eaf",
+  "inputs": "eNrNWNuOxSAItK1pfPBhP3k/fZtNT+sFkFExZx4bKQoDjIaQwUnYlHBup0GvDgKaXp1orsXlxjOIbIA+p2pEyLHhgMDkhN6060RpTmxiw9BNoucHr/MuKys4gsGRIY0ZsHg6uRCxBJL8kNmr9+IlvMvwaJUoKqtY6fXI9oIYXqZPlACj+FIs+kUYKRLF4jTD9MzoapVeRSboWMdx3Ds6sHicJxZxictMDbGkvAH64ssWaMytSlWNB2iQ6Wx+H1SmfR1mQb/vmKTWJ+F0T7nxpD77GhDzP/U821ci2fdpLEVWkrWmX5IKTEmw2rAuUW07T/p6gAfk/q04m8qB5l37WqC/yPEmbjLm8DQqhuiqXr1BcH1Xni0NHeR0QTao+cX8nCcuco6bsx2NKFv2bltQmNlHjdwc6PEsdP+YQgk340VDpdUIoxaxskAblDQUKtPiSY7LeKr1rHVWdZRlF0vFAgqAuveDYjPx3C1TA+gxVz0LcjQkbPm9nJ+L7kwu2UzQqlK5rjRLkAhLSCmKV60Qq1H+DBGymUTqFU43p4IRSC5ohDUlGeptT6tJfLBLXLGJaTmyKB98VKgL4j4P/HCpuoOfjfGHEen6Cz8PW78jkHf0tYhYCBUNG861AFmQ41n7N/u5MVrDWw8u/3+oNXFm",
+  "unpauses": 4,
+  "warps_set": 1
 }

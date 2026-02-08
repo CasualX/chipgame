@@ -1,13 +1,10 @@
 {
   "level_name": "Tetragons",
-  "attempts": 11,
-  "realtime": 119.56433,
-  "ticks": 4474,
+  "attempts": 14,
+  "realtime": 74.562035,
+  "ticks": 4475,
   "steps": 376,
   "bonks": 0,
   "seed": "11853ac6e12f6495",
-  "inputs": "eNrVV8sShDAIQ8eD///Fe3BUWiCEVmd3c3SEhvBqt+23sVrIgXUIh+3CQE5U+PrcTk/ROZGjKPaA6B5CbmhPAf3GRp+hvS0kAhV90oqn1cGSI+XH+tdQroiU3Ip1vkxbjZ4IYy4SotOcmGy6lcu+DJZ30JZe0xf6VGn1T/v6culNDnpexbF7HO5+KcSN9RgHoGL0zkoDzbAxKVHz0VXtHlCVyGiCdkM7sWEsmOYYy8C071wpOq9KbXRzvvcFvX8FMnRveBppS5sbATVFpJ9xIAmUm13ybHqzaiY3TPZyZQ+iXC3bTaJjiQyI9ApTipGxPgz9j24xCYd8N/Hdkt/+QsOLTfelHWKRyvOvjhmwGVE1lXZBbwpHPU6upSAUhbcnJM6X2PVNzL/ep/tKCdfWePWLEK9BMelIZol5aeQXKSaU8opKyn/5WwhU8wODFDLf",
-  "unpauses": 4,
-  "warps_set": 4,
-  "warps_used": 1
+  "inputs": "eNrVV8sShDAIQ8eD///Fe3BUWiCEVmd3c3SEhvBqt+23sVrIgXUIh+3CQE5U+PrcTk/ROZGjKPaA6B5CbmhPAf3GRp+hvS0kAhV90oqn1cGSI+XH+tdQroiU3Ip1vkxbjZ4IYy4SotOcmGy6lcu+DJZ30JZe0xf6VGn1T/v6culNDnpexbF7HO5+KcSN9RgHoGL0zkoDzbAxKVHz0VXtHlCVyGiCdkM7sWEsmOYYy8C071wpOq9KbXRzvvcFvX8FMnRveBppS5sbATVFpJ9xIAmUm13ybHqzaiY3TPZyZQ+iXC3bTaJjiQyI9ApTipGxPgz9j24xCYd8N/Hdkt/+QsOLTfelHWKRyvOvjhmwGVE1lXZBbwpHPU6upSAUhbcnJM6X2PVNzL/ep/tKCdfWePWLEK9BMelIZol5aeQXKSaU8opKyn/5Z6DgPrXXMuo"
 }

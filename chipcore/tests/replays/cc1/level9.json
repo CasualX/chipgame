@@ -1,13 +1,13 @@
 {
   "level_name": "Nuts and Bolts",
-  "attempts": 136,
-  "realtime": 171.44173,
-  "ticks": 5995,
+  "attempts": 153,
+  "realtime": 196.98065,
+  "ticks": 5994,
   "steps": 543,
-  "bonks": 4,
-  "seed": "a65b159bd43a210e",
-  "inputs": "eNrdWNFuwzAIJMFCieSH7Y/2/181rVI3tEB8ZztR1XtubeC4g7iUB7YQtXAQWWBsd0I6LhVZ/2BJwmeXdUFE/t2xHuGiqb+3ur8MxXMIoIE1hmWVyuKUobql2ZR+rCQ8LRXosBLQeF0l8I4jBN9of8HFdgbEeR5oMXRehpBTgzTvcgDqfRpjlB7tdwM9ncfdVVcGR23cqoS5vjjgJCIs4RsTiKHTnKv+xTnWMBUwlzLNU1klCl4SNJf56Y6uVy+Hrx/gP+8e+QCpNKtkd0hTLf4UjQV7HqVzAiWzjBsms9i+rX5BfWOMyWfpVH3eBmhQlWyOHnfRC4TdZMzB56jKTVGgyyUg1EZodAEbaqUpjUZIkx4Y2i7+Ti4JeDx739zPS1qjeT7Co5eX5YKUpeFhuR63S1ArY//pxsRKPf7wg6uuzSIypwT4+OxcVfhdTmfF3D7SJi53L4TKkhF/RBmg8rfC3jDs/YntNgR2lLxi7cTIuR0VerSu2QNdsOjO4vwb8TFYoQ",
-  "unpauses": 4,
-  "warps_set": 3,
-  "warps_used": 10
+  "bonks": 2,
+  "seed": "ab915ef48c232c4d",
+  "inputs": "eNrdV1uOgzAMNIgPjtH7n3K3rFo5+DVjwqrqfFXFie3xM9t2QH6xO3j+LxuMQ1wWCPLGfi9EO6N1V+eeWA9IxIN7z8uvpQPRukTZoGFllOrtHFLSnndcqKBfslOu81Y4g3iwgsD4wXPMpNINPFzih/VxsD/lQVg4aefCi5eYBKuOWr0nWcgRUFvirVVpREMzcr5qjhzDM5vhrn8OhE2uvy/60OPA8r9g+6FbI1xnIWZibdtw5+DLeNb8Jsc43T9JF4c58jDQ7mpJfjOpnWUtnztZZm9iS3cTk2+CJm6dDDKmkQ1+bgSxS9zSuaE/pPc78iZxo9aDbcj97qePI92jHUSXh7BmC94kmCwYD7q3BMO3W9d770UjJpei+OYbuCB53o+ps3tkegXJ/5XL/8a8KPkHdI38E/LI9ED7lbewduIoYD0GWw3Tx6bV0ctf6zv0Gg1sqHtgWMvc7BspJ3ebtAYbS1j+6sTvaeYb0gPnr3WfBy8Wcd8o9oSI9eW7kPUTU2D7XZCyFwm4v91rZ2tTgV7Exbyr9hku3j8JaEQQ",
+  "unpauses": 6,
+  "warps_set": 6,
+  "warps_used": 8
 }

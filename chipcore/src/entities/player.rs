@@ -121,11 +121,26 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 				_ => None,
 			};
 			if let Some(force_dir) = force_dir {
-				let override_dir = match force_dir {
-					_ if ent.flags & EF_TERRAIN_MOVE == 0 => None,
-					Compass::Left | Compass::Right => if input_dir == Some(Compass::Up) { Some(Compass::Up) } else if input_dir == Some(Compass::Down) { Some(Compass::Down) } else { None },
-					Compass::Up | Compass::Down => if input_dir == Some(Compass::Left) { Some(Compass::Left) } else if input_dir == Some(Compass::Right) { Some(Compass::Right) } else { None },
-				};
+				let override_dir =
+					// Allow the player to override the force terrain every other step
+					if ent.flags & EF_TERRAIN_MOVE == 0 { None }
+					// Allow any direction to override random forces, to make them less frustrating
+					else if matches!(terrain, Terrain::ForceRandom) { input_dir }
+					// Only allow perpendicular directions to override cardinal forces
+					else {
+						match force_dir {
+							Compass::Left | Compass::Right => match input_dir {
+								Some(Compass::Up) => Some(Compass::Up),
+								Some(Compass::Down) => Some(Compass::Down),
+								_ => None,
+							},
+							Compass::Up | Compass::Down => match input_dir {
+								Some(Compass::Left) => Some(Compass::Left),
+								Some(Compass::Right) => Some(Compass::Right),
+								_ => None,
+							},
+						}
+					};
 
 				// Consider this a forced move if the player did not step in the direction of the force terrain
 				if let Some(override_dir) = override_dir {

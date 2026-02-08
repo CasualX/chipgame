@@ -1,13 +1,10 @@
 {
   "level_name": "Thanks to...",
-  "attempts": 8,
-  "realtime": 59.099606,
-  "ticks": 726,
+  "attempts": 14,
+  "realtime": 17.683292,
+  "ticks": 732,
   "steps": 87,
   "bonks": 0,
-  "seed": "9909788cd78fc61e",
-  "inputs": "eNrlkSEKAAAIAw0Gg/9/r8GiYNiCIHhR3NiY2St0GUlYAV6A9S+hZDgVLs7VkjvynvUCPEgRtQ",
-  "unpauses": 4,
-  "warps_set": 1,
-  "warps_used": 2
+  "seed": "ac182f8d704059f9",
+  "inputs": "eNrNkjsOAAAEQw0G9z+xwSKE+Ay8kWibBtEJsCfSqTjjG0qZXW8TD3PV7e30RXRi2ckgV2CncA7p"
 }

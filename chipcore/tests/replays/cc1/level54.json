@@ -1,8 +1,13 @@
 {
-  "ticks": 2670,
-  "realtime": 44.48752,
-  "steps": 214,
+  "level_name": "Grail",
+  "attempts": 19,
+  "realtime": 128.38461,
+  "ticks": 2354,
+  "steps": 188,
   "bonks": 0,
   "seed": "af54ead27f7ec322",
-  "replay": "eNq9lNsSwyAIRFE7jHT8/+/tU2KbsIhic94XVy6bcxh6AeggqVAM+0k63V2oJ/eSX39CogoEWbOoqywFIkGGLbl1BhXH/rHU+wuP/zn36ia6aq1xNEOkey95A8xsv8yLuk20vsUCZigVol6FyCgJvM1713lasyc8owGV9IENdcxzq1NKMrH2cyC9zOenF5MXE0J8nmLz2uz5X0gKQ65iIq47GqSFf1O0w/GHGwfvBKcNQ9bjvnuh/Cw73Af5AN0zIck"
+  "inputs": "eNq1VUsSxSAIo85beK13/0t1obVBiP9m4VgGMNCIIWxDfgTy4HIhe2gfKYVdhVhgU0JNLCiSgOBR9KNaEQwXRbclpjMsOefPQ6sq/sAqxWFqJIKscE8kNlDgArBI1WbOZOpiuJyzRYnh8+q6oB3WUpjkqQQ/EiuznW9fjld7TFLo5SjB8Ec77m1/pOmD3OIBnNaPM/k+xv5ZWsNd/gPD9Z2K3pToQoTpx3itTZL1GaL/rxfrvnJ0Mk+NxEr/9j1Mn2V9fPI+EU4kiz2vghaVNRzCDbDkGdg",
+  "unpauses": 5,
+  "warps_set": 3,
+  "warps_used": 7
 }
