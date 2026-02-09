@@ -1,13 +1,13 @@
 {
   "level_name": "Problems",
-  "attempts": 6,
-  "realtime": 66.003685,
-  "ticks": 2390,
-  "steps": 199,
+  "attempts": 12,
+  "realtime": 111.368225,
+  "ticks": 2360,
+  "steps": 197,
   "bonks": 0,
-  "seed": "c08ef6f364b82816",
-  "inputs": "eNrVVdsOhSAMK8QHP8P//8qTnAjOjWINmGifINlGd+nIuQtg6QNAngKkAhQkjmqTHwIuM3dVIHR8LgLnv70NayOleaik11Gcc1RiHjk2yri+BXQOB3juMZePwc8hU4A9X824UIdmHGE/1OnW5S7wublzBME+u8cAtc4hSWWGt813vtyJA1T1ENZkY6HzY8zaKLdVa94d67DiK8ePExH6wtxsQVn09k/l7UO/Aof4luGmqL+rNe0Htj7hbDk3bH57zBw7",
-  "unpauses": 2,
-  "warps_set": 2,
-  "warps_used": 1
+  "seed": "c68cd4c161d951ef",
+  "inputs": "eNrVVVsOgCAMK8QPj+H9T2kUH4OssAl82C9jttGWbcTYBJY6cCA6EW5ouUgINVwxcSrQ0m7wQSgxcj5iZNXXkjAYqerqwMMC/tyyDvNwnYoe/vcN9GhPucu/IPrWxL/d59ks2CxxcrDKgryYr3ti/C6SErPpV89CsTMZn9JDslbBCJHwAbOQvrdNSu6ctoedfu9aTTjPNe1ltFzX4pmaMY3FPbFksy6QhXrIsZfKq9H0/OmVeYXz/w4/dx0N",
+  "unpauses": 4,
+  "warps_set": 3,
+  "warps_used": 4
 }

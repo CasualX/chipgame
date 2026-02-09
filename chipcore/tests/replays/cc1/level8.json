@@ -1,8 +1,10 @@
 {
-  "ticks": 269,
-  "realtime": 4.9666667,
+  "level_name": "Lesson 8",
+  "attempts": 2,
+  "realtime": 4.419025,
+  "ticks": 266,
   "steps": 21,
   "bonks": 0,
-  "seed": "222dd64898a07986",
-  "replay": "eNrNy7EJAAAIAzALHSr4/72Ks6Cj2SPd2IiMsk3Am75L0BoHqQ"
+  "seed": "8f5e9a008627d192",
+  "inputs": "eNrNy6ENAAAIA7CRICb2/70gkIQgV1/yC4ts0t1i0BpQoRcHWQ"
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 4080,
-  "realtime": 67.983665,
-  "steps": 311,
-  "bonks": 0,
-  "seed": "fb42fb3e17416e45",
-  "replay": "eNrNlttuxCAMRCcEoTz4/7+3WnU3JeDxBVqp55EQMPb4UuvMpQIcbwDt+3GDywJV5UqDQ4dcL9VA7I1A+dC65VK85f6MkqdpZ04cPu7lj+cSG55v4M782dMphW2m4a0Rdv6lL/Y5mZ/PgHcDj/m13eImAPqYQuPO+r+kxrKTPI1VqqkWAHaeRLPKlh3GCikRu8WLOHw1jp5Eop7ma7Hq6H4xc73nA2pDGL83jY1lVcoiOe+R9uWp1Snuiqhph1GrVUuUxMBdxII3ZRc3o1nWBJN+FgjSspYrCf4BLz2nDV8d54yaAV/98GM38v2fnaHgIRnGnHDS2gPDluZJN73FKI/2n2e0HPDdngyqURXD7tW8FC9K/lz42dOXrma61n4hlgbWFp4YyLzrj8GBEeR5DJKDbzemCOv4SyPNIHjZ1+Fu+p7LifJi3p8zF/gCQvQ5kA"
+  "level_name": "Nightmare",
+  "attempts": 78,
+  "realtime": 126.66529,
+  "ticks": 4002,
+  "steps": 313,
+  "bonks": 4,
+  "seed": "ee134bfbef9b0ca7",
+  "inputs": "eNqlV1EWwjAIY75+7Bi7/yn1uU1pG0Lo8uVTaCHQgK0NsBN7D7uxfQFt9t5mY+e0GfjMEP1d/koaG872sg+Cu21eNy6b4eufr4Ef/EkvGS4ei3wRD5gU4Sp4VxQ/LmRn42pBuQ0L3BgCX8ET9kC1LpjmiFmToijmntkPvZ3lfn4+VPjUj0X4OGiS3gR1zf/tm69HLBb4mZBHFYpLR29vM4lCJGRKsXFf9fkmr4pIqTXdV+J5SdCpQAMHtU1FSlha/l4fwh70Z31+DbNVaNtIdcC4NqL4V8hg7ggzC+0GNSVdnY/5HDRtbmZPf+yfQpv/nymVgeQAT1bX/kvLUxG+wCYtiMHykS9tv8+H7w5RgHpnRNemwh60Ik+S7zGziFthFqdc0xkWLfICUaJcoXVDpRvMqEhMDKzts3tpxWHJyJtmiwJSbEJfou1cV4lNcf88iz9L0QPds2yemlXatPhvCBAVHSRvFNuCHH1s3m8iREg",
+  "unpauses": 8,
+  "warps_set": 7,
+  "warps_used": 10
 }
