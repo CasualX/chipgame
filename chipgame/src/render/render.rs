@@ -139,12 +139,10 @@ impl ModelData {
 	};
 }
 
-fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, sprite: chipty::SpriteId, z1: f32, z2: f32, frame: u16, alpha: f32) {
+fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, spr: &SpriteUV, pos: Vec3<f32>, z1: f32, z2: f32, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 4, 2);
 
 	p.add_indices_quad();
-
-	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
 
 	let x = pos.x - spr.origin.x;
 	let y = pos.y - spr.origin.y;
@@ -175,7 +173,7 @@ fn draw_floor(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources
 	});
 }
 
-fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, base: f32, sprite: chipty::SpriteId, frame: u16, alpha: f32) {
+fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, spr: &SpriteUV, pos: Vec3<f32>, base: f32, alpha: f32) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
 
 	p.add_indices(&[
@@ -185,8 +183,6 @@ fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources,
 		3, 0, 7, 7, 0, 4,
 		4, 6, 7, 4, 5, 6,
 	]);
-
-	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
 
 	let x = pos.x;
 	let y = pos.y;
@@ -241,12 +237,10 @@ fn draw_wall(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources,
 	});
 }
 
-fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resources, pos: Vec3<f32>, frame: u16, sprite: chipty::SpriteId) {
+fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, spr: &SpriteUV, pos: Vec3<f32>) {
 	let mut p = cv.begin(shade::PrimType::Triangles, 5, 4);
 
 	p.add_indices(&[0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1]);
-
-	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
 
 	let x = pos.x;
 	let y = pos.y;
@@ -284,6 +278,73 @@ fn draw_portal(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, resx: &Resource
 	});
 }
 
+fn draw_tank(cv: &mut shade::im::DrawBuilder<Vertex, Uniform>, spr: &SpriteUV, pos: Vec3<f32>, face_dir: Option<chipty::Compass>, alpha: f32) {
+	let mut p = cv.begin(shade::PrimType::Triangles, 8, 10);
+
+	p.add_indices(&[
+		0, 1, 4, 4, 1, 5,
+		1, 2, 5, 5, 2, 6,
+		2, 3, 6, 6, 3, 7,
+		3, 0, 7, 7, 0, 4,
+		4, 6, 7, 4, 5, 6,
+	]);
+
+	let x = pos.x;
+	let y = pos.y;
+	let z = pos.z;
+	let base = 0.0;
+
+	let s = 8.0 + base;//if matches!(sprite, data::Sprite::Wall) { 0.0 } else { 4.0 };
+	let t = 8.0;
+	let tall = 8.0; //if block.is_door() { 15.0 } else { 20.0 };
+
+	let color = [255, 255, 255, (alpha * 255.0) as u8];
+
+	_ = face_dir;
+
+	p.add_vertex(Vertex {
+		pos: Vec3(x + base, y + base, z),
+		uv: spr.top_left,
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + base, y + spr.height - base, z),
+		uv: spr.bottom_left,
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + spr.width - base, y + spr.height - base, z),
+		uv: spr.bottom_right,
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + spr.width - base, y + base, z),
+		uv: spr.top_right,
+		color,
+	});
+
+	p.add_vertex(Vertex {
+		pos: Vec3(x + s, y + s, z + tall),
+		uv: spr.top_left + Vec2(t, t),
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + s, y + spr.height - s, z + tall),
+		uv: spr.bottom_left + Vec2(t, -t),
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + spr.width - s, y + spr.height - s, z + tall),
+		uv: spr.bottom_right + Vec2(-t, -t),
+		color,
+	});
+	p.add_vertex(Vertex {
+		pos: Vec3(x + spr.width - s, y + s, z + tall),
+		uv: spr.top_right + Vec2(-t, t),
+		color,
+	});
+}
+
 pub fn draw(
 	cv: &mut shade::im::DrawBuilder<Vertex, Uniform>,
 	camera: Option<&shade::d3::Camera>,
@@ -294,7 +355,7 @@ pub fn draw(
 	frame: u16,
 	alpha: f32,
 ) {
-	if alpha <= 0.0 {
+	if alpha <= 0.0 || matches!(sprite, chipty::SpriteId::Blank) || matches!(model, chipty::ModelId::Empty) {
 		return;
 	}
 	if let Some(camera) = camera {
@@ -304,16 +365,21 @@ pub fn draw(
 		}
 	}
 
+	let spr = sprite_uv(&resx.spritesheet_meta, sprite, frame);
+	let face_dir = sprite.face_dir();
+
 	match model {
 		chipty::ModelId::Empty => (),
-		chipty::ModelId::Floor => draw_floor(cv, resx, pos, sprite, 0.0, 0.0, frame, alpha),
-		chipty::ModelId::Wall => draw_wall(cv, resx, pos, 0.0, sprite, frame, alpha),
-		chipty::ModelId::ToggleWall => draw_wall(cv, resx, pos, 2.0, sprite, frame, alpha),
-		chipty::ModelId::Sprite => draw_floor(cv, resx, pos, sprite, 0.0, 20.0, frame, alpha),
-		chipty::ModelId::EndPortal => draw_portal(cv, resx, pos, frame, sprite),
-		chipty::ModelId::FlatSprite => draw_floor(cv, resx, pos, sprite, 3.0, 12.0, frame, alpha),
-		chipty::ModelId::ReallyFlatSprite => draw_floor(cv, resx, pos, sprite, 6.0, 10.0, frame, alpha),
-		chipty::ModelId::FloorSprite => draw_floor(cv, resx, pos, sprite, 1.0, 1.0, frame, alpha),
+		chipty::ModelId::Floor => draw_floor(cv, &spr, pos, 0.0, 0.0, alpha),
+		chipty::ModelId::Wall => draw_wall(cv, &spr, pos, 0.0, alpha),
+		chipty::ModelId::ToggleWall => draw_wall(cv, &spr, pos, 2.0, alpha),
+		chipty::ModelId::Sprite => draw_floor(cv, &spr, pos, 0.0, 20.0, alpha),
+		chipty::ModelId::EndPortal => draw_portal(cv, &spr, pos),
+		chipty::ModelId::FlatSprite => draw_floor(cv, &spr, pos, 3.0, 12.0, alpha),
+		chipty::ModelId::ReallyFlatSprite => draw_floor(cv, &spr, pos, 6.0, 10.0, alpha),
+		chipty::ModelId::FloorSprite => draw_floor(cv, &spr, pos, 1.0, 1.0, alpha),
+		chipty::ModelId::Tank => draw_tank(cv, &spr, pos, face_dir, alpha),
+		chipty::ModelId::Glider => unimplemented!(),//draw_glider(cv, &spr, pos, face_dir, alpha),
 	}
 }
 

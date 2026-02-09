@@ -1,3 +1,4 @@
+use crate::Compass;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -154,4 +155,33 @@ pub enum SpriteId {
 	ParameciumWA,
 	ParameciumSA,
 	ParameciumEA,
+}
+
+impl SpriteId {
+	#[inline]
+	pub fn face_dir(self) -> Option<Compass> {
+		match self {
+			SpriteId::BugN | SpriteId::BugNA => Some(Compass::Up),
+			SpriteId::BugW | SpriteId::BugWA => Some(Compass::Left),
+			SpriteId::BugS | SpriteId::BugSA => Some(Compass::Down),
+			SpriteId::BugE | SpriteId::BugEA => Some(Compass::Right),
+			SpriteId::TankN => Some(Compass::Up),
+			SpriteId::TankW => Some(Compass::Left),
+			SpriteId::TankS => Some(Compass::Down),
+			SpriteId::TankE => Some(Compass::Right),
+			SpriteId::GliderN | SpriteId::GliderNA => Some(Compass::Up),
+			SpriteId::GliderW | SpriteId::GliderWA => Some(Compass::Left),
+			SpriteId::GliderS | SpriteId::GliderSA => Some(Compass::Down),
+			SpriteId::GliderE | SpriteId::GliderEA => Some(Compass::Right),
+			SpriteId::TeethN | SpriteId::TeethNA => Some(Compass::Up),
+			SpriteId::TeethW | SpriteId::TeethWA => Some(Compass::Left),
+			SpriteId::TeethS | SpriteId::TeethSA => Some(Compass::Down),
+			SpriteId::TeethE | SpriteId::TeethEA => Some(Compass::Right),
+			SpriteId::BlobNA => Some(Compass::Up),
+			SpriteId::BlobEA => Some(Compass::Right),
+			SpriteId::BlobSA => Some(Compass::Down),
+			SpriteId::BlobWA => Some(Compass::Left),
+			_ => None,
+		}
+	}
 }

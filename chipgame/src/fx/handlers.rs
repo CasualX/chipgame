@@ -316,7 +316,7 @@ fn model_for_ent(ent: &chipcore::Entity) -> chipty::ModelId {
 	match ent.kind {
 		chipty::EntityKind::Block => chipty::ModelId::Wall,
 		chipty::EntityKind::IceBlock => chipty::ModelId::Wall,
-		chipty::EntityKind::Tank => chipty::ModelId::ReallyFlatSprite,
+		chipty::EntityKind::Tank => chipty::ModelId::Tank,
 		chipty::EntityKind::Bug => chipty::ModelId::FlatSprite,
 		chipty::EntityKind::Blob => chipty::ModelId::ReallyFlatSprite,
 		chipty::EntityKind::Paramecium => chipty::ModelId::ReallyFlatSprite,
