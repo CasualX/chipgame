@@ -43,9 +43,22 @@ fn default_true() -> bool {
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ZoomMode {
-	Classic,
 	#[default]
 	Wide,
+	Classic,
+	Editor,
+}
+
+impl ZoomMode {
+	#[inline]
+	pub fn cycle(self) -> ZoomMode {
+		match self {
+			ZoomMode::Wide => ZoomMode::Classic,
+			ZoomMode::Classic => ZoomMode::Wide,
+			// Editor mode is not cycled to, it can only be set from the level editor
+			ZoomMode::Editor => ZoomMode::Editor,
+		}
+	}
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]

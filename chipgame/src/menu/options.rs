@@ -39,10 +39,7 @@ impl OptionsMenu {
 					MenuEvent::SetPerspective { value: self.options.perspective }
 				}
 				3 => {
-					self.options.zoom_mode = match self.options.zoom_mode {
-						chipty::ZoomMode::Classic => chipty::ZoomMode::Wide,
-						chipty::ZoomMode::Wide => chipty::ZoomMode::Classic,
-					};
+					self.options.zoom_mode = self.options.zoom_mode.cycle();
 					MenuEvent::SetZoomMode { value: self.options.zoom_mode }
 				}
 				4 => {
@@ -85,8 +82,9 @@ impl OptionsMenu {
 
 		let get_flag = |state| if state { "\x1b[color=#0f0]ON" } else { "\x1b[color=#f00]OFF" };
 		let get_zoom = |mode| match mode {
-			chipty::ZoomMode::Classic => "\x1b[color=#0f0]Classic",
 			chipty::ZoomMode::Wide => "\x1b[color=#ff0]Wide",
+			chipty::ZoomMode::Classic => "\x1b[color=#0f0]Classic",
+			chipty::ZoomMode::Editor => "\x1b[color=#0ff]Editor",
 		};
 
 		let items: [&dyn fmt::Display; _] = [

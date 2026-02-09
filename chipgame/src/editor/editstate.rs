@@ -22,9 +22,9 @@ impl EditorEditState {
 		self.fx = fx::FxState::new(0, &level_dto, chipcore::RngSeed::System, &tiles::TILES);
 		self.fx.hud_enabled = false;
 		// Initialize the camera far enough to see the whole level
-		self.fx.camera.offset = Vec3f(0.0, 0.0 * 32.0, 400.0);
 		self.fx.camera.target = Vec3f(26.0 * 16.0, 20.0 * 16.0, 0.0);
 		self.fx.camera.set_perspective(false);
+		self.fx.camera.set_zoom_mode(chipty::ZoomMode::Editor, false);
 		// Unlock the camera
 		self.fx.pause();
 

@@ -4,13 +4,16 @@ const FOV_Y: f32 = 90.0;
 const NEAR: f32 = 10.0;
 const FAR: f32 = 2000.0;
 
-const CLASSIC_OFFSET: Vec3f = Vec3(0.0, 0.5 * 32.0, 150.0);
 const WIDE_OFFSET: Vec3f = Vec3(0.0, 1.0 * 32.0, 200.0);
+const CLASSIC_OFFSET: Vec3f = Vec3(0.0, 0.5 * 32.0, 150.0);
+const EDITOR_OFFSET: Vec3f = Vec3f(0.0, 0.0 * 32.0, 400.0);
 
 #[derive(Clone)]
 pub struct PlayCamera {
 	// Camera offset from the object
-	pub offset: Vec3f,
+	offset: Vec3f,
+	/// Animate the camera offset towards this target
+	offset_target: Vec3f,
 
 	// Camera look at target
 	pub target: Vec3f,
@@ -35,6 +38,7 @@ impl Default for PlayCamera {
 	fn default() -> PlayCamera {
 		PlayCamera {
 			offset: WIDE_OFFSET,
+			offset_target: WIDE_OFFSET,
 			target: Vec3f::ZERO,
 			position: Vec3f::ONE,
 			blend: 0.0,
@@ -85,12 +89,15 @@ impl PlayCamera {
 		self.perspective = perspective;
 	}
 
-	pub fn set_zoom_mode(&mut self, zoom_mode: chipty::ZoomMode) {
-		self.offset = match zoom_mode {
-			chipty::ZoomMode::Classic => CLASSIC_OFFSET,
+	pub fn set_zoom_mode(&mut self, zoom_mode: chipty::ZoomMode, animate: bool) {
+		self.offset_target = match zoom_mode {
 			chipty::ZoomMode::Wide => WIDE_OFFSET,
+			chipty::ZoomMode::Classic => CLASSIC_OFFSET,
+			chipty::ZoomMode::Editor => EDITOR_OFFSET,
 		};
-		self.position = self.target + self.get_offset();
+		if !animate {
+			self.offset = self.offset_target;
+		}
 	}
 
 	pub fn set_target(&mut self, pos: Vec3f) {
@@ -110,6 +117,7 @@ impl PlayCamera {
 	pub fn animate_position(&mut self, dt: f64) {
 		let position_target = self.target + self.get_offset();
 		self.position = self.position.exp_decay(position_target, 15.0, dt as f32).set_x(position_target.x);
+		self.offset = self.offset.exp_decay(self.offset_target, 10.0, dt as f32);
 	}
 
 	pub fn animate_move(&mut self, time: f64) {
