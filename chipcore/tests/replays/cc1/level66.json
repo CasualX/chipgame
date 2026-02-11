@@ -1,8 +1,13 @@
 {
-  "ticks": 1934,
-  "realtime": 32.95,
-  "steps": 130,
-  "bonks": 3,
-  "seed": "80097d20f0a8d3c0",
-  "replay": "eNrtlNsOhCAMREfLA038/+/dZddgoS3iJUYTzwuBwlDKQAgzSMTMrwsRshkrMGyBOZoIWXKXMqe2TCcLLBOh5f8rzSDX42mfpSTjE0Cb8KJcHX3MGsY7wsPVkONA2qDR+lWUY1X9sZNacPUddeduGKQjn7ZgzkeITlN5hsMlcYyNeQ/5I67cqOsE+qJDYqyYT93Owslc9mRRneADj9kXOQ"
+  "level_name": "Victim",
+  "attempts": 18,
+  "realtime": 76.08099,
+  "ticks": 2088,
+  "steps": 126,
+  "bonks": 1,
+  "seed": "e04aa3c7ab752f8b",
+  "inputs": "eNrlld0KgCAMhWdJGPj+z1vgT3OekSiG0Hep4uY5m7M2QC7iLYOa2CC7acdhqOU+fh5eqIR5ls8yqPKe6dh/4ZbCdLBn695L25ixCIkDSUmTSEH5WpkgLY3QLq5K1Vjn8+18ImzqikvTutOt/z+Rz6jheqGt7SPwVMrluThQR6S254o6OEkqlIGEJpVoX72r1RnHbfv0PyyK5c7hAo7tFlA",
+  "unpauses": 2,
+  "warps_set": 2,
+  "warps_used": 3
 }

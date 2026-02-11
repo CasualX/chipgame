@@ -1,8 +1,13 @@
 {
-  "ticks": 4970,
-  "realtime": 83.88333,
-  "steps": 334,
-  "bonks": 4,
+  "level_name": "Skelzie",
+  "attempts": 15,
+  "realtime": 204.53102,
+  "ticks": 4631,
+  "steps": 346,
+  "bonks": 1,
   "seed": "5bcb50c9dd3a33dd",
-  "replay": "eNrdmNsOgyAMhgsSosb3f97hMjPceoSyuX23aqGl/WkNAQMwUsX7U+Fj4L5VGUBsiS9CEKE8PKNaBZTEgxaPnswPrMt62dXaq21qdtti1zsGQg4jfqEeqhMjRv3OjC6DxWPJtHcOtZ+J9eTxKrOsrZAnUS86NVK3C9FrTxIrmnMv2848lKUQOpgiRc5kaCh3Uzs5msjpXzBojIqJIV6EyZ6PwHZB+rzJ4zMHLQ+6SMEcJQdluhB3kSSD6aaf+wEUrRR3gx8pUmBtmW/jKgXrUvQF9bXEn9RC3XoQ1/XcV1EmMM14fbvuWKo1qm2EkUyfijoeamCt0rNog2IO7pG+K2+/3Z6UCzN3JSB74x7WG29l5czj90/GPr/0zjKGH0vs9My1KZucozeZXjev"
+  "inputs": "eNrlV0uOgzAMddKoYsGi7W5uA6MejKPPQElsxzbBEqpQ+1Zd2M+/VzuEYOA5Iy3AX8MMmDGO48tuHNef2QbNi1u2ReOFH82FffFYfIh3nVt6tohkpiGuAEgM0K2ADCwY4HdGZACGleQfNU8xz0WhyWKEQV6tJfXzYKvLNImgRk4APwL3+21BtpiQLpOwrpBW5ESxjqpTtU7Qb4AmBOlUoNrzBAEej5sC0RNBqci/GmHdDBCFB9YSHiFPRlEa0Ro2iyqGqpDqZdDSGERFQhhmHeooQnto24QkNqXUaq99pJQ3vWw3E7lnBq+XbzM7B3HpaKdAmY5BpyvM3F7OInZ3G3UpE4o7WKrloVYVY5Op2z0dnrTYw7v+QqmBvjsxIHjAL+L1qhdM9aJHTYchupBOC4hfDl+3wNItWDo3GnzRWYCc9DP/fd+1Jepj1h5Rc91Um9Pakj0bO3r7FRY+G5fv2RWHjtfSvPfkHHgMPC+G8560tzx8eu+dVb4DwYedX1VQnqh6lMYjVX3i6s98Nb8Sv9mPP6kac+M",
+  "unpauses": 48,
+  "warps_set": 1,
+  "warps_used": 2
 }

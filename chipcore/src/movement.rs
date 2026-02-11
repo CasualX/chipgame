@@ -118,6 +118,9 @@ pub struct MovementPhase {
 
 /// Tries to move the entity in the given step direction.
 pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Compass) -> bool {
+	try_move_into(s, phase, ent, step_dir, ent.pos + step_dir.to_vec())
+}
+fn try_move_into(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, step_dir: Compass, new_pos: Vec2i) -> bool {
 	ent.flags &= !EF_NEW_POS;
 
 	// Template entities cannot be moved
@@ -134,7 +137,6 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 		return false;
 	}
 
-	let new_pos = ent.pos + step_dir.to_vec();
 	let from_terrain = s.field.get_terrain(ent.pos);
 	let mut to_terrain = s.field.get_terrain(new_pos);
 
@@ -331,6 +333,7 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	s.qt.update(ent.handle, ent.pos, new_pos);
 
 	let old_pos = ent.pos;
+	let ent_turned = ent.face_dir != Some(step_dir);
 
 	ent.face_dir = Some(step_dir);
 	ent.step_dir = Some(step_dir);
@@ -352,7 +355,9 @@ pub fn try_move(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	if matches!(mover_kind, EntityKind::Player) {
 		s.ps.steps += 1;
 	}
-	s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
+	if ent_turned {
+		s.events.fire(GameEvent::EntityTurn { entity: ent.handle });
+	}
 	s.events.fire(GameEvent::EntityStep { entity: ent.handle });
 
 	if matches!(mover_kind, EntityKind::Player) && player_push {
@@ -492,20 +497,18 @@ pub fn teleport(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity, 
 	let teleported = loop {
 		// Find the teleport connection from the current source
 		let dest = s.field.find_teleport_dest(tele_src);
-		// Skip teleport exits that cannot accept any more entities
-		if s.qt.capacity_at(dest) != 0 {
-			// Teleport the entity
-			s.qt.update(ent.handle, ent.pos, dest);
-			ent.pos = dest;
+		// Skip over occupied teleporters (UNLESS it's the original teleporter)
+		if s.qt.count_at(dest) == 0 || dest == old_pos {
 			// Force the entity to move out of the teleporter
-			if try_move(s, phase, ent, step_dir) {
+			let new_pos = dest + step_dir.to_vec();
+			if try_move_into(s, phase, ent, step_dir, new_pos) {
 				// Fixes visual glitch: Don't emit EntityTeleport if they exit the same teleporter they entered
 				break old_pos != dest;
 			}
 		}
 		// Reflect the entity back if they're softlocked
 		// This happens when all destinations are blocked (including the source)
-		if old_pos == dest {
+		if dest == old_pos {
 			// CCLP3: level 50 bug fix - only reflect player entities, requires a block to be softlocked on the teleporter
 			if matches!(ent.kind, EntityKind::Player) && !try_move(s, phase, ent, step_dir.turn_around()) {
 				return false;
