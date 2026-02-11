@@ -1,13 +1,12 @@
 {
-  "level_name": "Fun House Rink *",
-  "attempts": 5,
-  "realtime": 157.09578,
-  "ticks": 3211,
-  "steps": 498,
+  "level_name": "Fun House Rink",
+  "attempts": 11,
+  "realtime": 87.19682,
+  "ticks": 3060,
+  "steps": 472,
   "bonks": 0,
   "seed": "e2fc8f3eb7b5ddab",
-  "inputs": "eNrtljsOACAIQ9E4cP8TO+iAvwFNQBvfjilCG2JEgcwJ7hAAXEBoZYLNarpZQOWPTq1SbqrsVbXFTqHBCizmQohgxOS72qXRoKOdpFdlo2PenLyP+HMfO1ZReN0BnwHDDwa+",
+  "inputs": "eNrtljsOgCAMhoEwODjQ0dvoxv1PZJT4ikUoamyJ38qjpf3bYkwtqPdoSsEu6xeQNQDoVgBcYFoZZjSKkov3PjtwoijQ6YUuiFZ4hOCs01tu2iPJ/aF2LHbscZkhKainRiPZjCH4YaL83iQtq3G63VRLExmsLbEZ5FnhH7yfT9FEeP6UR+wzEig",
   "unpauses": 8,
-  "warps_set": 3,
-  "warps_used": 1
+  "warps_set": 3
 }

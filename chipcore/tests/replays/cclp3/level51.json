@@ -1,13 +1,13 @@
 {
   "level_name": "Dancing on Ice",
-  "attempts": 16,
-  "realtime": 230.08443,
-  "ticks": 12212,
-  "steps": 1490,
+  "attempts": 37,
+  "realtime": 265.13635,
+  "ticks": 6929,
+  "steps": 768,
   "bonks": 1,
   "seed": "b47deb592492c30a",
-  "inputs": "eNrtWsuygyAMjY6LLrroJ99Pv9Oxg8EEOAHExnpWnalonicksCwryIIHALlqtqJZhjo5kY/AShFNARRrtr1q2Zzw8A/MouKf1UQrlhhh2eIAQrHC35rC4UnFWmp6DFeKIG8Tri327Qqi2IdYCDJjtn3Wq6uYZEy9uRqoJhOgQpmlNlPPXwbGnSxuEvoEuz97ktfEUQ6xvxWtpa8hWHBZawt+6bn3r9eKZJ5FPBA9pNH/3hVmqkk7QyeGVhjZLUO1utVV778CygIa0y+PbM5ED+xlLlfGI6B8sXmLg2+BNE+IzNW/J6z9UnwuQyNfTPXAJdg4dGME0g7I0gta+jHgKfLMb+ZE7GklTeWa+treeUvMMsBu+J78i/bjjSzfRRSqfG+NOX+aLo7HbX1/pQLe3eD9ZbSS0Xzd1jGG3BcGEcvvSIelrEeZud1enH2/MgC2wlRKST0559NAsmamOwI5AqATGogbichxI3Rdk/dtAOa0zlzhTuC7Bx6N62w2ncfRZbb8V0hm525wWoAZvBZiz2Z3HTL+Q76UCtfQ5tfQgcP46ARrrtgKYGTQc8ieHpWUpueK/HXD7G31ORMj1ZwE3vOrPhXIH4nHyPnGMJ6EZpFZocJZa5/GW05c+17cuASbnIWh/Y1+caiP6V3Oh6TtRYJkDxKiQmM5dLBgdNJ+7noEzZhbmyvedDySTpq8gV34NJ5rGb+jcNA/p8BXkw",
-  "unpauses": 8,
-  "warps_set": 6,
-  "warps_used": 1
+  "inputs": "eNrdWFtywyAMXFym44989Ei9/6k6aWzL2BKSQM7g7F8ygB5erQQ5vzA3Apiakf4xhwA7pBWFNYAWL0FnzJ8AChnObWdkDnRsvheEfNj3nxIDoMyhsm1BwUMhy52hkmP0X2NhQkYqgX0+DFKyngDUlpAfvZEo0ezjMRWMwdz39kFafE28eF2HLcWaTr++9o5vagri9e3pQ2uguZ9LBe03RIT4eGjFfbLdnBK+ELiesNor9rIyp9uStTEePyvQRbqj12IapSXVnPj6M99+zG19OKQKxvK0jT5yKbtLlT3Gpy79rvgHkma3/O6BmNM1F1INcax0jAdpQEwBGKsyOdzIf1Hw5jjQzdB+KooGTy5Gu/RG3rJDHDM/sUGKrGKERbUoKfphdHbc+wJSot9fD5PVMDV08ynIJ2q+wpFn8s53BoXjOsemq1G90Z/1x69scCXcLEmuTQal0CTM/hB1SYU5DlSofkPoz3lDaU9ct2WgvPloNIBrpDg+4JaBbj9/nzBSsbbMcoB7DGdNc+l0zlpD3le+OoreYWb5+H+74kyc",
+  "unpauses": 10,
+  "warps_set": 9,
+  "warps_used": 16
 }

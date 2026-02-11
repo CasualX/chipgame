@@ -1,8 +1,13 @@
 {
-  "ticks": 8350,
-  "realtime": 151.9851,
-  "steps": 703,
-  "bonks": 8,
+  "level_name": "Anniversary Day",
+  "attempts": 32,
+  "realtime": 221.56972,
+  "ticks": 8273,
+  "steps": 697,
+  "bonks": 11,
   "seed": "0c38a2c35608bb23",
-  "replay": "eNrVWFuOwyAMJLCKGolj9WB79F1VaSAYv7BJ0/lMGvwaj01j/Mf6I0OIDIIFUYi5Fub6PmrQ7ucCsT3ccbZJv+1Fh/wAPaPDUaIYJQnQZnkD3cL8rmwS+aa/Hfua+OTkNiz6OaU5C7qeZlF1MscHspQfA89pqzhCfkFmgXJLyYcwiOWQiH8j3JX1df2cT2PVuUddcuVFqRXN0HMEeOkDekLPueJHeZgoP95mtm1/ktLgkNCqxETg6ZZpTMk+pkpUs27bkUzBnOPE4A75tOqWLBLYy+xc/A608ZsV65x1vUO1eckSJ65hozy4buiYEbrjjeNEX2+/iSrcdFOu9IsGKRqBlQ+NSH8wfqQ8zrqPdgPSSyi5pOo+seR5+I48CUG+xPfbHNS35ce6ciNZx/XFKBWWGypMTLtTipKnMEsvgqoIlosgonIhRc4y/7O0PwVapHA2Sf/2mD9vBprU+/zOOzopexJTuoR66QXmJ1fIqm0qsVgxsl6TZqEkz4rSEudga8BT/Is6OJluffXk/tJwotxjHkJfC5/Pp2Pp0ZLqN7Y3XARLvZVawhXE3mAKMbr3keByin5RWi0CEWx9VEoAOtjFieDRtlnbauDe/nsAv9zD8dFK77B2xTsjhJnSaoLTzBWn4kOVdRP4IaGek0pIM99tIPwB6vBWrg"
+  "inputs": "eNrVWFuOwyAMJGEVNRLHyv3PtKtVWkiM7TEG2s5n0uDXeGy6rn/YfjCEVUHwYAUx1sJY31sN+v1cKPZHd1xtym9r0TE/YM+ocFQoRk4CtZnfULc4vwubQr7lb9u+Fj65uE2Lfk1pSkDXyywqTtb4IJbybdA57RVHyi/KLFJulHwMg1QOQfxr4S7W1+VzPY1F577qkgovcq1khl4j4Esf2BNqzmU/8sMo+fE0s+/nkxgbh4RVJQaCTzemMTn7nCpJzbrvr2QCc04Tg0/Ip1e3sEhoL6tz8Ttwj9+tWNes2x0qzSNLHFzDm/LwumFjRqiON40Tdb39Jqpo08240i8WxNUJrnxsRPaD+SPxOMs+Og2gl1BxSbV94slz8x15EAK+xNfbnNT3zo9t00ayjeuLUyo8N1SamPtOCSXPYFZeBE0RLJMAUTmTIiXM/4T2J6BFBmcj+rfH+HnT0KS9z6+8k5NyJjHGKdSL/1B+MkNWfVNJxcaRdU6aQUkeFaUnzsbWoKf0L2rjZProq6f2l0Ynyj3GIdS18DiOjqVnS2rf2J7oIljmrdQTLhD7DUOIUb2PhC6n2BelzSMQwddHuQSkg7s4EXq0bfK1WJe0GdbeN13ywkiFdMOjnHgS4tQScpv0CDkdmDSP+JrwCzUtUe4",
+  "unpauses": 11,
+  "warps_set": 10,
+  "warps_used": 10
 }

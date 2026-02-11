@@ -102,6 +102,9 @@ fn movement_phase(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 							s.events.fire(GameEvent::SoundFx { sound: SoundFx::CantMove });
 						}
 					}
+					// Ice is considered a forced move, so players can change direction on the next force floor
+					// Clearing this flag is handled below, in the force floor handling code
+					ent.flags |= EF_TERRAIN_MOVE;
 					break 'end_move;
 				}
 			}

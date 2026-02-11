@@ -1,13 +1,13 @@
 {
-  "level_name": "Abandoned Mines *",
-  "attempts": 136,
-  "realtime": 747.5485,
-  "ticks": 4245,
-  "steps": 473,
-  "bonks": 5,
+  "level_name": "Abandoned Mines",
+  "attempts": 165,
+  "realtime": 386.6685,
+  "ticks": 3836,
+  "steps": 405,
+  "bonks": 4,
   "seed": "ecef215afb8633cf",
-  "inputs": "eNrtV1uOAyEMS6v5mGP0/qdcaYYFB8cQtuxHpeajSimExM6DPh7rYkVOJdbkmZO6//WBgjEjArguzpnH8tYRZYTndVzSA1t0BDzQFY3jPcS5KarVEbV/LS3MWuQeFLWOTqCOlmM8/fV8VhB9VqLBqpFevtHVZspVcond5hzK6OwbryMH7P/hKO7PYiIoOpRONaX0U/h/WETNxoJPSNfUcLUZw4QUNeeiyCQh29TF3u9B/fYZy8tsnLO4n3gwvkFFrFrQGvC/+YjrbDVj7ahy6depaewNq76GelHrxYxqjvfd9/XjbtFbHEcdRcFTKdOZuJkjnarld+i5Zv8nCSsJf1FzG9NyhFIwHuVMn42dHjIOJstj5PHqS+/5L9J6iOLr2CjpZ84UkF0ejVFP3vVeLI7lCQsuD1MYLjO4GMt7GYJ3GXyWEqU9/oXSOEr6Jl5PtZaXebQoB2wr5hHLE/thhjiv6jo2gg25McrP4O2hI81MupW/LV/JiZvSPzKBR2w",
-  "unpauses": 30,
-  "warps_set": 31,
-  "warps_used": 79
+  "inputs": "eNrtVltywzAIxBl/+Bi5/yk7NbK0YlkZd9qPzoQvQgDD8tK2PSdrdCiyQa8adf33PyTMGRFAubCzGUvnEWWE572fFIFtPAKe8KqMax2qualSKxOl/6wtzEbmMyhKjkEgj55zPOfPs60o9NELDV6N+PaLPm2mQqWQOGzuoQrPsbEca8Dx71OJoy02giqH4mmmFH+I+HfLSvOLA1+gsNRQOpxhQ4qZm7KoNCH71MMedZD3mHG8zNY9i/pUB+MvqIzVCnoG/NWPKGevFW97p5M/rW5zH1jFGYqk5M2NWo7+bf/8eltEj+ussyz4KlU2Ey9zLKda+QG9adn/iNJJwn/U3ca2XKGUnEd50+/OToSMk6nWMYv46Uvv9Sc0dkilaoiD2wNP8uQiTR49N1cA/vCMQW7uwnl1ySEGg9iM4mzy+Di6PNAlxEolN5BjcGvwllipf+M9/5YMq45M7/aAzHjWTR4SzTDXqIk97yxGwg9bjAfndFQE0VDybUNMsJqhUlPnsAfqnIb2hYb76vqFjVp9Gn/onrL18gUHeUST",
+  "unpauses": 14,
+  "warps_set": 14,
+  "warps_used": 28
 }
