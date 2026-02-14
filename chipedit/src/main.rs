@@ -242,20 +242,10 @@ fn main() {
 					};
 
 					if has_unsaved {
-						#[cfg(windows)]
-						if let Some(ap) = ap.take() {
-							ap.delete();
-						}
-						let result = rfd::MessageDialog::new()
-							.set_title("Unsaved changes")
-							.set_description("There are unsaved changes. Quit without saving?")
-							.set_buttons(rfd::MessageButtons::YesNo)
-							.set_level(rfd::MessageLevel::Warning)
-							.show();
-						#[cfg(windows)] {
-							ap = init_audio(&fs, &config);
-						}
-						if matches!(result, rfd::MessageDialogResult::Yes) {
+						let title = "Unsaved changes";
+						let description = "There are unsaved changes. Quit without saving?";
+						let icon = tinyfiledialogs::MessageBoxIcon::Warning;
+						if tinyfiledialogs::message_box_yes_no(title, description, icon, tinyfiledialogs::YesNo::No) == tinyfiledialogs::YesNo::Yes {
 							event_loop.exit();
 						}
 					}
@@ -276,45 +266,18 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyU) if pressed => editor.undo(),
 						PhysicalKey::Code(KeyCode::KeyY) if pressed => editor.redo(),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
-							#[cfg(windows)]
-							if let Some(ap) = ap.take() {
-								ap.delete();
-							}
 							// Open file dialog to load a level
-							let mut dialog = rfd::FileDialog::new()
-								.add_filter("Level", &["json"])
-								.set_title("Open Level");
-							if let Some(existing) = &file_path {
-								if let Some(parent) = existing.parent() {
-									dialog = dialog.set_directory(parent);
-								}
-							}
-							if let Some(path) = dialog.pick_file() {
-								file_path = Some(path);
+							let default_path = file_path.as_ref().map(|p| p.to_string_lossy().into_owned()).unwrap_or_default();
+							if let Some(path) = tinyfiledialogs::open_file_dialog("Open Level", &default_path, Some((&["*.json"], "Level"))) {
+								file_path = Some(path::PathBuf::from(path));
 								load_level(&mut editor, &file_path, app.as_deref(), &mut saved_level);
-							}
-							#[cfg(windows)] {
-								ap = init_audio(&fs, &config);
 							}
 						}
 						PhysicalKey::Code(KeyCode::F5) if pressed => {
-							#[cfg(windows)]
-							if let Some(ap) = ap.take() {
-								ap.delete();
-							}
 							// Save file dialog to save the level
-							let mut dialog = rfd::FileDialog::new()
-								.add_filter("Level", &["json"])
-								.set_title("Save Level");
-							if let Some(existing) = &file_path {
-								if let Some(parent) = existing.parent() {
-									dialog = dialog.set_directory(parent);
-								}
-								if let Some(name) = existing.file_name().and_then(|s| s.to_str()) {
-									dialog = dialog.set_file_name(name);
-								}
-							}
-							if let Some(path) = dialog.save_file() {
+							let default_path = file_path.as_ref().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|| String::from("level.json"));
+							if let Some(path) = tinyfiledialogs::save_file_dialog_with_filter("Save Level", &default_path, &["*.json"], "Level") {
+								let path = path::PathBuf::from(path);
 								let contents = editor.save_level();
 								saved_level = Some(contents.clone());
 								match fs::write(&path, contents) {
@@ -328,9 +291,6 @@ fn main() {
 										eprintln!("Failed to save level: {err}");
 									}
 								}
-							}
-							#[cfg(windows)] {
-								ap = init_audio(&fs, &config);
 							}
 						}
 						PhysicalKey::Code(KeyCode::KeyT) => editor.tool_terrain(pressed),
@@ -467,6 +427,7 @@ fn main() {
 }
 
 fn level_complete(editor: &mut editor::EditorState) {
+	let title = "Save replay?";
 	let string;
 	let description = if let Some(run_stats) = editor.play_stats() {
 		string = format!(
@@ -480,13 +441,8 @@ fn level_complete(editor: &mut editor::EditorState) {
 	else {
 		"Embed this run into the level file for future reference?"
 	};
-	let save_replay = rfd::MessageDialog::new()
-		.set_title("Save replay?")
-		.set_description(description)
-		.set_buttons(rfd::MessageButtons::YesNo)
-		.set_level(rfd::MessageLevel::Info)
-		.show();
-	if matches!(save_replay, rfd::MessageDialogResult::Yes) {
+	let icon = tinyfiledialogs::MessageBoxIcon::Info;
+	if tinyfiledialogs::message_box_yes_no(title, description, icon, tinyfiledialogs::YesNo::No) == tinyfiledialogs::YesNo::Yes {
 		editor.save_replay();
 	}
 	editor.toggle_play();
