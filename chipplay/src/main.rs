@@ -107,6 +107,8 @@ impl AppStuff {
 		let mut g = shade::gl::GlGraphics::new(shade::gl::GlConfig { srgb: true, ..Default::default() });
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
+		resx.backbuffer_viewport.maxs = [size.width as i32, size.height as i32].into();
+		resx.viewport = resx.backbuffer_viewport;
 
 		Box::new(AppStuff { size, window, surface, context, g, resx })
 	}

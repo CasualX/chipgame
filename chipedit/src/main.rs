@@ -108,6 +108,8 @@ impl AppStuff {
 		let mut g = shade::gl::GlGraphics::new(shade::gl::GlConfig { srgb: true, ..Default::default() });
 		let mut resx = chipgame::fx::Resources::default();
 		resx.load(fs, config, &mut g);
+		resx.backbuffer_viewport.maxs = [size.width as i32, size.height as i32].into();
+		resx.viewport = resx.backbuffer_viewport;
 
 		let cursor = winit::window::CursorIcon::Default;
 		Box::new(AppStuff { size, window, cursor, surface, context, g, resx })
@@ -185,6 +187,7 @@ fn main() {
 	// App state
 	let mut app: Option<Box<AppStuff>> = None;
 	let mut editor = editor::EditorState::default();
+	editor.set_screen_size(800, 600);
 	editor.load_level(include_str!("template.json"));
 	let mut saved_level: Option<String> = None;
 
