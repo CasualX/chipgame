@@ -245,10 +245,14 @@ fn main() {
 					};
 
 					if has_unsaved {
-						let title = "Unsaved changes";
-						let description = "There are unsaved changes. Quit without saving?";
-						let icon = tinyfiledialogs::MessageBoxIcon::Warning;
-						if tinyfiledialogs::message_box_yes_no(title, description, icon, tinyfiledialogs::YesNo::No) == tinyfiledialogs::YesNo::Yes {
+						let result = rustydialogs::MessageBox {
+							title: "Unsaved changes",
+							message: "There are unsaved changes. Quit without saving?",
+							icon: rustydialogs::MessageIcon::Warning,
+							buttons: rustydialogs::MessageButtons::YesNo,
+							owner: window_owner(app.as_deref()),
+						}.show();
+						if result == Some(rustydialogs::MessageResult::Yes) {
 							event_loop.exit();
 						}
 					}
@@ -270,16 +274,38 @@ fn main() {
 						PhysicalKey::Code(KeyCode::KeyY) if pressed => editor.redo(),
 						PhysicalKey::Code(KeyCode::F2) if pressed => {
 							// Open file dialog to load a level
-							let default_path = file_path.as_ref().map(|p| p.to_string_lossy().into_owned()).unwrap_or_default();
-							if let Some(path) = tinyfiledialogs::open_file_dialog("Open Level", &default_path, Some((&["*.json"], "Level"))) {
+							let open_path = rustydialogs::FileDialog {
+								title: "Open Level",
+								directory: file_path.as_ref().and_then(|p| p.parent()),
+								file_name: file_path.as_ref().map(|p| p.as_path()),
+								filter: Some(&[
+									rustydialogs::FileFilter {
+										desc: "Level Files",
+										patterns: &["*.json"],
+									},
+								]),
+								owner: window_owner(app.as_deref()),
+							}.pick_file();
+							if let Some(path) = open_path {
 								file_path = Some(path::PathBuf::from(path));
 								load_level(&mut editor, &file_path, app.as_deref(), &mut saved_level);
 							}
 						}
 						PhysicalKey::Code(KeyCode::F5) if pressed => {
 							// Save file dialog to save the level
-							let default_path = file_path.as_ref().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|| String::from("level.json"));
-							if let Some(path) = tinyfiledialogs::save_file_dialog_with_filter("Save Level", &default_path, &["*.json"], "Level") {
+							let save_path = rustydialogs::FileDialog {
+								title: "Save Level",
+								directory: file_path.as_ref().and_then(|p| p.parent()),
+								file_name: file_path.as_ref().map(|p| p.as_path()),
+								filter: Some(&[
+									rustydialogs::FileFilter {
+										desc: "Level Files",
+										patterns: &["*.json"],
+									},
+								]),
+								owner: window_owner(app.as_deref()),
+							}.save_file();
+							if let Some(path) = save_path {
 								let path = path::PathBuf::from(path);
 								let contents = editor.save_level();
 								saved_level = Some(contents.clone());
@@ -398,7 +424,7 @@ fn main() {
 						for evt in fx_events {
 							match evt {
 								chipgame::fx::FxEvent::PlaySound(sound) => if let Some(ap) = &mut ap { ap.play_sound(sound) },
-								chipgame::fx::FxEvent::LevelComplete => level_complete(&mut editor),
+								chipgame::fx::FxEvent::LevelComplete => level_complete(&mut editor, Some(app)),
 								chipgame::fx::FxEvent::GameOver => editor.toggle_play(),
 								_ => {}
 							}
@@ -429,8 +455,7 @@ fn main() {
 	});
 }
 
-fn level_complete(editor: &mut editor::EditorState) {
-	let title = "Save replay?";
+fn level_complete(editor: &mut editor::EditorState, app: Option<&AppStuff>) {
 	let string;
 	let description = if let Some(run_stats) = editor.play_stats() {
 		string = format!(
@@ -444,11 +469,21 @@ fn level_complete(editor: &mut editor::EditorState) {
 	else {
 		"Embed this run into the level file for future reference?"
 	};
-	let icon = tinyfiledialogs::MessageBoxIcon::Info;
-	if tinyfiledialogs::message_box_yes_no(title, description, icon, tinyfiledialogs::YesNo::No) == tinyfiledialogs::YesNo::Yes {
+	let result = rustydialogs::MessageBox {
+		title: "Save replay?",
+		message: description,
+		icon: rustydialogs::MessageIcon::Info,
+		buttons: rustydialogs::MessageButtons::YesNo,
+		owner: window_owner(app.as_deref()),
+	}.show();
+	if result == Some(rustydialogs::MessageResult::Yes) {
 		editor.save_replay();
 	}
 	editor.toggle_play();
+}
+
+fn window_owner(app: Option<&AppStuff>) -> Option<&dyn raw_window_handle::HasWindowHandle> {
+	app.map(|a| &a.window as &dyn raw_window_handle::HasWindowHandle)
 }
 
 // Dummy file I/O functions for linking
