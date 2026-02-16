@@ -1,13 +1,13 @@
 {
   "level_name": "Leave No Stone Unturned",
-  "attempts": 44,
-  "realtime": 275.85355,
-  "ticks": 3853,
-  "steps": 321,
+  "attempts": 63,
+  "realtime": 177.36894,
+  "ticks": 3672,
+  "steps": 306,
   "bonks": 0,
-  "seed": "11de07b88d06159e",
-  "inputs": "eNq9VkESgzAIXB0PPqP/f2WntqPoAlmSTDlphgCBZWFZSPCRleQ4xnbI99vq70+B1T/ld+qYny44Ze8RmDeC3x6ow8/m3Acr7wKiekV33Xqdd/9fF8ZYT/67AXeFyTUNJPZlY/ZsXr7sBcJhjKsazpHHYAufXm33xTOFl36EgaJ+HA/D2N5gTmOWIn0o+rtv3wk0gNyNKHMOqdlfR+xvtV5odUnkq9deVpdqzyvOtkSqnOPyDJD6yji8mrsZ9Qz4p5ErkWPz3k9r0XLN/CzNIwEPaQ8O4XzWDB7J2whUpE1xuI7dcSp5HqqFxUyCYZopUfdYHd7xlOyO8IAwTxvNr+RZ5QSHHm7LhJoTAOkcT/nBGeT2PY1dTpgRD4Ol7gl3PDp39roirsJZPNLxZPNlfzhovdhvGdoltg",
-  "unpauses": 6,
-  "warps_set": 6,
-  "warps_used": 11
+  "seed": "4092f013c8e9511e",
+  "inputs": "eNq9Vs0agzAIy/x68LD3f95tTi0gKdR2y2lToCH81GXRAPA4gA/KhvePlaE6WADLP7DxXO/iSPGb5Zk/jVnNDeZnm8rLL1hhnrLA14J1kDO5nyGaZJ++cr+s+1C+Dd+emIonIj/sOAvmpVC7rbf7aQcgMfDCGWJyCmL5oRwK+uxpOn5022EygSo0tXfNTc+7qUDFB1kutPOEQ8K6EkoFX1TBlAsAb31Bb5Tm7khOxw5yFnWRf3yW97mJmHqlxDHRbruqmzNHLufjeZkMX/OrjFEx/G1RPM7gtW5SQFZnvSdjbT2dH3PhX0mpmqb4dOk52Ev2Durojbbqkt3AzQ/ZBExPWYGof+yekblnzhppHPfKSNYoI5bUP/w82M2tfpTZweG6EugsXOYavDfuzoU9yr6as1V1wrG0wbmODsymsXv5V/bAvPTgBShgKMw",
+  "unpauses": 8,
+  "warps_set": 7,
+  "warps_used": 4
 }

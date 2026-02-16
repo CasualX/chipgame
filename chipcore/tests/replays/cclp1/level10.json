@@ -1,12 +1,13 @@
 {
   "level_name": "Graduation",
-  "attempts": 96,
-  "realtime": 89.767715,
-  "ticks": 5016,
-  "steps": 428,
-  "bonks": 1,
-  "seed": "0fac0fb4ea3d8de3",
-  "inputs": "eNrNV0ESgzAIRKeHHP3/a3uo0wmGzUKIGk6dRhEWdiGlRE3+tr9nZwRlSVsAn1FA5V5QPneZqPjP3xlHUS5sDxvqMUc4KMUaNA8KOnf4hh2QBL7Qi0jjz30K6g3MWd5LJLZMP3tIWwNaHyCntputhZAceDLw1qWgxrVjNryrg5SKINZw9YxRzUBWUvGP5QvT8VPk94qfUxdam9olQeNc8tkyC8QztV5yDzmOltlAkvkYlGawMfVx9YF/0A7joPtXkSKzmLoUFi3ZfbbRfOP6RkdWu7f4pwsrnRDluvTYqHr06jKbs2BnmKI52X3YStg1EsN3Ul0vacZQ3TXN/+dJ7cvws/PnS9A/fL7w52P9iSGf1ZRjjExqnUv5Jl3pzO1iFm65eyu/H6Ek6iBGKgT1wbi/9LfpWZqJig2zQc1hf7h7o4BoyRfRhz2R",
+  "attempts": 120,
+  "realtime": 138.6417,
+  "ticks": 4980,
+  "steps": 418,
+  "bonks": 8,
+  "seed": "fec965533ea8f026",
+  "inputs": "eNrNl10OhCAMhGcXQzDhAHv/k26yWRW1lU7Bn3lEhNJ+pSUllwC87xWQHizc7yDan6c7NA/nqtM2mQr06ybpeBlMqkUos6c/mOMwQ6Emu23YSoy76tEGZppYNGRtmH05jcSorhe1VcqYjDLbjjMBJlwFG0yQYD+jNfOhp071cqTzdJoQ5pE4XC7NuNjjDyGDjDD/HEdKD6pF6Um6NNTP03HqGI9UgiR1CR3KSFuZrmjHMF/lCLNB9djZC1k/dLd3RT3AdIcl3nJxGxdrffDR1D23Fr8F+UjtQlNP7IWGc8NC9vqdVhKvfdHHUQ5DXmge374Qi4Xe2jryBpA3WG9Ml7hMNpFuEC2STfz8RaS7oWAEn4m6zeKFe8rDUSt17DW3nzX6y+EKznp/Td/JKmGBoykdveZBUXzsqC8c6Um4",
   "unpauses": 3,
-  "warps_set": 3
+  "warps_set": 3,
+  "warps_used": 9
 }
