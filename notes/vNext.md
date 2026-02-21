@@ -11,7 +11,7 @@ This allows players to take their time planning each move without pressure.
 
 * [x] Initial implementation of Step Mode.\
 * [x] Add Step Mode toggle to SaveData and Options menu.\
-* [ ] Fix replay desync when using Step Mode.\
+* [x] Fix replay desync when using Step Mode.\
 
 The desync is caused by clearing the input buffering when stepping the simulation.
 When replaying, the buffered inputs are not cleared, causing extra moves to be processed.
@@ -47,6 +47,16 @@ When the Player gets close enough, hidden entities should fade in smoothly showi
 
 
 
+Remaster CCLP1 levels
+----------------------
+
+Remaster the CCLP1 levelset using the improved DAT conversion features.
+
+* [x] Remaster CCLP1 levelset to take advantage of new conversion features.\
+* [x] Fix any broken CCLP1 replays.\
+
+
+
 Validate CCLP2 levels
 ---------------------
 
@@ -61,7 +71,7 @@ Validate CCLP3 levels
 
 Play through all CCLP3 levels and check the levels can be reasonably completed.
 
-* [ ] Reprocess CCLP3 levelset to take advantage of new conversion features.\
+* [ ] Remaster CCLP3 levelset to take advantage of new conversion features.\
 * [ ] Add CCLP3 replay tests.\
 * [ ] Identify and fix levels that cannot be completed.\
 
@@ -152,6 +162,8 @@ Startup Performance
 Loading the audio assets causes a long delay before the game starts.
 
 * [ ] Load audio assets in the background after initial startup.\
+* [x] Audio loading in chiphtml is delayed on user interaction.\
+
 
 
 Editor: Undo/Redo System
