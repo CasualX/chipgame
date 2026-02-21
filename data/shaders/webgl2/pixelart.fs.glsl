@@ -19,11 +19,24 @@ uniform vec3 u_shadow_tint;
 void main() {
 	// --- Pixel art UV correction ---
 	vec2 texSize = vec2(textureSize(u_tex, 0));
-	vec2 uv_pix = v_texcoord * texSize;
-	vec2 uv_center = (floor(uv_pix) + 0.5) / texSize;
-	vec2 uv_biased = mix(v_texcoord, uv_center, u_pixel_bias);
+	vec2 uv_texel = v_texcoord * texSize;
 
-	vec4 color = texture(u_tex, uv_biased);
+	// How many texels does one screen pixel cover?
+	vec2 dx = dFdx(uv_texel);
+	vec2 dy = dFdy(uv_texel);
+	float texel_footprint = max(length(dx), length(dy));
+
+	// If we're magnifying (footprint < 1 texel), snap.
+	// If minifying, let hardware filtering + mips handle it.
+	float snap = clamp(1.0 - texel_footprint, 0.0, 1.0);
+
+	// Optional: allow artistic control
+	snap *= u_pixel_bias;
+
+	vec2 uv_snapped = (floor(uv_texel) + 0.5) / texSize;
+	vec2 uv_final = mix(v_texcoord, uv_snapped, snap);
+
+	vec4 color = texture(u_tex, uv_final);
 	if (color.a < 0.2) {
 		discard;
 	}
