@@ -40,7 +40,7 @@ flate2 = "1.0"
 basenc = "0.2"
 png = "0.17"
 
-shade = { git = "https://github.com/CasualX/shade", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
+shade = { version = "0.0.4", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
 
 paks = "0.1.1"
 
