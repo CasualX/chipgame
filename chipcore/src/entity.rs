@@ -41,6 +41,12 @@ impl Entity {
 	pub fn is_trapped(&self) -> bool {
 		self.flags & (EF_TRAPPED | EF_RELEASED) == EF_TRAPPED
 	}
+
+	/// Checks if the entity has moved in the current tick.
+	#[inline]
+	pub fn has_moved(&self, time: i32) -> bool {
+		time == self.step_time && self.flags & EF_NEW_POS != 0
+	}
 }
 
 /// Entity will be removed at the end of the current tick.

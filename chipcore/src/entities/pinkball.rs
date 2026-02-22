@@ -50,7 +50,7 @@ fn terrain_phase(s: &mut GameState, phase: &mut TerrainPhase, ent: &mut Entity) 
 		return bear_trap(s, ent);
 	}
 
-	if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+	if ent.has_moved(s.time) {
 		match terrain {
 			Terrain::Water => {
 				s.events.fire(GameEvent::WaterSplash { pos: ent.pos });

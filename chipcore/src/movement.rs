@@ -384,7 +384,7 @@ fn try_push_block(s: &mut GameState, phase: &mut MovementPhase, ent: &mut Entity
 
 	if s.time >= ent.step_time + ent.base_spd / 2 && try_terrain_move(s, phase, ent) {
 		// Returns true if the Block was actually moved out of the way
-		if s.time == ent.step_time && ent.flags & EF_NEW_POS != 0 {
+		if ent.has_moved(s.time) {
 			return true;
 		}
 	}
