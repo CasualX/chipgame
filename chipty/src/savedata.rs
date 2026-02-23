@@ -44,8 +44,8 @@ fn default_true() -> bool {
 #[serde(rename_all = "lowercase")]
 pub enum ZoomMode {
 	#[default]
-	Wide,
 	Classic,
+	Wide,
 	Editor,
 }
 
