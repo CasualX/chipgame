@@ -200,6 +200,7 @@ fn main() {
 	let mut music_enabled = true;
 	let mut last_frame_start = time::Instant::now();
 	let mut tick_budget = time::Duration::ZERO;
+	let mut fullscreen_toggled = false;
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
@@ -276,8 +277,7 @@ fn main() {
 							// Open file dialog to load a level
 							let open_path = rustydialogs::FileDialog {
 								title: "Open Level",
-								directory: file_path.as_ref().and_then(|p| p.parent()),
-								file_name: file_path.as_ref().map(|p| p.as_path()),
+								path: file_path.as_deref(),
 								filter: Some(&[
 									rustydialogs::FileFilter {
 										desc: "Level Files",
@@ -295,8 +295,7 @@ fn main() {
 							// Save file dialog to save the level
 							let save_path = rustydialogs::FileDialog {
 								title: "Save Level",
-								directory: file_path.as_ref().and_then(|p| p.parent()),
-								file_name: file_path.as_ref().map(|p| p.as_path()),
+								path: file_path.as_deref(),
 								filter: Some(&[
 									rustydialogs::FileFilter {
 										desc: "Level Files",
@@ -358,13 +357,19 @@ fn main() {
 						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
 							if let Some(app) = app.as_deref_mut() {
-								let want_fullscreen = app.window.fullscreen().is_none();
-								app.set_fullscreen(want_fullscreen);
+								if !fullscreen_toggled {
+									fullscreen_toggled = true;
+									let want_fullscreen = app.window.fullscreen().is_none();
+									app.set_fullscreen(want_fullscreen);
+								}
 							}
 						}
 						PhysicalKey::Code(KeyCode::Escape) if pressed => {
 							if let Some(app) = app.as_deref_mut() {
-								app.set_fullscreen(false);
+								if !fullscreen_toggled {
+									fullscreen_toggled = true;
+									app.set_fullscreen(false);
+								}
 							}
 						}
 						_ => {}
@@ -446,6 +451,7 @@ fn main() {
 				_ => {}
 			},
 			Event::AboutToWait => {
+				fullscreen_toggled = false;
 				if let Some(app) = app.as_deref() {
 					app.window.request_redraw();
 				}

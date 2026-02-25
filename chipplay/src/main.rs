@@ -169,6 +169,7 @@ fn main() {
 	let mut key_input = chipcore::Input::default();
 	let mut last_frame_start = time::Instant::now();
 	let mut tick_budget = time::Duration::ZERO;
+	let mut fullscreen_toggled = false;
 
 	let event_loop = winit::event_loop::EventLoop::new().expect("Failed to create event loop");
 
@@ -216,13 +217,19 @@ fn main() {
 						}
 						PhysicalKey::Code(KeyCode::KeyF) if pressed => {
 							if let Some(app) = app.as_deref_mut() {
-								let want_fullscreen = app.window.fullscreen().is_none();
-								app.set_fullscreen(want_fullscreen);
+								if !fullscreen_toggled {
+									fullscreen_toggled = true;
+									let want_fullscreen = app.window.fullscreen().is_none();
+									app.set_fullscreen(want_fullscreen);
+								}
 							}
 						}
 						PhysicalKey::Code(KeyCode::Escape) if pressed => {
 							if let Some(app) = app.as_deref_mut() {
-								app.set_fullscreen(false);
+								if !fullscreen_toggled {
+									fullscreen_toggled = true;
+									app.set_fullscreen(false);
+								}
 							}
 						}
 						_ => {}
@@ -267,6 +274,7 @@ fn main() {
 				_ => {}
 			},
 			Event::AboutToWait => {
+				fullscreen_toggled = false;
 				if let Some(app) = app.as_deref() {
 					app.window.request_redraw();
 				}
