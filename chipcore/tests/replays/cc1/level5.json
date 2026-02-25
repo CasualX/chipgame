@@ -1,8 +1,10 @@
 {
-  "ticks": 950,
-  "realtime": 15.810602,
+  "level_name": "Lesson 5",
+  "attempts": 8,
+  "realtime": 15.785417,
+  "ticks": 949,
   "steps": 77,
   "bonks": 0,
   "seed": "03b571153c572da9",
-  "replay": "eNrF0ksKACAIBNDRIlx0AO9/0j7rwgqlt5ZBB1VVJpAHfgbIs5oDFPZn9gfgYDWJQBGYf7RIu1/q9S4T08Epl5G7jWEYM8nKay81C9Y"
+  "inputs": "eNrF0ksKACAIBNDRIlx0AO9/0j7rwgqlt5ZBB1VVJpAHfgbIs5oDFPZn9gfgYDWJQBGYf7RIu1/q9S4T08Epl5G7jWEYM8mIayNfC9Q"
 }

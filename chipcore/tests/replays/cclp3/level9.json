@@ -1,8 +1,13 @@
 {
-  "ticks": 4276,
-  "realtime": 71.24732,
-  "steps": 367,
-  "bonks": 1,
+  "level_name": "Redoubled Effort",
+  "attempts": 19,
+  "realtime": 218.43031,
+  "ticks": 4028,
+  "steps": 357,
+  "bonks": 0,
   "seed": "c6ae79d22fac3558",
-  "replay": "eNrNlukOwiAMgMsRQs3e/3k1cQPG2lJgQ7+fynpfMRJs/gsI+MT1v0MOgN0BQ0HJjT8CDYezFO5D7YS/QnhYf0Xbw8hjyJEuCcWLkH7NGk8+D0UeDA/m2GKd78qkk6UX32zLt/IxYyfxIMcs5VLId9K7Y+c4aexjKFGvDtuCn2CmgRHNKviOpQmTyR7NNiKunILwDHYlfKwd29M3pd/dVZ38/mj3XLuYt9Exv3Qjg+pe+PMSVU0YXvnSHTExNTps2FR1eJxJol4mnPpGGFxxAA8spLJoQFnx36nGHyzN+krDUjx6uEAsG+lhLl995cOFS77q5RndcrCvPrp3TiSO3ma0w9COpdVqGUuwfoOor0OtCKiz0B6W3EyR9lLZ76SdchhXn2DP8gZjcDkt"
+  "inputs": "eNq9V0sWwyAIxLwsPEKWvf8p+0nSgBkQjDqrPoMKMwg057xt+QIdWAW+K0sJKgw+4IccRj8kAfpjt+CfshMkb2zFeUy6A8ZcRIS4utjgNtrNqxfwGKr4f25QfGYqnIHhSDATKjkkt/Mv3HXmqCYN4kGXEthI7y+i1KhEAKHYIROpBdHcjmm0UDT3QE48eW5pBsIxPtB657TNz9wNHl1oLJYpuJeYeq4zm6Li9Uo1nkX896tskJ7nF25vnpYzAKj/0HR0SCdbEfOuiYW+g1yKC6RpaxZ9rr52jsKtuPdZQzIlG9FVQPnYn7oJzpI5OEEbKmc9eA5V2J5VndvVtOdcZ9vG9gqr3iFADrL1V6175ckxHrZ/5Lazy1GKwn/Auuhb9C/bSdDj3Hs5IXzdMzABhm9ngvVRbYzoDW7eMP4",
+  "unpauses": 6,
+  "warps_set": 6,
+  "warps_used": 5
 }

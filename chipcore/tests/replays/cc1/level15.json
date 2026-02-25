@@ -1,11 +1,12 @@
 {
   "level_name": "Elementary",
-  "attempts": 2,
-  "realtime": 162.28389,
-  "ticks": 9738,
-  "steps": 828,
+  "attempts": 4,
+  "realtime": 166.019,
+  "ticks": 9714,
+  "steps": 826,
   "bonks": 0,
   "seed": "b092b9942efaf14d",
-  "inputs": "eNrVWVGuwyAMcwdCm5RT9f6Hej9vaqvRYpNAN39OW4HEsV22ruv6oJGbeERheWP/YUr/H76eLgDEDsrZGdG/8BIFRNR4f0JUu2zOMkNs9g6OdS2rqD4m6yiPSBR1x144Zvpsr0Y06eQ7YLiwPQbb9xdGwRg6apS9+pFMmiLWU5wFkalA0LrPe0BL0bci3hZK4TTNrOFkADNVy2C8opiiLjyCrssdCJ2QebWq2heINuJKLjQRj5/3dLbpwC5FMNvsUiacnu4MQO1iMXPRjjxkTyBOWnaA6oaPznk+TD5M8EhU5jG+LZwV4Caj9Si7Q9SGGoq1lX3Ky5g4DsNPP+HIqPgxmtpLgnhtGeTp3xVqrSZBFpdfuNdDzV49BhSjjc+J8KXyuTmfb13pmqf06a1cutyEo0dw24JoqojEzxDDGox10bkZ/nPVgEDGaIgRHpGZdFAlMeeyYtjePX934cWVTSw1FPHBkdto09anXcT+23rVA1VywuKGCO2ctcRwuED2lc18/zLpkCKDVsIBR+HSOXXhNYBIxSHsZgMGIcUkb6ZWjGHnKPQzi1B8nXHW/9NBmpZCSJ/YaPvm/xv6EvukMije9tMf5CH8WYyTi547ipA5ip7GC7wculTqziy8bOBn4Vb189gqkehE5g4PKR6rgnjbrOAP0LeYAA",
-  "unpauses": 1
+  "inputs": "eNrVWdGOgzAMM2tVbVK+iv//qHs5DqYVajdp2flxAtomjm3Yuq7rg0Zu4hGFZcPxx5R+f3w9XQCIHZSzM6J/4SUKiKjx8YSodtmcZYbY7AMc61pWUX1M1lEekSjqjr1wzPTZXo1o0sk1YLiwPwb79QujYAwdNcpe3SSTpoj1FGdBZCoQtO7zHtBS9K2It4VSOE0zazgZwEzVMhivKKaoC4+g63IHQidkXq2q9gWijbiSC03E4+c9nW06sEsRzDa7lAmnpzsDULtYzFy0Iw/ZE4iTlh2guuGjc54Pkw8TPBKVeYxvC2cFuMloPcruELWhhmJtZZ/yMiaOw/DTTzgyKn6MpvaSIF5bBnn6d4Vaq0mQxeUX7vVQs1ePAcVo43MifKl8bs7nW1e65il9eiuXLnfh6BHctiCaKiLxM8SwBmNddG6G/1w1IJAxGmKER2QmHVRJzLmsGLYPzz988OLKJpYaivjgndto09anXcT+23rVA1VywuKGCO2ctcTw9gHZVzbz/cukQ4oMWgkHHIVL59QHrwFEKg5hNxswCCkmeTO1Ygw7R6GfWYTi64yz/lsHaVoKIX1io+3G/w36EsekMije9tMf5CH8WYyTi55vFCFzFD2NF3g5dKnUnVl42cC/hVSzVI+AMosJZv4t2elJyAPwA2Xnl3M",
+  "unpauses": 5,
+  "warps_set": 4
 }

@@ -1,8 +1,13 @@
 {
-  "ticks": 1750,
-  "realtime": 31.15,
-  "steps": 128,
-  "bonks": 1,
+  "level_name": "Pigeonholed",
+  "attempts": 19,
+  "realtime": 100.0016,
+  "ticks": 1008,
+  "steps": 116,
+  "bonks": 0,
   "seed": "c4a09800fcacc631",
-  "replay": "eNqllEESwCAIA9XxYP//4fbUEQyS6B47Ekio9r6nGFpAIagT5YrxE3fxJ9HZXM2iJBWmdeC3NT336siU5yqfjfWv7GeXKu71nZfmVlPNdsZ58N9rCprezxTtmv0TM8fq7cJwKqtrRqOLIPH81hxxsX0mYSZBWwx7S69HZBHKkbsYFERmg+dZql+S+Q3x"
+  "inputs": "eNqVUkkSgDAISx0P/v/FLumSFhDNpQwKJIR9dwBgRMCW4fqnDNxxrZry5WmGw6LnObfFSZXpEkixWtiyMuS37R+grBiXBKkKpydf1scaI90yMfOxTfm+h1Cv9ZSdmbNLcfLorolTmRvRInS9ssMaR07xVf7uAbjc9B7wxm1iOLNdod0Gt5pfbmbNK04zWgwY",
+  "unpauses": 5,
+  "warps_set": 5,
+  "warps_used": 6
 }

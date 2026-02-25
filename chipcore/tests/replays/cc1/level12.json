@@ -1,8 +1,10 @@
 {
-  "ticks": 7938,
-  "realtime": 132.83333,
+  "level_name": "Hunt",
+  "attempts": 3,
+  "realtime": 132.25566,
+  "ticks": 7937,
   "steps": 661,
   "bonks": 0,
   "seed": "ff365e9d586b5cc2",
-  "replay": "eNrtmdcShCAMRYM4jpnh/793iw2kyEKC4HKekZpyE4VYgZkXXJaRUg7cvNeQy2o438RyWkl8qBKXx8a0Ez6m8AAwPxK1YpnQQtRodA82vlDWF/l7B9BfqGXrrN97xg4LhmOA6AQ5orBS3XbCdqUqzzwtgKVE40P5ikaBWN/LtmaEnaj8cCiWngIiALiufP5CVmyc4hf4cutO2r3vxSivAsjYoWvPw1VpbUCWP5g7D5T7Nfds4x9OZstrLU7vJMcpiJ3P6BbkW/xYnHRnVl6Zvp1EVS7klbPB42oI+Uf65j3roKBRO2fBAKIJ9JT0k4WRxbNCVUJqWImsLY6wAEFrvsx23jSSEjLGaqk07FTntne1BiaC7ENrL/ozlWxkwinal0t82+2ziFJLeZd4YXanR11PcmUTW1fmBh1M9XYZ+qP44QWh/n3T"
+  "inputs": "eNrtmdkOhCAMRYsYYxP+/3vHjBvIIgMtgsN5RtYut1WIDZh5wXUZKeXAzbKGXFfD+SHW00riQ5W4PDamg/AxhQeA+ZWoDcuEVqJGo3uw8YWyvsjfO4D+Qi1bZ/3eM3ZYMBwDRCfIGYWV6rYTtitVeeZpASwlGl/KVzQKxPpetjUj7ETlh1Ox9BQQAcB95fMXsmLnEr/Al1sP0u79KEZ5FUDGDl17Hu5KawOy/MHceaDcr7lnG/9wMlveanF6JzlPQex8Rrcg3+LH4qQ7s/LK9P0kqnIhr5wNHldDyD/SN+9VBwWN2jkLBhBNoKeknyyMLJ4VqhJSw0pkbXGGBQha822286aRlJAxVkulYac6t32qNTARZB9ae9GfqWQjEy7Rvlzi22+fRZRayrvEC7M7Pep6kiub2LoyN+hgqrfL0B/FhQ8kK33T"
 }

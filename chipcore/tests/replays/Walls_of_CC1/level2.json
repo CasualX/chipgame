@@ -1,8 +1,13 @@
 {
-  "ticks": 3605,
-  "realtime": 60.683334,
+  "level_name": "Slay the Pyre",
+  "attempts": 183,
+  "realtime": 131.31404,
+  "ticks": 3468,
   "steps": 271,
-  "bonks": 1,
-  "seed": "f910ae2922af8fe3",
-  "replay": "eNrFlu2uwyAIhlk1pjvh/q/3tIlWKJ+uS/b8XGaBF3yx1hPcB1AHcPFyAdg686ygbWnOiGcm7wM/cjHOV1ZDLwwRr193ThQnEbRTFHn2bzHSnI2R2oLVgykEA/hfEv2+ur21ZAwSDdSGqUNFPzZb93i6bJoXAdV6grTqXVCwRv71IUSkoRHtQTDY5Xt6tYP+c6uOhbzvI915ejXy5ZUDbdjmfcpb3zjcp9uzAeX/OC2JDvufL/uZv9241lp9TlQ9OLYt7nyknztjgw/G0xLC8Sh03QUcxI5x1dX7KhcGmQ92ZZZ3lTOQ1GVT6WdokWnkHxdWu9Y9s2RXdpDSkglZu437jf0YYifUaWI3EITvg7uVIagLXIewtvyanuxypRSDn9A32MNthaaiU78Bd1eKOiuLhofKnk7LIHc5SV9+VdZGq4h89X6Ocy+CpWLqJt5mYV6ZXPJvBv+k3mPrlXK9QHQCqwOh1z9NlypW"
+  "bonks": 18,
+  "seed": "90ec934d5bbf0339",
+  "inputs": "eNqtVlsSgzAIXDv58P4nbkdTS2CXEO1+ZZTwXAitdQDYD+DA9fGDLQE6Xgfs3R9GmQK6/G4cyu3Gy9Z0iGvQP4+xZBdI/dz/AKP/ikXnHwE2n1ZkId6QW6J/8DerkbcBUpcWscalboxXa8xVyE+jcbm7AkNueR5QyP+sLtHnNuX2cj/K/hr18Lkhe/lBX9C4wLhqz0KcxFKpS4wrmwOb4rb9ntTlq1PVrsRJwk97n8zeKeefcFj1xcAxH2/OW+Enkp4V8xlxRtkfkxkVLJB+UXwT+lfeLIC9C0pmJZZVXgl+rvaXp+Hj9/qunuIsmhYme8ucb6wuiHGxGVvidiqj6mvl7uxRm+Zn6DvFf+updXsiI86ivybxkt5J90zls9qvbH7UfivnGJDsOfWz5FJBv4Wf0WyHgdcJ8c66N93np6K/0qiRq6cRUq9W8ZPvA6f8G9hsIEY",
+  "unpauses": 7,
+  "warps_set": 7,
+  "warps_used": 4
 }

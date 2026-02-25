@@ -1,8 +1,10 @@
 {
-  "ticks": 2603,
-  "realtime": 45.583332,
+  "level_name": "Digger",
+  "attempts": 11,
+  "realtime": 43.33356,
+  "ticks": 2602,
   "steps": 216,
   "bonks": 0,
   "seed": "f1fe2abe4eae0846",
-  "replay": "eNrNluEOgyAMhG/oiJfw/s874xa3JsAKbaPff6HctT3X9VJK2SIh+QhkSV7kpkLPg2YJ5HYVpYxZXfkQH2bE373lnd43Bc7bgFo3ZFNXwTSaIQN52vc2XuiAxmxkTbn5wOiGbEd8vUGKZNmpNzmkTCod7FWIW+cPTFpDoNwD0N8nT+yvCmpWDftZYouClv2/b3dcbP9TOTaWB+V3iWq/rHZs/NE9TId/AHTmvyvhC1CQKQg"
+  "inputs": "eNrNluEOgyAMhG/oiJfw/s874xa3JsAKbaPff6HctT3X9VJK2SIh+QhkSV7kpkLPg2YJ5HYVpYxZXfkQH2bE373lnd43Bc7bgFo3ZFNXwTSaIQN52vc2XuiAxmxkTbn5wOiGbEd8vUGKZNmpNzmkTCod7FWIW+cPTFpDoNwD0N8nT+yvCmpWDftZYouClv2/b3dcbP9TOTaWB+V3iWq/rHZs/NE9TId/AHTmv6fgCyeIKQc"
 }

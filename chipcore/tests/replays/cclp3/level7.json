@@ -1,8 +1,10 @@
 {
-  "ticks": 3356,
-  "realtime": 55.9194,
+  "level_name": "Dancing Gliders",
+  "attempts": 18,
+  "realtime": 55.8922,
+  "ticks": 3355,
   "steps": 268,
   "bonks": 0,
   "seed": "90a449db19283d15",
-  "replay": "eNrNVkEOwyAMMwVFHPj/e4c2dQsokKQrbX2k4IJjQ3J+o5SSKrYFiDGGLyL7QJQ+wFlI5wIIhyBvbrbCL2W+DoVrUvZR+E4/0QLuFd1qsXR2W+SbIURjPYgJIAX1GvwR2XPiD7EiqlHqz3YhmxmNxMCAERJPS5RkmoxeBAdRZYK0IajHqnMG40MJ848q3AZfDETVyOSdpNHMncz0l03dXoCbriyrg0WecUB1Iqy4E6EJ2iUDak55CWiYU4jPAqMh8qVdZnHTjM1GM3sDJiMshF5qy+2susESU91T5haTxxEWgWHILPqOYBLZQy/1pQ3GNuvw2vHwULwAY2Mo0w"
+  "inputs": "eNrNVkEOwyAMMwVFHPj/e4c2dQsokKQrbX2k4IJjQ3J+o5SSKrYFiDGGLyL7QJQ+wFlI5wIIhyBvbrbCL2W+DoVrUvZR+E4/0QLuFd1qsXR2W+SbIURjPYgJIAX1GvwR2XPiD7EiqlHqz3YhmxmNxMCAERJPS5RkmoxeBAdRZYK0IajHqnMG40MJ848q3AZfDETVyOSdpNHMncz0l03dXoCbriyrg0WecUB1Iqy4E6EJ2iUDak55CWiYU4jPAqMh8qVdZnHTjM1GM3sDJiMshF5qy+2susESU91T5haTxxEWgWHILPqOYBLZQy/1pQ3GNuvw2vHwTLwAOpAo0g"
 }

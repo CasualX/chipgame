@@ -1,8 +1,13 @@
 {
-  "ticks": 1865,
-  "realtime": 32.2,
-  "steps": 145,
+  "level_name": "Annoying Wall",
+  "attempts": 36,
+  "realtime": 116.61672,
+  "ticks": 1773,
+  "steps": 137,
   "bonks": 0,
   "seed": "30ba902332a513b3",
-  "replay": "eNqtlNsOxCAIREfdGEz4/+/d7LZeKoq3nmdpgZmBSIKPhrfTOHOB9OkQTMbZDQCQit79u6RWmHd39J+JZoBZJPwwJ6Alm3F7wg3rvY9rvYhT3OML8mYAuXmcGAHRay3qbqz2WGn7IW7R7tDhw8nyb5hLa/p11TBRe+c8TRhLeORkV0d716dTGlBlJKsVybPTF4/yGbigU8JxZMvMbuW1m97+mzK8Ucvuxlj66oXTPUqkuCW27YLlBX0BEH0XcQ"
+  "inputs": "eNqtlFEOwzAIQ00zTYnUQ+z+p9zWiowIwgjt++pHcTGG1qrBw+O5hSl0gi7dGv0oWwIA1cXv/l56K/uendHhqUYALdK+0BVgxUZlLTjI7Loy7Gw/8GwP+G1YuUMXSKlwioPO+fyKo3uftBvJeLTktiwrhAss3RJ/y67tmjIGObVJ+yBRILUyO8gsR6Kd/B98MsLRdsqilDLGl/hPymszdKbXRqZ3tZqsGVxZ5/CuRRsfyRvU9yOe",
+  "unpauses": 9,
+  "warps_set": 9,
+  "warps_used": 21
 }

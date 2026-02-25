@@ -1,10 +1,13 @@
 {
   "level_name": "Hall of Origin",
-  "attempts": 183,
-  "realtime": 78.098595,
-  "ticks": 4687,
+  "attempts": 191,
+  "realtime": 118.3955,
+  "ticks": 4686,
   "steps": 406,
   "bonks": 1,
-  "seed": "d7ac4b7fb321a79f",
-  "inputs": "eNq1V9t2xCAIpDGbozn+//c2NzYmggzazuNW4wDDQOe5wnJghpFzPLCu04EQfnCEMOHQaTGHjQXAITEcRK07KUUTfJ8u3AlHYtfyL1/WMvD5mCkUkTfsx5j7XcDgKnhxS7i4/3YFQPX7O3R2+l9fFUh1rc7CnJy0CqzRgdxEk9uttJdOdEAKwsPgWpeftQ2B1Ki+ip+dUJxIC5f19MhbQxVnlDibqRMcxqt3EiomxXQIi2Nx8g5f2GdGfXsguX7X6bF9FFwKQg5FIj1Xcj6K5jK/XqHwV+1ZPiD95sCjxWM/WNG5+wv0bhLjOFlJLPCcm+7Qim512Gs1rwvuJO4I2Wlzr0iUW0hvEpZ1TUVGa4AAruUoJHH2Q97Rpn/CNUUATRPJTUoNA6rewR4bbnX3fED9n4yNelHNUFUi4tit0cXMEPUuoJwcjaTO5MUgbKwtvn7WNJXHFhkg+KGphpmBufEI9v1XdDtD8fR433LUXo9aC7ChKbRfnc/KdAMy9gjoA95gk5xaw9vrLqKax62tnv/Sn5yDFf6GX7kaRtM"
+  "seed": "7c91c064a6c6ef7d",
+  "inputs": "eNqtV9uuwzAI4xz1of//xZO6Gwk2NtV4mtYkGAI2OY7d4rL/p12/D2rxsfOyZe+1+a+zWNcrey1nKBKCFT/ze55f1AbMSMuDLPmciW3ZmoMx8oBiD57B1xcWDLtNDf+9dzlf5xwAAetL/WTPFWfF4+DPqcgfupr07nd3xTtGYXPuaz932EehM7XmPO9mkfVxebFILhJ3VPsLYisxdkD8PvXIa8+JU02EcqL2ZiXoaW1kL2TJgv8Wcf8Qp0E3isNHB93QCIghx+PUNhMSm082jsV6YWhoL5U+JwsCyvVxj9vvOUdzQqeD08gqn9Aeqf9/W79qMeMEsB6cr/gE12dEDHWN9zvxi+Y6NhsU7WCx09mV5ufA/0tfTUdjGywFeWergHhgn+HZ6bldzFEBdi5jHVuJ5pXWbm9UUjoGrwDSZYErTU/7jaqOpoU9/7DT+R2hMzlj8DrxJ41G6bpaIv3SMzPoIFXn2ytAxRWq/oUWV3VQcUzVdvd2b/oaKcj+UmPTi5oYf6Vcge60x0x7SvYamh7zl6qS1K9dRPixvsb/AOaeLN8",
+  "unpauses": 6,
+  "warps_set": 4,
+  "warps_used": 1
 }

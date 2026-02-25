@@ -1,10 +1,12 @@
 {
   "level_name": "Alternate Universe",
-  "attempts": 12,
-  "realtime": 66.54779,
-  "ticks": 3994,
-  "steps": 246,
-  "bonks": 3,
-  "seed": "bb80dbdbf6895a05",
-  "inputs": "eNrNl9EShCAIRbFxdnzo/793Z2eqBbkIlDWdR01BuKDVqiBqGiIqGPh5Wyuk+diWCg2WBQz9NyZqt0Fz2XMSZNlQOUVhTYchYPjH7nVAV44h5TD5chtNr8lTafu+79VgtY5azuj9RrT8PAHy9Lgh0svZOLYnBufUpNHL3sNRSzgK/BSoBsViUIuUD98CgJEU33KrfCUbvkG6liK14hK5L0MsccIEDAjkpqsc4wvH1Uw6T2bBnEo0lQI2Ska0t1TCzC/rsz5b3nsWwmKmd/H6/vw0rkrUfdHdGcd87j1m9goXM5GioPH18Bk/mi7cDstVEu1jI/A4lKC7sz2B0A4bTLfLmX6ATYMNVXeUsW+wclTu+iX2v5QIHMFQbZWi574p1DSq"
+  "attempts": 20,
+  "realtime": 64.021736,
+  "ticks": 3756,
+  "steps": 242,
+  "bonks": 7,
+  "seed": "910902befed81dcc",
+  "inputs": "eNrNVkEOhCAMrIQYDxz2/6/dqFELnUKpxDBHtkvb6XQwRgHasUkc5wsACr4QEbL72aWEb8JZTemvsgXKhu9owMVYPHXztC0ORmFICy5uwgnCesOT7SZDS1qOXIy3OwufohyuciOvIYlfU1aZc3odHFLUoO4/HNI2D+D0H3Tpm8mjHLZ71zQBvthbHAOOtBWbDb8DfH4Zd1kzaMh7PFa1Q0sBQ3uRePzKc9+nWUUppWHKtz+LhRQcptJhMrEH71Zfrw/OEId+4VFNHszkT7i+hdW5/mQjRnGO0zswc2yhCa5nqL7Qmk8EP6ghwZQTsK7SXQars9YP/gCo9be0UWm3ogTgs2n7FG1fHP2ZRGZ2LLW5TLvCsTWyYWqkie0P2OE4SA",
+  "unpauses": 2,
+  "warps_set": 2
 }
