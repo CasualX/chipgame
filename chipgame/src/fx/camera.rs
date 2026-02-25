@@ -115,8 +115,7 @@ impl PlayCamera {
 	}
 
 	pub fn animate_position(&mut self, dt: f64) {
-		let position_target = self.target + self.get_offset();
-		self.position = self.position.exp_decay(position_target, 15.0, dt as f32).set_x(position_target.x);
+		self.position = self.target + self.get_offset();
 		self.offset = self.offset.exp_decay(self.offset_target, 10.0, dt as f32);
 	}
 
