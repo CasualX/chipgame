@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="100" viewBox="0 0 220 100" role="img" aria-labelledby="title desc">
+  <title id="title">Play ChipGame in Browser</title>
+  <desc id="desc">Right half of a segmented button linking to the ChipGame WebGL browser version.</desc>
+  <defs>
+    <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38c8ff"/>
+      <stop offset="100%" stop-color="#1673d6"/>
+    </linearGradient>
+    <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="btnShadow" x="-18%" y="-28%" width="136%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0c4177" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+  <g filter="url(#btnShadow)">
+    <path d="M0 10H188C196.837 10 204 17.163 204 26V74C204 82.837 196.837 90 188 90H0Z" fill="url(#btnGradient)"/>
+    <path d="M0 10H188C196.837 10 204 17.163 204 26V28H0Z" fill="url(#shineGradient)"/>
+    <rect x="0" y="18" width="1.5" height="64" fill="#0e5eae" fill-opacity="0.55"/>
+    <g fill="#ffffff" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif" text-anchor="middle">
+      <text x="126" y="47" font-size="18" font-weight="700">Play Online</text>
+      <text x="126" y="69" font-size="13" opacity="0.9">In Your Browser</text>
+    </g>
+    <g transform="translate(16 27)">
+      <circle cx="24" cy="23" r="20" fill="#ffffff" fill-opacity="0.18"/>
+      <circle cx="24" cy="23" r="12" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.95"/>
+      <path d="M18 23l11-6v12z" fill="#ffffff"/>
+      <path d="M12 23h24M24 11c-3 3.5-4.5 7.5-4.5 12s1.5 8.5 4.5 12M24 11c3 3.5 4.5 7.5 4.5 12s-1.5 8.5-4.5 12" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.75"/>
+    </g>
+  </g>
+</svg>
