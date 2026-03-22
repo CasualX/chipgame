@@ -1,10 +1,13 @@
 {
   "level_name": "Mugger Square",
-  "attempts": 53,
-  "realtime": 36.798786,
-  "ticks": 2209,
-  "steps": 196,
+  "attempts": 9,
+  "realtime": 137.36812,
+  "ticks": 2016,
+  "steps": 190,
   "bonks": 0,
-  "seed": "b950277fe3d5c812",
-  "inputs": "eNrVlTkOgCAQRQckkykoLD0Opfc/kRJcQTZBA69gC0vmzwKRD+EHkWtwnwPwjWOL2YD7iN8PrCfCsBXTPsA7ZWCvOd0C9gp4hIlJDEop3Y3jRGGAdQwYG2YNueMY0sSrPb+sPHrFp7nIgDpFigJk2iXgZhdmK3u+gfZlOjm2/EhK7YzH24QukeuahX+UR/xWRFk7zhNDo91PJY0Ch9YobgtLXCRa"
+  "seed": "b1797f8f1f2078d6",
+  "inputs": "eNrNlFsSgCAIRYnpo2W0/1XWJCagCE6O0/npdQMuqMfRBOjysCuAQKJo0tP7kmkwa+hr0SNsNyDYFDoj8hTTUUmbsFZV1cq/+btUd7pnDa5iGoCRay6q5jkRA+4abkVnKAJfg1zp5cqrVM5x7xGdy+8IueubFuvTEqKxIXunh5fa2tzY4YvfJTj1h/A9hnqVY/G+WSeeu6m9XKQ5H3AFgcpbRka0MGOaA26sKUcOgQtB2Bec",
+  "unpauses": 4,
+  "warps_set": 4,
+  "warps_used": 6
 }

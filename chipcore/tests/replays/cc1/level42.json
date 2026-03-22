@@ -1,8 +1,10 @@
 {
-  "ticks": 7027,
-  "realtime": 121.26667,
-  "steps": 540,
-  "bonks": 10,
-  "seed": "a911585d5d611d1f",
-  "replay": "eNrtl10OhCAMhKsYIgmH8v6nWlyXnypqVegq8j3pxBfptFPatpIIAOgmAKwmpew2AU9DAP5MV0kC9BZtMILu+QHe/hCCwcPjUY70lev+sFNHKeVE86yaChXwWeD8X2b85UHuhOYCn7zvTZcVgqGoWYZkWqcLwZIgpL3HSCVO/NOFxttreDhhWKg+rl8bsIk2MsQwDOsWOOCbAhPtXJFcEztNFJ9dpMvimxILcAB9M+ldmzpknYX37fcSd14fCUEPP64lfVbrEi7OQYOhDrv3pVXgLfcZ0Sgnwmf8gli3IOUbpgtSwLGvl/BZXjniKpP1hSeuYnJa8ufDuUjkqFX2DZGjxGpGqpoJAnh7iWMPZnYVgnQ1lpECU9t1qRELEBGj57rxAx/+SGkS"
+  "level_name": "Beware of Bug",
+  "attempts": 1,
+  "realtime": 113.85144,
+  "ticks": 6832,
+  "steps": 544,
+  "bonks": 3,
+  "seed": "56ee655679ec369e",
+  "inputs": "eNrtmM0OhCAMhLtIDAfe/3n3srBj6JIuKRWBuVlJVPrzjTi3pSSfRWVIT0QvA1FFfktJAcUG+4vIsEdIVmGt+uxgDFsKhQGpKkJbsjGKxZ+Cc+KvG02BqGcdjEk98TsNb+xoY0IYqXnZVFHMa8Uz5jXfVXBXFmJi3NPwWq9X2utlLcTJwWdpNAdHGrmFGBVjiZ11xilOsTCtj75W+nHM6XWRDin2uOMQbMfo7WxgxxbLHRYe0mF08cS/2mjsDhgJYJEBzMgIsDaJxB5EHLeVT36ds2st2JypQjIpqOWXS5j27rv2Hf3DvuFPm2g6Vz7hDSr3X90"
 }
