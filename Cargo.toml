@@ -42,7 +42,7 @@ png = "0.17"
 
 shade = { version = "0.0.4", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
 
-paks = "0.1.1"
+paks = "0.1.2"
 
 [profile.dev]
 opt-level = 1

@@ -143,6 +143,7 @@ fn load_levelset_dto(fs: Option<&FileSystem>, index: chipty::LevelSetDto, name: 
 	let splash = index.splash.and_then(|s| match fs.unwrap() {
 		FileSystem::Memory(paks, key) => paks.read(s.as_bytes(), key).ok(),
 		FileSystem::Paks(paks, key) => paks.read(s.as_bytes(), key).ok(),
+		FileSystem::Bundle(bundle) => bundle.read(s.as_bytes(), bundle.key()).ok(),
 		FileSystem::StdFs(path) => fs::read(path.join(s)).ok(),
 	});
 

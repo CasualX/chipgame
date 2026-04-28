@@ -3,12 +3,12 @@ use std::{mem, ptr};
 mod api;
 
 const CHIPGAME_INI: &str = include_str!("../../chipgame.webgl.ini");
-const DATA_PAK: &[u8] = include_bytes!("../../target/publish/data.paks");
-const CCLP1_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp1.paks");
-const CCLP2_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp2.paks");
-const CCLP3_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp3.paks");
-const CCLP4_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp4.paks");
-const CCLP5_PAK: &[u8] = include_bytes!("../../target/publish/levelsets/cclp5.paks");
+paks::static_bundle!(DATA_PAK = "../../target/publish/data.paks");
+paks::static_bundle!(CCLP1_PAK = "../../target/publish/levelsets/cclp1.paks");
+paks::static_bundle!(CCLP2_PAK = "../../target/publish/levelsets/cclp2.paks");
+paks::static_bundle!(CCLP3_PAK = "../../target/publish/levelsets/cclp3.paks");
+paks::static_bundle!(CCLP4_PAK = "../../target/publish/levelsets/cclp4.paks");
+paks::static_bundle!(CCLP5_PAK = "../../target/publish/levelsets/cclp5.paks");
 
 fn play_sound(sound: chipty::SoundFx) {
 	unsafe {
@@ -47,10 +47,10 @@ pub struct Instance {
 	play: chipgame::play::PlayState,
 }
 
-fn load_levelset(data: &[u8], name: String, play: &mut chipgame::play::PlayState) {
+fn load_levelset(data: &'static [paks::Block], name: String, play: &mut chipgame::play::PlayState) {
 	let key = paks::Key::default();
-	let paks = paks::MemoryReader::from_bytes(data, &key).expect("Failed to open levelset paks");
-	let fs = chipgame::FileSystem::Memory(paks, key.clone());
+	let paks = paks::BundleReader::open(data, key).expect("Failed to open levelset paks");
+	let fs = chipgame::FileSystem::Bundle(paks);
 	chipgame::play::load_levelset(&fs, name, &mut play.lvsets.collection);
 }
 
@@ -69,15 +69,15 @@ pub extern "C" fn create() -> *mut Instance {
 	// Load the resources
 	let config = chipgame::config::Config::parse(CHIPGAME_INI);
 	let key = paks::Key::default();
-	let paks = paks::MemoryReader::from_bytes(DATA_PAK, &key).expect("Failed to open data.paks");
-	let fs = chipgame::FileSystem::Memory(paks, key.clone());
+	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
+	let fs = chipgame::FileSystem::Bundle(paks);
 	instance.resx.load(&fs, &config, instance.graphics.as_graphics());
 
-	load_levelset(CCLP1_PAK, "cclp1".to_string(), &mut instance.play);
-	load_levelset(CCLP2_PAK, "cclp2".to_string(), &mut instance.play);
-	load_levelset(CCLP3_PAK, "cclp3".to_string(), &mut instance.play);
-	load_levelset(CCLP4_PAK, "cclp4".to_string(), &mut instance.play);
-	load_levelset(CCLP5_PAK, "cclp5".to_string(), &mut instance.play);
+	load_levelset(&CCLP1_PAK, "cclp1".to_string(), &mut instance.play);
+	load_levelset(&CCLP2_PAK, "cclp2".to_string(), &mut instance.play);
+	load_levelset(&CCLP3_PAK, "cclp3".to_string(), &mut instance.play);
+	load_levelset(&CCLP4_PAK, "cclp4".to_string(), &mut instance.play);
+	load_levelset(&CCLP5_PAK, "cclp5".to_string(), &mut instance.play);
 
 	instance.play.launch(instance.graphics.as_graphics());
 
@@ -88,8 +88,8 @@ pub extern "C" fn create() -> *mut Instance {
 pub extern "C" fn audio_init() {
 	let config = chipgame::config::Config::parse(CHIPGAME_INI);
 	let key = paks::Key::default();
-	let paks = paks::MemoryReader::from_bytes(DATA_PAK, &key).expect("Failed to open data.paks");
-	let fs = chipgame::FileSystem::Memory(paks, key.clone());
+	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
+	let fs = chipgame::FileSystem::Bundle(paks);
 	register_audio_assets(&fs, &config);
 }
 

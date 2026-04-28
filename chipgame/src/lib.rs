@@ -9,6 +9,7 @@ pub mod render;
 pub enum FileSystem {
 	Memory(paks::MemoryReader, paks::Key),
 	Paks(paks::FileReader, paks::Key),
+	Bundle(paks::BundleReader<'static>),
 	StdFs(std::path::PathBuf),
 }
 impl FileSystem {
@@ -24,6 +25,10 @@ impl FileSystem {
 				let data = paks.read_data(&desc, key)?;
 				String::from_utf8(data).map_err(|_| std::io::Error::from(std::io::ErrorKind::InvalidData))
 			}
+			FileSystem::Bundle(bundle) => {
+				let data = bundle.read(path.as_bytes(), bundle.key()).map_err(|_| std::io::Error::from(std::io::ErrorKind::NotFound))?;
+				String::from_utf8(data).map_err(|_| std::io::Error::from(std::io::ErrorKind::InvalidData))
+			}
 			FileSystem::StdFs(base) => std::fs::read_to_string(base.join(path)),
 		}
 	}
@@ -37,6 +42,10 @@ impl FileSystem {
 			FileSystem::Paks(paks, key) => {
 				let desc = paks.find_desc(path.as_bytes()).ok_or_else(|| std::io::Error::from(std::io::ErrorKind::NotFound))?;
 				let data = paks.read_data(&desc, key)?;
+				Ok(data)
+			}
+			FileSystem::Bundle(bundle) => {
+				let data = bundle.read(path.as_bytes(), bundle.key()).map_err(|_| std::io::Error::from(std::io::ErrorKind::NotFound))?;
 				Ok(data)
 			}
 			FileSystem::StdFs(base) => std::fs::read(base.join(path)),
@@ -55,6 +64,10 @@ impl FileSystem {
 			FileSystem::Paks(paks, key) => {
 				let desc = paks.find_desc(path.as_bytes()).ok_or_else(|| std::io::Error::from(std::io::ErrorKind::NotFound))?;
 				let data = paks.read_data(&desc, key)?;
+				Ok(chipty::decompress(&data))
+			}
+			FileSystem::Bundle(bundle) => {
+				let data = bundle.read(path.as_bytes(), bundle.key()).map_err(|_| std::io::Error::from(std::io::ErrorKind::NotFound))?;
 				Ok(chipty::decompress(&data))
 			}
 			FileSystem::StdFs(base) => std::fs::read(base.join(path)),
