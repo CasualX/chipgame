@@ -208,7 +208,7 @@ fn parse_content(upper: &[u8], lower: &[u8]) -> (FieldDto, Vec<EntityArgs>) {
 	// Replace Block entites on Floor with DirtBlock terrain
 	entities.retain_mut(|ent| {
 		let index = (ent.pos.y * 32 + ent.pos.x) as usize;
-		if matches!(ent.kind, EntityKind::Block) && matches!(terrain[index], Terrain::Floor) {
+		if matches!(ent.kind, EntityKind::Block) && matches!(terrain[index], Terrain::Floor | Terrain::DirtBlock) {
 			terrain[index] = Terrain::DirtBlock;
 			return false;
 		}
