@@ -40,7 +40,7 @@ fn main() {
 
 		// Keep the best records as test cases
 		for (level_id, record) in records {
-			let test_path = format!("chipcore/tests/replays/{set_name}/level{level_id}.json");
+			let test_path = format!("code/chipcore/tests/replays/{set_name}/level{level_id}.json");
 			let write_record = if let Ok(existing_content) = fs::read_to_string(&test_path) {
 				let existing: chipty::ReplayDto = serde_json::from_str(&existing_content).unwrap();
 

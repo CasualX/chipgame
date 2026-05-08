@@ -1,5 +1,13 @@
 @echo off
 
+setlocal
+
+set "SCRIPT_DIR=%~dp0"
+if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
+for %%I in ("%SCRIPT_DIR%\..\..") do set "REPO_ROOT=%%~fI"
+
+pushd "%REPO_ROOT%" >NUL || exit /b 1
+
 set ALLOW_DIRTY=0
 
 :parse_args
@@ -76,3 +84,5 @@ del /Q target\chipgame.zip 2> NUL
 pushd target\publish
 powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\chipgame.zip -Force"
 popd
+popd >NUL
+exit /b 0

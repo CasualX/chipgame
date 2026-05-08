@@ -2,13 +2,13 @@ use std::{mem, ptr};
 
 mod api;
 
-const CHIPGAME_INI: &str = include_str!("../../chipgame.webgl.ini");
-paks::static_bundle!(DATA_PAK = "../../target/publish/data.paks");
-paks::static_bundle!(CCLP1_PAK = "../../target/publish/levelsets/cclp1.paks");
-paks::static_bundle!(CCLP2_PAK = "../../target/publish/levelsets/cclp2.paks");
-paks::static_bundle!(CCLP3_PAK = "../../target/publish/levelsets/cclp3.paks");
-paks::static_bundle!(CCLP4_PAK = "../../target/publish/levelsets/cclp4.paks");
-paks::static_bundle!(CCLP5_PAK = "../../target/publish/levelsets/cclp5.paks");
+const CHIPGAME_INI: &str = include_str!("../../../chipgame.webgl.ini");
+paks::static_bundle!(DATA_PAK = "../../../target/publish/data.paks");
+paks::static_bundle!(CCLP1_PAK = "../../../target/publish/levelsets/cclp1.paks");
+paks::static_bundle!(CCLP2_PAK = "../../../target/publish/levelsets/cclp2.paks");
+paks::static_bundle!(CCLP3_PAK = "../../../target/publish/levelsets/cclp3.paks");
+paks::static_bundle!(CCLP4_PAK = "../../../target/publish/levelsets/cclp4.paks");
+paks::static_bundle!(CCLP5_PAK = "../../../target/publish/levelsets/cclp5.paks");
 
 fn play_sound(sound: chipty::SoundFx) {
 	unsafe {

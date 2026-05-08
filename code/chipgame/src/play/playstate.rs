@@ -85,7 +85,7 @@ impl PlayState {
 			seed = chipcore::RngSeed::Manual(fx.game.field.seed);
 			inputs = Some(fx.game.inputs.clone());
 		}
-		// else if let Ok(replay) = fs::read_to_string(format!("chipcore/tests/replays/{}/level{level_number}.json", self.lvsets.current().name)) {
+		// else if let Ok(replay) = fs::read_to_string(format!("code/chipcore/tests/replays/{}/level{level_number}.json", self.lvsets.current().name)) {
 		// 	let replay: chipty::ReplayDto = serde_json::from_str(&replay).unwrap();
 		// 	seed = chipcore::RngSeed::Manual(u64::from_str_radix(&replay.seed, 16).unwrap());
 		// 	inputs = Some(chipty::decode(&replay.inputs));

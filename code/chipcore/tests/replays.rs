@@ -64,7 +64,7 @@ fn test_levelset(levels_dir: &Path, replays_dir: &Path) {
 #[test]
 fn cc1() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cc1/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cc1/lv");
 	let replays_dir = current_dir.join("tests/replays/cc1");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -72,7 +72,7 @@ fn cc1() {
 #[test]
 fn cclp1() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp1/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cclp1/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp1");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -80,7 +80,7 @@ fn cclp1() {
 #[test]
 fn cclp2() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp2/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cclp2/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp2");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -88,7 +88,7 @@ fn cclp2() {
 #[test]
 fn cclp3() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp3/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cclp3/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp3");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -96,7 +96,7 @@ fn cclp3() {
 #[test]
 fn cclp4() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp4/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cclp4/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp4");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -104,7 +104,7 @@ fn cclp4() {
 #[test]
 fn cclp5() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/cclp5/lv");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/cclp5/lv");
 	let replays_dir = current_dir.join("tests/replays/cclp5");
 	test_levelset(&levels_dir, &replays_dir);
 }
@@ -112,7 +112,7 @@ fn cclp5() {
 #[test]
 fn walls_of_cc1() {
 	let current_dir = env::current_dir().unwrap();
-	let levels_dir = current_dir.parent().unwrap().join("levelsets/Walls_of_CC1/lv");
-	let replays_dir = current_dir.join("tests/replays/Walls_of_CC1");
+	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/WoCC1/lv");
+	let replays_dir = current_dir.join("tests/replays/WoCC1");
 	test_levelset(&levels_dir, &replays_dir);
 }

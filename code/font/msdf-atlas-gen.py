@@ -67,6 +67,7 @@ def utf8_to_codepoints(s: str) -> str:
 
 def main() -> int:
 	script_dir = Path(__file__).resolve().parent
+	data_dir = script_dir / "../../data"
 	tmp_dir = script_dir / "tmp"
 	exe_path = tmp_dir / EXE_NAME
 
@@ -102,8 +103,8 @@ def main() -> int:
 		"-type", "mtsdf",
 		"-format", "png",
 		"-potr",
-		"-imageout", str(script_dir / "../data/font.png"),
-		"-json", str(script_dir / "../data/font.json"),
+		"-imageout", str(data_dir / "font.png"),
+		"-json", str(data_dir / "font.json"),
 		"-size", "32",
 		"-pxrange", "4",
 		"-outerpxpadding", "1"

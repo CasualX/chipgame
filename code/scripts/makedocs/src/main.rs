@@ -2,7 +2,7 @@ use std::{fs, path};
 
 fn main() {
 	render_content(
-		include_str!("../../../readme.md"),
+		include_str!("../../../../readme.md"),
 		include_str!("template.html"),
 		path::Path::new("target/publish/readme.html"),
 	);
