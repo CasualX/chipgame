@@ -1,10 +1,16 @@
 use super::*;
 
-#[cfg(target_arch = "wasm32")]
-use shade::webgl::shaders as shaders;
-
-#[cfg(not(target_arch = "wasm32"))]
-use shade::gl::shaders as shaders;
+cfg_select! {
+	target_arch = "wasm32" => {
+		use shade::shaders::glsl300es as shaders;
+	}
+	target_os = "android" => {
+		use shade::shaders::glsl300es as shaders;
+	}
+	_ => {
+		use shade::shaders::glsl330core as shaders;
+	}
+}
 
 pub struct PostProcessCopy {
 	pub quad: shade::d2::PostProcessQuad,

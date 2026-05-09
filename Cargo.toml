@@ -5,6 +5,7 @@ members = [
 	"./code/chipcore",
 	"./code/chipedit",
 	"./code/chipgame",
+	"./code/chipjni",
 	"./code/chipplay",
 	"./code/chipty",
 	"./code/chipwasm",
@@ -30,7 +31,7 @@ ini_core = "0.2"
 clap = { version = "4.5", features = ["cargo"] }
 cvar = "0.4"
 
-cvmath = { version = "0.0.6", features=["serde", "dataview"] }
+cvmath = { version = "0.0.7", features=["serde", "dataview"] }
 fmtools = "0.1"
 
 urandom = "0.2"
@@ -40,7 +41,7 @@ flate2 = "1.0"
 basenc = "0.2"
 png = "0.17"
 
-shade = { version = "0.0.4", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
+shade = { git = "https://github.com/CasualX/shade", features = ["gl", "webgl", "msdfgen", "png", "gif"] }
 
 paks = "0.1.2"
 

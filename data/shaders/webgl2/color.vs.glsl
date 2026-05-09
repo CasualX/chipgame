@@ -5,7 +5,7 @@ in vec4 a_color;
 
 out vec4 v_color;
 
-uniform mat3 u_transform;
+uniform mat3x2 u_transform;
 uniform vec4 u_color;
 uniform float u_gamma;
 
@@ -21,6 +21,5 @@ vec4 srgbToLinear(vec4 c) {
 
 void main() {
 	v_color = srgbToLinear(a_color) * u_color;
-	vec3 pos = u_transform * vec3(a_pos, 1.0);
-	gl_Position = vec4(pos.xy, 0.0, 1.0);
+	gl_Position = vec4(u_transform * vec3(a_pos, 1.0), 0.0, 1.0);
 }

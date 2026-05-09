@@ -1,0 +1,20 @@
+[package]
+name = "chipjni"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+chipcore = { path = "../chipcore" }
+chipgame = { path = "../chipgame" }
+chipty = { path = "../chipty" }
+
+shade.workspace = true
+cvmath.workspace = true
+serde_json.workspace = true
+paks.workspace = true
+
+jni = "0.21"
+libc = "0.2"
