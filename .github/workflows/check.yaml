@@ -1,4 +1,4 @@
-name: CI
+name: Check
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  ci:
+  check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,14 +21,12 @@ jobs:
 
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          default: true
 
       - name: Run chipcore tests
         run: cargo test -p chipcore

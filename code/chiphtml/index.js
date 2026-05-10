@@ -507,7 +507,7 @@ window.chipGame = function chipGame() {
 			};
 
 			const set_title = (title_ptr, title_len) => {
-				document.title = readUtf8(title_ptr, title_len) || "ChipGame (WASM)";
+				document.title = readUtf8(title_ptr, title_len) || "Chip DX";
 			};
 
 			const quit_game = () => {

@@ -1,6 +1,6 @@
-ChipGame GamePlay
+Chip DX Gameplay
 =================
 
-Core chipgame gameplay code.
+Core Chip DX gameplay code.
 
 No graphics, audio, or input handling here. Just the game simulation logic.

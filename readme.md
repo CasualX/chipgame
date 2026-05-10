@@ -1,12 +1,12 @@
-Chip's Challenge Remake
-=======================
+Chip DX
+=======
 
-A passion project born from nostalgia of the classic puzzle game *Chip’s Challenge*, rewritten from scratch in Rust.
+A Rust remake inspired by the classic puzzle game *Chip's Challenge*.
 
 https://github.com/user-attachments/assets/19000227-1337-484a-8a81-2710e5f87b1f
 
 <p align="center">
-	<a href="https://github.com/CasualX/chipgame/releases/latest"><img src="docs/download-button-left.svg" alt="Download the latest ChipGame Windows release" width="220" /></a><a href="https://casualhacks.net/chipgame/index.html"><img src="docs/play-button-right.svg" alt="Play ChipGame in your browser" width="220" /></a>
+	<a href="https://github.com/CasualX/chipgame/releases/latest"><img src="docs/download-button-left.svg" alt="Download the latest Chip DX Windows release" width="220" /></a><a href="https://casualhacks.net/chipdx/index.html"><img src="docs/play-button-right.svg" alt="Play Chip DX in your browser" width="220" /></a>
 </p>
 
 Features
@@ -44,7 +44,7 @@ Other platforms must be built from source code.
 ### Publish from Source
 
 1. Run either `./scripts/publish.sh` or `scripts\publish.bat` on Linux/macOS or Windows, respectively.
-2. Find the packaged release in `target/publish/` and compressed to `target/chipgame.zip`.
+2. Find the packaged release in `target/publish/` and compressed to `target/chipdx.zip`.
 
 Controls
 --------

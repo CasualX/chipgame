@@ -50,7 +50,7 @@ cp target/release/chipplay target/publish
 cp target/release/chipedit target/publish
 
 # Copy the config
-cp chipgame.ini target/publish
+cp chipdx.ini target/publish
 
 # Package the assets
 pakscmd target/publish/data.paks 0 new
@@ -71,5 +71,5 @@ mkdir -p target/publish/save
 cargo run --bin makedocs
 
 # Zip it all up
-rm -f target/chipgame.zip
-( cd target/publish && zip -r ../chipgame.zip . )
+rm -f target/chipdx.zip
+( cd target/publish && zip -r ../chipdx.zip . )

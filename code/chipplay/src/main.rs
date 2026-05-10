@@ -46,14 +46,14 @@ impl AppStuff {
 		let window_attributes = {
 			use winit::platform::windows::WindowAttributesExtWindows;
 			winit::window::Window::default_attributes()
-				.with_title("Play ChipGame")
+				.with_title("Play Chip DX")
 				.with_inner_size(size)
 				.with_drag_and_drop(false)
 		};
 
 		#[cfg(not(windows))]
 		let window_attributes = winit::window::Window::default_attributes()
-			.with_title("Play ChipGame")
+			.with_title("Play Chip DX")
 			.with_inner_size(size);
 
 		let (window, gl_config) = glutin_winit::DisplayBuilder::new()
@@ -143,7 +143,7 @@ fn main() {
 	let time_base = time::Instant::now();
 
 	let config = {
-		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
+		let config = fs::read_to_string("chipdx.ini").unwrap_or_default();
 		chipgame::config::Config::parse(config.as_str())
 	};
 

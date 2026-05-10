@@ -59,7 +59,7 @@ copy target\release\chipplay.exe target\publish
 copy target\release\chipedit.exe target\publish
 
 rem Copy the config
-copy chipgame.ini target\publish
+copy chipdx.ini target\publish
 
 rem Package the assets
 pakscmd target/publish/data.paks 0 new
@@ -80,9 +80,9 @@ rem Generate the documentation
 cargo run --bin makedocs
 
 rem Zip it all up
-del /Q target\chipgame.zip 2> NUL
+del /Q target\chipdx.zip 2> NUL
 pushd target\publish
-powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\chipgame.zip -Force"
+powershell -NoProfile -Command "Compress-Archive -Path * -DestinationPath ..\chipdx.zip -Force"
 popd
 popd >NUL
 exit /b 0

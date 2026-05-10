@@ -2,7 +2,7 @@ use std::{mem, ptr};
 
 mod api;
 
-const CHIPGAME_INI: &str = include_str!("../../../chipgame.webgl.ini");
+const CHIPDX_INI: &str = include_str!("../../../chipdx.webgl.ini");
 paks::static_bundle!(DATA_PAK = "../../../target/publish/data.paks");
 paks::static_bundle!(CCLP1_PAK = "../../../target/publish/levelsets/cclp1.paks");
 paks::static_bundle!(CCLP2_PAK = "../../../target/publish/levelsets/cclp2.paks");
@@ -67,7 +67,7 @@ pub extern "C" fn create() -> *mut Instance {
 	});
 
 	// Load the resources
-	let config = chipgame::config::Config::parse(CHIPGAME_INI);
+	let config = chipgame::config::Config::parse(CHIPDX_INI);
 	let key = paks::Key::default();
 	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
 	let fs = chipgame::FileSystem::Bundle(paks);
@@ -86,7 +86,7 @@ pub extern "C" fn create() -> *mut Instance {
 
 #[no_mangle]
 pub extern "C" fn audio_init() {
-	let config = chipgame::config::Config::parse(CHIPGAME_INI);
+	let config = chipgame::config::Config::parse(CHIPDX_INI);
 	let key = paks::Key::default();
 	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
 	let fs = chipgame::FileSystem::Bundle(paks);

@@ -94,4 +94,4 @@ progress "Force-pushing gh-pages"
 git push -f origin gh-pages
 
 progress "Done. Wait for GitHub Pages to finish publishing."
-printf "%b✓%b Game URL: https://casualhacks.net/chipgame/\n" "$color_green" "$color_reset"
+printf "%b✓%b Game URL: https://casualhacks.net/chipdx/\n" "$color_green" "$color_reset"

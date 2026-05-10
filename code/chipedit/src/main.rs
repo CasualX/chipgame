@@ -167,7 +167,7 @@ fn main() {
 	let mut file_path = matches.get_one::<path::PathBuf>("level").cloned();
 
 	let config = {
-		let config = fs::read_to_string("chipgame.ini").unwrap_or_default();
+		let config = fs::read_to_string("chipdx.ini").unwrap_or_default();
 		chipgame::config::Config::parse(config.as_str())
 	};
 

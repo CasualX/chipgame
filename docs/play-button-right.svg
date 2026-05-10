@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="100" viewBox="0 0 220 100" role="img" aria-labelledby="title desc">
-  <title id="title">Play ChipGame in Browser</title>
-  <desc id="desc">Right half of a segmented button linking to the ChipGame WebGL browser version.</desc>
+  <title id="title">Play Chip DX in Browser</title>
+  <desc id="desc">Right half of a segmented button linking to the Chip DX browser version.</desc>
   <defs>
     <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#38c8ff"/>
