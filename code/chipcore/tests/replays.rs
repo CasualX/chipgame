@@ -110,7 +110,7 @@ fn cclp5() {
 }
 
 #[test]
-fn walls_of_cc1() {
+fn wocc1() {
 	let current_dir = env::current_dir().unwrap();
 	let levels_dir = current_dir.parent().unwrap().parent().unwrap().join("levelsets/WoCC1/lv");
 	let replays_dir = current_dir.join("tests/replays/WoCC1");

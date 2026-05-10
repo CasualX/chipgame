@@ -1,7 +1,7 @@
 use std::collections::hash_map;
 use std::fs;
 
-const LEVELSETS: &[&str] = &["cc1", "cclp1", "cclp2", "cclp3", "cclp4", "cclp5", "Walls_of_CC1"];
+const LEVELSETS: &[&str] = &["cc1", "cclp1", "cclp2", "cclp3", "cclp4", "cclp5", "WoCC1"];
 
 fn main() {
 	for set_name in LEVELSETS {

@@ -1,8 +1,13 @@
 {
-  "ticks": 7035,
-  "realtime": 118.03333,
-  "steps": 550,
+  "level_name": "When the Fire Nation Attacked",
+  "attempts": 39,
+  "realtime": 406.2264,
+  "ticks": 8288,
+  "steps": 642,
   "bonks": 3,
-  "seed": "1053165b3ce19be0",
-  "replay": "eNq9WNuygyAMXMVhfOD/v/e006oEcgV69rFVsrltgudJcPAAdoK0SXiOun7BKQGgNmwex9d+zvRN4LaG5/RNQSL+8L8+yMcqPGfyv6qo+HseX8X6VDJoElVrZBpwOVAI5U+mq1RnZ6C42nrXni9WNQeuIGntXcxf6N3Nb+xufNgqbV7k/Nq9c3ElRM/yJVppRi0a2ENIyaiiOwdtXFxutr5WSvSKPxGazYEUbEFvGrcQ2lys6Xi9iBUAWNPYpbDJg2CVPkRwPcLNOUUT4BLobbTa8w2mkU1wChUV1WhdsLGvzGpdE9Ow1kSonxCPhFWQucrZSH9Ph2Vo1ufg2V/1TSnti+GWMLE+C6tIPqYpxXS0VxCTHyzblGnXziPrGvjph7n6b8Pwy7z/ems85VOBbR7waIhnPuNf4d2Gu5k6lVcbjuEgTKlSPCOc72f4lt/7BLlZ7KnwKJGwZvm0V6ub0DpwLIE8nVbND0zsr2EUv78LAa4T8sDVnhY42GagE7HeScergJZfdykg2qOUtCGQ/JCilsHfBjTZDTBt5USjOzp0VRKGXd/ZQo4aM31UBnxSZ1FvgXlNHZg9RW/mmIMX5U0zGs9aG0Kpu6i19t8FuyCkvVXfN2hwHYZYBWliKWxb9kYuiq5jsaObkKSWvJOKPE5vS09cS/gjkG88pUm2fUhgh3r+YqIyUj+sMBZNFxEs6vtNfkdM4dB7L+6B0kpe3hyUb1y/RJ6ueLa1B+fCH+AiX4w"
+  "seed": "131d608fad91e066",
+  "inputs": "eNrVWcGSrDAIxNFKechhDu//v/VN1a4jSWhooh62b2MZQqBpiLNtHeR1YEHYD8j5THYP2r56XDeEwwfRKz84djutiCwOztOo8+iHGtsdgPZeJE7nXzkIF9oc6hFloVz+5kf5IggGI5pF9Hb97vsT+PW3EHypVa8zXWxCcIbEsW1SXoURhtI4CYibxpdUEuZPJduQEZeyY8rUaaJTSFDwr7LZ1g7PVS5XbIWs1lEeFWt6BShlKLEoaWZ11ZrTlz6FOyzTZkHGO4tXdkZ4JQ35QwA1JBrTdeVFhtefSKITSTm39cp7EBilT5LNG4pNsselCHSK0ARJTodlqp9keSQxRRzdnq2Vtn3Yc2CnH5eaaLgXk01CAkSyxMpNf3nzra9z6/myslWvJZw5NkyU5hopm6Ur/ZBod0zAbBmcvGHS1VuVXG9mRq4R81lfppP+48vcGZJXilqZsGQ7Zj7yMN+5lhm+AQfIck00qDluKK5+qOcVgwHhWPNTXXOsE3gSACaLFYzb38drVvTF/r4w0eAJvN/vfx80e4+yUO4kzowi+tR65KL9YPtNd+lFgmqziAqFfRCxCgXJiroqFFDD7caSz7UtHqifJenDNTzYJwXdRD3lo7bDvkda2hoigxFPCtaAhBkXMxK8CE6HwyZB1sERfQ44bkcBk78OMwFtZPrUXBk/hzwbZmOWGXwRosqMDMu1YzmbQ4rGRpf4Prl+EF+vcBnNz7VZxb0FjiRG+Y/c9VJrsChvKEpss8u6mtfXCV7GZtRh4Es4rioP6JWSYf1A2JKK83IPOsUg7nAQxVGjFW17+QDt5/R5KrHDUpso8ys7XFLuHpuJkdRTCHnMh5mvbffcjJmvGNR9XCS2SrCKYSRSWYrGMvyz8B/7Qmy0",
+  "unpauses": 4,
+  "warps_set": 4,
+  "warps_used": 3
 }
