@@ -1,14 +1,20 @@
 
 extern "C" {
 	fn randomBytes(ptr: *mut u8, len: usize);
-	pub fn play_sound(sound_id: i32);
-	pub fn play_music(music_id: i32);
-	pub fn register_sound(sound_id: i32, data_ptr: *const u8, data_len: usize);
-	pub fn register_music(music_id: i32, data_ptr: *const u8, data_len: usize);
-	pub fn set_title(title_ptr: *const u8, title_len: usize);
-	pub fn quit_game();
-	pub fn read_file(path_ptr: *const u8, path_len: usize, content_ptr: *mut u8, content_len: *mut usize) -> i32;
-	pub fn write_file(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32;
+	pub fn playSound(sound_id: i32);
+	pub fn playMusic(music_id: i32);
+	pub fn registerSound(sound_id: i32, data_ptr: *const u8, data_len: usize);
+	pub fn registerMusic(music_id: i32, data_ptr: *const u8, data_len: usize);
+	pub fn setTitle(title_ptr: *const u8, title_len: usize);
+	pub fn resultError(message_ptr: *const u8, message_len: usize);
+	pub fn readFile(path_ptr: *const u8, path_len: usize, content_ptr: *mut u8, content_len: *mut usize) -> i32;
+	pub fn writeFile(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32;
+}
+
+pub fn result_error(message: &str) {
+	unsafe {
+		resultError(message.as_ptr(), message.len());
+	}
 }
 
 // Support getrandom in wasm builds

@@ -14,6 +14,7 @@ members = [
 	"./code/scripts/copyrecords",
 	"./code/scripts/fixcclp3",
 	"./code/scripts/fixlevel",
+	"./code/scripts/levelencode",
 	"./code/scripts/levelquery",
 	"./code/scripts/makedocs",
 	"./code/scripts/packset",

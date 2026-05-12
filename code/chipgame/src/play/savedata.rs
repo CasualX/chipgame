@@ -23,6 +23,7 @@ pub struct SaveData {
 	pub unlocked_levels: Vec<bool>,
 	pub completed_levels: Vec<bool>,
 	pub high_scores: HighScores,
+	pub ephemeral: bool,
 	pub show_hidden_levels: bool,
 	pub segmented_speedrun: bool,
 	pub options: chipty::OptionsDto,
@@ -102,7 +103,11 @@ impl SaveData {
 		self.high_scores.attempts.get(level_index).copied().unwrap_or(0)
 	}
 
-	pub fn save(&mut self, level_set: &LevelSet) {
+	pub fn save(&self, level_set: &LevelSet) {
+		if self.ephemeral {
+			return;
+		}
+
 		let file_name = get_levelset_state_filename(level_set);
 
 		let level_name = level_set.levels.get((self.current_level - 1) as usize).map(|level| level.name.clone());
@@ -139,69 +144,79 @@ impl SaveData {
 	}
 
 	pub fn load(&mut self, level_set: &LevelSet) {
-		*self = Self::load_refactored(level_set);
+		*self = load(level_set, self.ephemeral);
 	}
+}
 
-	fn load_refactored(level_set: &LevelSet) -> SaveData {
-		let file_name = get_levelset_state_filename(level_set);
-
-		let mut this = SaveData {
-			current_level: 0,
-			unlocked_levels: vec![false; level_set.levels.len()],
-			completed_levels: vec![false; level_set.levels.len()],
-			high_scores: HighScores {
-				ticks: vec![-1; level_set.levels.len()],
-				steps: vec![-1; level_set.levels.len()],
-				attempts: vec![0; level_set.levels.len()],
-			},
-			show_hidden_levels: false,
-			segmented_speedrun: false,
-			options: chipty::OptionsDto::default(),
-		};
-		this.unlocked_levels[0] = true;
-
-		let Ok(content) = read_file(path::Path::new(&file_name)) else {
-			return this;
-		};
-		let Some(dto) = serde_json::from_str::<SaveFileDto>(&content).ok() else {
-			return this;
-		};
-
-		if let Some(current_level) = &dto.current_level {
-			if let Some(level_number) = level_set.get_level_number(current_level) {
-				this.current_level = level_number;
-			}
-		}
-
-		this.options = dto.options.clone();
-
-		for level_index in dto.unlocked_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
-			this.unlocked_levels[level_index] = true;
-		}
-
-		for level_index in dto.completed_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
-			this.completed_levels[level_index] = true;
-		}
-
-		fn load_high_scores(
-			level_set: &LevelSet,
-			saved_data: &BTreeMap<String, i32>,
-			scores: &mut Vec<i32>,
-		) {
-			for (level_name, score) in saved_data {
-				if let Some(level_index) = level_set.get_level_index(level_name) {
-					scores[level_index] = *score;
-				}
-			}
-		}
-		load_high_scores(level_set, &dto.high_scores.ticks, &mut this.high_scores.ticks);
-		load_high_scores(level_set, &dto.high_scores.steps, &mut this.high_scores.steps);
-		load_high_scores(level_set, &dto.high_scores.attempts, &mut this.high_scores.attempts);
-
-		return this;
-	}
+fn fresh(level_set: &LevelSet, ephemeral: bool) -> SaveData {
+	let mut this = SaveData {
+		current_level: 0,
+		unlocked_levels: vec![false; level_set.levels.len()],
+		completed_levels: vec![false; level_set.levels.len()],
+		high_scores: HighScores {
+			ticks: vec![-1; level_set.levels.len()],
+			steps: vec![-1; level_set.levels.len()],
+			attempts: vec![0; level_set.levels.len()],
+		},
+		ephemeral,
+		show_hidden_levels: false,
+		segmented_speedrun: false,
+		options: chipty::OptionsDto::default(),
+	};
+	this.unlocked_levels[0] = true;
+	this
 }
 
 fn get_levelset_state_filename(level_set: &LevelSet) -> String {
 	format!("save/{}/state.json", level_set.name)
+}
+
+fn load(level_set: &LevelSet, ephemeral: bool) -> SaveData {
+	if ephemeral {
+		return fresh(level_set, true);
+	}
+
+	let file_name = get_levelset_state_filename(level_set);
+
+	let mut this = fresh(level_set, false);
+
+	let Ok(content) = read_file(path::Path::new(&file_name)) else {
+		return this;
+	};
+	let Some(dto) = serde_json::from_str::<SaveFileDto>(&content).ok() else {
+		return this;
+	};
+
+	if let Some(current_level) = &dto.current_level {
+		if let Some(level_number) = level_set.get_level_number(current_level) {
+			this.current_level = level_number;
+		}
+	}
+
+	this.options = dto.options.clone();
+
+	for level_index in dto.unlocked_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
+		this.unlocked_levels[level_index] = true;
+	}
+
+	for level_index in dto.completed_levels.iter().filter_map(|level_name| level_set.get_level_index(level_name)) {
+		this.completed_levels[level_index] = true;
+	}
+
+	fn load_high_scores(
+		level_set: &LevelSet,
+		saved_data: &BTreeMap<String, i32>,
+		scores: &mut Vec<i32>,
+	) {
+		for (level_name, score) in saved_data {
+			if let Some(level_index) = level_set.get_level_index(level_name) {
+				scores[level_index] = *score;
+			}
+		}
+	}
+	load_high_scores(level_set, &dto.high_scores.ticks, &mut this.high_scores.ticks);
+	load_high_scores(level_set, &dto.high_scores.steps, &mut this.high_scores.steps);
+	load_high_scores(level_set, &dto.high_scores.attempts, &mut this.high_scores.attempts);
+
+	return this;
 }

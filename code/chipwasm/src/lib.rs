@@ -1,4 +1,4 @@
-use std::{mem, ptr};
+use std::{mem, ptr, str};
 
 mod api;
 
@@ -12,13 +12,13 @@ paks::static_bundle!(CCLP5_PAK = "../../../target/publish/levelsets/cclp5.paks")
 
 fn play_sound(sound: chipty::SoundFx) {
 	unsafe {
-		api::play_sound(sound as i32);
+		api::playSound(sound as i32);
 	}
 }
 fn play_music(music: Option<chipty::MusicId>) {
 	let id = music.map(|m| m as i32).unwrap_or(-1);
 	unsafe {
-		api::play_music(id);
+		api::playMusic(id);
 	}
 }
 fn set_title(state: &chipgame::play::PlayState) {
@@ -32,19 +32,37 @@ fn set_title(state: &chipgame::play::PlayState) {
 		"Choose LevelSet".to_string()
 	};
 	unsafe {
-		api::set_title(title.as_ptr(), title.len());
+		api::setTitle(title.as_ptr(), title.len());
 	}
 }
-fn quit_game() {
-	unsafe {
-		api::quit_game();
-	}
+fn quit_game(instance: &mut Instance) {
+	// Relaunch the game to return to the levelset select screen, since we can't actually quit the page
+	instance.play.lvsets.selected = -1;
+	instance.play.launch(instance.graphics.as_graphics());
+	set_title(&instance.play);
 }
 
 pub struct Instance {
 	graphics: shade::webgl::WebGLGraphics,
 	resx: chipgame::fx::Resources,
 	play: chipgame::play::PlayState,
+}
+
+fn create_instance() -> Box<Instance> {
+	let mut instance = Box::new(Instance {
+		graphics: shade::webgl::WebGLGraphics::new(shade::webgl::WebGLConfig {
+			srgb: false,
+		}),
+		resx: chipgame::fx::Resources::default(),
+		play: chipgame::play::PlayState::default(),
+	});
+
+	let config = chipgame::config::Config::parse(CHIPDX_INI);
+	let key = paks::Key::default();
+	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
+	let fs = chipgame::FileSystem::Bundle(paks);
+	instance.resx.load(&fs, &config, instance.graphics.as_graphics());
+	return instance;
 }
 
 fn load_levelset(data: &'static [paks::Block], name: String, play: &mut chipgame::play::PlayState) {
@@ -55,23 +73,10 @@ fn load_levelset(data: &'static [paks::Block], name: String, play: &mut chipgame
 }
 
 #[no_mangle]
-pub extern "C" fn create() -> *mut Instance {
+pub extern "C" fn createInstance() -> *mut Instance {
 	shade::webgl::setup_panic_hook();
 
-	let mut instance = Box::new(Instance {
-		graphics: shade::webgl::WebGLGraphics::new(shade::webgl::WebGLConfig {
-			srgb: false,
-		}),
-		resx: chipgame::fx::Resources::default(),
-		play: chipgame::play::PlayState::default(),
-	});
-
-	// Load the resources
-	let config = chipgame::config::Config::parse(CHIPDX_INI);
-	let key = paks::Key::default();
-	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
-	let fs = chipgame::FileSystem::Bundle(paks);
-	instance.resx.load(&fs, &config, instance.graphics.as_graphics());
+	let mut instance = create_instance();
 
 	load_levelset(&CCLP1_PAK, "cclp1".to_string(), &mut instance.play);
 	load_levelset(&CCLP2_PAK, "cclp2".to_string(), &mut instance.play);
@@ -84,8 +89,68 @@ pub extern "C" fn create() -> *mut Instance {
 	Box::into_raw(instance)
 }
 
+fn load_custom_level(mut level: chipty::LevelDto) -> Box<Instance> {
+	level.normalize();
+	let level_set = chipgame::play::LevelSet {
+		name: "Custom Level".to_string(),
+		title: "Custom Level".to_string(),
+		about: None,
+		splash: None,
+		levels: vec![level],
+	};
+
+	let mut instance = create_instance();
+	instance.play.save_data.ephemeral = true;
+	instance.play.load_single_level(level_set);
+	instance.play.play_level(1);
+	return instance;
+}
+
+#[allow(non_snake_case)]
 #[no_mangle]
-pub extern "C" fn audio_init() {
+pub extern "C" fn createCustomLevel(level_ptr: *const u8, level_len: usize, compressed: bool) -> *mut Instance {
+	shade::webgl::setup_panic_hook();
+
+	if level_ptr.is_null() {
+		api::result_error("Missing custom level payload");
+		return ptr::null_mut();
+	}
+
+	let level = unsafe { std::slice::from_raw_parts(level_ptr, level_len) };
+
+	let level_data;
+	let level_json = if compressed {
+		let Ok(level_input) = str::from_utf8(level) else {
+			api::result_error("Compressed custom level is not valid UTF-8");
+			return ptr::null_mut();
+		};
+		let Some(decoded) = chipty::try_decode_level(level_input) else {
+			api::result_error("Compressed custom level could not be decoded");
+			return ptr::null_mut();
+		};
+		level_data = decoded;
+		level_data.as_slice()
+	}
+	else {
+		level
+	};
+
+	let Ok(level_json) = str::from_utf8(level_json) else {
+		api::result_error("Custom level is not valid UTF-8");
+		return ptr::null_mut();
+	};
+	let Ok(level) = serde_json::from_str::<chipty::LevelDto>(level_json) else {
+		api::result_error("Custom level JSON is invalid");
+		return ptr::null_mut();
+	};
+
+	let instance = load_custom_level(level);
+	Box::into_raw(instance)
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn audioInit() {
 	let config = chipgame::config::Config::parse(CHIPDX_INI);
 	let key = paks::Key::default();
 	let paks = paks::BundleReader::open(&DATA_PAK, key).expect("Failed to open data.paks");
@@ -93,18 +158,38 @@ pub extern "C" fn audio_init() {
 	register_audio_assets(&fs, &config);
 }
 
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn allocBytes(len: usize) -> *mut u8 {
+	let mut buf = Vec::<u8>::with_capacity(len);
+	let ptr = buf.as_mut_ptr();
+	mem::forget(buf);
+	ptr
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn freeBytes(ptr: *mut u8, len: usize) {
+	if ptr.is_null() {
+		return;
+	}
+	unsafe {
+		let _ = Vec::from_raw_parts(ptr, 0, len);
+	}
+}
+
 fn register_audio_assets(fs: &chipgame::FileSystem, config: &chipgame::config::Config) {
 	for (&fx, path) in &config.sound_fx {
 		if let Ok(data) = fs.read(path) {
 			unsafe {
-				api::register_sound(fx as i32, data.as_ptr(), data.len());
+				api::registerSound(fx as i32, data.as_ptr(), data.len());
 			}
 		}
 	}
 	for (&music, path) in &config.music {
 		if let Ok(data) = fs.read(path) {
 			unsafe {
-				api::register_music(music as i32, data.as_ptr(), data.len());
+				api::registerMusic(music as i32, data.as_ptr(), data.len());
 			}
 		}
 	}
@@ -112,12 +197,12 @@ fn register_audio_assets(fs: &chipgame::FileSystem, config: &chipgame::config::C
 
 
 #[no_mangle]
-pub extern "C" fn destroy(instance: *mut Instance) {
+pub extern "C" fn destroyInstance(instance: *mut Instance) {
 	_ = unsafe { Box::from_raw(instance) };
 }
 
 #[no_mangle]
-pub extern "C" fn think(instance: *mut Instance, buttons: u8) {
+pub extern "C" fn thinkInstance(instance: *mut Instance, buttons: u8) {
 	let instance = unsafe { &mut *instance };
 	let input = chipcore::Input::decode(buttons);
 	instance.play.think(&input);
@@ -128,13 +213,13 @@ pub extern "C" fn think(instance: *mut Instance, buttons: u8) {
 			&chipgame::play::PlayEvent::PlayMusic { music } => play_music(music),
 			&chipgame::play::PlayEvent::SetTitle => set_title(&instance.play),
 			&chipgame::play::PlayEvent::Restart => instance.play.launch(instance.graphics.as_graphics()),
-			&chipgame::play::PlayEvent::Quit => quit_game(),
+			&chipgame::play::PlayEvent::Quit => quit_game(instance),
 		}
 	}
 }
 
 #[no_mangle]
-pub extern "C" fn draw(instance: *mut Instance, time: f64, width: i32, height: i32) {
+pub extern "C" fn drawInstance(instance: *mut Instance, time: f64, width: i32, height: i32) {
 	let instance = unsafe { &mut *instance };
 	let g = instance.graphics.as_graphics();
 	instance.resx.backbuffer_viewport.maxs = cvmath::Vec2i(width, height);
@@ -146,7 +231,7 @@ pub extern "C" fn draw(instance: *mut Instance, time: f64, width: i32, height: i
 #[no_mangle]
 extern "C" fn chipgame_write_file(path_ptr: *const u8, path_len: usize, content_ptr: *const u8, content_len: usize) -> i32 {
 	unsafe {
-		api::write_file(path_ptr, path_len, content_ptr, content_len)
+		api::writeFile(path_ptr, path_len, content_ptr, content_len)
 	}
 }
 
@@ -154,14 +239,14 @@ extern "C" fn chipgame_write_file(path_ptr: *const u8, path_len: usize, content_
 extern "C" fn chipgame_read_file(path_ptr: *const u8, path_len: usize, content_ptr: *mut String) -> i32 {
 	unsafe {
 		let mut size: usize = 0;
-		if api::read_file(path_ptr, path_len, ptr::null_mut(), &mut size as *mut usize) != 0 {
+		if api::readFile(path_ptr, path_len, ptr::null_mut(), &mut size as *mut usize) != 0 {
 			return -1;
 		}
 		let content = &mut *content_ptr;
 		content.as_mut_vec().set_len(0);
 		content.reserve(size);
 		let mut read = size;
-		if api::read_file(path_ptr, path_len, content.as_mut_ptr() as *mut u8, &mut read as *mut usize) != 0 {
+		if api::readFile(path_ptr, path_len, content.as_mut_ptr() as *mut u8, &mut read as *mut usize) != 0 {
 			return -1;
 		}
 		content.as_mut_vec().set_len(read);

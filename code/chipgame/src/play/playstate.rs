@@ -9,6 +9,7 @@ pub struct PlayState {
 	pub lvsets: LevelSets,
 	pub save_data: SaveData,
 	pub metrics: shade::DrawMetrics,
+	pub single_level_session: bool,
 }
 
 impl cvar::IVisit for PlayState {
@@ -20,6 +21,17 @@ impl cvar::IVisit for PlayState {
 }
 
 impl PlayState {
+	pub fn load_single_level(&mut self, level_set: LevelSet) {
+		self.single_level_session = true;
+		self.fx = None;
+		self.warp = None;
+		self.menu.close_all();
+		self.lvsets.selected = 0;
+		self.lvsets.collection.clear();
+		self.lvsets.collection.push(level_set);
+		self.save_data.load(self.lvsets.current());
+	}
+
 	pub fn launch(&mut self, g: &mut shade::Graphics) {
 		if self.lvsets.collection.is_empty() {
 			return;
@@ -168,12 +180,18 @@ impl PlayState {
 					self.play_level(1);
 				}
 				menu::MenuEvent::OpenMainMenu => {
+					if self.single_level_session {
+						continue;
+					}
 					self.fx = None;
 					self.events.push(PlayEvent::SetTitle);
 					self.menu.open_main(self.save_data.current_level > 0, &self.lvsets.current().title);
 					self.play_music();
 				}
 				menu::MenuEvent::SwitchLevelSet => {
+					if self.single_level_session {
+						continue;
+					}
 					self.fx = None;
 					self.lvsets.selected = -1;
 					self.menu.close_all();
@@ -256,6 +274,9 @@ impl PlayState {
 					}
 				}
 				menu::MenuEvent::ExitGame => {
+					if self.single_level_session {
+						continue;
+					}
 					self.menu.close_all();
 					self.fx = None;
 					self.events.push(PlayEvent::Quit);

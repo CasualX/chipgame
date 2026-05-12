@@ -99,6 +99,19 @@ window.chipGame = function chipGame() {
 			this.loadingReadyText = text;
 		},
 
+		getCustomLevelPayload() {
+			const params = new URLSearchParams(window.location.search);
+			const compressed = params.get("levelc");
+			if (compressed !== null) {
+				return { value: compressed, compressed: true };
+			}
+			const plain = params.get("level");
+			if (plain !== null) {
+				return { value: plain, compressed: false };
+			}
+			return null;
+		},
+
 		isLandscapeViewport() {
 			if (screen && screen.orientation && typeof screen.orientation.type === "string") {
 				return screen.orientation.type.startsWith("landscape");
@@ -151,13 +164,13 @@ window.chipGame = function chipGame() {
 			if (ctx && ctx.state === "suspended") {
 				ctx.resume().catch(() => {});
 			}
-			if (!this.wasmExports || !this.wasmExports.audio_init) return;
+			if (!this.wasmExports) return;
 			try {
-				this.wasmExports.audio_init();
+				this.wasmExports.audioInit();
 				this.audioLoaded = true;
 			}
 			catch (err) {
-				console.warn("audio_init failed", err);
+				console.warn("audio init failed", err);
 			}
 		},
 
@@ -402,6 +415,7 @@ window.chipGame = function chipGame() {
 
 		async load() {
 			this.updateDisplayModeCta();
+			const customLevelPayload = this.getCustomLevelPayload();
 			this.setLoadingStatus("Initializing WebGL...", 0.1);
 			const shade = createWasmAPI(this.$refs.canvas, {
 				alpha: false,
@@ -431,7 +445,9 @@ window.chipGame = function chipGame() {
 				}
 			};
 
-			const play_sound = (sound_id) => {
+			let resultValue = null;
+
+			const playSound = (sound_id) => {
 				const ctx = this.ensureAudioContext();
 				if (!ctx) return;
 				const entry = this.soundBank.get(sound_id | 0);
@@ -455,7 +471,7 @@ window.chipGame = function chipGame() {
 				this.currentMusicKey = null;
 			};
 
-			const play_music = (music_id) => {
+			const playMusic = (music_id) => {
 				const ctx = this.ensureAudioContext();
 				if (!ctx) return;
 				const id = music_id | 0;
@@ -476,7 +492,7 @@ window.chipGame = function chipGame() {
 				this.currentMusicKey = id;
 			};
 
-			const register_sound = (sound_id, data_ptr, data_len) => {
+			const registerSound = (sound_id, data_ptr, data_len) => {
 				const ctx = this.ensureAudioContext();
 				if (!ctx || !wasmMemory) return;
 				const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
@@ -491,7 +507,7 @@ window.chipGame = function chipGame() {
 				});
 			};
 
-			const register_music = (music_id, data_ptr, data_len) => {
+			const registerMusic = (music_id, data_ptr, data_len) => {
 				const ctx = this.ensureAudioContext();
 				if (!ctx || !wasmMemory) return;
 				const bytes = new Uint8Array(wasmMemory.buffer, data_ptr, data_len);
@@ -506,15 +522,19 @@ window.chipGame = function chipGame() {
 				});
 			};
 
-			const set_title = (title_ptr, title_len) => {
+			const setTitle = (title_ptr, title_len) => {
 				document.title = readUtf8(title_ptr, title_len) || "Chip DX";
 			};
 
-			const quit_game = () => {
-				console.log("quit_game requested");
+			const quitGame = () => {
+				console.log("quitGame requested");
 			};
 
-			const read_file = (path_ptr, path_len, content_ptr, content_len_ptr) => {
+			const resultError = (message_ptr, message_len) => {
+				resultValue = new Error(readUtf8(message_ptr, message_len) || "Unknown error");
+			};
+
+			const readFile = (path_ptr, path_len, content_ptr, content_len_ptr) => {
 				if (!wasmMemory) return -1;
 				const path = readUtf8(path_ptr, path_len);
 				if (!path || !content_len_ptr) return -1;
@@ -523,7 +543,7 @@ window.chipGame = function chipGame() {
 					content = localStorage.getItem(path);
 				}
 				catch (err) {
-					console.warn("read_file localStorage failed", err);
+					console.warn("readFile localStorage failed", err);
 					return -1;
 				}
 				if (content === null) return -1;
@@ -541,7 +561,7 @@ window.chipGame = function chipGame() {
 				return 0;
 			};
 
-			const write_file = (path_ptr, path_len, content_ptr, content_len) => {
+			const writeFile = (path_ptr, path_len, content_ptr, content_len) => {
 				if (!wasmMemory) return -1;
 				const path = readUtf8(path_ptr, path_len);
 				if (!path || !content_ptr) return -1;
@@ -552,7 +572,7 @@ window.chipGame = function chipGame() {
 					return 0;
 				}
 				catch (err) {
-					console.warn("write_file localStorage failed", err);
+					console.warn("writeFile localStorage failed", err);
 					return -1;
 				}
 			};
@@ -567,14 +587,15 @@ window.chipGame = function chipGame() {
 				webgl: shade,
 				env: {
 					randomBytes,
-					play_sound,
-					play_music,
-					register_sound,
-					register_music,
-					set_title,
-					quit_game,
-					read_file,
-					write_file,
+					playSound,
+					playMusic,
+					registerSound,
+					registerMusic,
+					setTitle,
+					quitGame,
+					resultError,
+					readFile,
+					writeFile,
 				},
 			};
 
@@ -584,21 +605,54 @@ window.chipGame = function chipGame() {
 			wasmMemory = instance.exports.memory;
 
 			const exports = instance.exports;
-			if (!exports.create || !exports.think || !exports.draw) {
-				throw new Error("WASM exports missing one of: create/think/draw");
-			}
 			this.wasmExports = exports;
+
+			const allocWasmBytes = (bytes) => {
+				if (!exports.allocBytes || !exports.freeBytes) {
+					throw new Error("WASM exports missing allocBytes/freeBytes bridge");
+				}
+				const capacity = Math.max(1, bytes.length);
+				const ptr = exports.allocBytes(capacity);
+				if (!ptr) {
+					throw new Error("WASM allocBytes() returned null");
+				}
+				new Uint8Array(wasmMemory.buffer, ptr, bytes.length).set(bytes);
+				return {
+					ptr,
+					len: bytes.length,
+					capacity,
+				};
+			};
 
 			this.setLoadingStatus("Starting...", 0.8);
 			let gamePtr = 0;
 			try {
-				gamePtr = exports.create();
+				if (customLevelPayload !== null) {
+					this.setLoadingStatus("Loading custom level...", 0.8);
+					resultValue = null;
+					const payloadBytes = encoder.encode(customLevelPayload.value);
+					const payload = allocWasmBytes(payloadBytes);
+					try {
+						gamePtr = exports.createCustomLevel(payload.ptr, payload.len, customLevelPayload.compressed);
+					}
+					finally {
+						exports.freeBytes(payload.ptr, payload.capacity);
+					}
+					if (resultValue instanceof Error) {
+						throw resultValue;
+					}
+				}
+				else {
+					gamePtr = exports.createInstance();
+				}
 			}
 			catch (err) {
-				throw new Error(`create() trapped: ${err && err.message ? err.message : String(err)}`);
+				const message = err && err.message ? err.message : String(err);
+				throw new Error(`${customLevelPayload !== null ? "custom level boot" : "createInstance()"} trapped: ${message}`);
 			}
 			if (!gamePtr) {
-				throw new Error("create() returned null (0) instance pointer");
+				const label = customLevelPayload === null ? "createInstance()" : "createCustomLevel()";
+				throw new Error(`${label} returned null (0) instance pointer`);
 			}
 			this.wasmGamePtr = gamePtr;
 
@@ -638,10 +692,10 @@ window.chipGame = function chipGame() {
 
 				while (acc >= stepMs) {
 					try {
-						exports.think(gamePtr, buttons);
+						exports.thinkInstance(gamePtr, buttons);
 					}
 					catch (err) {
-						this.setLoadingStatus(`think() trapped: ${err && err.message ? err.message : String(err)}`);
+						this.setLoadingStatus(`thinkInstance() trapped: ${err && err.message ? err.message : String(err)}`);
 						return;
 					}
 					thinkCount++;
@@ -650,10 +704,10 @@ window.chipGame = function chipGame() {
 
 				const { width, height } = this.resizeCanvasToDisplaySize();
 				try {
-					exports.draw(gamePtr, now / 1000.0, width, height);
+					exports.drawInstance(gamePtr, now / 1000.0, width, height);
 				}
 				catch (err) {
-					this.setLoadingStatus(`draw() trapped: ${err && err.message ? err.message : String(err)}`);
+					this.setLoadingStatus(`drawInstance() trapped: ${err && err.message ? err.message : String(err)}`);
 					return;
 				}
 				drawCount++;
@@ -681,7 +735,7 @@ window.chipGame = function chipGame() {
 						this.frameHandle = 0;
 					}
 					try {
-						if (exports.destroy) exports.destroy(gamePtr);
+						exports.destroyInstance(gamePtr);
 					}
 					catch {
 						// ignore
