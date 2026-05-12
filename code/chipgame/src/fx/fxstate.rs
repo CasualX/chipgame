@@ -399,7 +399,7 @@ impl FxState {
 			},
 		});
 
-		let viewport = cvmath::Bounds2i::c(0, 0, SIZE, SIZE);
+		let viewport = cvmath::Bounds2!(0, 0, SIZE, SIZE);
 
 		let light_target = self.camera.target;
 		let light_pos = light_target + Vec3f::new(-300.0, 300.0, 300.0);

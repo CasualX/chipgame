@@ -54,7 +54,7 @@ impl LevelSetMenu {
 				top_left: UiVertex { pos: Vec2f(0.0, ss.y as f32), uv: Vec2f(0.0, 0.0), color },
 				top_right: UiVertex { pos: Vec2f(ss.x as f32, ss.y as f32), uv: Vec2f(1.0, 0.0), color },
 			};
-			let rc = Bounds2::c(0.0, 0.0, ss.x as f32, ss.y as f32);
+			let rc = Bounds2!(0.0, 0.0, ss.x as f32, ss.y as f32);
 			let height = splash.height as f32 * (ss.x as f32 / splash.width as f32);
 			let [_, rc, _] = draw::flexv(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(height), layout::Unit::Fr(1.0)]);
 			// let [_, rc, _] = draw::flexh(rc, None, layout::Justify::Center, &[layout::Unit::Fr(1.0), layout::Unit::Abs(splash.width as f32), layout::Unit::Fr(1.0)]);

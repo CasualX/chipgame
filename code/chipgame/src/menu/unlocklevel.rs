@@ -118,7 +118,7 @@ impl UnlockLevelMenu {
 			..Default::default()
 		};
 
-		let rect = Bounds2::c(0.0, size + size, resx.viewport.width() as f32, size + size);
+		let rect = Bounds2!(0.0, size + size, resx.viewport.width() as f32, size + size);
 
 		buf.text_lines(&resx.font, &scribe, &rect, shade::d2::TextAlign::TopCenter, &[
 			&format_args!("Enter Password: {} {} {} {}", self.password[0].unwrap_or('_'), self.password[1].unwrap_or('_'), self.password[2].unwrap_or('_'), self.password[3].unwrap_or('_')),
@@ -132,7 +132,7 @@ impl UnlockLevelMenu {
 			for (j, &chr) in line.iter().enumerate() {
 				let xstart = (resx.viewport.width() as f32 - width) * 0.5;
 				let current_index = match i { 0 => j as i8, 1 => j as i8 + 10, 2 => j as i8 + 19, _ => unreachable!() };
-				let rect = Bounds2::c(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
+				let rect = Bounds2!(xstart + j as f32 * size * 1.5, y, xstart + j as f32 * size * 1.5, y);
 				let scribe = shade::d2::Scribe {
 					font_size: size,
 					line_height: size * (5.0 / 4.0),

@@ -123,7 +123,7 @@ impl Resources {
 	pub fn update_back(&mut self, g: &mut shade::Graphics) {
 		let width = (self.backbuffer_viewport.width() as f32 * self.renderscale) as i32;
 		let height = (self.backbuffer_viewport.height() as f32 * self.renderscale) as i32;
-		self.viewport = Bounds2i::c(0, 0, width, height);
+		self.viewport = Bounds2!(0, 0, width, height);
 		self.backcolor = g.texture2d_update(self.backcolor, &shade::Texture2DInfo {
 			width,
 			height,

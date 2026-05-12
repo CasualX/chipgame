@@ -29,7 +29,7 @@ impl DrawScoreCard {
 			return;
 		}
 
-		let rect = Bounds2::c(rect.right(), rect.top(), rect.right(), rect.bottom());
+		let rect = Bounds2!(rect.right(), rect.top(), rect.right(), rect.bottom());
 		scribe.color = Vec4(255, 223, 0, 255); // Gold color
 
 		fn status_str(score: i32, high_score: i32) -> impl fmt::Display {

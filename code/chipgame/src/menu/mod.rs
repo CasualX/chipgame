@@ -48,7 +48,7 @@ pub fn darken(g: &mut shade::Graphics, resx: &Resources, alpha: u8) {
 	let paint = shade::d2::Paint {
 		template: UiVertex { pos: Vec2::ZERO, uv: Vec2::ZERO, color: [0, 0, 0, alpha] },
 	};
-	cv.fill_rect(&paint, &Bounds2::c(-1.0, 1.0, 1.0, -1.0));
+	cv.fill_rect(&paint, &Bounds2!(-1.0, 1.0, 1.0, -1.0));
 
 	cv.draw(g);
 }

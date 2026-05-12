@@ -42,14 +42,14 @@ impl FxState {
 			shade::d2::layout::Unit::Abs(a * 3.0),
 		]);
 		if game.ps.keys.iter().any(|&k| k > 0) {
-			cv.fill_rect(&paint, &Bounds2::c(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
+			cv.fill_rect(&paint, &Bounds2!(keys_x1, y, keys_x2, resx.viewport.bottom() as f32));
 		}
 		if game.ps.boots != chipcore::Boots::NONE {
-			cv.fill_rect(&paint, &Bounds2::c(items_x1, y, items_x2, resx.viewport.bottom() as f32));
+			cv.fill_rect(&paint, &Bounds2!(items_x1, y, items_x2, resx.viewport.bottom() as f32));
 		}
 		if !self.darken {
-			cv.fill_rect(&paint, &Bounds2::c(chips_x1, 0.0, chips_x2, a * 0.9));
-			cv.fill_rect(&paint, &Bounds2::c(time_x1, 0.0, time_x2, a * 0.9));
+			cv.fill_rect(&paint, &Bounds2!(chips_x1, 0.0, chips_x2, a * 0.9));
+			cv.fill_rect(&paint, &Bounds2!(time_x1, 0.0, time_x2, a * 0.9));
 		}
 
 		// Draw the inventory items
@@ -108,7 +108,7 @@ impl FxState {
 						3 => Vec4(255, 255, 0, 255),
 						_ => Vec4(255, 255, 255, 255),
 					};
-					tbuf.text_box(&resx.font, &scribe, &Bounds2::c(keys_x1 + a * (i as f32 + 0.5), y + 0.0, keys_x1 + a * (i as f32 + 1.5), y + a), shade::d2::TextAlign::BottomCenter, &format!("x{}", game.ps.keys[i]));
+					tbuf.text_box(&resx.font, &scribe, &Bounds2!(keys_x1 + a * (i as f32 + 0.5), y + 0.0, keys_x1 + a * (i as f32 + 1.5), y + a), shade::d2::TextAlign::BottomCenter, &format!("x{}", game.ps.keys[i]));
 				}
 			}
 
@@ -121,18 +121,18 @@ impl FxState {
 			let time_remaining = if game.field.time_limit <= 0 { -1 } else { f32::ceil((game.field.time_limit * 60 - game.time) as f32 / 60.0) as i32 };
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "💎");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2!(chips_x, 0.0, chips_x, a), shade::d2::TextAlign::TopRight, "💎");
 			scribe.color = if chips_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(chips_x + a * 0.125, 0.0, chips_x, a), shade::d2::TextAlign::TopLeft, &format!("{chips_remaining}"));
+			tbuf.text_box(&resx.font, &scribe, &Bounds2!(chips_x + a * 0.125, 0.0, chips_x, a), shade::d2::TextAlign::TopLeft, &format!("{chips_remaining}"));
 
 			scribe.color = Vec4(255, 0, 128, 255);
-			tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "⏰");
+			tbuf.text_box(&resx.font, &scribe, &Bounds2!(time_x, 0.0, time_x, a), shade::d2::TextAlign::TopRight, "⏰");
 			scribe.color = if time_remaining <= 0 { Vec4::unpack8(0xFF00FFFF) } else { Vec4::unpack8(0xFF00FF00) };
 			if time_remaining >= 0 {
-				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x + a * 0.125, a), shade::d2::TextAlign::TopLeft, &format!("{time_remaining}"));
+				tbuf.text_box(&resx.font, &scribe, &Bounds2!(time_x + a * 0.125, 0.0, time_x + a * 0.125, a), shade::d2::TextAlign::TopLeft, &format!("{time_remaining}"));
 			}
 			else {
-				tbuf.text_box(&resx.font, &scribe, &Bounds2::c(time_x + a * 0.125, 0.0, time_x, a), shade::d2::TextAlign::TopLeft, "- - -");
+				tbuf.text_box(&resx.font, &scribe, &Bounds2!(time_x + a * 0.125, 0.0, time_x, a), shade::d2::TextAlign::TopLeft, "- - -");
 			}
 		}
 
@@ -181,7 +181,7 @@ impl FxState {
 				let rect = resx.viewport.cast();
 				let max_hint_width = rect.size().x * 0.9;
 				let hpad = (rect.size().x - max_hint_width) * 0.5;
-				let hint_rect = Bounds2::c(rect.mins.x + hpad, rect.mins.y, rect.maxs.x - hpad, rect.maxs.y);
+				let hint_rect = Bounds2!(rect.mins.x + hpad, rect.mins.y, rect.maxs.x - hpad, rect.maxs.y);
 				let transform = Transform2f::ortho(rect);
 				tbuf.uniform = shade::d2::TextUniform {
 					transform,
@@ -237,5 +237,5 @@ fn sprite_uv(sheet: &chipty::SpriteSheet<chipty::SpriteId>, sprite: chipty::Spri
 	assert!(frame < entry.len as usize, "frame index in bounds");
 	let f = &sheet.frames[(entry.index as usize) + frame];
 	let [x, y, width, height] = f.rect;
-	Bounds2::c(x as f32 / sheet.width as f32, y as f32 / sheet.height as f32, (x + width) as f32 / sheet.width as f32, (y + height) as f32 / sheet.height as f32)
+	Bounds2!(x as f32 / sheet.width as f32, y as f32 / sheet.height as f32, (x + width) as f32 / sheet.width as f32, (y + height) as f32 / sheet.height as f32)
 }
