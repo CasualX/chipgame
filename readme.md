@@ -1,7 +1,7 @@
 Chip DX
 =======
 
-A Rust remake inspired by the classic puzzle game *Chip's Challenge*.
+A Rust remaster inspired by the classic puzzle game *Chip's Challenge*.
 
 https://github.com/user-attachments/assets/19000227-1337-484a-8a81-2710e5f87b1f
 
@@ -43,8 +43,8 @@ Other platforms must be built from source code.
 
 ### Publish from Source
 
-1. Run either `./scripts/publish.sh` or `scripts\publish.bat` on Linux/macOS or Windows, respectively.
-2. Find the packaged release in `target/publish/` and compressed to `target/chipdx.zip`.
+1. Run `cargo run --release -p publish -- target/publish` from the repository root.
+2. Find the packaged release files in `target/publish`.
 
 Controls
 --------
@@ -138,11 +138,11 @@ License & Credits
 ### Chip's Challenge
 
 *Chip's Challenge* was created by Chuck Sommerville and is owned by Niffler Ltd.  
-This project is an independent, open-source remake and is not affiliated with Niffler Ltd.
+This project is an independent, open-source remaster and is not affiliated with Niffler Ltd.
 
 ### Source Code
 
-This remake is released under the GNU General Public License v3.0.  
+This remaster is released under the GNU General Public License v3.0.  
 See the [license](license.md) file for more information.  
 
 ### Graphics
@@ -173,7 +173,7 @@ The sound effects included in this distribution were created by Brian Raiter, wi
 
 ### Community Level Packs
 
-This remake is distributed with several community-created level packs.
+This remaster is distributed with several community-created level packs.
 
 These packs were designed and maintained by the Chip’s Challenge community and are distributed freely for use with compatible engines such as Tile World.
 

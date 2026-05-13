@@ -28,9 +28,6 @@ jobs:
       with:
         targets: aarch64-linux-android,x86_64-linux-android
 
-    - name: Cache Rust Build
-      uses: Swatinem/rust-cache@v2
-
     - name: Set Up Android SDK
       uses: android-actions/setup-android@v4
 

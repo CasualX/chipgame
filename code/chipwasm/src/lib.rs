@@ -3,12 +3,12 @@ use std::{mem, ptr, str};
 mod api;
 
 const CHIPDX_INI: &str = include_str!("../../../chipdx.webgl.ini");
-paks::static_bundle!(DATA_PAK = "../../../target/publish/data.paks");
-paks::static_bundle!(CCLP1_PAK = "../../../target/publish/levelsets/cclp1.paks");
-paks::static_bundle!(CCLP2_PAK = "../../../target/publish/levelsets/cclp2.paks");
-paks::static_bundle!(CCLP3_PAK = "../../../target/publish/levelsets/cclp3.paks");
-paks::static_bundle!(CCLP4_PAK = "../../../target/publish/levelsets/cclp4.paks");
-paks::static_bundle!(CCLP5_PAK = "../../../target/publish/levelsets/cclp5.paks");
+paks::static_bundle!(DATA_PAK = concat!(env!("OUT_DIR"), "/data.paks"));
+paks::static_bundle!(CCLP1_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp1.paks"));
+paks::static_bundle!(CCLP2_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp2.paks"));
+paks::static_bundle!(CCLP3_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp3.paks"));
+paks::static_bundle!(CCLP4_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp4.paks"));
+paks::static_bundle!(CCLP5_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp5.paks"));
 
 fn play_sound(sound: chipty::SoundFx) {
 	unsafe {

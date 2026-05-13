@@ -1,0 +1,10 @@
+[package]
+name = "chipbundle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chipty = { path = "../../chipty" }
+serde.workspace = true
+serde_json.workspace = true
+paks.workspace = true

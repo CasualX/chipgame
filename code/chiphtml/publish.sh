@@ -29,11 +29,29 @@ progress() {
 	printf "\n%b%s%b %b%s%b\n" "$color_blue" "==" "$color_reset" "$color_bold" "$1" "$color_reset"
 }
 
+is_ci() {
+	[[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]
+}
+
 pause_for_ack() {
 	local prompt="$1"
+	if is_ci; then
+		printf "\n%b•%b %s %b[auto-confirmed in CI]%b\n" "$color_yellow" "$color_reset" "$prompt" "$color_dim" "$color_reset"
+		return
+	fi
 	printf "\n%b•%b %s\n" "$color_yellow" "$color_reset" "$prompt"
 	printf "  %b[Press Enter to continue or Ctrl-C to abort]%b" "$color_dim" "$color_reset"
 	read -r _
+}
+
+ensure_git_identity() {
+	local repo="$1"
+	if ! git -C "$repo" config user.name >/dev/null; then
+		git -C "$repo" config user.name "github-actions[bot]"
+	fi
+	if ! git -C "$repo" config user.email >/dev/null; then
+		git -C "$repo" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+	fi
 }
 
 warn_if_dirty_worktree() {
@@ -46,8 +64,8 @@ warn_if_dirty_worktree() {
 progress "Checking repository state"
 warn_if_dirty_worktree
 
-progress "Preparing desktop publish assets"
-"$repo_root/code/scripts/publish.sh" --allow-dirty
+progress "Preparing shared publish assets"
+bash "$repo_root/code/chiphtml/prepare.sh"
 
 progress "Building release chipwasm artifact"
 cargo build --release -p chipwasm --target=wasm32-unknown-unknown
@@ -82,6 +100,7 @@ cp code/chiphtml/*.png "$repo_root/gh-pages/"
 cp target/wasm32-unknown-unknown/release/chipwasm.wasm "$repo_root/gh-pages/chipwasm.wasm"
 
 progress "Creating gh-pages commit"
+ensure_git_identity "$repo_root/gh-pages"
 git -C "$repo_root/gh-pages" add .
 git -C "$repo_root/gh-pages" commit --allow-empty -m "Initial commit"
 

@@ -10,12 +10,12 @@ const NANOS_PER_SECOND: u64 = 1_000_000_000;
 const FRAME_NANOS: u64 = NANOS_PER_SECOND / chipcore::FPS as u64;
 const JNI_CLASS_NAME: &str = "net/casualhacks/chipdx/ChipJNI";
 
-paks::static_bundle!(DATA_PAK = "../../../target/publish/data.paks");
-paks::static_bundle!(CCLP1_PAK = "../../../target/publish/levelsets/cclp1.paks");
-paks::static_bundle!(CCLP2_PAK = "../../../target/publish/levelsets/cclp2.paks");
-paks::static_bundle!(CCLP3_PAK = "../../../target/publish/levelsets/cclp3.paks");
-paks::static_bundle!(CCLP4_PAK = "../../../target/publish/levelsets/cclp4.paks");
-paks::static_bundle!(CCLP5_PAK = "../../../target/publish/levelsets/cclp5.paks");
+paks::static_bundle!(DATA_PAK = concat!(env!("OUT_DIR"), "/data.paks"));
+paks::static_bundle!(CCLP1_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp1.paks"));
+paks::static_bundle!(CCLP2_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp2.paks"));
+paks::static_bundle!(CCLP3_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp3.paks"));
+paks::static_bundle!(CCLP4_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp4.paks"));
+paks::static_bundle!(CCLP5_PAK = concat!(env!("OUT_DIR"), "/levelsets/cclp5.paks"));
 
 #[link(name = "EGL")]
 extern "C" {

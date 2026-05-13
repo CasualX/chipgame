@@ -15,14 +15,12 @@ jobs:
       with:
         toolchain: stable
 
-    - name: Build Binaries
-      run: |
-        cargo build --release --bin chipedit
-        cargo build --release --bin chipplay
+    - name: Build Package
+      run: cargo run --release -p publish -- target/publish
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v7
       with:
-        path: |
-          target/release/*.exe
-          target/release/*.pdb
+        name: chipdx-win32
+        if-no-files-found: error
+        path: target/publish/**

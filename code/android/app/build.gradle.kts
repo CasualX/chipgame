@@ -31,13 +31,6 @@ plugins {
 val repoRoot = rootProject.projectDir.resolve("../..").canonicalFile
 val rustJniLibsDir = layout.buildDirectory.dir("rustJniLibs")
 val generatedIconResDir = layout.buildDirectory.dir("generated/icon-res")
-val projectProviders = providers
-
-fun deleteIfExists(file: java.io.File) {
-	if (file.exists() && !file.delete()) {
-		throw GradleException("Failed to delete $file")
-	}
-}
 
 fun requiredStringGradleProperty(name: String): String {
 	return providers.gradleProperty(name).orNull
@@ -174,61 +167,6 @@ fun configuredAndroidSdkRoot(): String {
 	)
 }
 
-val bundledLevelsets = listOf("cclp1", "cclp2", "cclp3", "cclp4", "cclp5")
-
-val prepareAndroidBundles by tasks.registering {
-	group = "build"
-	description = "Build the bundled data and curated levelset pak files used by chipjni."
-	inputs.file(repoRoot.resolve("Cargo.toml"))
-	inputs.file(repoRoot.resolve("code/scripts/packset/Cargo.toml"))
-	inputs.dir(repoRoot.resolve("code/scripts/packset/src"))
-	inputs.dir(repoRoot.resolve("code/chipty/src"))
-	inputs.dir(repoRoot.resolve("data"))
-	for (levelset in bundledLevelsets) {
-		inputs.dir(repoRoot.resolve("levelsets/$levelset"))
-	}
-
-	outputs.file(repoRoot.resolve("target/publish/data.paks"))
-	for (levelset in bundledLevelsets) {
-		outputs.file(repoRoot.resolve("target/publish/levelsets/$levelset.paks"))
-	}
-	outputs.upToDateWhen { false }
-
-	doLast {
-		val publishDir = repoRoot.resolve("target/publish")
-		val levelsetsDir = publishDir.resolve("levelsets")
-		levelsetsDir.mkdirs()
-
-		deleteIfExists(publishDir.resolve("data.paks"))
-		bundledLevelsets.forEach { levelset ->
-			deleteIfExists(levelsetsDir.resolve("$levelset.paks"))
-		}
-
-		projectProviders.exec {
-			workingDir = repoRoot
-			commandLine("pakscmd", publishDir.resolve("data.paks").absolutePath, "0", "new")
-		}.result.get().assertNormalExitValue()
-		projectProviders.exec {
-			workingDir = repoRoot
-			commandLine("pakscmd", publishDir.resolve("data.paks").absolutePath, "0", "copy", "", repoRoot.resolve("data").absolutePath)
-		}.result.get().assertNormalExitValue()
-		bundledLevelsets.forEach { levelset ->
-			projectProviders.exec {
-				workingDir = repoRoot
-				commandLine(
-					"cargo",
-					"run",
-					"--bin",
-					"packset",
-					"--",
-					repoRoot.resolve("levelsets/$levelset").absolutePath,
-					levelsetsDir.resolve("$levelset.paks").absolutePath,
-				)
-			}.result.get().assertNormalExitValue()
-		}
-	}
-}
-
 dependencies {
 	implementation("androidx.core:core-ktx:1.15.0")
 }
@@ -236,7 +174,6 @@ dependencies {
 val buildRustAndroid by tasks.registering(Exec::class) {
 	group = "build"
 	description = "Compile chipjni for Android and stage the JNI libraries for packaging."
-	dependsOn(prepareAndroidBundles)
 	workingDir = repoRoot
 	outputs.upToDateWhen { false }
 	commandLine(
