@@ -169,6 +169,18 @@ impl EditorState {
 			EditorState::Play(_) => (),
 		}
 	}
+	pub fn zoom_in(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.zoom_in(),
+			EditorState::Play(_) => {},
+		}
+	}
+	pub fn zoom_out(&mut self) {
+		match self {
+			EditorState::Edit(s) => s.zoom_out(),
+			EditorState::Play(_) => {},
+		}
+	}
 	pub fn toggle_play(&mut self) {
 		match self {
 			EditorState::Edit(s) => {

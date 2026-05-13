@@ -100,6 +100,11 @@ impl PlayCamera {
 		}
 	}
 
+	pub fn zoom_by(&mut self, delta: f32, min: f32, max: f32) {
+		self.offset_target.z = (self.offset_target.z + delta).clamp(min, max);
+		self.offset.z = self.offset_target.z;
+	}
+
 	pub fn set_target(&mut self, pos: Vec3f) {
 		self.target = pos;
 	}

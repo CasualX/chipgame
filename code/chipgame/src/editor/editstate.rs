@@ -1,5 +1,9 @@
 use super::*;
 
+const ZOOM_STEP: f32 = 32.0;
+const ZOOM_MIN: f32 = 64.0;
+const ZOOM_MAX: f32 = 1024.0;
+
 #[derive(Default)]
 pub struct EditorEditState {
 	pub fx: Box<fx::FxState>,
@@ -114,6 +118,12 @@ impl EditorEditState {
 	}
 	pub fn key_shift(&mut self, pressed: bool) {
 		self.input.key_shift = pressed;
+	}
+	pub fn zoom_in(&mut self) {
+		self.fx.camera.zoom_by(-ZOOM_STEP, ZOOM_MIN, ZOOM_MAX);
+	}
+	pub fn zoom_out(&mut self) {
+		self.fx.camera.zoom_by(ZOOM_STEP, ZOOM_MIN, ZOOM_MAX);
 	}
 	pub fn think(&mut self) {
 	}

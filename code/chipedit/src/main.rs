@@ -352,6 +352,12 @@ fn main() {
 							let level = editor.save_level();
 							editor.reload_level(&level);
 						}
+						PhysicalKey::Code(KeyCode::NumpadAdd) if pressed => {
+							editor.zoom_in();
+						}
+						PhysicalKey::Code(KeyCode::NumpadSubtract) if pressed => {
+							editor.zoom_out();
+						}
 						PhysicalKey::Code(KeyCode::KeyM) if pressed => {
 							music_enabled = !music_enabled;
 						}
