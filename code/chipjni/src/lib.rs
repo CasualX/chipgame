@@ -1,3 +1,5 @@
+#![cfg(target_family = "unix")]
+
 use std::{mem, ptr, sync};
 use std::ffi::*;
 

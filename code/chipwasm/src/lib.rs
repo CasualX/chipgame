@@ -1,3 +1,5 @@
+// #![cfg(target_family = "wasm")]
+
 use std::{mem, ptr, str};
 
 mod api;
