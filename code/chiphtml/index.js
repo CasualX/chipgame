@@ -1,5 +1,11 @@
 import { createWasmAPI } from "./shade.js";
 
+const PREFS_KEY = "chipdx-prefs";
+const DEFAULT_PREFS = {
+	audioEnabled: true,
+	fullscreenEnabled: true,
+};
+
 const INPUT_UP = 1 << 0;
 const INPUT_LEFT = 1 << 1;
 const INPUT_DOWN = 1 << 2;
@@ -23,7 +29,7 @@ window.chipGame = function chipGame() {
 		loadingPanelFrameWidth: 620,
 		loadingPanelFrameHeight: 0,
 		hasTouchSupport: false,
-		audioEnabled: true,
+		prefs: { ...DEFAULT_PREFS },
 		touchEnabled: false,
 		touchPressed: {
 			up: false,
@@ -55,6 +61,7 @@ window.chipGame = function chipGame() {
 		init() {
 			if (this.initialized) return;
 			this.initialized = true;
+			this.loadPrefs();
 			this.syncViewportLayout();
 			this.hasTouchSupport = this.detectTouchSupport();
 			this.syncControlSchemeFromEnvironment();
@@ -108,6 +115,27 @@ window.chipGame = function chipGame() {
 				this.loadingProgress = Math.max(0, Math.min(1, progress));
 			}
 			this.queueLoadingPanelScaleSync();
+		},
+
+		loadPrefs() {
+			try {
+				let raw = localStorage.getItem(PREFS_KEY);
+				this.prefs = raw ? JSON.parse(raw) : { ...DEFAULT_PREFS };
+			}
+			catch (err) {
+				console.warn("Prefs read failed", err);
+				this.prefs = { ...DEFAULT_PREFS };
+				return;
+			}
+		},
+
+		savePrefs() {
+			try {
+				localStorage.setItem(PREFS_KEY, JSON.stringify(this.prefs));
+			}
+			catch (err) {
+				console.warn("Prefs write failed", err);
+			}
 		},
 
 		detectTouchSupport() {
@@ -431,8 +459,14 @@ window.chipGame = function chipGame() {
 		},
 
 		async startGame() {
-			if (!this.isReadyToPlay) return;
-			if (this.audioEnabled) {
+			if (!this.isReadyToPlay) {
+				return;
+			}
+			this.savePrefs();
+			if (this.prefs.fullscreenEnabled) {
+				await this.requestPreferredDisplayMode();
+			}
+			if (this.prefs.audioEnabled) {
 				await this.enableAudio();
 			}
 			this.gameActive = true;
@@ -500,7 +534,7 @@ window.chipGame = function chipGame() {
 			let resultValue = null;
 
 			const playSound = (sound_id) => {
-				if (!this.audioEnabled) return;
+				if (!this.prefs.audioEnabled) return;
 				const ctx = this.ensureAudioContext();
 				if (!ctx) return;
 				const entry = this.soundBank.get(sound_id | 0);
@@ -525,7 +559,7 @@ window.chipGame = function chipGame() {
 			};
 
 			const playMusic = (music_id) => {
-				if (!this.audioEnabled) {
+				if (!this.prefs.audioEnabled) {
 					this.requestedMusicKey = null;
 					stopMusic();
 					return;
