@@ -29,13 +29,47 @@ class HandleTable {
 }
 
 export function createWasmAPI(canvas, options) {
+	const { perfEnabled = false, ...contextOptions } = options || {};
 	let memory = null;
 	let handles = new HandleTable();
 	let decoder = new TextDecoder();
 	let encoder = new TextEncoder();
-	let gl = canvas.getContext("webgl2", options);
+	let gl = canvas.getContext("webgl2", contextOptions);
+	let perf = {
+		enabled: perfEnabled,
+		counts: Object.create(null),
+		ms: Object.create(null),
+		contextLost: 0,
+		contextRestored: 0,
+	};
 	// gl.drawingBufferColorSpace = "srgb";
 	// gl.unpackColorSpace = "srgb";
+
+	function perfRecord(name, startedAt) {
+		if (!perf.enabled) return;
+		perf.counts[name] = (perf.counts[name] || 0) + 1;
+		perf.ms[name] = (perf.ms[name] || 0) + (performance.now() - startedAt);
+	}
+
+	function perfWrap(name, fn) {
+		if (!perf.enabled) return fn();
+		const startedAt = performance.now();
+		try {
+			return fn();
+		}
+		finally {
+			perfRecord(name, startedAt);
+		}
+	}
+
+	canvas.addEventListener("webglcontextlost", () => {
+		if (!perf.enabled) return;
+		perf.contextLost++;
+	});
+	canvas.addEventListener("webglcontextrestored", () => {
+		if (!perf.enabled) return;
+		perf.contextRestored++;
+	});
 
 	function getString(ptr, len) {
 		if (ptr === 0) {
@@ -66,6 +100,20 @@ export function createWasmAPI(canvas, options) {
 		bindInstance(instance) {
 			memory = instance.exports.memory;
 		},
+		getPerfStats() {
+			return {
+				counts: { ...perf.counts },
+				ms: { ...perf.ms },
+				contextLost: perf.contextLost,
+				contextRestored: perf.contextRestored,
+			};
+		},
+		resetPerfStats() {
+			perf.counts = Object.create(null);
+			perf.ms = Object.create(null);
+			perf.contextLost = 0;
+			perf.contextRestored = 0;
+		},
 		consoleLog(ptr, len) {
 			console.log(getString(ptr, len));
 		},
@@ -88,22 +136,28 @@ export function createWasmAPI(canvas, options) {
 		createBuffer() { return handles.add(gl.createBuffer()); },
 		bindBuffer(target, buffer) { gl.bindBuffer(target, handles.get(buffer)); },
 		bufferData(target, size, data_ptr, usage) {
-			if (data_ptr === 0) {
-				gl.bufferData(target, size, usage);
-			}
-			else if (memory) {
-				const data = new Uint8Array(memory.buffer, data_ptr, size);
-				gl.bufferData(target, data, usage);
-			}
+			perfWrap("bufferData", () => {
+				if (data_ptr === 0) {
+					gl.bufferData(target, size, usage);
+				}
+				else if (memory) {
+					const data = new Uint8Array(memory.buffer, data_ptr, size);
+					gl.bufferData(target, data, usage);
+				}
+			});
 		},
 		bufferSubData(target, offset, size, data_ptr) {
 			if (!memory) return;
-			const data = new Uint8Array(memory.buffer, data_ptr, size);
-			gl.bufferSubData(target, offset, data);
+			perfWrap("bufferSubData", () => {
+				const data = new Uint8Array(memory.buffer, data_ptr, size);
+				gl.bufferSubData(target, offset, data);
+			});
 		},
 		deleteBuffer(buffer) {
-			gl.deleteBuffer(handles.get(buffer));
-			handles.remove(buffer);
+			perfWrap("deleteBuffer", () => {
+				gl.deleteBuffer(handles.get(buffer));
+				handles.remove(buffer);
+			});
 		},
 		enableVertexAttribArray(index) { gl.enableVertexAttribArray(index); },
 		disableVertexAttribArray(index) { gl.disableVertexAttribArray(index); },
@@ -111,10 +165,10 @@ export function createWasmAPI(canvas, options) {
 			gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
 		},
 		vertexAttribDivisor(index, divisor) { gl.vertexAttribDivisor(index, divisor); },
-		createProgram() { return handles.add(gl.createProgram()); },
-		deleteProgram(program) { let value = handles.remove(program); gl.deleteProgram(value); },
-		createShader(type) { return handles.add(gl.createShader(type)); },
-		deleteShader(shader) { let value = handles.remove(shader); gl.deleteShader(value); },
+		createProgram() { return perfWrap("createProgram", () => handles.add(gl.createProgram())); },
+		deleteProgram(program) { perfWrap("deleteProgram", () => { let value = handles.remove(program); gl.deleteProgram(value); }); },
+		createShader(type) { return perfWrap("createShader", () => handles.add(gl.createShader(type))); },
+		deleteShader(shader) { perfWrap("deleteShader", () => { let value = handles.remove(shader); gl.deleteShader(value); }); },
 		shaderSource(shader, source_ptr, source_len) {
 			if (!memory) return;
 			const source = decoder.decode(new Uint8Array(memory.buffer, source_ptr, source_len));
@@ -262,10 +316,12 @@ export function createWasmAPI(canvas, options) {
 			if (!memory) return;
 			gl.uniformMatrix4fv(handles.get(location), transpose, new Float32Array(memory.buffer, value, count * 16));
 		},
-		createTexture() { return handles.add(gl.createTexture()); },
+		createTexture() { return perfWrap("createTexture", () => handles.add(gl.createTexture())); },
 		deleteTexture(texture) {
-			let value = handles.remove(texture);
-			gl.deleteTexture(value);
+			perfWrap("deleteTexture", () => {
+				let value = handles.remove(texture);
+				gl.deleteTexture(value);
+			});
 		},
 		activeTexture(texture) { gl.activeTexture(texture); },
 		bindTexture(target, texture) { gl.bindTexture(target, handles.get(texture)); },
@@ -275,18 +331,24 @@ export function createWasmAPI(canvas, options) {
 		texStorage2D(target, levels, internalformat, width, height) { gl.texStorage2D(target, levels, internalformat, width, height); },
 		texImage2D(target, level, internalformat, width, height, border, format, type, pixels_ptr, pixels_len) {
 			if (!memory) return;
-			const pixels = getTypedView(type, pixels_ptr, pixels_len);
-			gl.texImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+			perfWrap("texImage2D", () => {
+				const pixels = getTypedView(type, pixels_ptr, pixels_len);
+				gl.texImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+			});
 		},
 		texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels_ptr, pixels_len) {
 			if (!memory) return;
-			const pixels = getTypedView(type, pixels_ptr, pixels_len);
-			gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+			perfWrap("texSubImage2D", () => {
+				const pixels = getTypedView(type, pixels_ptr, pixels_len);
+				gl.texSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+			});
 		},
-		createFramebuffer() { return handles.add(gl.createFramebuffer()); },
+		createFramebuffer() { return perfWrap("createFramebuffer", () => handles.add(gl.createFramebuffer())); },
 		deleteFramebuffer(framebuffer) {
-			const value = handles.remove(framebuffer);
-			gl.deleteFramebuffer(value);
+			perfWrap("deleteFramebuffer", () => {
+				const value = handles.remove(framebuffer);
+				gl.deleteFramebuffer(value);
+			});
 		},
 		bindFramebuffer(target, framebuffer) { gl.bindFramebuffer(target, handles.get(framebuffer)); },
 		framebufferTexture2D(target, attachment, textarget, texture, level) {
@@ -304,9 +366,9 @@ export function createWasmAPI(canvas, options) {
 			const pixels = getTypedView(type, pixels_ptr, pixels_len);
 			gl.readPixels(x, y, width, height, format, type, pixels);
 		},
-		drawArrays(mode, first, count) { gl.drawArrays(mode, first, count); },
-		drawElements(mode, count, type, offset) { gl.drawElements(mode, count, type, offset); },
-		drawArraysInstanced(mode, first, count, instancecount) { gl.drawArraysInstanced(mode, first, count, instancecount); },
-		drawElementsInstanced(mode, count, type, offset, instancecount) { gl.drawElementsInstanced(mode, count, type, offset, instancecount); },
+		drawArrays(mode, first, count) { perfWrap("drawArrays", () => gl.drawArrays(mode, first, count)); },
+		drawElements(mode, count, type, offset) { perfWrap("drawElements", () => gl.drawElements(mode, count, type, offset)); },
+		drawArraysInstanced(mode, first, count, instancecount) { perfWrap("drawArraysInstanced", () => gl.drawArraysInstanced(mode, first, count, instancecount)); },
+		drawElementsInstanced(mode, count, type, offset, instancecount) { perfWrap("drawElementsInstanced", () => gl.drawElementsInstanced(mode, count, type, offset, instancecount)); },
 	}
 }

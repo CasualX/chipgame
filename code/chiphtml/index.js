@@ -9,6 +9,20 @@ const INPUT_B = 1 << 5;
 const INPUT_START = 1 << 6;
 const INPUT_SELECT = 1 << 7;
 
+function average(values) {
+	if (!values.length) return 0;
+	let sum = 0;
+	for (const value of values) sum += value;
+	return sum / values.length;
+}
+
+function percentile(values, ratio) {
+	if (!values.length) return 0;
+	const sorted = values.slice().sort((a, b) => a - b);
+	const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * ratio)));
+	return sorted[index];
+}
+
 window.chipGame = function chipGame() {
 	return {
 		loadingStatus: "Starting...",
@@ -51,10 +65,16 @@ window.chipGame = function chipGame() {
 		frameHandle: 0,
 		initialized: false,
 		cleanupRegistered: false,
+		perfEnabled: false,
+		perfPanel: null,
+		perfStats: null,
+		perfObservers: [],
 
 		init() {
 			if (this.initialized) return;
 			this.initialized = true;
+			this.perfEnabled = new URLSearchParams(window.location.search).has("perf");
+			this.setupPerfDebug();
 			this.syncViewportLayout();
 			this.hasTouchSupport = this.detectTouchSupport();
 			this.syncControlSchemeFromEnvironment();
@@ -85,6 +105,167 @@ window.chipGame = function chipGame() {
 				console.error(err);
 				this.setLoadingStatus(String(err && err.message ? err.message : err));
 			});
+		},
+
+		setupPerfDebug() {
+			if (!this.perfEnabled || this.perfStats) return;
+			this.perfStats = {
+				frameDt: [],
+				frameWorkMs: 0,
+				frameWorkMaxMs: 0,
+				inputMs: 0,
+				inputMaxMs: 0,
+				resizeMs: 0,
+				resizeMaxMs: 0,
+				thinkMs: 0,
+				thinkMaxMs: 0,
+				drawMs: 0,
+				drawMaxMs: 0,
+				frames: 0,
+				steps: 0,
+				resizeChanges: 0,
+				longTasks: [],
+				gcEvents: [],
+				lastCanvasSize: "",
+				lastFlushAt: performance.now(),
+			};
+
+			const observe = (type) => {
+				if (typeof PerformanceObserver !== "function") return;
+				try {
+					const observer = new PerformanceObserver((list) => {
+						if (!this.perfStats) return;
+						for (const entry of list.getEntries()) {
+							if (type === "longtask") {
+								this.perfStats.longTasks.push(entry.duration);
+							}
+							else if (type === "gc") {
+								this.perfStats.gcEvents.push(entry.duration);
+							}
+						}
+					});
+					observer.observe({ type, buffered: true });
+					this.perfObservers.push(observer);
+				}
+				catch {
+					// unsupported entry type
+				}
+			};
+
+			observe("longtask");
+			observe("gc");
+
+			const panel = document.createElement("pre");
+			panel.id = "perf-debug";
+			panel.setAttribute("aria-live", "polite");
+			Object.assign(panel.style, {
+				position: "fixed",
+				right: "8px",
+				top: "8px",
+				zIndex: "9999",
+				margin: "0",
+				padding: "8px 10px",
+				maxWidth: "min(92vw, 520px)",
+				maxHeight: "45vh",
+				overflow: "auto",
+				background: "rgba(9, 13, 20, 0.82)",
+				color: "#d7f3ff",
+				font: "12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+				border: "1px solid rgba(215, 243, 255, 0.22)",
+				borderRadius: "8px",
+				pointerEvents: "none",
+				whiteSpace: "pre-wrap",
+			});
+			panel.textContent = "perf=1 enabled\ncollecting frame data...";
+			document.body.appendChild(panel);
+			this.perfPanel = panel;
+			window.__chipPerf = {
+				read: () => this.perfPanel?.textContent || "",
+				stats: () => typeof structuredClone === "function"
+					? structuredClone(this.perfStats)
+					: JSON.parse(JSON.stringify(this.perfStats)),
+			};
+		},
+
+		updatePerfPanel(lines) {
+			if (!this.perfEnabled || !this.perfPanel) return;
+			this.perfPanel.textContent = lines.join("\n");
+		},
+
+		flushPerfStats(now, shadeStats) {
+			if (!this.perfEnabled || !this.perfStats) return;
+			const elapsedMs = now - this.perfStats.lastFlushAt;
+			if (elapsedMs < 1000) return;
+
+			const frameDt = this.perfStats.frameDt;
+			const fps = frameDt.length ? (1000 / average(frameDt)) : 0;
+			const p95Dt = percentile(frameDt, 0.95);
+			const p99Dt = percentile(frameDt, 0.99);
+			const budget60 = frameDt.filter((value) => value > 16.7).length;
+			const budget90 = frameDt.filter((value) => value > 11.2).length;
+			const budget120 = frameDt.filter((value) => value > 8.4).length;
+			const budget144 = frameDt.filter((value) => value > 7.0).length;
+			const heapMb = performance.memory?.usedJSHeapSize ? (performance.memory.usedJSHeapSize / (1024 * 1024)) : 0;
+			const longTaskTotal = this.perfStats.longTasks.reduce((sum, value) => sum + value, 0);
+			const gcTotal = this.perfStats.gcEvents.reduce((sum, value) => sum + value, 0);
+			const glCounts = shadeStats?.counts || {};
+			const glMs = shadeStats?.ms || {};
+			const glSummary = [
+				`texImage ${glCounts.texImage2D || 0}/${(glMs.texImage2D || 0).toFixed(1)}ms`,
+				`texSub ${glCounts.texSubImage2D || 0}/${(glMs.texSubImage2D || 0).toFixed(1)}ms`,
+				`bufData ${glCounts.bufferData || 0}/${(glMs.bufferData || 0).toFixed(1)}ms`,
+				`bufSub ${glCounts.bufferSubData || 0}/${(glMs.bufferSubData || 0).toFixed(1)}ms`,
+				`newTex ${glCounts.createTexture || 0}`,
+				`delTex ${glCounts.deleteTexture || 0}`,
+				`newFb ${glCounts.createFramebuffer || 0}`,
+				`ctxLost ${shadeStats?.contextLost || 0}`,
+			];
+
+			const lines = [
+				`perf=1 window ${(elapsedMs / 1000).toFixed(1)}s`,
+				`raf avg ${fps.toFixed(1)}fps | p95 ${(p95Dt || 0).toFixed(2)}ms | p99 ${(p99Dt || 0).toFixed(2)}ms`,
+				`missed budgets 60:${budget60} 90:${budget90} 120:${budget120} 144:${budget144}`,
+				`js avg ms input ${(this.perfStats.inputMs / Math.max(1, this.perfStats.frames)).toFixed(2)} resize ${(this.perfStats.resizeMs / Math.max(1, this.perfStats.frames)).toFixed(2)} draw ${(this.perfStats.drawMs / Math.max(1, this.perfStats.frames)).toFixed(2)} think ${(this.perfStats.thinkMs / Math.max(1, this.perfStats.steps)).toFixed(2)}`,
+				`js max ms input ${this.perfStats.inputMaxMs.toFixed(2)} resize ${this.perfStats.resizeMaxMs.toFixed(2)} draw ${this.perfStats.drawMaxMs.toFixed(2)} think ${this.perfStats.thinkMaxMs.toFixed(2)} frame ${this.perfStats.frameWorkMaxMs.toFixed(2)}`,
+				`canvas ${this.perfStats.lastCanvasSize || "?"} | size changes ${this.perfStats.resizeChanges}`,
+				`longtasks ${this.perfStats.longTasks.length}/${longTaskTotal.toFixed(1)}ms | gc ${this.perfStats.gcEvents.length}/${gcTotal.toFixed(1)}ms | heap ${heapMb ? heapMb.toFixed(1) + "MB" : "n/a"}`,
+				`webgl ${glSummary.join(" | ")}`,
+			];
+
+			console.table({
+				fps: Number(fps.toFixed(1)),
+				raf_p95_ms: Number((p95Dt || 0).toFixed(2)),
+				raf_p99_ms: Number((p99Dt || 0).toFixed(2)),
+				input_avg_ms: Number((this.perfStats.inputMs / Math.max(1, this.perfStats.frames)).toFixed(2)),
+				resize_avg_ms: Number((this.perfStats.resizeMs / Math.max(1, this.perfStats.frames)).toFixed(2)),
+				draw_avg_ms: Number((this.perfStats.drawMs / Math.max(1, this.perfStats.frames)).toFixed(2)),
+				think_avg_ms: Number((this.perfStats.thinkMs / Math.max(1, this.perfStats.steps)).toFixed(2)),
+				longtasks: this.perfStats.longTasks.length,
+				gc_events: this.perfStats.gcEvents.length,
+				resize_changes: this.perfStats.resizeChanges,
+				gl_texImage2D: glCounts.texImage2D || 0,
+				gl_bufferData: glCounts.bufferData || 0,
+				gl_createTexture: glCounts.createTexture || 0,
+			});
+			this.updatePerfPanel(lines);
+
+			this.perfStats.frameDt = [];
+			this.perfStats.frameWorkMs = 0;
+			this.perfStats.frameWorkMaxMs = 0;
+			this.perfStats.inputMs = 0;
+			this.perfStats.inputMaxMs = 0;
+			this.perfStats.resizeMs = 0;
+			this.perfStats.resizeMaxMs = 0;
+			this.perfStats.thinkMs = 0;
+			this.perfStats.thinkMaxMs = 0;
+			this.perfStats.drawMs = 0;
+			this.perfStats.drawMaxMs = 0;
+			this.perfStats.frames = 0;
+			this.perfStats.steps = 0;
+			this.perfStats.resizeChanges = 0;
+			this.perfStats.longTasks = [];
+			this.perfStats.gcEvents = [];
+			this.perfStats.lastFlushAt = now;
 		},
 
 		get overlayStatusText() {
@@ -219,13 +400,24 @@ window.chipGame = function chipGame() {
 
 		resizeCanvasToDisplaySize() {
 			const canvas = this.$refs.canvas;
+			const startedAt = this.perfEnabled ? performance.now() : 0;
 			const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
 			const rect = canvas.getBoundingClientRect();
 			const width = Math.max(1, Math.floor(rect.width * dpr));
 			const height = Math.max(1, Math.floor(rect.height * dpr));
+			const changed = canvas.width !== width || canvas.height !== height;
 			if (canvas.width !== width || canvas.height !== height) {
 				canvas.width = width;
 				canvas.height = height;
+			}
+			if (this.perfEnabled && this.perfStats) {
+				const elapsed = performance.now() - startedAt;
+				this.perfStats.resizeMs += elapsed;
+				this.perfStats.resizeMaxMs = Math.max(this.perfStats.resizeMaxMs, elapsed);
+				if (changed) {
+					this.perfStats.resizeChanges++;
+				}
+				this.perfStats.lastCanvasSize = `${width}x${height} @${dpr.toFixed(2)}x`;
 			}
 			return { width, height, dpr };
 		},
@@ -474,6 +666,7 @@ window.chipGame = function chipGame() {
 				desynchronized: true,
 				antialias: false,
 				premultipliedAlpha: false,
+				perfEnabled: this.perfEnabled,
 			});
 
 			let wasmMemory = null;
@@ -735,22 +928,42 @@ window.chipGame = function chipGame() {
 			let lastHud = performance.now();
 
 			const frame = (now) => {
+				const frameStartedAt = this.perfEnabled ? performance.now() : 0;
 				const dt = Math.min(250, now - last);
 				last = now;
 				acc += dt;
+				if (this.perfEnabled && this.perfStats) {
+					this.perfStats.frameDt.push(dt);
+				}
 
 				if (!this.userSelectedControlScheme) {
 					this.syncControlSchemeFromEnvironment();
 				}
 
+				const inputStartedAt = this.perfEnabled ? performance.now() : 0;
 				const buttons = this.getButtonsBitmask();
+				if (this.perfEnabled && this.perfStats) {
+					const elapsed = performance.now() - inputStartedAt;
+					this.perfStats.inputMs += elapsed;
+					this.perfStats.inputMaxMs = Math.max(this.perfStats.inputMaxMs, elapsed);
+				}
 				if (!this.gameActive) {
 					this.resizeCanvasToDisplaySize();
+					if (this.perfEnabled && this.perfStats) {
+						const shadeStats = shade.getPerfStats ? shade.getPerfStats() : null;
+						this.flushPerfStats(now, shadeStats);
+						shade.resetPerfStats?.();
+						const elapsed = performance.now() - frameStartedAt;
+						this.perfStats.frameWorkMs += elapsed;
+						this.perfStats.frameWorkMaxMs = Math.max(this.perfStats.frameWorkMaxMs, elapsed);
+						this.perfStats.frames++;
+					}
 					this.frameHandle = requestAnimationFrame(frame);
 					return;
 				}
 
 				while (acc >= stepMs) {
+					const thinkStartedAt = this.perfEnabled ? performance.now() : 0;
 					try {
 						exports.thinkInstance(gamePtr, buttons);
 					}
@@ -758,17 +971,29 @@ window.chipGame = function chipGame() {
 						this.setLoadingStatus(`thinkInstance() trapped: ${err && err.message ? err.message : String(err)}`);
 						return;
 					}
+					if (this.perfEnabled && this.perfStats) {
+						const elapsed = performance.now() - thinkStartedAt;
+						this.perfStats.thinkMs += elapsed;
+						this.perfStats.thinkMaxMs = Math.max(this.perfStats.thinkMaxMs, elapsed);
+						this.perfStats.steps++;
+					}
 					thinkCount++;
 					acc -= stepMs;
 				}
 
 				const { width, height } = this.resizeCanvasToDisplaySize();
+				const drawStartedAt = this.perfEnabled ? performance.now() : 0;
 				try {
 					exports.drawInstance(gamePtr, now / 1000.0, width, height);
 				}
 				catch (err) {
 					this.setLoadingStatus(`drawInstance() trapped: ${err && err.message ? err.message : String(err)}`);
 					return;
+				}
+				if (this.perfEnabled && this.perfStats) {
+					const elapsed = performance.now() - drawStartedAt;
+					this.perfStats.drawMs += elapsed;
+					this.perfStats.drawMaxMs = Math.max(this.perfStats.drawMaxMs, elapsed);
 				}
 				drawCount++;
 
@@ -780,6 +1005,16 @@ window.chipGame = function chipGame() {
 					drawCount = 0;
 					thinkCount = 0;
 					lastHud = now;
+				}
+
+				if (this.perfEnabled && this.perfStats) {
+					const shadeStats = shade.getPerfStats ? shade.getPerfStats() : null;
+					const elapsed = performance.now() - frameStartedAt;
+					this.perfStats.frameWorkMs += elapsed;
+					this.perfStats.frameWorkMaxMs = Math.max(this.perfStats.frameWorkMaxMs, elapsed);
+					this.perfStats.frames++;
+					this.flushPerfStats(now, shadeStats);
+					shade.resetPerfStats?.();
 				}
 
 				this.frameHandle = requestAnimationFrame(frame);
