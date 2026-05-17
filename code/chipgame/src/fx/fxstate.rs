@@ -223,7 +223,7 @@ impl FxState {
 				&chipcore::GameEvent::TerrainUpdated { pos, old, new } => handlers::terrain_updated(self, pos, old, new),
 				&chipcore::GameEvent::GameOver { reason } => handlers::game_over(self, reason),
 				&chipcore::GameEvent::SoundFx { sound } => self.events.push(FxEvent::PlaySound(sound)),
-				&chipcore::GameEvent::BombExplode { pos } => handlers::effect(self, pos, render::EffectType::Sparkles),
+				&chipcore::GameEvent::BombExplode { pos } => handlers::bomb_explode(self, pos),
 				&chipcore::GameEvent::WaterSplash { pos } => handlers::effect(self, pos, render::EffectType::Splash),
 				_ => {}
 			}
@@ -243,6 +243,7 @@ impl FxState {
 		}
 		self.scout_camera(ctx.dt);
 		self.camera.animate_position(ctx.dt);
+		self.camera.shake.update(ctx.dt, &mut self.random);
 		self.render.update(&ctx);
 
 		self.draw_shadow_map(g, resx);

@@ -7,6 +7,7 @@ const FAR: f32 = 2000.0;
 const WIDE_OFFSET: Vec3f = Vec3(0.0, 1.0 * 32.0, 200.0);
 const CLASSIC_OFFSET: Vec3f = Vec3(0.0, 0.5 * 32.0, 150.0);
 const EDITOR_OFFSET: Vec3f = Vec3f(0.0, 0.0 * 32.0, 400.0);
+const SHAKE_DURATION: f64 = 0.35;
 
 #[derive(Clone)]
 pub struct PlayCamera {
@@ -32,6 +33,8 @@ pub struct PlayCamera {
 	pub move_time: f64,
 	pub move_spd: f32,
 	pub move_teleport: bool,
+
+	pub shake: CameraShake,
 }
 
 impl Default for PlayCamera {
@@ -49,17 +52,20 @@ impl Default for PlayCamera {
 			move_time: 0.0,
 			move_spd: 1.0,
 			move_teleport: true,
+			shake: CameraShake::default(),
 		}
 	}
 }
 
 impl PlayCamera {
 	pub fn setup(&self, screen_size: Vec2i) -> shade::d3::Camera {
-		let pos = self.target + self.get_offset();
-		let corr = offset_correction(pos.y - self.target.y, pos.z, Angle::deg(FOV_Y));
+		let shake_offset = self.shake.offset();
+		let target = self.target + shake_offset;
+		let pos = target + self.get_offset();
+		let corr = offset_correction(pos.y - target.y, pos.z, Angle::deg(FOV_Y));
 		let corr = Vec3(0.0, corr, 0.0);
-		let position = self.position + corr;
-		let target = self.target + corr;
+		let position = self.position + shake_offset + corr;
+		let target = target + corr;
 		let view = Transform3f::look_at(position, target, -Vec3f::Y, Hand::LH);
 		let aspect_ratio = screen_size.x as f32 / screen_size.y as f32;
 		let fov_y = Angle::deg(FOV_Y);
@@ -107,6 +113,12 @@ impl PlayCamera {
 
 	pub fn set_target(&mut self, pos: Vec3f) {
 		self.target = pos;
+	}
+
+	pub fn add_shake_at(&mut self, pos: Vec3f, strength: f32, falloff: f32) {
+		let distance = self.target.distance(pos);
+		let magnitude = CameraShake::attenuate(strength, distance, falloff);
+		self.shake.add(magnitude, SHAKE_DURATION);
 	}
 
 	// Update blend over time

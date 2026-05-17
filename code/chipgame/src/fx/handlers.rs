@@ -189,6 +189,13 @@ pub fn player_activity(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	}
 }
 
+pub fn bomb_explode(fx: &mut FxState, pos: Vec2i) {
+	effect(fx, pos, render::EffectType::Sparkles);
+
+	let bomb_center = Vec3::new(pos.x as f32 * 32.0 + 16.0, pos.y as f32 * 32.0 + 16.0, 0.0);
+	fx.camera.add_shake_at(bomb_center, 50.0, 1.0);
+}
+
 pub fn player_push(fx: &mut FxState, ehandle: chipcore::EntityHandle) {
 	let Some(&obj_handle) = fx.game_objects.get(&ehandle) else { return };
 	let Some(obj) = fx.render.objects.get_mut(obj_handle) else { return };
