@@ -22,7 +22,6 @@ That is the main supported way to get started from a clean checkout.
 - Rust based tools
   ```sh
   cargo install cargo-ndk --locked
-  cargo install paks --locked
   ```
 
 If Android Studio prompts to create `local.properties`, let it do that.

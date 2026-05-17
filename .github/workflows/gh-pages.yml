@@ -28,9 +28,6 @@ jobs:
           toolchain: stable
           targets: wasm32-unknown-unknown
 
-      - name: Install cargo tools
-        run: cargo install paks --locked
-
       - name: Publish gh-pages branch
         env:
           CI: true

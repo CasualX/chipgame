@@ -64,9 +64,6 @@ warn_if_dirty_worktree() {
 progress "Checking repository state"
 warn_if_dirty_worktree
 
-progress "Preparing shared publish assets"
-bash "$repo_root/code/chiphtml/prepare.sh"
-
 progress "Building release chipwasm artifact"
 cargo build --release -p chipwasm --target=wasm32-unknown-unknown
 
@@ -86,13 +83,9 @@ fi
 
 progress "Recreating gh-pages branch and worktree"
 git branch -D gh-pages >/dev/null 2>&1 || true
-git worktree add --detach "$repo_root/gh-pages"
-git -C "$repo_root/gh-pages" checkout --orphan gh-pages
+git worktree add --orphan "$repo_root/gh-pages"
 
-progress "Refreshing gh-pages contents"
-git -C "$repo_root/gh-pages" rm -rf . >/dev/null 2>&1 || true
-find "$repo_root/gh-pages" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-
+progress "Copying gh-pages contents"
 cp code/chiphtml/*.js "$repo_root/gh-pages/"
 cp code/chiphtml/*.css "$repo_root/gh-pages/"
 cp code/chiphtml/*.html "$repo_root/gh-pages/"

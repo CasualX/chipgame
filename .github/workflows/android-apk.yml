@@ -37,7 +37,6 @@ jobs:
     - name: Install Cargo Tools
       run: |
         cargo install cargo-ndk --locked
-        cargo install paks --locked
 
     - name: Build Release APK
       working-directory: code/android
