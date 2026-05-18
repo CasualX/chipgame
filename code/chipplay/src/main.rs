@@ -46,14 +46,14 @@ impl AppStuff {
 		let window_attributes = {
 			use winit::platform::windows::WindowAttributesExtWindows;
 			winit::window::Window::default_attributes()
-				.with_title("Play Chip DX")
+				.with_title("Chip's Challenge DX")
 				.with_inner_size(size)
 				.with_drag_and_drop(false)
 		};
 
 		#[cfg(not(windows))]
 		let window_attributes = winit::window::Window::default_attributes()
-			.with_title("Play Chip DX")
+			.with_title("Chip's Challenge DX")
 			.with_inner_size(size);
 
 		let (window, gl_config) = glutin_winit::DisplayBuilder::new()

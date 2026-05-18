@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Chip DX</title>
+		<title>Chip's Challenge DX</title>
 		<link rel="stylesheet" href="./index.css" />
 	</head>
 	<body>
@@ -38,7 +38,7 @@
 			<div id="loading-screen" aria-live="polite" x-cloak x-show="!gameActive">
 				<div id="loading-panel-frame" :style="{ width: loadingPanelFrameWidth + 'px', height: loadingPanelFrameHeight + 'px' }">
 					<div id="loading-panel" x-ref="loadingPanel" :class="{ landscape: showAllControlHints }" :style="{ transform: 'scale(' + loadingPanelScale + ')' }">
-						<div id="loading-title">Chip DX - Chip's Challenge</div>
+						<div id="loading-title">Chip's Challenge DX</div>
 						<div id="loading-bar"><span :style="{ width: Math.round(loadingProgress * 100) + '%' }"></span></div>
 						<div id="loading-status" x-text="overlayStatusText"></div>
 						<div id="control-grid">

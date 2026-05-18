@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="100" viewBox="0 0 220 100" role="img" aria-labelledby="title desc">
-  <title id="title">Download Chip DX</title>
-  <desc id="desc">Left half of a segmented button linking to the latest Chip DX Windows release.</desc>
+  <title id="title">Download Chip's Challenge DX</title>
+  <desc id="desc">Left half of a segmented button linking to the latest Chip's Challenge DX Windows release.</desc>
   <defs>
     <linearGradient id="btnGradient" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#44d489"/>

@@ -626,7 +626,7 @@ window.chipGame = function chipGame() {
 			};
 
 			const setTitle = (title_ptr, title_len) => {
-				document.title = readUtf8(title_ptr, title_len) || "Chip DX";
+				document.title = readUtf8(title_ptr, title_len) || "Chip's Challenge DX";
 			};
 
 			const quitGame = () => {

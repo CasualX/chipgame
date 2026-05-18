@@ -1,31 +1,39 @@
-Chip DX
-=======
+Chip's Challenge DX
+===================
 
-A Rust remaster inspired by the classic puzzle game *Chip's Challenge*.
-
-https://github.com/user-attachments/assets/19000227-1337-484a-8a81-2710e5f87b1f
-
-<p align="center">
-	<a href="https://github.com/CasualX/chipgame/releases/latest"><img src="docs/download-button-left.svg" alt="Download the latest Chip DX Windows release" width="220" /></a><a href="https://casualhacks.net/chipdx/index.html"><img src="docs/play-button-right.svg" alt="Play Chip DX in your browser" width="220" /></a>
-</p>
+Modern browser-playable _Chip's Challenge_ remaster with touch, gamepad, mobile, and WebAssembly support. Inspired by the classic *Chip’s Challenge* released for Windows. Built with Rust, WebAssembly, and WebGL.
 
 Features
 --------
 
-- Inspired by the classic *Chip’s Challenge* released for Windows
-- Smooth and responsive controls for a more enjoyable experience
+- Instant browser play with no installation required
+- Designed for keyboard, touch, and gamepad controls
+- Mobile-friendly interface and responsive controls
+- Smooth movement and responsive gameplay
 - Retro aesthetic: 2D graphics displayed as 3D models and sprites
+- Includes decades of the best community-created level packs
 - Built-in level editor for creating and modifying levels
-- Includes community level packs: CCLP1, CCLP2, CCLP3, CCLP4, and CCLP5
 - Supports additional levelsets in the game's native .DAT level format
-- Over 500 community levels available to play, thousands of hours of fun!
+
+https://github.com/user-attachments/assets/19000227-1337-484a-8a81-2710e5f87b1f
+
+Play instantly in your browser on desktop or mobile:
+
+<p align="center">
+	<a href="https://github.com/CasualX/chipdx/releases/latest"><img src="docs/download-button-left.svg" alt="Download the latest Chip DX release for Windows" width="220" /></a><a href="https://casualhacks.net/chipdx/index.html"><img src="docs/play-button-right.svg" alt="Play Chip DX instantly in your browser on desktop or mobile" width="220" /></a>
+</p>
 
 Getting Started
 ---------------
 
+### [Play in Your Browser](https://casualhacks.net/chipdx/index.html)
+
+1. Play instantly in your browser with no installation required.
+2. Supports keyboard, touch, and gamepad controls on desktop and mobile devices.
+
 ### Download and Play
 
-Precompiled binaries for Windows are available on the [Releases](https://github.com/CasualX/chipgame/releases) page.
+Precompiled binaries for Windows are available on the [Releases](https://github.com/CasualX/chipdx/releases) page.
 
 1. Download and extract the latest release.
 2. Run `chipplay.exe` to start the game.
@@ -138,7 +146,7 @@ License & Credits
 ### Chip's Challenge
 
 *Chip's Challenge* was created by Chuck Sommerville and is owned by Niffler Ltd.  
-This project is an independent, open-source remaster and is not affiliated with Niffler Ltd.
+This project is an independent, open-source remaster inspired by the original game and is not affiliated with or endorsed by Niffler Ltd.
 
 ### Source Code
 
@@ -167,7 +175,7 @@ Music files written by chaozz of gp32x.com and am-fm's music is used under Creat
 
 ### Sound Effects
 
-The sound effects included in this distribution were created by Brian Raiter, with assistance from SoX. Brian Raiter has explictly placed these files in the public domain.
+The sound effects included in this distribution were created by Brian Raiter, with assistance from SoX. Brian Raiter has explicitly placed these files in the public domain.
 
 - Sourced from [SicklySilverMoon/tworld](https://github.com/SicklySilverMoon/tworld)
 
